@@ -1,0 +1,51 @@
+{
+  "name": "@0xmail/lib",
+  "version": "1.0.0",
+  "description": "React Native-compatible shared utilities and common functions for 0xmail.box projects",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "keywords": [
+    "web3",
+    "email",
+    "blockchain",
+    "typescript",
+    "utilities",
+    "react-native"
+  ],
+  "author": "0xmail.box team",
+  "license": "MIT",
+  "devDependencies": {
+    "@testing-library/react": "^16.3.0",
+    "@types/node": "^18.0.0",
+    "@types/react": "^18.2.66",
+    "jsdom": "^26.1.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "typescript": "^5.5.3",
+    "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0"
+  },
+  "dependencies": {
+    "@noble/hashes": "^1.8.0",
+    "bs58": "^6.0.0",
+    "firebase": "^12.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0xmail/mail_box_lib.git"
+  }
+}
