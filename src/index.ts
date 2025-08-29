@@ -2,17 +2,21 @@
  * @0xmail/lib - Shared utilities and common functions for 0xmail.box projects
  */
 
-// Environment utilities
-export * from './env.interface';
-export * from './env';
-export * from './env.web';
-export * from './env.reactnative';
+// Types - Centralized type exports (Goal 1)
+export * from './types';
 
-// Main environment exports (commonly used)
-export { getEnvProvider, getAppConfig, env } from './env';
+// Dependency Injection - Grouped DI definitions (Goal 2)  
+export * from './di';
 
-// Utils exports - platform-agnostic utilities
+// Infrastructure - Separated networking and storage logic (Goal 3)
+export * from './network';
+export * from './storage';
+
+// Business Logic - Organized by functionality (Goal 4)
+export * from './business';
+
+// Utilities - General utility functions
 export * from './utils';
 
-// Hooks exports - platform-agnostic React hooks
-export * from './hooks';
+// Main environment exports (commonly used)
+export { getEnvProvider, getAppConfig, env } from './di/env';

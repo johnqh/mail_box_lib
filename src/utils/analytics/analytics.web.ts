@@ -2,7 +2,7 @@
  * Web implementation of analytics client using Firebase Analytics
  */
 
-import { AnalyticsClient, AnalyticsEvent } from './analytics.interface';
+import { AnalyticsClient, AnalyticsEvent } from './../../types/analytics';
 
 /**
  * Web analytics client using Firebase Analytics

@@ -2,7 +2,7 @@
  * Web implementation of environment variable provider using Vite
  */
 
-import { EnvProvider, EnvironmentVariables, AppConfig } from './env.interface';
+import { EnvProvider, EnvironmentVariables, AppConfig } from '../types/environment';
 
 /**
  * Web environment provider using import.meta.env (Vite)
@@ -19,7 +19,6 @@ export class WebEnvProvider implements EnvProvider {
     return {
       VITE_WILDDUCK_API_TOKEN: env?.VITE_WILDDUCK_API_TOKEN,
       VITE_WILDDUCK_BACKEND_URL: env?.VITE_WILDDUCK_BACKEND_URL,
-      VITE_INDEXER_BACKEND_URL: env?.VITE_INDEXER_BACKEND_URL,
       VITE_REVENUECAT_API_KEY: env?.VITE_REVENUECAT_API_KEY,
       VITE_WALLETCONNECT_PROJECT_ID: env?.VITE_WALLETCONNECT_PROJECT_ID,
       VITE_PRIVY_APP_ID: env?.VITE_PRIVY_APP_ID,
@@ -65,7 +64,6 @@ export const createWebAppConfig = (envProvider: EnvProvider = new WebEnvProvider
   return {
     wildDuckApiToken: envProvider.get('VITE_WILDDUCK_API_TOKEN', ''),
     wildDuckBackendUrl: envProvider.get('VITE_WILDDUCK_BACKEND_URL', 'http://localhost:8080'),
-    indexerBackendUrl: envProvider.get('VITE_INDEXER_BACKEND_URL', 'http://localhost:3001'),
     revenueCatApiKey: envProvider.get('VITE_REVENUECAT_API_KEY', ''),
     walletConnectProjectId: envProvider.get('VITE_WALLETCONNECT_PROJECT_ID', '2f05ae7f1f5344b5ae075017bfaaa560'),
     privyAppId: envProvider.get('VITE_PRIVY_APP_ID', ''),

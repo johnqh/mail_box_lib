@@ -59,3 +59,14 @@ export interface AdvancedPlatformStorage extends PlatformStorage {
    */
   clearPattern(pattern?: string): Promise<void> | void;
 }
+
+/**
+ * Storage provider implementation that wraps platform storage
+ */
+export interface StorageProvider {
+  storage: PlatformStorage | AdvancedPlatformStorage;
+  get(key: string): Promise<string | null> | string | null;
+  set(key: string, value: string, ttl?: number): Promise<void> | void;
+  remove(key: string): Promise<void> | void;
+  clear(): Promise<void> | void;
+}

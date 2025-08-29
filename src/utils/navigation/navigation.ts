@@ -9,7 +9,7 @@ import {
   LocationHook,
   NavigationConfig,
   NavigationOptions
-} from './navigation.interface';
+} from './../../types/navigation';
 
 let navigationService: NavigationService;
 
@@ -230,4 +230,4 @@ export type {
   NavigationConfig,
   NavigationOptions,
   NavigationState
-} from './navigation.interface';
+} from './../../types/navigation';

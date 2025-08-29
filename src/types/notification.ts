@@ -109,3 +109,23 @@ export interface NotificationConfig {
   enableDebugLogging: boolean;
   fallbackToAlert: boolean; // Use alert() as fallback in React Native
 }
+
+/**
+ * Notification client wrapper for easier usage
+ */
+export interface NotificationClient {
+  service: NotificationService;
+  config: NotificationConfig;
+  show(title: string, options?: NotificationOptions): Promise<NotificationResult>;
+  requestPermissions(): Promise<NotificationPermissionResult>;
+}
+
+/**
+ * Notification context provider interface
+ */
+export interface NotificationContextProvider {
+  client: NotificationClient;
+  isSupported: boolean;
+  hasPermission: boolean;
+  requestPermission(): Promise<void>;
+}

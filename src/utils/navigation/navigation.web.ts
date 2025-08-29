@@ -8,7 +8,7 @@ import {
   NavigationOptions,
   NavigationState,
   NavigationConfig
-} from './navigation.interface';
+} from './../../types/navigation';
 
 const DEFAULT_CONFIG: NavigationConfig = {
   enableBackGesture: false, // Not applicable to web

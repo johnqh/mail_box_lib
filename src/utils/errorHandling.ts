@@ -1,5 +1,5 @@
 import { ERROR_MESSAGES } from './constants';
-import { env } from '../env';
+import { env } from '../di/env';
 
 export class AppError extends Error {
   code: string;

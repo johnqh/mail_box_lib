@@ -3,7 +3,7 @@
  * This shows how to implement the AnalyticsClient for React Native
  */
 
-import { AnalyticsClient, AnalyticsEvent } from './analytics.interface';
+import { AnalyticsClient, AnalyticsEvent } from './../../types/analytics';
 
 /**
  * React Native analytics client implementation
