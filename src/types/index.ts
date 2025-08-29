@@ -20,3 +20,12 @@ export * from './analytics';
 
 // Notification types
 export * from './notification';
+
+// Email types
+export * from './email';
+
+// API types
+export * from './api';
+
+// Service types
+export * from './services';
