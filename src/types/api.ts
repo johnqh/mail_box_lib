@@ -245,16 +245,17 @@ export interface WildDuckAddressResponse {
 }
 
 // =============================================================================
-// INDEXER API TYPES
+// INDEXER API TYPES (v2.2.0)
 // =============================================================================
 
 /**
- * Indexer Authentication and User Types
+ * Indexer Mail API Types
  */
 export interface IndexerEmailAddress {
   email: string;
-  type: 'primary' | 'domain' | 'delegated';
+  type: 'primary' | 'domain' | 'delegated' | 'nameservice';
   source?: string;
+  isVerified?: boolean;
 }
 
 export interface IndexerEmailResponse {
@@ -279,6 +280,81 @@ export interface IndexerSignatureVerification {
   addressType: string;
   isValid: boolean;
   message: string;
+  timestamp: string;
+}
+
+export interface IndexerDelegationResponse {
+  walletAddress: string;
+  addressType: string;
+  hasDelegation: boolean;
+  delegatedTo?: string;
+  delegationType?: string;
+  isActive?: boolean;
+  verified: boolean;
+  timestamp: string;
+}
+
+export interface IndexerDelegatedToResponse {
+  walletAddress: string;
+  addressType: string;
+  delegators: Array<{
+    delegatorAddress: string;
+    delegationType: string;
+    isActive: boolean;
+    delegationDate: string;
+  }>;
+  totalDelegators: number;
+  timestamp: string;
+}
+
+export interface IndexerMessageResponse {
+  walletAddress: string;
+  addressType: string;
+  chainId: number;
+  domain: string;
+  uri: string;
+  messages: {
+    deterministic?: string;
+    simple?: string;
+    solana?: string;
+  };
+  recommended: string;
+  instructions: {
+    evm?: string;
+    solana?: string;
+  };
+  verification: {
+    endpoint: string;
+    method: string;
+    body: Record<string, any>;
+    note: string;
+  };
+  timestamp: string;
+}
+
+export interface IndexerNonceResponse {
+  walletAddress: string;
+  addressType: string;
+  nonce: string;
+  createdAt?: string;
+  updatedAt?: string;
+  message: string;
+  timestamp: string;
+}
+
+export interface IndexerEntitlementResponse {
+  walletAddress: string;
+  addressType: string;
+  entitlement: {
+    type: string;
+    hasEntitlement: boolean;
+    isActive: boolean;
+    productIdentifier?: string;
+    expiresDate?: string;
+    store?: string;
+  };
+  message: string;
+  error?: string;
   timestamp: string;
 }
 
@@ -331,17 +407,197 @@ export interface IndexerDelegation {
 }
 
 /**
- * Indexer Points System Types
+ * Indexer Points System Types (v2.2.0)
  */
-export interface IndexerUserPoints {
+
+// How to Earn Points Response
+export interface IndexerEarnMethod {
+  id: string;
+  title: string;
+  description: string;
+  pointsValue: number | string;
+  pointsUnit: string;
+  secondaryValue?: number;
+  secondaryUnit?: string;
+  icon: string;
+  difficulty: 'easy' | 'medium' | 'advanced' | 'varies';
+  category: 'daily' | 'growth' | 'features' | 'milestones' | 'events';
+  tips: string;
+}
+
+export interface IndexerHowToEarnResponse {
+  success: boolean;
+  data: {
+    title: string;
+    description: string;
+    earnMethods: IndexerEarnMethod[];
+    quickStart: {
+      title: string;
+      steps: Array<{
+        step: number;
+        title: string;
+        description: string;
+        action: string;
+      }>;
+    };
+    totalMethods: number;
+    estimatedEarningsPerDay: {
+      casual: number;
+      regular: number;
+      power: number;
+    };
+  };
+}
+
+// Public Stats Response
+export interface IndexerPublicStatsResponse {
+  success: boolean;
+  data: {
+    totalUsers: number;
+    totalPointsAwarded: string;
+    topUsersThisWeek: number;
+    activeCampaigns: number;
+    totalEmailsSent: number;
+    totalReferrals: number;
+    averagePointsPerUser: number;
+    lastUpdated: string;
+  };
+}
+
+// Points Summary Response
+export interface IndexerPointsSummary {
   walletAddress: string;
   totalPoints: string;
+  availablePoints: string;
+  lifetimeEarned: string;
   currentStreak: number;
   longestStreak: number;
   lastActivityDate: number | null;
-  rank?: number;
+  rank: number | null;
+  tier: string;
+  nextTierThreshold: string | null;
+  recentActivities: Array<{
+    id: string;
+    activityType: string;
+    pointsAmount: string;
+    createdAt: number;
+    metadata?: Record<string, any>;
+  }>;
+  achievements: Array<{
+    id: string;
+    name: string;
+    description: string;
+    unlockedAt: number;
+    pointsAwarded: string;
+  }>;
+  referralStats: {
+    totalReferrals: number;
+    successfulReferrals: number;
+    referralPointsEarned: string;
+    referralCode: string;
+  };
 }
 
+export interface IndexerPointsSummaryResponse {
+  success: boolean;
+  data: {
+    pointsSummary: IndexerPointsSummary;
+  };
+}
+
+// Points History Response
+export interface IndexerPointsHistoryEntry {
+  id: string;
+  walletAddress: string;
+  transactionType: 'AWARD' | 'DEDUCT' | 'ADJUST' | 'CLAIM';
+  pointsAmount: string;
+  activityType: string;
+  activityReference?: string;
+  description: string;
+  createdAt: number;
+  metadata?: Record<string, any>;
+  chainId?: number;
+  transactionHash?: string;
+  blockNumber?: string;
+}
+
+export interface IndexerPointsHistoryResponse {
+  success: boolean;
+  data: {
+    transactions: IndexerPointsHistoryEntry[];
+    pagination: {
+      total: number;
+      limit: number;
+      offset: number;
+      hasMore: boolean;
+    };
+    summary: {
+      totalAwarded: string;
+      totalSpent: string;
+      netPoints: string;
+    };
+  };
+}
+
+// Promotional Code Types
+export interface IndexerPromoCodeResponse {
+  success: boolean;
+  data?: {
+    promoCode: string;
+    pointsAwarded: string;
+    campaignName: string;
+    message: string;
+    newTotalPoints: string;
+    newRank?: number;
+  };
+  error?: string;
+  message?: string;
+}
+
+export interface IndexerPromoValidationResponse {
+  success: boolean;
+  data?: {
+    isValid: boolean;
+    promoCode: string;
+    pointsValue: string;
+    campaignName: string;
+    expiresAt?: number;
+    usageInfo: {
+      maxClaimsPerUser: number;
+      currentUserClaims: number;
+      remainingClaims: number;
+    };
+  };
+  error?: string;
+  message?: string;
+}
+
+// Referral Types
+export interface IndexerReferralResponse {
+  success: boolean;
+  data?: {
+    referralCode: string;
+    isNewReferral: boolean;
+    message: string;
+  };
+  error?: string;
+}
+
+export interface IndexerRefereeLoginResponse {
+  success: boolean;
+  data?: {
+    pointsAwarded: string;
+    referralBonuses: Array<{
+      referrerWallet: string;
+      pointsAwarded: string;
+      bonusType: string;
+    }>;
+    message: string;
+  };
+  error?: string;
+}
+
+// Leaderboard Types
 export interface IndexerLeaderboardEntry {
   rank: number;
   walletAddress: string;
@@ -349,44 +605,38 @@ export interface IndexerLeaderboardEntry {
   currentStreak: number;
   longestStreak: number;
   lastActivityDate: number | null;
+  tier: string;
 }
 
 export interface IndexerLeaderboardResponse {
   success: boolean;
   data: {
-    timeframe: 'all_time' | 'weekly' | 'monthly';
     leaderboard: IndexerLeaderboardEntry[];
+    userRank: number | null;
     pagination: {
-      page: number;
+      total: number;
       limit: number;
-      totalUsers: number;
-      totalPages: number;
-      hasNext: boolean;
-      hasPrevious: boolean;
+      offset: number;
+      hasMore: boolean;
     };
+    lastUpdated: number;
   };
 }
 
-export interface IndexerPointsActivity {
-  id: string;
-  walletAddress: string;
-  pointsAwarded: number;
-  reason: string;
-  metadata?: any;
-  timestamp: number;
-}
-
+// Campaign Types
 export interface IndexerCampaign {
   id: string;
   campaignName: string;
-  campaignType: 'random_drop' | 'milestone' | 'event' | 'targeted';
-  pointsPerClaim: number;
-  maxClaimsPerUser: number;
-  totalClaimsLimit: number | null;
+  campaignType: 'promotional_code' | 'referral_bonus' | 'achievement_unlock' | 'seasonal_event';
+  isActive: boolean;
+  description?: string;
   startTime: number;
   endTime: number;
-  isActive: boolean;
-  createdBy: string | null;
+  pointsPerClaim: number;
+  maxClaimsPerUser: number;
+  totalClaimsLimit?: number;
+  currentClaims: number;
+  createdBy?: string;
   createdAt: number;
 }
 
@@ -394,6 +644,144 @@ export interface IndexerCampaignsResponse {
   success: boolean;
   data: {
     campaigns: IndexerCampaign[];
+    totalActive: number;
+  };
+}
+
+export interface IndexerCampaignStatsResponse {
+  success: boolean;
+  data: {
+    campaign: IndexerCampaign;
+    stats: {
+      totalClaims: number;
+      uniqueClaimers: number;
+      totalPointsDistributed: string;
+      topClaimers: Array<{
+        walletAddress: string;
+        claimCount: number;
+        totalPointsClaimed: string;
+      }>;
+      dailyBreakdown: Array<{
+        date: string;
+        claims: number;
+        pointsDistributed: string;
+      }>;
+    };
+  };
+}
+
+// Webhook Types
+export interface IndexerWebhookEmailSentRequest {
+  senderWallet: string;
+  recipientEmails: string[];
+  transactionHash?: string;
+  chainId?: number;
+  blockNumber?: string;
+}
+
+export interface IndexerWebhookRecipientLoginRequest {
+  recipientWallet: string;
+  senderWallets: string[];
+}
+
+export interface IndexerWebhookLoginRequest {
+  walletAddress: string;
+  referralCode?: string;
+}
+
+// Admin Types
+export interface IndexerAdminCampaignRequest {
+  campaignName: string;
+  campaignType: string;
+  pointsPerClaim: number;
+  maxClaimsPerUser: number;
+  totalClaimsLimit?: number;
+  startTime: number;
+  endTime: number;
+  description?: string;
+  adminWallet: string;
+  adminSignature: string;
+  adminMessage: string;
+}
+
+export interface IndexerAdminAwardPointsRequest {
+  targetWallet: string;
+  points: number;
+  reason: string;
+  adminWallet: string;
+  adminSignature: string;
+  adminMessage: string;
+}
+
+export interface IndexerAdminFlagUserRequest {
+  targetWallet: string;
+  reason: string;
+  adminWallet: string;
+  adminSignature: string;
+  adminMessage: string;
+}
+
+export interface IndexerAdminStatsResponse {
+  success: boolean;
+  data: {
+    overview: {
+      totalUsers: number;
+      totalPointsAwarded: string;
+      activeUsers24h: number;
+      activeUsers7d: number;
+      totalCampaigns: number;
+      activeCampaigns: number;
+      flaggedUsers: number;
+      totalTransactions: number;
+    };
+    recentActivity: Array<{
+      id: string;
+      type: string;
+      description: string;
+      timestamp: number;
+      metadata?: Record<string, any>;
+    }>;
+    topUsers: Array<{
+      walletAddress: string;
+      totalPoints: string;
+      rank: number;
+    }>;
+    systemHealth: {
+      status: 'healthy' | 'warning' | 'error';
+      lastUpdated: number;
+      alerts: string[];
+    };
+  };
+}
+
+export interface IndexerAdminFlaggedUsersResponse {
+  success: boolean;
+  data: {
+    flaggedUsers: Array<{
+      walletAddress: string;
+      flagReason: string;
+      flaggedAt: number;
+      flaggedBy?: string;
+      totalFlags: number;
+      lastActivity: number;
+      isActive: boolean;
+    }>;
+    pagination: {
+      total: number;
+      limit: number;
+      offset: number;
+      hasMore: boolean;
+    };
+  };
+}
+
+export interface IndexerAdminBulkCodesResponse {
+  success: boolean;
+  data: {
+    campaignId: string;
+    codesGenerated: number;
+    codes: string[];
+    message: string;
   };
 }
 

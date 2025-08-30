@@ -15,6 +15,9 @@ export * from './analytics';
 // Email operations
 export * from './email/email-operations';
 
+// Indexer service
+export * from './indexer';
+
 // Mailbox operations
 export * from './mailbox/mailbox-operations';
 

@@ -7,7 +7,16 @@
       "Bash(npm run build:*)",
       "Bash(npm install:*)",
       "Bash(npm run lint:*)",
-      "Bash(npm run format:*)"
+      "Bash(npm run format:*)",
+      "Read(/Users/qianghuang/mail_box_indexer/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/src/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/src/services/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/src/services/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/api//**)",
+      "Bash(npm run typecheck:*)"
     ],
     "deny": [],
     "ask": []
