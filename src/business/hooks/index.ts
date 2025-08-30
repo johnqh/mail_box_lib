@@ -14,3 +14,9 @@ export * from './data/useEmail';
 export * from './data/useEmails';
 export * from './data/useEmailAddresses';
 export * from './data/useMailBoxes';
+
+// Indexer hooks
+export * from './indexer/useIndexerPoints';
+
+// Points hooks  
+export * from './points/usePointsLeaderboard';
