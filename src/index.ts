@@ -106,5 +106,5 @@ export {
   // Storage types
   PlatformStorage,
   AdvancedPlatformStorage,
-  StorageProvider
+  StorageProvider,
 } from './types';

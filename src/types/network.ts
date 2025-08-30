@@ -30,7 +30,10 @@ export interface NetworkClient {
    * @param options Request options
    * @returns Promise with the response
    */
-  request<T = any>(url: string, options?: NetworkRequestOptions): Promise<NetworkResponse<T>>;
+  request<T = any>(
+    url: string,
+    options?: NetworkRequestOptions
+  ): Promise<NetworkResponse<T>>;
 
   /**
    * Make a GET request
@@ -38,7 +41,10 @@ export interface NetworkClient {
    * @param options Request options
    * @returns Promise with the response
    */
-  get<T = any>(url: string, options?: Omit<NetworkRequestOptions, 'method' | 'body'>): Promise<NetworkResponse<T>>;
+  get<T = any>(
+    url: string,
+    options?: Omit<NetworkRequestOptions, 'method' | 'body'>
+  ): Promise<NetworkResponse<T>>;
 
   /**
    * Make a POST request
@@ -47,7 +53,11 @@ export interface NetworkClient {
    * @param options Request options
    * @returns Promise with the response
    */
-  post<T = any>(url: string, body?: any, options?: Omit<NetworkRequestOptions, 'method'>): Promise<NetworkResponse<T>>;
+  post<T = any>(
+    url: string,
+    body?: any,
+    options?: Omit<NetworkRequestOptions, 'method'>
+  ): Promise<NetworkResponse<T>>;
 
   /**
    * Make a PUT request
@@ -56,7 +66,11 @@ export interface NetworkClient {
    * @param options Request options
    * @returns Promise with the response
    */
-  put<T = any>(url: string, body?: any, options?: Omit<NetworkRequestOptions, 'method'>): Promise<NetworkResponse<T>>;
+  put<T = any>(
+    url: string,
+    body?: any,
+    options?: Omit<NetworkRequestOptions, 'method'>
+  ): Promise<NetworkResponse<T>>;
 
   /**
    * Make a DELETE request
@@ -64,7 +78,10 @@ export interface NetworkClient {
    * @param options Request options
    * @returns Promise with the response
    */
-  delete<T = any>(url: string, options?: Omit<NetworkRequestOptions, 'method' | 'body'>): Promise<NetworkResponse<T>>;
+  delete<T = any>(
+    url: string,
+    options?: Omit<NetworkRequestOptions, 'method' | 'body'>
+  ): Promise<NetworkResponse<T>>;
 }
 
 /**
@@ -76,7 +93,13 @@ export class NetworkError extends Error {
   public readonly url: string;
   public readonly data?: any;
 
-  constructor(message: string, status: number, statusText: string, url: string, data?: any) {
+  constructor(
+    message: string,
+    status: number,
+    statusText: string,
+    url: string,
+    data?: any
+  ) {
     super(message);
     this.name = 'NetworkError';
     this.status = status;

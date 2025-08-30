@@ -38,7 +38,9 @@ export class WildDuckUserHelper {
   /**
    * Create a new user
    */
-  static async createUser(params: CreateUserParams): Promise<{ success: boolean; id: string }> {
+  static async createUser(
+    params: CreateUserParams
+  ): Promise<{ success: boolean; id: string }> {
     const response = await fetch(`${getWildDuckBaseUrl()}/users`, {
       method: 'POST',
       headers: {
@@ -49,7 +51,9 @@ export class WildDuckUserHelper {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -59,18 +63,26 @@ export class WildDuckUserHelper {
   /**
    * Update user information
    */
-  static async updateUser(userId: string, params: UpdateUserParams): Promise<{ success: boolean }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
+  static async updateUser(
+    userId: string,
+    params: UpdateUserParams
+  ): Promise<{ success: boolean }> {
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -81,16 +93,21 @@ export class WildDuckUserHelper {
    * Delete a user
    */
   static async deleteUser(userId: string): Promise<{ success: boolean }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -100,18 +117,26 @@ export class WildDuckUserHelper {
   /**
    * Reset user password
    */
-  static async resetPassword(userId: string, password: string): Promise<{ success: boolean }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/password`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ password }),
-    });
+  static async resetPassword(
+    userId: string,
+    password: string
+  ): Promise<{ success: boolean }> {
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/password`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password }),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -122,16 +147,21 @@ export class WildDuckUserHelper {
    * Recalculate user quota
    */
   static async resetQuota(userId: string): Promise<{ success: boolean }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/quota/reset`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/quota/reset`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -142,16 +172,21 @@ export class WildDuckUserHelper {
    * Cancel user deletion task (restore user)
    */
   static async restoreUser(userId: string): Promise<{ success: boolean }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/restore`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/restore`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();

@@ -66,8 +66,10 @@ Issued At: ${issuedAt.toISOString()}`;
  * Generate a random nonce for signature messages (compatible with WildDuck)
  */
 export const generateNonce = (): string => {
-  return Math.random().toString(36).substring(2, 15) + 
-         Math.random().toString(36).substring(2, 15);
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
 };
 
 /**
@@ -75,9 +77,7 @@ export const generateNonce = (): string => {
  * @deprecated WildDuck now accepts any valid signature from the wallet address
  * This function is kept for backward compatibility
  */
-export const createWildDuckAuthMessage = (
-  nonce: string
-): string => {
+export const createWildDuckAuthMessage = (nonce: string): string => {
   return `Sign in to WildDuck\nNonce: ${nonce}`;
 };
 
@@ -93,29 +93,29 @@ export const createAuthMessage = (
   issuedAt?: Date
 ): { message: string; nonce: string } => {
   const authNonce = nonce || generateNonce();
-  
+
   // For WildDuck compatibility, sign the nonce directly
   if (domain === '0xmail.box' || domain.includes('wildduck')) {
     return {
       message: authNonce, // Sign the nonce directly
-      nonce: authNonce
+      nonce: authNonce,
     };
   }
-  
+
   // For other domains, use standard SIWE/Solana messages
   const authIssuedAt = issuedAt || new Date();
   let message: string;
-  
+
   if (chainType === 'solana') {
     message = createSolanaSignMessage(domain, address, authNonce, authIssuedAt);
   } else {
     // Default to SIWE for EVM chains
     message = createSIWEMessage(domain, address, authNonce, authIssuedAt);
   }
-  
+
   return {
     message,
-    nonce: authNonce
+    nonce: authNonce,
   };
 };
 
@@ -137,7 +137,9 @@ export const formatSignatureForWildDuck = (
     if (signature instanceof Uint8Array) {
       // Validate signature length for Solana (should be 64 bytes)
       if (signature.length !== 64) {
-        throw new Error(`Invalid Solana signature length: expected 64, got ${signature.length}`);
+        throw new Error(
+          `Invalid Solana signature length: expected 64, got ${signature.length}`
+        );
       }
       // Convert Uint8Array to base58 (not base64)
       const bs58 = require('bs58');
@@ -155,24 +157,26 @@ export const formatSignatureForWildDuck = (
     if (signature instanceof Uint8Array) {
       // Validate signature length for EVM (should be 65 bytes)
       if (signature.length !== 65) {
-        console.warn(`Unexpected EVM signature length: expected 65, got ${signature.length}`);
+        console.warn(
+          `Unexpected EVM signature length: expected 65, got ${signature.length}`
+        );
       }
       // Convert Uint8Array to Base64
       return Buffer.from(signature).toString('base64');
     }
-    
+
     // Convert hex string to Base64
     const hexSig = signature as string;
     if (hexSig.length === 0) {
       throw new Error('Empty EVM signature string');
     }
-    
+
     // Clean hex format (remove 0x prefix if present)
     const cleanHex = hexSig.startsWith('0x') ? hexSig.slice(2) : hexSig;
     if (!/^[0-9a-fA-F]+$/.test(cleanHex)) {
       throw new Error('Invalid hex signature format');
     }
-    
+
     // Convert hex to bytes then to Base64
     const signatureBytes = Buffer.from(cleanHex, 'hex');
     return signatureBytes.toString('base64');
@@ -186,34 +190,34 @@ export const isValidBlockchainUsername = (username: string): boolean => {
   if (!username || typeof username !== 'string') {
     return false;
   }
-  
+
   const cleanUsername = username.trim().toLowerCase();
-  
+
   // EVM address
   if (isEVMAddress(cleanUsername)) {
     return true;
   }
-  
+
   // Base64 encoded EVM address
   if (isBase64EVMAddress(cleanUsername)) {
     return true;
   }
-  
+
   // Solana address
   if (isSolanaAddress(cleanUsername)) {
     return true;
   }
-  
+
   // ENS name
   if (isENSName(cleanUsername)) {
     return true;
   }
-  
+
   // SNS name
   if (isSNSName(cleanUsername)) {
     return true;
   }
-  
+
   return false;
 };
 
@@ -240,7 +244,7 @@ const isBase64EVMAddress = (encoded: string): boolean => {
     if (decoded.length !== 40) {
       return false;
     }
-    const address = '0x' + decoded;
+    const address = `0x${decoded}`;
     return isEVMAddress(address);
   } catch {
     return false;
@@ -249,7 +253,12 @@ const isBase64EVMAddress = (encoded: string): boolean => {
 
 const isSolanaAddress = (address: string): boolean => {
   try {
-    if (!address || typeof address !== 'string' || address.length < 32 || address.length > 44) {
+    if (
+      !address ||
+      typeof address !== 'string' ||
+      address.length < 32 ||
+      address.length > 44
+    ) {
       return false;
     }
     const base58Regex = /^[1-9A-HJ-NP-Za-km-z]+$/;
@@ -270,8 +279,8 @@ const isENSName = (name: string): boolean => {
   if (!lowerName.endsWith('.eth') && !lowerName.endsWith('.box')) {
     return false;
   }
-  const withoutTLD = lowerName.endsWith('.eth') 
-    ? lowerName.slice(0, -4) 
+  const withoutTLD = lowerName.endsWith('.eth')
+    ? lowerName.slice(0, -4)
     : lowerName.slice(0, -4);
   if (withoutTLD.length === 0) {
     return false;

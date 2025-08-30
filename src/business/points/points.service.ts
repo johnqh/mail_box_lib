@@ -1,7 +1,14 @@
 export interface PointsAction {
   id: string;
   walletAddress: string;
-  action: 'send_email' | 'first_time_recipient' | 'delegate_privilege' | 'receive_delegation' | 'send_privileged_email' | 'referral' | 'claim_points';
+  action:
+    | 'send_email'
+    | 'first_time_recipient'
+    | 'delegate_privilege'
+    | 'receive_delegation'
+    | 'send_privileged_email'
+    | 'referral'
+    | 'claim_points';
   points: number;
   timestamp: Date;
   metadata?: {
@@ -59,22 +66,22 @@ export class PointsService {
     metadata?: PointsAction['metadata']
   ): Promise<void> {
     const points = this.getPointsForAction(action, metadata);
-    
+
     const pointsAction: PointsAction = {
       id: crypto.randomUUID(),
       walletAddress,
       action,
       points,
       timestamp: new Date(),
-      metadata
+      metadata,
     };
 
     // In a real implementation, this would be sent to the backend
     await this.recordPointsAction(pointsAction);
-    
+
     // Update local cache
     this.updateUserPointsCache(walletAddress, pointsAction);
-    
+
     console.log(`Awarded ${points} points to ${walletAddress} for ${action}`);
   }
 
@@ -110,7 +117,7 @@ export class PointsService {
     // For now, store in localStorage for demo purposes
     const storageKey = `points_${action.walletAddress}`;
     const existingData = localStorage.getItem(storageKey);
-    
+
     let userPoints: UserPoints;
     if (existingData) {
       userPoints = JSON.parse(existingData);
@@ -122,7 +129,7 @@ export class PointsService {
         walletAddress: action.walletAddress,
         totalPoints: action.points,
         actions: [action],
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       };
     }
 
@@ -130,9 +137,12 @@ export class PointsService {
   }
 
   // Update local cache
-  private updateUserPointsCache(walletAddress: string, action: PointsAction): void {
+  private updateUserPointsCache(
+    walletAddress: string,
+    action: PointsAction
+  ): void {
     const cached = this.userPointsCache.get(walletAddress);
-    
+
     if (cached) {
       cached.actions.push(action);
       cached.totalPoints += action.points;
@@ -142,7 +152,7 @@ export class PointsService {
         walletAddress,
         totalPoints: action.points,
         actions: [action],
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       });
     }
   }
@@ -158,16 +168,16 @@ export class PointsService {
     // Load from localStorage (in real implementation, this would be an API call)
     const storageKey = `points_${walletAddress}`;
     const stored = localStorage.getItem(storageKey);
-    
+
     if (stored) {
       const userPoints = JSON.parse(stored);
       // Convert string dates back to Date objects
       userPoints.lastUpdated = new Date(userPoints.lastUpdated);
       userPoints.actions = userPoints.actions.map((action: any) => ({
         ...action,
-        timestamp: new Date(action.timestamp)
+        timestamp: new Date(action.timestamp),
       }));
-      
+
       this.userPointsCache.set(walletAddress, userPoints);
       return userPoints;
     }
@@ -177,9 +187,9 @@ export class PointsService {
       walletAddress,
       totalPoints: 0,
       actions: [],
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
-    
+
     this.userPointsCache.set(walletAddress, defaultPoints);
     return defaultPoints;
   }
@@ -197,7 +207,7 @@ export class PointsService {
       clicks: 0,
       conversions: 0,
       pointsEarned: 0,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     // Store referral link (in real implementation, this would be sent to backend)
@@ -223,14 +233,16 @@ export class PointsService {
   ): Promise<void> {
     // Extract referrer wallet from referral code
     const referrerWallet = referralCode.split('_')[0];
-    
+
     // Award points to referrer
     await this.awardPoints(referrerWallet, 'referral', {
       referralCode,
-      points: 50 // Bonus points for successful referral
+      points: 50, // Bonus points for successful referral
     });
 
-    console.log(`Referral conversion processed: ${referralCode} -> ${newUserWallet}`);
+    console.log(
+      `Referral conversion processed: ${referralCode} -> ${newUserWallet}`
+    );
   }
 
   // Generate claimable points (admin function - would be done by backend)
@@ -247,7 +259,7 @@ export class PointsService {
       walletAddress,
       points,
       expirationDate,
-      claimCode: `CLAIM_${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+      claimCode: `CLAIM_${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
     };
 
     // Store claimable points
@@ -267,12 +279,15 @@ export class PointsService {
   ): Promise<boolean> {
     const storageKey = `claimable_${walletAddress}`;
     const existing = localStorage.getItem(storageKey);
-    
+
     if (!existing) return false;
 
     const claimables: ClaimablePoints[] = JSON.parse(existing);
     const claimableIndex = claimables.findIndex(
-      c => c.claimCode === claimCode && !c.claimedAt && new Date() < new Date(c.expirationDate)
+      c =>
+        c.claimCode === claimCode &&
+        !c.claimedAt &&
+        new Date() < new Date(c.expirationDate)
     );
 
     if (claimableIndex === -1) return false;
@@ -283,7 +298,7 @@ export class PointsService {
     // Award the points
     await this.awardPoints(walletAddress, 'claim_points', {
       claimCode,
-      points: claimable.points
+      points: claimable.points,
     });
 
     // Update storage
@@ -297,17 +312,22 @@ export class PointsService {
   public getClaimablePoints(walletAddress: string): ClaimablePoints[] {
     const storageKey = `claimable_${walletAddress}`;
     const existing = localStorage.getItem(storageKey);
-    
+
     if (!existing) return [];
 
     const claimables: ClaimablePoints[] = JSON.parse(existing);
-    return claimables.filter(c => !c.claimedAt && new Date() < new Date(c.expirationDate));
+    return claimables.filter(
+      c => !c.claimedAt && new Date() < new Date(c.expirationDate)
+    );
   }
 
   // Get leaderboard (top point holders)
-  public getLeaderboard(limit: number = 10): Array<{walletAddress: string, totalPoints: number}> {
-    const leaderboard: Array<{walletAddress: string, totalPoints: number}> = [];
-    
+  public getLeaderboard(
+    limit: number = 10
+  ): Array<{ walletAddress: string; totalPoints: number }> {
+    const leaderboard: Array<{ walletAddress: string; totalPoints: number }> =
+      [];
+
     // In a real implementation, this would come from the backend
     // For now, we'll scan localStorage for all user points
     for (let i = 0; i < localStorage.length; i++) {
@@ -318,7 +338,7 @@ export class PointsService {
           const userPoints: UserPoints = JSON.parse(data);
           leaderboard.push({
             walletAddress: userPoints.walletAddress,
-            totalPoints: userPoints.totalPoints
+            totalPoints: userPoints.totalPoints,
           });
         }
       }

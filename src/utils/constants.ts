@@ -13,14 +13,14 @@ export const API_RETRY_DELAY = 1000; // 1 second
 export const AUTH_STATUS = {
   DISCONNECTED: 'disconnected',
   CONNECTED: 'connected',
-  VERIFIED: 'verified'
+  VERIFIED: 'verified',
 } as const;
 
 // Chain Types
 export const CHAIN_TYPE = {
   EVM: 'evm',
   SOLANA: 'solana',
-  UNKNOWN: 'unknown'
+  UNKNOWN: 'unknown',
 } as const;
 
 // Storage Keys
@@ -30,7 +30,7 @@ export const STORAGE_KEYS = {
   THEME: 'theme',
   EMAIL_CACHE: 'emailCache',
   WALLET_ADDRESS: 'walletAddress',
-  CHAIN_TYPE: 'chainType'
+  CHAIN_TYPE: 'chainType',
 } as const;
 
 // Email Configuration
@@ -39,7 +39,7 @@ export const EMAIL_CONFIG = {
   MAX_RECIPIENTS: 100,
   ITEMS_PER_PAGE: 50,
   REFRESH_INTERVAL: 60000, // 1 minute
-  NOTIFICATION_COOLDOWN: 300000 // 5 minutes
+  NOTIFICATION_COOLDOWN: 300000, // 5 minutes
 } as const;
 
 // Subscription Tiers
@@ -47,7 +47,7 @@ export const SUBSCRIPTION_TIERS = {
   FREE: 'free',
   BASIC: 'basic',
   PRO: 'pro',
-  ENTERPRISE: 'enterprise'
+  ENTERPRISE: 'enterprise',
 } as const;
 
 // Time Formats
@@ -55,7 +55,7 @@ export const TIME_FORMAT = {
   SHORT_DATE: 'MMM d',
   FULL_DATE: 'MMM d, yyyy',
   DATE_TIME: 'MMM d, yyyy h:mm a',
-  RELATIVE: 'relative'
+  RELATIVE: 'relative',
 } as const;
 
 // Error Messages
@@ -68,7 +68,7 @@ export const ERROR_MESSAGES = {
   INSUFFICIENT_FUNDS: 'Insufficient funds for this operation',
   RATE_LIMITED: 'Too many requests. Please wait a moment.',
   SESSION_EXPIRED: 'Your session has expired. Please sign in again.',
-  PERMISSION_DENIED: 'You do not have permission to perform this action'
+  PERMISSION_DENIED: 'You do not have permission to perform this action',
 } as const;
 
 // Success Messages
@@ -79,7 +79,7 @@ export const SUCCESS_MESSAGES = {
   WALLET_CONNECTED: 'Wallet connected successfully',
   AUTHENTICATION_SUCCESS: 'Authentication successful',
   DELEGATION_SUCCESS: 'Delegation successful',
-  SUBSCRIPTION_ACTIVATED: 'Subscription activated successfully'
+  SUBSCRIPTION_ACTIVATED: 'Subscription activated successfully',
 } as const;
 
 // Routes
@@ -96,7 +96,7 @@ export const ROUTES = {
   DOCUMENTATION: '/document',
   WEB3_USERS: '/web3-users',
   WEB3_PROJECTS: '/web3-projects',
-  NAME_SERVICE: '/admin/subscriptions/ns'
+  NAME_SERVICE: '/admin/subscriptions/ns',
 } as const;
 
 // External Links
@@ -106,7 +106,7 @@ export const EXTERNAL_LINKS = {
   DISCORD: 'https://discord.gg/0xmailbox',
   DOCUMENTATION: 'https://docs.0xmail.box',
   SUPPORT_EMAIL: 'support@sudobility.com',
-  CONTACT_EMAIL: 'info@sudobility.com'
+  CONTACT_EMAIL: 'info@sudobility.com',
 } as const;
 
 // Wallet Names
@@ -120,7 +120,7 @@ export const WALLET_NAMES = {
   RAINBOW: 'Rainbow',
   TRUST: 'Trust Wallet',
   LEDGER: 'Ledger',
-  TREZOR: 'Trezor'
+  TREZOR: 'Trezor',
 } as const;
 
 // Network IDs
@@ -131,7 +131,7 @@ export const NETWORK_IDS = {
   OPTIMISM: 10,
   BASE: 8453,
   SOLANA_MAINNET: 'mainnet-beta',
-  SOLANA_DEVNET: 'devnet'
+  SOLANA_DEVNET: 'devnet',
 } as const;
 
 // Animation Durations
@@ -139,7 +139,7 @@ export const ANIMATION = {
   FAST: 150,
   NORMAL: 300,
   SLOW: 500,
-  VERY_SLOW: 1000
+  VERY_SLOW: 1000,
 } as const;
 
 // Z-Index Layers
@@ -149,13 +149,13 @@ export const Z_INDEX = {
   MODAL: 30,
   POPOVER: 40,
   TOOLTIP: 50,
-  TOAST: 60
+  TOAST: 60,
 } as const;
 
 // Formatting utilities
 export const formatWalletAddress = (
-  address: string, 
-  startChars: number = 6, 
+  address: string,
+  startChars: number = 6,
   endChars: number = 4
 ): string => {
   if (!address) return '';
@@ -168,31 +168,33 @@ export const formatFileSize = (bytes: number): string => {
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 };
 
 export const formatEmailDate = (
-  date: Date, 
+  date: Date,
   format: 'relative' | 'full' | 'short' = 'relative'
 ): string => {
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-  
+
   if (format === 'relative') {
     if (diffInSeconds < 60) return 'Just now';
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 604800)
+      return `${Math.floor(diffInSeconds / 86400)}d ago`;
     return date.toLocaleDateString();
   }
-  
+
   if (format === 'short') {
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
       day: 'numeric',
-      year: diffInSeconds > 31536000 ? 'numeric' : undefined 
+      year: diffInSeconds > 31536000 ? 'numeric' : undefined,
     });
   }
-  
+
   return date.toLocaleString();
 };

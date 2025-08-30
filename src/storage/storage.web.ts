@@ -2,7 +2,7 @@
  * Web implementation of platform storage using localStorage
  */
 
-import { PlatformStorage, AdvancedPlatformStorage } from "../types";
+import { AdvancedPlatformStorage, PlatformStorage } from '../types';
 
 /**
  * Basic web storage implementation using localStorage
@@ -71,7 +71,7 @@ export class AdvancedWebStorage implements AdvancedPlatformStorage {
     const item = {
       value,
       timestamp: Date.now(),
-      ttl
+      ttl,
     };
     this.storage.setItem(key, JSON.stringify(item));
   }
@@ -82,7 +82,7 @@ export class AdvancedWebStorage implements AdvancedPlatformStorage {
       if (!itemStr) return null;
 
       const item = JSON.parse(itemStr);
-      
+
       // Check if expired
       if (item.ttl && Date.now() - item.timestamp > item.ttl) {
         this.removeItem(key);

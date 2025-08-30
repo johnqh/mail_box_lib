@@ -3,7 +3,11 @@
  * This shows how to implement the AnalyticsClient for React Native
  */
 
-import { AnalyticsClient, AnalyticsEvent, AnalyticsEventData } from "../../types";
+import {
+  AnalyticsClient,
+  AnalyticsEvent,
+  AnalyticsEventData,
+} from '../../types';
 
 /**
  * React Native analytics client implementation
@@ -38,7 +42,7 @@ export class ReactNativeAnalyticsClient implements AnalyticsClient {
       // In React Native, you would use something like:
       // import analytics from '@react-native-firebase/analytics';
       // analytics().logEvent(eventName, parameters);
-      
+
       // Or for other providers like Mixpanel:
       // import { Mixpanel } from 'mixpanel-react-native';
       // Mixpanel.track(eventName, parameters);
@@ -53,7 +57,7 @@ export class ReactNativeAnalyticsClient implements AnalyticsClient {
     try {
       // Example for Firebase Analytics:
       // analytics().setUserProperties(properties);
-      
+
       // Example for Mixpanel:
       // Mixpanel.getPeople().set(properties);
 
@@ -67,7 +71,7 @@ export class ReactNativeAnalyticsClient implements AnalyticsClient {
     try {
       // Example for Firebase Analytics:
       // analytics().setUserId(userId);
-      
+
       // Example for Mixpanel:
       // Mixpanel.identify(userId);
 
@@ -79,11 +83,11 @@ export class ReactNativeAnalyticsClient implements AnalyticsClient {
 
   setAnalyticsEnabled(enabled: boolean): void {
     this.enabled = enabled;
-    
+
     try {
       // Example for Firebase Analytics:
       // analytics().setAnalyticsCollectionEnabled(enabled);
-      
+
       // Example for Mixpanel:
       // Mixpanel.optOutTracking(!enabled);
 
@@ -113,21 +117,21 @@ export const reactNativeAnalyticsClient = new ReactNativeAnalyticsClient();
 
 /**
  * Usage instructions for React Native:
- * 
+ *
  * 1. Install required packages:
  *    npm install @react-native-firebase/app @react-native-firebase/analytics
  *    # OR for other providers:
  *    npm install mixpanel-react-native
- * 
+ *
  * 2. In your React Native app setup:
  *    import { ReactNativeAnalyticsClient } from './utils/analytics.reactnative';
  *    import { Analytics } from './utils/analytics';
- *    
+ *
  *    const analyticsClient = new ReactNativeAnalyticsClient();
  *    const analytics = new Analytics(
  *      analyticsClient.trackEvent.bind(analyticsClient),
  *      getCurrentContext // your context provider
  *    );
- * 
+ *
  * 3. The Analytics class will work exactly the same as in web
  */

@@ -18,7 +18,7 @@ export function addDocumentEventListener(
   // Only add event listener in web environment
   if (typeof document !== 'undefined' && document.addEventListener) {
     document.addEventListener(type, listener, options);
-    
+
     // Return cleanup function
     return () => {
       if (typeof document !== 'undefined' && document.removeEventListener) {
@@ -26,7 +26,7 @@ export function addDocumentEventListener(
       }
     };
   }
-  
+
   // Return no-op cleanup for React Native
   return () => {};
 }

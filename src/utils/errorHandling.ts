@@ -6,7 +6,12 @@ export class AppError extends Error {
   statusCode?: number;
   details?: any;
 
-  constructor(message: string, code: string, statusCode?: number, details?: any) {
+  constructor(
+    message: string,
+    code: string,
+    statusCode?: number,
+    details?: any
+  ) {
     super(message);
     this.name = 'AppError';
     this.code = code;
@@ -23,19 +28,19 @@ export const getErrorMessage = (error: unknown): string => {
   if (isAppError(error)) {
     return error.message;
   }
-  
+
   if (error instanceof Error) {
     return error.message;
   }
-  
+
   if (typeof error === 'string') {
     return error;
   }
-  
+
   if (error && typeof error === 'object' && 'message' in error) {
     return String(error.message);
   }
-  
+
   return ERROR_MESSAGES.NETWORK_ERROR;
 };
 
@@ -46,17 +51,13 @@ export const handleApiError = (error: unknown): AppError => {
 
   // Handle fetch errors
   if (error instanceof TypeError && error.message.includes('fetch')) {
-    return new AppError(
-      ERROR_MESSAGES.NETWORK_ERROR,
-      'NETWORK_ERROR',
-      0
-    );
+    return new AppError(ERROR_MESSAGES.NETWORK_ERROR, 'NETWORK_ERROR', 0);
   }
 
   // Handle response errors
   if (error && typeof error === 'object' && 'status' in error) {
     const status = (error as any).status;
-    
+
     switch (status) {
       case 401:
         return new AppError(
@@ -65,38 +66,26 @@ export const handleApiError = (error: unknown): AppError => {
           401
         );
       case 403:
-        return new AppError(
-          ERROR_MESSAGES.PERMISSION_DENIED,
-          'FORBIDDEN',
-          403
-        );
+        return new AppError(ERROR_MESSAGES.PERMISSION_DENIED, 'FORBIDDEN', 403);
       case 429:
-        return new AppError(
-          ERROR_MESSAGES.RATE_LIMITED,
-          'RATE_LIMITED',
-          429
-        );
+        return new AppError(ERROR_MESSAGES.RATE_LIMITED, 'RATE_LIMITED', 429);
       default:
-        return new AppError(
-          ERROR_MESSAGES.NETWORK_ERROR,
-          'API_ERROR',
-          status
-        );
+        return new AppError(ERROR_MESSAGES.NETWORK_ERROR, 'API_ERROR', status);
     }
   }
 
-  return new AppError(
-    getErrorMessage(error),
-    'UNKNOWN_ERROR'
-  );
+  return new AppError(getErrorMessage(error), 'UNKNOWN_ERROR');
 };
 
 export const logError = (error: unknown, context?: string): void => {
   const timestamp = new Date().toISOString();
   const errorMessage = getErrorMessage(error);
-  
-  console.error(`[${timestamp}]${context ? ` [${context}]` : ''}: ${errorMessage}`, error);
-  
+
+  console.error(
+    `[${timestamp}]${context ? ` [${context}]` : ''}: ${errorMessage}`,
+    error
+  );
+
   // In production, you might want to send this to an error tracking service
   if (env.isProduction()) {
     // Send to error tracking service
@@ -110,20 +99,20 @@ export const retryWithBackoff = async <T>(
   initialDelay: number = 1000
 ): Promise<T> => {
   let lastError: unknown;
-  
+
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await fn();
     } catch (error) {
       lastError = error;
-      
+
       if (i < maxRetries - 1) {
         const delay = initialDelay * Math.pow(2, i);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
   }
-  
+
   throw lastError;
 };
 

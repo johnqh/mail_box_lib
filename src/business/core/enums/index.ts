@@ -7,28 +7,28 @@
 export enum AuthStatus {
   DISCONNECTED = 'disconnected',
   CONNECTED = 'connected',
-  VERIFIED = 'verified'
+  VERIFIED = 'verified',
 }
 
 // Chain types
 export enum ChainType {
   EVM = 'evm',
   SOLANA = 'solana',
-  UNKNOWN = 'unknown'
+  UNKNOWN = 'unknown',
 }
 
 // Theme states
 export enum Theme {
   LIGHT = 'light',
   DARK = 'dark',
-  SYSTEM = 'system'
+  SYSTEM = 'system',
 }
 
 // Font sizes
 export enum FontSize {
   SMALL = 'small',
   MEDIUM = 'medium',
-  LARGE = 'large'
+  LARGE = 'large',
 }
 
 // Standard email folder types (users can also create custom folders)
@@ -40,7 +40,7 @@ export enum StandardEmailFolder {
   TRASH = 'trash',
   STARRED = 'starred',
   SNOOZED = 'snoozed',
-  ARCHIVE = 'archive'
+  ARCHIVE = 'archive',
 }
 
 // Helper type that allows both standard folders and custom folder names
@@ -52,7 +52,9 @@ export const EmailFolderUtils = {
    * Check if a folder name is one of the standard folders
    */
   isStandardFolder(folder: string): folder is StandardEmailFolder {
-    return Object.values(StandardEmailFolder).includes(folder as StandardEmailFolder);
+    return Object.values(StandardEmailFolder).includes(
+      folder as StandardEmailFolder
+    );
   },
 
   /**
@@ -74,7 +76,7 @@ export const EmailFolderUtils = {
    */
   displayName(folder: EmailFolder): string {
     return folder.charAt(0).toUpperCase() + folder.slice(1);
-  }
+  },
 };
 
 // Email compose types
@@ -82,7 +84,7 @@ export enum EmailComposeType {
   NEW = 'new',
   REPLY = 'reply',
   REPLY_ALL = 'replyAll',
-  FORWARD = 'forward'
+  FORWARD = 'forward',
 }
 
 // Mobile navigation views
@@ -90,13 +92,13 @@ export enum MobileView {
   EMAIL_ADDRESSES = 'emailAddresses',
   FOLDERS = 'folders',
   EMAILS = 'emails',
-  EMAIL_BODY = 'emailBody'
+  EMAIL_BODY = 'emailBody',
 }
 
 // Medium screen navigation
 export enum MediumView {
   LEFT = 'left',
-  RIGHT = 'right'
+  RIGHT = 'right',
 }
 
 // Analytics events
@@ -118,7 +120,7 @@ export enum AnalyticsEvent {
   SETTINGS_CHANGED = 'settings_changed',
   ERROR_OCCURRED = 'error_occurred',
   AB_TEST_VIEWED = 'ab_test_viewed',
-  AB_TEST_CONVERTED = 'ab_test_converted'
+  AB_TEST_CONVERTED = 'ab_test_converted',
 }
 
 // Email actions
@@ -130,7 +132,7 @@ export enum EmailAction {
   STAR = 'star',
   UNSTAR = 'unstar',
   MARK_READ = 'mark_read',
-  MARK_UNREAD = 'mark_unread'
+  MARK_UNREAD = 'mark_unread',
 }
 
 // Subscription actions
@@ -138,7 +140,7 @@ export enum SubscriptionAction {
   VIEW = 'view',
   PURCHASE = 'purchase',
   CANCEL = 'cancel',
-  RESTORE = 'restore'
+  RESTORE = 'restore',
 }
 
 // Network request states
@@ -146,14 +148,14 @@ export enum RequestStatus {
   IDLE = 'idle',
   LOADING = 'loading',
   SUCCESS = 'success',
-  ERROR = 'error'
+  ERROR = 'error',
 }
 
 // Storage types
 export enum StorageType {
   LOCAL = 'local',
   SESSION = 'session',
-  MEMORY = 'memory'
+  MEMORY = 'memory',
 }
 
 // Notification types
@@ -161,7 +163,7 @@ export enum NotificationType {
   INFO = 'info',
   SUCCESS = 'success',
   WARNING = 'warning',
-  ERROR = 'error'
+  ERROR = 'error',
 }
 
 // Email address types
@@ -169,13 +171,13 @@ export enum EmailAddressType {
   DIRECT = 'direct',
   ENS = 'ens',
   SNS = 'sns',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
 }
 
 // Mailbox sort orders
 export enum SortOrder {
   ASC = 'asc',
-  DESC = 'desc'
+  DESC = 'desc',
 }
 
 // Email sort criteria
@@ -183,7 +185,7 @@ export enum EmailSortCriteria {
   DATE = 'date',
   SUBJECT = 'subject',
   FROM = 'from',
-  SIZE = 'size'
+  SIZE = 'size',
 }
 
 // Mailbox types
@@ -194,14 +196,14 @@ export enum MailboxType {
   TRASH = 'trash',
   SPAM = 'spam',
   ARCHIVE = 'archive',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
 }
 
 // Login methods
 export enum LoginMethod {
   WALLET = 'wallet',
   EMAIL = 'email',
-  SOCIAL = 'social'
+  SOCIAL = 'social',
 }
 
 // Wallet types for analytics
@@ -211,7 +213,7 @@ export enum WalletType {
   METAMASK = 'metamask',
   PHANTOM = 'phantom',
   COINBASE = 'coinbase',
-  WALLETCONNECT = 'walletconnect'
+  WALLETCONNECT = 'walletconnect',
 }
 
 // Network status
@@ -219,7 +221,7 @@ export enum NetworkStatus {
   UNKNOWN = 'unknown',
   CONNECTED = 'connected',
   DISCONNECTED = 'disconnected',
-  LIMITED = 'limited'
+  LIMITED = 'limited',
 }
 
 // Connection types
@@ -231,7 +233,7 @@ export enum ConnectionType {
   CELLULAR_3G = '3g',
   CELLULAR_4G = '4g',
   CELLULAR_5G = '5g',
-  ETHERNET = 'ethernet'
+  ETHERNET = 'ethernet',
 }
 
 // Connection states
@@ -240,14 +242,14 @@ export enum ConnectionState {
   CONNECTING = 'connecting',
   CONNECTED = 'connected',
   RECONNECTING = 'reconnecting',
-  ERROR = 'error'
+  ERROR = 'error',
 }
 
 // Platform types
 export enum PlatformType {
   WEB = 'web',
   REACT_NATIVE = 'react_native',
-  DESKTOP = 'desktop'
+  DESKTOP = 'desktop',
 }
 
 // Email validation states
@@ -255,7 +257,7 @@ export enum EmailValidationState {
   VALID = 'valid',
   INVALID = 'invalid',
   PENDING = 'pending',
-  UNKNOWN = 'unknown'
+  UNKNOWN = 'unknown',
 }
 
 // Feature flags
@@ -265,7 +267,7 @@ export enum FeatureFlag {
   ADVANCED_FILTERS = 'advanced_filters',
   DARK_MODE = 'dark_mode',
   NOTIFICATIONS = 'notifications',
-  ANALYTICS = 'analytics'
+  ANALYTICS = 'analytics',
 }
 
 // Error types
@@ -274,7 +276,7 @@ export enum ErrorType {
   AUTH = 'auth',
   VALIDATION = 'validation',
   PERMISSION = 'permission',
-  UNKNOWN = 'unknown'
+  UNKNOWN = 'unknown',
 }
 
 // Currency types for subscriptions
@@ -283,5 +285,5 @@ export enum Currency {
   EUR = 'EUR',
   GBP = 'GBP',
   CAD = 'CAD',
-  AUD = 'AUD'
+  AUD = 'AUD',
 }

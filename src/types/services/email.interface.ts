@@ -3,7 +3,7 @@
  * This interface defines the contract for email operations that work across web and React Native
  */
 
-import { Email, EmailAddress } from "../email";
+import { Email, EmailAddress } from '../email';
 export { EmailAddress };
 
 export interface EmailListOptions {
@@ -19,7 +19,11 @@ export interface EmailService {
    * @param mailboxId Mailbox identifier
    * @param options Pagination and sorting options
    */
-  getEmails(userId: string, mailboxId: string, options?: EmailListOptions): Promise<Email[]>;
+  getEmails(
+    userId: string,
+    mailboxId: string,
+    options?: EmailListOptions
+  ): Promise<Email[]>;
 
   /**
    * Get a specific email by ID
@@ -34,7 +38,11 @@ export interface EmailService {
    * @param emailId Email identifier
    * @param updates Partial email updates
    */
-  updateEmail(userId: string, emailId: string, updates: Partial<Email>): Promise<Email>;
+  updateEmail(
+    userId: string,
+    emailId: string,
+    updates: Partial<Email>
+  ): Promise<Email>;
 
   /**
    * Delete email
@@ -56,7 +64,11 @@ export interface EmailService {
    * @param query Search query
    * @param options Search options
    */
-  searchEmails(userId: string, query: string, options?: EmailListOptions): Promise<Email[]>;
+  searchEmails(
+    userId: string,
+    query: string,
+    options?: EmailListOptions
+  ): Promise<Email[]>;
 }
 
 export interface MailboxService {
@@ -72,7 +84,11 @@ export interface MailboxService {
    * @param name Mailbox name
    * @param options Additional options
    */
-  createMailbox(userId: string, name: string, options?: { hidden?: boolean }): Promise<Mailbox>;
+  createMailbox(
+    userId: string,
+    name: string,
+    options?: { hidden?: boolean }
+  ): Promise<Mailbox>;
 
   /**
    * Delete a mailbox
@@ -95,7 +111,11 @@ export interface EmailAddressService {
    * @param address Email address
    * @param options Additional options
    */
-  addEmailAddress(userId: string, address: string, options?: { main?: boolean }): Promise<EmailAddress>;
+  addEmailAddress(
+    userId: string,
+    address: string,
+    options?: { main?: boolean }
+  ): Promise<EmailAddress>;
 
   /**
    * Delete an email address
@@ -123,7 +143,11 @@ export interface Mailbox {
  * Mock data provider interface for development/testing
  */
 export interface MockDataProvider {
-  generateEmails(mailboxId: string, userId: string, count?: number): Promise<Email[]>;
+  generateEmails(
+    mailboxId: string,
+    userId: string,
+    count?: number
+  ): Promise<Email[]>;
   generateEmail(emailId: string): Promise<Email>;
   generateMailboxes(userId: string): Promise<Mailbox[]>;
   generateEmailAddresses(userId: string): Promise<EmailAddress[]>;

@@ -72,17 +72,22 @@ export class WildDuckAddressHelper {
     userId: string,
     params: CreateAddressParams
   ): Promise<{ success: boolean; id: string }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/addresses`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/addresses`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -97,17 +102,22 @@ export class WildDuckAddressHelper {
     addressId: string,
     params: UpdateAddressParams
   ): Promise<{ success: boolean }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/addresses/${encodeURIComponent(addressId)}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/addresses/${encodeURIComponent(addressId)}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -121,16 +131,21 @@ export class WildDuckAddressHelper {
     userId: string,
     address: string
   ): Promise<{ success: boolean }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/addresses/${encodeURIComponent(address)}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/addresses/${encodeURIComponent(address)}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -143,17 +158,22 @@ export class WildDuckAddressHelper {
   static async createForwardedAddress(
     params: CreateForwardedAddressParams
   ): Promise<{ success: boolean; id: string }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/addresses/forwarded`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/addresses/forwarded`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -167,17 +187,22 @@ export class WildDuckAddressHelper {
     addressId: string,
     params: UpdateForwardedAddressParams
   ): Promise<{ success: boolean }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/addresses/forwarded/${encodeURIComponent(addressId)}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/addresses/forwarded/${encodeURIComponent(addressId)}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -187,17 +212,24 @@ export class WildDuckAddressHelper {
   /**
    * Delete forwarded address
    */
-  static async deleteForwardedAddress(address: string): Promise<{ success: boolean }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/addresses/forwarded/${encodeURIComponent(address)}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+  static async deleteForwardedAddress(
+    address: string
+  ): Promise<{ success: boolean }> {
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/addresses/forwarded/${encodeURIComponent(address)}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -211,17 +243,22 @@ export class WildDuckAddressHelper {
     oldDomain: string,
     newDomain: string
   ): Promise<{ success: boolean; modified: number }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/addresses/renameDomain`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ oldDomain, newDomain }),
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/addresses/renameDomain`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ oldDomain, newDomain }),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();

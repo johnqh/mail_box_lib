@@ -3,14 +3,16 @@
  * Automatically selects the appropriate notification implementation based on platform
  */
 
-import { NotificationService, NotificationConfig } from "../../types";
+import { NotificationConfig, NotificationService } from '../../types';
 
 let notificationService: NotificationService;
 
 /**
  * Get platform-appropriate notification service
  */
-function createNotificationService(config?: Partial<NotificationConfig>): NotificationService {
+function createNotificationService(
+  config?: Partial<NotificationConfig>
+): NotificationService {
   // Platform detection - web vs React Native
   if (typeof window !== 'undefined' && 'Notification' in window) {
     // Web environment with Notification API
@@ -18,7 +20,9 @@ function createNotificationService(config?: Partial<NotificationConfig>): Notifi
     return createWebNotificationService(config);
   } else {
     // React Native environment
-    const { createReactNativeNotificationService } = require('./notification.reactnative');
+    const {
+      createReactNativeNotificationService,
+    } = require('./notification.reactnative');
     return createReactNativeNotificationService(config);
   }
 }
@@ -88,23 +92,27 @@ export const notificationHelper = {
    * @param from Email sender (for single email)
    * @param subject Email subject (for single email)
    */
-  notifyNewEmail: async (emailCount: number, from?: string, subject?: string) => {
+  notifyNewEmail: async (
+    emailCount: number,
+    from?: string,
+    subject?: string
+  ) => {
     const service = getNotificationService();
-    
+
     const title = emailCount === 1 ? 'New Email' : `${emailCount} New Emails`;
     let body: string;
-    
+
     if (emailCount === 1 && from && subject) {
       body = `From: ${from}\nSubject: ${subject}`;
     } else {
       body = `You have ${emailCount} new email${emailCount === 1 ? '' : 's'}`;
     }
-    
+
     return await service.showNotification(title, {
       body,
       icon: '/favicon.ico',
       tag: 'new-emails',
-      data: { type: 'new-email', count: emailCount }
+      data: { type: 'new-email', count: emailCount },
     });
   },
 
@@ -148,7 +156,7 @@ export const notificationHelper = {
   getCapabilities: () => {
     const service = getNotificationService();
     return service.getCapabilities();
-  }
+  },
 };
 
 // Re-export types for convenience
@@ -158,5 +166,5 @@ export type {
   NotificationResult,
   NotificationPermissionResult,
   NotificationCapabilities,
-  NotificationConfig
-} from "../../types";
+  NotificationConfig,
+} from '../../types';

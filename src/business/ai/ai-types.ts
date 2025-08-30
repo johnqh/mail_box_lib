@@ -4,7 +4,14 @@
  */
 
 export interface EmailCategory {
-  primary: 'priority' | 'promotional' | 'social' | 'web3' | 'finance' | 'personal' | 'spam';
+  primary:
+    | 'priority'
+    | 'promotional'
+    | 'social'
+    | 'web3'
+    | 'finance'
+    | 'personal'
+    | 'spam';
   secondary?: string[];
   confidence: number; // 0-1
   reasoning?: string;
@@ -20,7 +27,14 @@ export interface EmailSummary {
 }
 
 export interface Web3Entity {
-  type: 'wallet_address' | 'contract_address' | 'transaction_hash' | 'ens_name' | 'sns_name' | 'token_symbol' | 'nft_collection';
+  type:
+    | 'wallet_address'
+    | 'contract_address'
+    | 'transaction_hash'
+    | 'ens_name'
+    | 'sns_name'
+    | 'token_symbol'
+    | 'nft_collection';
   value: string;
   chainType?: 'ethereum' | 'solana' | 'polygon' | 'arbitrum' | 'optimism';
   confidence: number;
@@ -47,7 +61,15 @@ export interface EmailEntities {
 export interface TransactionAnalysis {
   txHash: string;
   chainType: string;
-  type: 'send' | 'receive' | 'swap' | 'mint' | 'stake' | 'defi' | 'nft' | 'contract_interaction';
+  type:
+    | 'send'
+    | 'receive'
+    | 'swap'
+    | 'mint'
+    | 'stake'
+    | 'defi'
+    | 'nft'
+    | 'contract_interaction';
   summary: string;
   details: {
     from?: string;

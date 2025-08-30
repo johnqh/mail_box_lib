@@ -5,7 +5,7 @@
 // Web implementation
 export * from './analytics.web';
 
-// React Native implementation  
+// React Native implementation
 export * from './analytics.reactnative';
 
 // Note: AnalyticsEvent enum is exported from business/core/enums

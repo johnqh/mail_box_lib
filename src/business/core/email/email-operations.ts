@@ -3,7 +3,7 @@
  * Contains all email-related business rules and operations that can be used across web and React Native
  */
 
-import { Email } from "../../../types/email";
+import { Email } from '../../../types/email';
 
 // Extended Email interface for business logic
 interface ExtendedEmail extends Email {
@@ -90,19 +90,26 @@ export interface EmailOperations {
   /**
    * Sort emails by criteria
    */
-  sortEmails(emails: Email[], criteria: 'date' | 'subject' | 'from', order: 'asc' | 'desc'): Email[];
+  sortEmails(
+    emails: Email[],
+    criteria: 'date' | 'subject' | 'from',
+    order: 'asc' | 'desc'
+  ): Email[];
 
   /**
    * Filter emails by criteria
    */
-  filterEmails(emails: Email[], filters: {
-    unread?: boolean;
-    starred?: boolean;
-    important?: boolean;
-    hasAttachments?: boolean;
-    fromDate?: Date;
-    toDate?: Date;
-  }): Email[];
+  filterEmails(
+    emails: Email[],
+    filters: {
+      unread?: boolean;
+      starred?: boolean;
+      important?: boolean;
+      hasAttachments?: boolean;
+      fromDate?: Date;
+      toDate?: Date;
+    }
+  ): Email[];
 
   /**
    * Search emails by query
@@ -119,32 +126,35 @@ export class DefaultEmailOperations implements EmailOperations {
       day: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
-      hour12: true
+      hour12: true,
     });
   }
 
   formatShortDate(date: Date): string {
     const now = new Date();
-    const diffInHours = Math.abs(now.getTime() - date.getTime()) / (1000 * 60 * 60);
-    
+    const diffInHours =
+      Math.abs(now.getTime() - date.getTime()) / (1000 * 60 * 60);
+
     if (diffInHours < 24) {
-      return date.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
         minute: '2-digit',
-        hour12: true 
+        hour12: true,
       });
     } else if (diffInHours < 24 * 7) {
       return date.toLocaleDateString('en-US', { weekday: 'short' });
     } else {
-      return date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
       });
     }
   }
 
   truncateText(text: string, maxLength: number): string {
-    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+    return text.length > maxLength
+      ? `${text.substring(0, maxLength)}...`
+      : text;
   }
 
   isUnread(email: Email): boolean {
@@ -167,8 +177,10 @@ export class DefaultEmailOperations implements EmailOperations {
     return {
       type: 'reply' as const,
       to: email.from,
-      subject: email.subject.startsWith('Re:') ? email.subject : `Re: ${email.subject}`,
-      body: `\n\n--- Original Message ---\nFrom: ${email.from}\nDate: ${email.date.toLocaleString()}\nSubject: ${email.subject}\n\n${email.body}`
+      subject: email.subject.startsWith('Re:')
+        ? email.subject
+        : `Re: ${email.subject}`,
+      body: `\n\n--- Original Message ---\nFrom: ${email.from}\nDate: ${email.date.toLocaleString()}\nSubject: ${email.subject}\n\n${email.body}`,
     };
   }
 
@@ -177,9 +189,13 @@ export class DefaultEmailOperations implements EmailOperations {
     return {
       type: 'replyAll' as const,
       to: email.from,
-      cc: Array.isArray(extendedEmail.cc) ? extendedEmail.cc.join(', ') : extendedEmail.cc || '',
-      subject: email.subject.startsWith('Re:') ? email.subject : `Re: ${email.subject}`,
-      body: `\n\n--- Original Message ---\nFrom: ${email.from}\nDate: ${email.date.toLocaleString()}\nSubject: ${email.subject}\n\n${email.body}`
+      cc: Array.isArray(extendedEmail.cc)
+        ? extendedEmail.cc.join(', ')
+        : extendedEmail.cc || '',
+      subject: email.subject.startsWith('Re:')
+        ? email.subject
+        : `Re: ${email.subject}`,
+      body: `\n\n--- Original Message ---\nFrom: ${email.from}\nDate: ${email.date.toLocaleString()}\nSubject: ${email.subject}\n\n${email.body}`,
     };
   }
 
@@ -187,8 +203,10 @@ export class DefaultEmailOperations implements EmailOperations {
     return {
       type: 'forward' as const,
       to: '',
-      subject: email.subject.startsWith('Fwd:') ? email.subject : `Fwd: ${email.subject}`,
-      body: `\n\n--- Forwarded Message ---\nFrom: ${email.from}\nTo: ${email.to}\nDate: ${email.date.toLocaleString()}\nSubject: ${email.subject}\n\n${email.body}`
+      subject: email.subject.startsWith('Fwd:')
+        ? email.subject
+        : `Fwd: ${email.subject}`,
+      body: `\n\n--- Forwarded Message ---\nFrom: ${email.from}\nTo: ${email.to}\nDate: ${email.date.toLocaleString()}\nSubject: ${email.subject}\n\n${email.body}`,
     };
   }
 
@@ -202,7 +220,11 @@ export class DefaultEmailOperations implements EmailOperations {
     return text.match(emailRegex) || [];
   }
 
-  sortEmails(emails: Email[], criteria: 'date' | 'subject' | 'from', order: 'asc' | 'desc'): Email[] {
+  sortEmails(
+    emails: Email[],
+    criteria: 'date' | 'subject' | 'from',
+    order: 'asc' | 'desc'
+  ): Email[] {
     const sortedEmails = [...emails];
     const multiplier = order === 'asc' ? 1 : -1;
 
@@ -222,25 +244,40 @@ export class DefaultEmailOperations implements EmailOperations {
     return sortedEmails;
   }
 
-  filterEmails(emails: Email[], filters: {
-    unread?: boolean;
-    starred?: boolean;
-    important?: boolean;
-    hasAttachments?: boolean;
-    fromDate?: Date;
-    toDate?: Date;
-  }): Email[] {
+  filterEmails(
+    emails: Email[],
+    filters: {
+      unread?: boolean;
+      starred?: boolean;
+      important?: boolean;
+      hasAttachments?: boolean;
+      fromDate?: Date;
+      toDate?: Date;
+    }
+  ): Email[] {
     return emails.filter(email => {
-      if (filters.unread !== undefined && this.isUnread(email) !== filters.unread) {
+      if (
+        filters.unread !== undefined &&
+        this.isUnread(email) !== filters.unread
+      ) {
         return false;
       }
-      if (filters.starred !== undefined && this.isStarred(email) !== filters.starred) {
+      if (
+        filters.starred !== undefined &&
+        this.isStarred(email) !== filters.starred
+      ) {
         return false;
       }
-      if (filters.important !== undefined && this.isImportant(email) !== filters.important) {
+      if (
+        filters.important !== undefined &&
+        this.isImportant(email) !== filters.important
+      ) {
         return false;
       }
-      if (filters.hasAttachments !== undefined && (!!email.attachments?.length) !== filters.hasAttachments) {
+      if (
+        filters.hasAttachments !== undefined &&
+        !!email.attachments?.length !== filters.hasAttachments
+      ) {
         return false;
       }
       if (filters.fromDate && email.date < filters.fromDate) {
@@ -255,11 +292,14 @@ export class DefaultEmailOperations implements EmailOperations {
 
   searchEmails(emails: Email[], query: string): Email[] {
     const lowerQuery = query.toLowerCase();
-    return emails.filter(email => 
-      email.subject.toLowerCase().includes(lowerQuery) ||
-      email.from.toLowerCase().includes(lowerQuery) ||
-      email.body.toLowerCase().includes(lowerQuery) ||
-      (typeof email.to === 'string' ? email.to.toLowerCase().includes(lowerQuery) : false)
+    return emails.filter(
+      email =>
+        email.subject.toLowerCase().includes(lowerQuery) ||
+        email.from.toLowerCase().includes(lowerQuery) ||
+        email.body.toLowerCase().includes(lowerQuery) ||
+        (typeof email.to === 'string'
+          ? email.to.toLowerCase().includes(lowerQuery)
+          : false)
     );
   }
 }

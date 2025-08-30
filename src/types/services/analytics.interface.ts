@@ -2,7 +2,12 @@
  * Platform-agnostic analytics service interface
  */
 
-import { AnalyticsEvent, ChainType, WalletType, LoginMethod } from "../../business/core/enums";
+import {
+  AnalyticsEvent,
+  ChainType,
+  LoginMethod,
+  WalletType,
+} from '../../business/core/enums';
 
 export interface AnalyticsEventProperties {
   [key: string]: string | number | boolean | undefined;
@@ -17,7 +22,10 @@ export interface AnalyticsService {
   /**
    * Track an event
    */
-  trackEvent(event: AnalyticsEvent | string, properties?: AnalyticsEventProperties): void;
+  trackEvent(
+    event: AnalyticsEvent | string,
+    properties?: AnalyticsEventProperties
+  ): void;
 
   /**
    * Set user property
@@ -47,7 +55,12 @@ export interface AnalyticsService {
   /**
    * Track timing event
    */
-  trackTiming(category: string, variable: string, time: number, label?: string): void;
+  trackTiming(
+    category: string,
+    variable: string,
+    time: number,
+    label?: string
+  ): void;
 
   /**
    * Check if analytics is enabled
@@ -81,39 +94,67 @@ export interface EmailAnalyticsService extends AnalyticsService {
   /**
    * Track user authentication
    */
-  trackAuth(method: LoginMethod, walletType?: WalletType, chainType?: ChainType): void;
+  trackAuth(
+    method: LoginMethod,
+    walletType?: WalletType,
+    chainType?: ChainType
+  ): void;
 
   /**
    * Track email action
    */
-  trackEmailAction(action: string, emailId: string, properties?: AnalyticsEventProperties): void;
+  trackEmailAction(
+    action: string,
+    emailId: string,
+    properties?: AnalyticsEventProperties
+  ): void;
 
   /**
    * Track navigation
    */
-  trackNavigation(from: string, to: string, properties?: AnalyticsEventProperties): void;
+  trackNavigation(
+    from: string,
+    to: string,
+    properties?: AnalyticsEventProperties
+  ): void;
 
   /**
    * Track subscription event
    */
-  trackSubscription(action: string, planType?: string, properties?: AnalyticsEventProperties): void;
+  trackSubscription(
+    action: string,
+    planType?: string,
+    properties?: AnalyticsEventProperties
+  ): void;
 
   /**
    * Track search
    */
-  trackSearch(query: string, resultsCount: number, properties?: AnalyticsEventProperties): void;
+  trackSearch(
+    query: string,
+    resultsCount: number,
+    properties?: AnalyticsEventProperties
+  ): void;
 
   /**
    * Track A/B test
    */
-  trackABTest(testName: string, variant: string, action: 'viewed' | 'converted', conversionType?: string): void;
+  trackABTest(
+    testName: string,
+    variant: string,
+    action: 'viewed' | 'converted',
+    conversionType?: string
+  ): void;
 }
 
 /**
  * Analytics event builders for common events
  */
 export class AnalyticsEventBuilder {
-  static userLogin(method: LoginMethod, walletType?: WalletType): AnalyticsEventProperties {
+  static userLogin(
+    method: LoginMethod,
+    walletType?: WalletType
+  ): AnalyticsEventProperties {
     return {
       method,
       wallet_type: walletType,
@@ -121,7 +162,11 @@ export class AnalyticsEventBuilder {
     };
   }
 
-  static emailAction(action: string, emailId: string, folder?: string): AnalyticsEventProperties {
+  static emailAction(
+    action: string,
+    emailId: string,
+    folder?: string
+  ): AnalyticsEventProperties {
     return {
       action,
       email_id: emailId,
@@ -130,7 +175,10 @@ export class AnalyticsEventBuilder {
     };
   }
 
-  static pageView(pageName: string, pagePath: string): AnalyticsEventProperties {
+  static pageView(
+    pageName: string,
+    pagePath: string
+  ): AnalyticsEventProperties {
     return {
       page_name: pageName,
       page_path: pagePath,
@@ -138,7 +186,11 @@ export class AnalyticsEventBuilder {
     };
   }
 
-  static error(errorType: string, errorMessage: string, pageName?: string): AnalyticsEventProperties {
+  static error(
+    errorType: string,
+    errorMessage: string,
+    pageName?: string
+  ): AnalyticsEventProperties {
     return {
       error_type: errorType,
       error_message: errorMessage,
@@ -147,7 +199,12 @@ export class AnalyticsEventBuilder {
     };
   }
 
-  static subscription(action: string, planType?: string, amount?: number, currency?: string): AnalyticsEventProperties {
+  static subscription(
+    action: string,
+    planType?: string,
+    amount?: number,
+    currency?: string
+  ): AnalyticsEventProperties {
     return {
       action,
       plan_type: planType,

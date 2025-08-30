@@ -71,17 +71,22 @@ export class WildDuckMessageHelper {
     mailboxId: string,
     params: UploadMessageParams
   ): Promise<{ success: boolean; id: string }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/mailboxes/${encodeURIComponent(mailboxId)}/messages`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/mailboxes/${encodeURIComponent(mailboxId)}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -97,17 +102,22 @@ export class WildDuckMessageHelper {
     messageId: string,
     params: UpdateMessageParams
   ): Promise<{ success: boolean }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/mailboxes/${encodeURIComponent(mailboxId)}/messages/${encodeURIComponent(messageId)}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/mailboxes/${encodeURIComponent(mailboxId)}/messages/${encodeURIComponent(messageId)}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -122,17 +132,22 @@ export class WildDuckMessageHelper {
     mailboxId: string,
     params: UpdateMessageParams & { message?: string[] }
   ): Promise<{ success: boolean; updated: number }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/mailboxes/${encodeURIComponent(mailboxId)}/messages`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/mailboxes/${encodeURIComponent(mailboxId)}/messages`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -147,16 +162,21 @@ export class WildDuckMessageHelper {
     mailboxId: string,
     messageId: string
   ): Promise<{ success: boolean }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/mailboxes/${encodeURIComponent(mailboxId)}/messages/${encodeURIComponent(messageId)}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/mailboxes/${encodeURIComponent(mailboxId)}/messages/${encodeURIComponent(messageId)}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -171,17 +191,22 @@ export class WildDuckMessageHelper {
     mailboxId: string,
     messageIds: string[]
   ): Promise<{ success: boolean; deleted: number }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/mailboxes/${encodeURIComponent(mailboxId)}/messages`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ message: messageIds }),
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/mailboxes/${encodeURIComponent(mailboxId)}/messages`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: messageIds }),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -197,17 +222,22 @@ export class WildDuckMessageHelper {
     messageId: string,
     params: ForwardMessageParams
   ): Promise<{ success: boolean; id: string }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/mailboxes/${encodeURIComponent(mailboxId)}/messages/${encodeURIComponent(messageId)}/forward`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/mailboxes/${encodeURIComponent(mailboxId)}/messages/${encodeURIComponent(messageId)}/forward`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -223,17 +253,22 @@ export class WildDuckMessageHelper {
     messageId: string,
     params: SubmitMessageParams
   ): Promise<{ success: boolean; id: string }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/mailboxes/${encodeURIComponent(mailboxId)}/messages/${encodeURIComponent(messageId)}/submit`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/mailboxes/${encodeURIComponent(mailboxId)}/messages/${encodeURIComponent(messageId)}/submit`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -247,17 +282,22 @@ export class WildDuckMessageHelper {
     userId: string,
     params: SearchApplyParams
   ): Promise<{ success: boolean; modified: number }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/search`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/search`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -271,16 +311,21 @@ export class WildDuckMessageHelper {
     userId: string,
     queueId: string
   ): Promise<{ success: boolean }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/outbound/${encodeURIComponent(queueId)}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/outbound/${encodeURIComponent(queueId)}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -294,17 +339,22 @@ export class WildDuckMessageHelper {
     userId: string,
     messageIds: string[]
   ): Promise<{ success: boolean; restored: number }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/archived/restore`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ message: messageIds }),
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/archived/restore`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: messageIds }),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -318,16 +368,21 @@ export class WildDuckMessageHelper {
     userId: string,
     messageId: string
   ): Promise<{ success: boolean }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/archived/messages/${encodeURIComponent(messageId)}/restore`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/archived/messages/${encodeURIComponent(messageId)}/restore`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();

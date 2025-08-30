@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getErrorMessage } from '../../utils/errorHandling';
 
 interface UseAsyncState<T> {
@@ -20,13 +20,13 @@ export function useAsync<T = any>(
   options: UseAsyncOptions = {}
 ) {
   const { immediate = false, onSuccess, onError } = options;
-  
+
   const [state, setState] = useState<UseAsyncState<T>>({
     data: null,
     error: null,
     isLoading: false,
     isSuccess: false,
-    isError: false
+    isError: false,
   });
 
   const isMountedRef = useRef(true);
@@ -43,40 +43,40 @@ export function useAsync<T = any>(
       error: null,
       isLoading: true,
       isSuccess: false,
-      isError: false
+      isError: false,
     });
 
     try {
       const result = await asyncFunction();
-      
+
       if (isMountedRef.current) {
         setState({
           data: result,
           error: null,
           isLoading: false,
           isSuccess: true,
-          isError: false
+          isError: false,
         });
-        
+
         onSuccess?.(result);
       }
-      
+
       return result;
     } catch (error) {
       const errorMessage = getErrorMessage(error);
-      
+
       if (isMountedRef.current) {
         setState({
           data: null,
           error: errorMessage,
           isLoading: false,
           isSuccess: false,
-          isError: true
+          isError: true,
         });
-        
+
         onError?.(errorMessage);
       }
-      
+
       throw error;
     }
   }, [asyncFunction, onSuccess, onError]);
@@ -93,13 +93,13 @@ export function useAsync<T = any>(
       error: null,
       isLoading: false,
       isSuccess: false,
-      isError: false
+      isError: false,
     });
   }, []);
 
   return {
     ...state,
     execute,
-    reset
+    reset,
   };
 }

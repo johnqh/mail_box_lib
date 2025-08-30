@@ -3,7 +3,12 @@
  * This shows how to implement the NetworkClient for React Native
  */
 
-import { NetworkClient, NetworkResponse, NetworkRequestOptions, NetworkError } from "../types";
+import {
+  NetworkClient,
+  NetworkError,
+  NetworkRequestOptions,
+  NetworkResponse,
+} from '../types';
 
 /**
  * React Native network client implementation
@@ -17,13 +22,16 @@ export class ReactNativeNetworkClient implements NetworkClient {
     this.defaultTimeout = defaultTimeout;
   }
 
-  async request<T = any>(url: string, options: NetworkRequestOptions = {}): Promise<NetworkResponse<T>> {
+  async request<T = any>(
+    url: string,
+    options: NetworkRequestOptions = {}
+  ): Promise<NetworkResponse<T>> {
     const {
       method = 'GET',
       headers = {},
       body,
       timeout = this.defaultTimeout,
-      signal
+      signal,
     } = options;
 
     // In React Native, you would use libraries like:
@@ -43,7 +51,7 @@ export class ReactNativeNetworkClient implements NetworkClient {
         method,
         headers,
         body,
-        signal: finalSignal
+        signal: finalSignal,
       });
 
       clearTimeout(timeoutId);
@@ -51,14 +59,14 @@ export class ReactNativeNetworkClient implements NetworkClient {
       // Parse response data
       let data: T;
       const contentType = response.headers.get('content-type') || '';
-      
+
       if (contentType.includes('application/json')) {
         data = await response.json();
       } else if (contentType.includes('text/')) {
-        data = await response.text() as unknown as T;
+        data = (await response.text()) as unknown as T;
       } else {
         // In React Native, you might handle binary data differently
-        data = await response.blob() as unknown as T;
+        data = (await response.blob()) as unknown as T;
       }
 
       // Convert headers to plain object
@@ -72,7 +80,7 @@ export class ReactNativeNetworkClient implements NetworkClient {
         status: response.status,
         statusText: response.statusText,
         data,
-        headers: responseHeaders
+        headers: responseHeaders,
       };
 
       if (!response.ok) {
@@ -94,7 +102,12 @@ export class ReactNativeNetworkClient implements NetworkClient {
 
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
-          throw new NetworkError('Request timeout', 408, 'Request Timeout', url);
+          throw new NetworkError(
+            'Request timeout',
+            408,
+            'Request Timeout',
+            url
+          );
         }
         throw new NetworkError(error.message, 0, 'Network Error', url);
       }
@@ -103,47 +116,71 @@ export class ReactNativeNetworkClient implements NetworkClient {
     }
   }
 
-  async get<T = any>(url: string, options: Omit<NetworkRequestOptions, 'method' | 'body'> = {}): Promise<NetworkResponse<T>> {
+  async get<T = any>(
+    url: string,
+    options: Omit<NetworkRequestOptions, 'method' | 'body'> = {}
+  ): Promise<NetworkResponse<T>> {
     return this.request<T>(url, { ...options, method: 'GET' });
   }
 
-  async post<T = any>(url: string, body?: any, options: Omit<NetworkRequestOptions, 'method'> = {}): Promise<NetworkResponse<T>> {
-    const requestBody = typeof body === 'object' && body !== null && !(body instanceof FormData)
-      ? JSON.stringify(body)
-      : body;
+  async post<T = any>(
+    url: string,
+    body?: any,
+    options: Omit<NetworkRequestOptions, 'method'> = {}
+  ): Promise<NetworkResponse<T>> {
+    const requestBody =
+      typeof body === 'object' && body !== null && !(body instanceof FormData)
+        ? JSON.stringify(body)
+        : body;
 
     const headers = { ...options.headers };
-    if (typeof body === 'object' && body !== null && !(body instanceof FormData)) {
+    if (
+      typeof body === 'object' &&
+      body !== null &&
+      !(body instanceof FormData)
+    ) {
       headers['Content-Type'] = 'application/json';
     }
 
-    return this.request<T>(url, { 
-      ...options, 
-      method: 'POST', 
+    return this.request<T>(url, {
+      ...options,
+      method: 'POST',
       body: requestBody,
-      headers 
+      headers,
     });
   }
 
-  async put<T = any>(url: string, body?: any, options: Omit<NetworkRequestOptions, 'method'> = {}): Promise<NetworkResponse<T>> {
-    const requestBody = typeof body === 'object' && body !== null && !(body instanceof FormData)
-      ? JSON.stringify(body)
-      : body;
+  async put<T = any>(
+    url: string,
+    body?: any,
+    options: Omit<NetworkRequestOptions, 'method'> = {}
+  ): Promise<NetworkResponse<T>> {
+    const requestBody =
+      typeof body === 'object' && body !== null && !(body instanceof FormData)
+        ? JSON.stringify(body)
+        : body;
 
     const headers = { ...options.headers };
-    if (typeof body === 'object' && body !== null && !(body instanceof FormData)) {
+    if (
+      typeof body === 'object' &&
+      body !== null &&
+      !(body instanceof FormData)
+    ) {
       headers['Content-Type'] = 'application/json';
     }
 
-    return this.request<T>(url, { 
-      ...options, 
-      method: 'PUT', 
+    return this.request<T>(url, {
+      ...options,
+      method: 'PUT',
       body: requestBody,
-      headers 
+      headers,
     });
   }
 
-  async delete<T = any>(url: string, options: Omit<NetworkRequestOptions, 'method' | 'body'> = {}): Promise<NetworkResponse<T>> {
+  async delete<T = any>(
+    url: string,
+    options: Omit<NetworkRequestOptions, 'method' | 'body'> = {}
+  ): Promise<NetworkResponse<T>> {
     return this.request<T>(url, { ...options, method: 'DELETE' });
   }
 }
@@ -153,16 +190,16 @@ export const reactNativeNetworkClient = new ReactNativeNetworkClient();
 
 /**
  * Usage instructions for React Native:
- * 
+ *
  * 1. Install required packages:
  *    npm install react-native-fetch-api
- * 
+ *
  * 2. In your React Native app setup:
  *    import { ReactNativeNetworkClient } from './utils/network.reactnative';
  *    import { WildDuckAPI } from './config/api';
- *    
+ *
  *    const networkClient = new ReactNativeNetworkClient();
  *    const api = new WildDuckAPI(networkClient);
- * 
+ *
  * 3. The API will work exactly the same as in web, but use React Native networking
  */

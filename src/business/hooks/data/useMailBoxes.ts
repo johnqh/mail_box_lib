@@ -1,7 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { emailToUserId } from '../../../network/clients/wildduck';
 import { WildDuckMailbox } from '../../../types/api';
-import { MailboxService, Mailbox as ServiceMailbox } from "../../../types/services";
+import {
+  MailboxService,
+  Mailbox as ServiceMailbox,
+} from '../../../types/services';
 // Services will be injected through options or dependency injection
 
 export interface MailBox {
@@ -33,16 +36,23 @@ interface UseMailBoxesOptions {
 const getMailboxIcon = (mailbox: ServiceMailbox | WildDuckMailbox): string => {
   if (mailbox.specialUse) {
     switch (mailbox.specialUse) {
-      case 'Inbox': return '📥';
-      case 'Sent': return '📤';
-      case 'Drafts': return '📝';
-      case 'Trash': return '🗑️';
-      case 'Junk': return '🚫';
-      case 'Archive': return '📦';
-      default: return '📁';
+      case 'Inbox':
+        return '📥';
+      case 'Sent':
+        return '📤';
+      case 'Drafts':
+        return '📝';
+      case 'Trash':
+        return '🗑️';
+      case 'Junk':
+        return '🚫';
+      case 'Archive':
+        return '📦';
+      default:
+        return '📁';
     }
   }
-  
+
   const nameLower = mailbox.name.toLowerCase();
   if (nameLower.includes('inbox')) return '📥';
   if (nameLower.includes('sent')) return '📤';
@@ -51,12 +61,14 @@ const getMailboxIcon = (mailbox: ServiceMailbox | WildDuckMailbox): string => {
   if (nameLower.includes('spam') || nameLower.includes('junk')) return '🚫';
   if (nameLower.includes('star')) return '⭐';
   if (nameLower.includes('archive')) return '📦';
-  
+
   return '📁';
 };
 
 // Convert service mailbox or WildDuck mailbox to our MailBox interface
-const convertServiceMailbox = (serviceMailbox: ServiceMailbox | WildDuckMailbox): MailBox => ({
+const convertServiceMailbox = (
+  serviceMailbox: ServiceMailbox | WildDuckMailbox
+): MailBox => ({
   id: serviceMailbox.id,
   name: serviceMailbox.name,
   icon: getMailboxIcon(serviceMailbox),
@@ -65,13 +77,12 @@ const convertServiceMailbox = (serviceMailbox: ServiceMailbox | WildDuckMailbox)
   path: serviceMailbox.path,
   specialUse: serviceMailbox.specialUse,
   subscribed: serviceMailbox.subscribed,
-  hidden: serviceMailbox.hidden
+  hidden: serviceMailbox.hidden,
 });
 
-
 export const useMailBoxes = (
-  emailAddressId: string, 
-  emailAddresses: Array<{id: string, email: string}> = [],
+  emailAddressId: string,
+  emailAddresses: Array<{ id: string; email: string }> = [],
   userId?: string, // Direct WildDuck user ID from authentication
   options: UseMailBoxesOptions = {}
 ): UseMailBoxesReturn => {
@@ -84,91 +95,88 @@ export const useMailBoxes = (
   const mockMailboxService = options.mockMailboxService;
   const getMailboxes = options.getMailboxes;
 
-  const fetchMailBoxes = useCallback(async (emailId: string) => {
-    if (!emailId) {
-      setMailBoxes([]);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      // Use direct user ID if provided, otherwise derive from email
-      let wildDuckUserId: string;
-      
-      if (userId) {
-        // Use the provided WildDuck user ID directly
-        wildDuckUserId = userId;
-        console.log('Using provided WildDuck user ID:', wildDuckUserId);
-      } else {
-        // Fallback: derive from email address (legacy behavior)
-        const selectedEmail = emailAddresses.find(addr => addr.id === emailId);
-        if (!selectedEmail) {
-          throw new Error(`Email address not found for ID: ${emailId}`);
-        }
-        wildDuckUserId = emailToUserId(selectedEmail.email);
-        console.log('Derived user ID from email:', selectedEmail.email, '→', wildDuckUserId);
+  const fetchMailBoxes = useCallback(
+    async (emailId: string) => {
+      if (!emailId) {
+        setMailBoxes([]);
+        return;
       }
-      
-      // Use WildDuck mailboxes function if provided
-      if (!getMailboxes) {
-        throw new Error('getMailboxes function not provided');
-      }
-      
-      const wildDuckMailboxes = await getMailboxes(wildDuckUserId, {
-        specialUse: true,
-        counters: true,
-        sizes: true
-      });
-      
-      const convertedMailboxes = wildDuckMailboxes
-        .filter(mailbox => !mailbox.hidden) // Filter out hidden mailboxes by default
-        .map(convertServiceMailbox)
-        .sort((a, b) => {
-          // Sort by special use first, then by name
-          if (a.specialUse && !b.specialUse) return -1;
-          if (!a.specialUse && b.specialUse) return 1;
-          return a.name.localeCompare(b.name);
-        });
-      
-      console.log('Successfully fetched mailboxes:', convertedMailboxes.length);
-      setMailBoxes(convertedMailboxes);
+
+      setLoading(true);
       setError(null);
-    } catch (err) {
-      console.warn('WildDuck hook failed, falling back to service layer:', err);
-      
+
       try {
-        // Fallback to mailbox service if provided
-        if (!mailboxService) {
-          throw new Error('Mailbox service not provided for fallback');
+        // Use direct user ID if provided, otherwise derive from email
+        let wildDuckUserId: string;
+
+        if (userId) {
+          // Use the provided WildDuck user ID directly
+          wildDuckUserId = userId;
+          console.log('Using provided WildDuck user ID:', wildDuckUserId);
+        } else {
+          // Fallback: derive from email address (legacy behavior)
+          const selectedEmail = emailAddresses.find(
+            addr => addr.id === emailId
+          );
+          if (!selectedEmail) {
+            throw new Error(`Email address not found for ID: ${emailId}`);
+          }
+          wildDuckUserId = emailToUserId(selectedEmail.email);
+          console.log(
+            'Derived user ID from email:',
+            selectedEmail.email,
+            '→',
+            wildDuckUserId
+          );
         }
-        
-        const wildDuckUserId = userId || emailToUserId(emailAddresses.find(addr => addr.id === emailId)?.email || '');
-        const serviceMailboxes = await mailboxService.getMailboxes(wildDuckUserId);
-        const convertedMailboxes = serviceMailboxes
-          .filter(mailbox => !mailbox.hidden)
+
+        // Use WildDuck mailboxes function if provided
+        if (!getMailboxes) {
+          throw new Error('getMailboxes function not provided');
+        }
+
+        const wildDuckMailboxes = await getMailboxes(wildDuckUserId, {
+          specialUse: true,
+          counters: true,
+          sizes: true,
+        });
+
+        const convertedMailboxes = wildDuckMailboxes
+          .filter(mailbox => !mailbox.hidden) // Filter out hidden mailboxes by default
           .map(convertServiceMailbox)
           .sort((a, b) => {
+            // Sort by special use first, then by name
             if (a.specialUse && !b.specialUse) return -1;
             if (!a.specialUse && b.specialUse) return 1;
             return a.name.localeCompare(b.name);
           });
-        
+
+        console.log(
+          'Successfully fetched mailboxes:',
+          convertedMailboxes.length
+        );
         setMailBoxes(convertedMailboxes);
         setError(null);
-        console.log('Using service layer fallback');
-      } catch (serviceErr) {
-        console.warn('Service layer failed, falling back to mock data:', serviceErr);
-        
+      } catch (err) {
+        console.warn(
+          'WildDuck hook failed, falling back to service layer:',
+          err
+        );
+
         try {
-          // Final fallback to mock service for development
-          if (!mockMailboxService) {
-            throw new Error('Mock mailbox service not provided');
+          // Fallback to mailbox service if provided
+          if (!mailboxService) {
+            throw new Error('Mailbox service not provided for fallback');
           }
-          
-          const mockServiceMailboxes = await mockMailboxService.getMailboxes(emailId);
-          const mockMailBoxes = mockServiceMailboxes
+
+          const wildDuckUserId =
+            userId ||
+            emailToUserId(
+              emailAddresses.find(addr => addr.id === emailId)?.email || ''
+            );
+          const serviceMailboxes =
+            await mailboxService.getMailboxes(wildDuckUserId);
+          const convertedMailboxes = serviceMailboxes
             .filter(mailbox => !mailbox.hidden)
             .map(convertServiceMailbox)
             .sort((a, b) => {
@@ -176,20 +184,48 @@ export const useMailBoxes = (
               if (!a.specialUse && b.specialUse) return 1;
               return a.name.localeCompare(b.name);
             });
-          
-          setMailBoxes(mockMailBoxes);
+
+          setMailBoxes(convertedMailboxes);
           setError(null);
-          console.log('Using offline mode with mock mailboxes');
-        } catch (mockErr) {
-          console.error('All fallback methods failed:', mockErr);
-          setError('Failed to load mailboxes');
-          setMailBoxes([]);
+          console.log('Using service layer fallback');
+        } catch (serviceErr) {
+          console.warn(
+            'Service layer failed, falling back to mock data:',
+            serviceErr
+          );
+
+          try {
+            // Final fallback to mock service for development
+            if (!mockMailboxService) {
+              throw new Error('Mock mailbox service not provided');
+            }
+
+            const mockServiceMailboxes =
+              await mockMailboxService.getMailboxes(emailId);
+            const mockMailBoxes = mockServiceMailboxes
+              .filter(mailbox => !mailbox.hidden)
+              .map(convertServiceMailbox)
+              .sort((a, b) => {
+                if (a.specialUse && !b.specialUse) return -1;
+                if (!a.specialUse && b.specialUse) return 1;
+                return a.name.localeCompare(b.name);
+              });
+
+            setMailBoxes(mockMailBoxes);
+            setError(null);
+            console.log('Using offline mode with mock mailboxes');
+          } catch (mockErr) {
+            console.error('All fallback methods failed:', mockErr);
+            setError('Failed to load mailboxes');
+            setMailBoxes([]);
+          }
         }
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  }, [emailAddresses, getMailboxes, mailboxService, mockMailboxService, userId]);
+    },
+    [emailAddresses, getMailboxes, mailboxService, mockMailboxService, userId]
+  );
 
   const refreshMailBoxes = useCallback(async () => {
     await fetchMailBoxes(emailAddressId);
@@ -203,6 +239,6 @@ export const useMailBoxes = (
     mailBoxes,
     loading,
     error,
-    refreshMailBoxes
+    refreshMailBoxes,
   };
 };

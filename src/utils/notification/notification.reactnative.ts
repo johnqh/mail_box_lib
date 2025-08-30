@@ -4,20 +4,20 @@
  */
 
 import {
-  NotificationService,
-  NotificationOptions,
-  NotificationResult,
-  NotificationPermissionResult,
   NotificationCapabilities,
-  NotificationConfig
-} from "../../types";
+  NotificationConfig,
+  NotificationOptions,
+  NotificationPermissionResult,
+  NotificationResult,
+  NotificationService,
+} from '../../types';
 
 const DEFAULT_CONFIG: NotificationConfig = {
   enableAutoClose: false, // React Native handles this automatically
   autoCloseDelay: 0,
   defaultIcon: '',
   enableDebugLogging: true,
-  fallbackToAlert: true
+  fallbackToAlert: true,
 };
 
 export class ReactNativeNotificationService implements NotificationService {
@@ -53,7 +53,7 @@ export class ReactNativeNotificationService implements NotificationService {
       return {
         granted: false,
         permission: 'denied',
-        error: 'React Native notifications not configured'
+        error: 'React Native notifications not configured',
       };
     }
 
@@ -61,38 +61,42 @@ export class ReactNativeNotificationService implements NotificationService {
       // In React Native, you would use something like:
       // import PushNotification from 'react-native-push-notification';
       // const result = await PushNotification.requestPermissions();
-      
+
       this.log('Requesting notification permission in React Native');
-      
+
       // Mock implementation
       this.hasRequestedPermission = true;
-      
+
       return {
         granted: true,
-        permission: 'granted'
+        permission: 'granted',
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to request permission';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to request permission';
       this.log('Error requesting permission:', error);
       return {
         granted: false,
         permission: 'denied',
-        error: errorMessage
+        error: errorMessage,
       };
     }
   }
 
-  async showNotification(title: string, options: NotificationOptions = {}): Promise<NotificationResult> {
+  async showNotification(
+    title: string,
+    options: NotificationOptions = {}
+  ): Promise<NotificationResult> {
     if (!this.isSupported()) {
       return {
         success: false,
-        error: 'React Native notifications not supported'
+        error: 'React Native notifications not supported',
       };
     }
 
     try {
       const notificationId = `rn-notification-${Date.now()}-${Math.random()}`;
-      
+
       this.log('Showing React Native notification:', { title, options });
 
       // In React Native, you would use something like:
@@ -116,14 +120,15 @@ export class ReactNativeNotificationService implements NotificationService {
 
       return {
         success: true,
-        notificationId
+        notificationId,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to show notification';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to show notification';
       this.log('Error showing notification:', error);
       return {
         success: false,
-        error: errorMessage
+        error: errorMessage,
       };
     }
   }
@@ -131,11 +136,11 @@ export class ReactNativeNotificationService implements NotificationService {
   async closeNotification(notificationId: string): Promise<boolean> {
     try {
       this.log('Closing React Native notification:', notificationId);
-      
+
       // In React Native, you would use something like:
       // import PushNotification from 'react-native-push-notification';
       // PushNotification.cancelLocalNotifications({id: notificationId});
-      
+
       return true;
     } catch (error) {
       this.log('Error closing notification:', error);
@@ -146,11 +151,11 @@ export class ReactNativeNotificationService implements NotificationService {
   async clearAllNotifications(): Promise<boolean> {
     try {
       this.log('Clearing all React Native notifications');
-      
+
       // In React Native, you would use something like:
       // import PushNotification from 'react-native-push-notification';
       // PushNotification.cancelAllLocalNotifications();
-      
+
       return true;
     } catch (error) {
       this.log('Error clearing notifications:', error);
@@ -161,7 +166,7 @@ export class ReactNativeNotificationService implements NotificationService {
   setClickHandler(handler: (data?: any) => void): void {
     this.clickHandler = handler;
     this.log('Set notification click handler');
-    
+
     // In React Native, you would set up notification event listeners:
     // import PushNotification from 'react-native-push-notification';
     // PushNotification.configure({
@@ -185,7 +190,7 @@ export class ReactNativeNotificationService implements NotificationService {
         supportsBadge: false,
         supportsData: false,
         supportsSound: false,
-        supportsVibration: false
+        supportsVibration: false,
       };
     }
 
@@ -196,7 +201,7 @@ export class ReactNativeNotificationService implements NotificationService {
       supportsData: true, // Custom data is supported
       supportsSound: true, // Sound is supported
       supportsVibration: true, // Vibration is supported
-      maxActions: 3 // React Native typically supports more actions
+      maxActions: 3, // React Native typically supports more actions
     };
   }
 
@@ -210,11 +215,14 @@ export class ReactNativeNotificationService implements NotificationService {
 /**
  * Create a React Native notification service instance
  */
-export function createReactNativeNotificationService(config?: Partial<NotificationConfig>): NotificationService {
+export function createReactNativeNotificationService(
+  config?: Partial<NotificationConfig>
+): NotificationService {
   return new ReactNativeNotificationService(config);
 }
 
 /**
  * Default React Native notification service instance
  */
-export const reactNativeNotificationService = createReactNativeNotificationService();
+export const reactNativeNotificationService =
+  createReactNativeNotificationService();

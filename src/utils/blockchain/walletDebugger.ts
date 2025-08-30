@@ -39,12 +39,12 @@ export const generateWalletDiagnostics = (
   // Chain-specific diagnostics
   if (chainType === 'solana') {
     const windowObj = window as any;
-    
+
     // Check for Solana providers
     const hasPhantom = !!windowObj.phantom?.solana;
     const hasSolflare = !!windowObj.solflare;
     const hasSollet = !!windowObj.sollet;
-    
+
     diagnostics.push(`Phantom detected: ${hasPhantom}`);
     diagnostics.push(`Solflare detected: ${hasSolflare}`);
     diagnostics.push(`Sollet detected: ${hasSollet}`);
@@ -57,16 +57,15 @@ export const generateWalletDiagnostics = (
     if (hasPhantom && windowObj.phantom?.solana?.isConnected === false) {
       recommendations.push('Connect your Phantom wallet to this site');
     }
-
   } else if (chainType === 'evm') {
     const windowObj = window as any;
-    
+
     // Check for Ethereum providers
     const hasEthereum = !!windowObj.ethereum;
     const isMetaMask = !!windowObj.ethereum?.isMetaMask;
     const isCoinbase = !!windowObj.ethereum?.isCoinbaseWallet;
     const isTrust = !!windowObj.ethereum?.isTrust;
-    
+
     diagnostics.push(`Ethereum provider detected: ${hasEthereum}`);
     diagnostics.push(`MetaMask detected: ${isMetaMask}`);
     diagnostics.push(`Coinbase Wallet detected: ${isCoinbase}`);
@@ -86,10 +85,15 @@ export const generateWalletDiagnostics = (
   // Error-specific diagnostics
   if (error) {
     const errorMessage = error.message.toLowerCase();
-    
-    if (errorMessage.includes('user rejected') || errorMessage.includes('user denied')) {
+
+    if (
+      errorMessage.includes('user rejected') ||
+      errorMessage.includes('user denied')
+    ) {
       diagnostics.push('User cancelled the signing request');
-      recommendations.push('Please approve the signature request in your wallet');
+      recommendations.push(
+        'Please approve the signature request in your wallet'
+      );
     } else if (errorMessage.includes('wallet not connected')) {
       diagnostics.push('Wallet connection lost during signing');
       recommendations.push('Refresh the page and reconnect your wallet');
@@ -101,10 +105,14 @@ export const generateWalletDiagnostics = (
       recommendations.push('Try again and approve the request more quickly');
     } else if (errorMessage.includes('insufficient funds')) {
       diagnostics.push('Insufficient funds for transaction');
-      recommendations.push('Note: Signing messages is free and does not require funds');
+      recommendations.push(
+        'Note: Signing messages is free and does not require funds'
+      );
     } else {
       diagnostics.push(`Unexpected error: ${error.message}`);
-      recommendations.push('Try refreshing the page and reconnecting your wallet');
+      recommendations.push(
+        'Try refreshing the page and reconnecting your wallet'
+      );
     }
   }
 
@@ -118,7 +126,8 @@ export const generateWalletDiagnostics = (
   } else if (chainType === 'evm') {
     const windowObj = window as any;
     if (windowObj.ethereum?.isMetaMask) walletProvider = 'MetaMask';
-    else if (windowObj.ethereum?.isCoinbaseWallet) walletProvider = 'Coinbase Wallet';
+    else if (windowObj.ethereum?.isCoinbaseWallet)
+      walletProvider = 'Coinbase Wallet';
     else if (windowObj.ethereum?.isTrust) walletProvider = 'Trust Wallet';
     else if (windowObj.ethereum?.isRainbow) walletProvider = 'Rainbow';
     else if (windowObj.ethereum) walletProvider = 'Generic Ethereum Wallet';
@@ -127,7 +136,9 @@ export const generateWalletDiagnostics = (
   // General recommendations
   if (recommendations.length === 0) {
     recommendations.push('If the issue persists, try refreshing the page');
-    recommendations.push('Make sure your wallet is updated to the latest version');
+    recommendations.push(
+      'Make sure your wallet is updated to the latest version'
+    );
   }
 
   return {
@@ -136,7 +147,7 @@ export const generateWalletDiagnostics = (
     isConnected,
     walletProvider,
     diagnostics,
-    recommendations
+    recommendations,
   };
 };
 
@@ -149,27 +160,32 @@ export const logWalletDiagnostics = (
   isConnected: boolean,
   error?: Error
 ): void => {
-  const info = generateWalletDiagnostics(chainType, address, isConnected, error);
-  
+  const info = generateWalletDiagnostics(
+    chainType,
+    address,
+    isConnected,
+    error
+  );
+
   console.group('🔍 Wallet Diagnostics');
   console.log('Chain Type:', info.chainType);
   console.log('Address:', info.address);
   console.log('Connected:', info.isConnected);
   console.log('Provider:', info.walletProvider);
-  
+
   console.group('📊 Diagnostics:');
   info.diagnostics.forEach(diag => console.log('-', diag));
   console.groupEnd();
-  
+
   console.group('💡 Recommendations:');
   info.recommendations.forEach(rec => console.log('-', rec));
   console.groupEnd();
-  
+
   if (error) {
     console.group('❌ Error Details:');
     console.error(error);
     console.groupEnd();
   }
-  
+
   console.groupEnd();
 };

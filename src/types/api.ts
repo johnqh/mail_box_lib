@@ -2,7 +2,7 @@
  * @fileoverview Comprehensive API type definitions for 0xmail.box
  * @description Central location for all API types, interfaces, and response formats
  * This file provides complete type safety for both WildDuck and Indexer APIs
- * 
+ *
  * Usage:
  * - Import specific types for your components/hooks
  * - All API responses are strongly typed
@@ -524,7 +524,9 @@ export interface Mailbox {
 /**
  * Type guards for runtime type checking
  */
-export const isWildDuckAuthResponse = (obj: any): obj is WildDuckAuthResponse => {
+export const isWildDuckAuthResponse = (
+  obj: any
+): obj is WildDuckAuthResponse => {
   return obj && typeof obj.success === 'boolean';
 };
 
@@ -532,8 +534,14 @@ export const isWildDuckMessage = (obj: any): obj is WildDuckMessage => {
   return obj && typeof obj.id === 'string' && typeof obj.subject === 'string';
 };
 
-export const isIndexerEmailResponse = (obj: any): obj is IndexerEmailResponse => {
-  return obj && typeof obj.walletAddress === 'string' && Array.isArray(obj.emailAddresses);
+export const isIndexerEmailResponse = (
+  obj: any
+): obj is IndexerEmailResponse => {
+  return (
+    obj &&
+    typeof obj.walletAddress === 'string' &&
+    Array.isArray(obj.emailAddresses)
+  );
 };
 
 export const isGraphQLResponse = (obj: any): obj is GraphQLResponse => {
@@ -552,7 +560,10 @@ export const validateEmailAddress = (email: string): boolean => {
   return emailRegex.test(email);
 };
 
-export const validateWalletAddress = (address: string, type: ChainType): boolean => {
+export const validateWalletAddress = (
+  address: string,
+  type: ChainType
+): boolean => {
   switch (type) {
     case 'evm':
       return /^0x[a-fA-F0-9]{40}$/.test(address);
@@ -585,7 +596,10 @@ export class AuthenticationError extends ApiError {
 }
 
 export class ValidationError extends ApiError {
-  constructor(message: string = 'Validation failed', public field?: string) {
+  constructor(
+    message: string = 'Validation failed',
+    public field?: string
+  ) {
     super(message, 400);
     this.name = 'ValidationError';
   }

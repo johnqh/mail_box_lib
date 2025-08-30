@@ -6,7 +6,7 @@
 // Environment types
 export * from './environment';
 
-// Network types  
+// Network types
 export * from './network';
 
 // Storage types
@@ -29,7 +29,7 @@ export {
   User,
   WalletUserData,
   Theme,
-  FontSize
+  FontSize,
 } from './email';
 
 // API types (with aliased exports to avoid conflicts)
@@ -89,7 +89,7 @@ export {
   AuthenticationError,
   ValidationError,
   ApiInterceptor,
-  ApiClientConfig
+  ApiClientConfig,
 } from './api';
 
 // Service types

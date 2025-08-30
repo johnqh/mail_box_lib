@@ -1,0 +1,104 @@
+# @0xmail/lib - AI Development Context
+
+## Project Overview
+A React Native-compatible shared utilities library for 0xmail.box projects, providing platform-agnostic business logic, authentication, email handling, blockchain integration, and UI utilities.
+
+## Architecture
+```
+src/
+├── business/           # Core business logic layer
+│   ├── ai/            # AI-powered email services
+│   ├── core/          # Domain operations (auth, email, analytics)
+│   ├── hooks/         # React hooks for data fetching
+│   └── points/        # Rewards/points system
+├── di/                # Dependency injection & environment
+├── network/           # Platform-agnostic networking
+├── storage/           # Platform-agnostic storage
+├── types/             # TypeScript interfaces & types
+└── utils/             # Platform-specific implementations
+```
+
+## Key Patterns
+
+### Platform Abstraction
+- Interface-first design with `.interface.ts` files
+- Platform-specific implementations: `.web.ts`, `.reactnative.ts`
+- Automatic platform detection in main files
+
+### Business Logic Layer
+- Pure business logic in `src/business/core/`
+- Operations classes for domain logic
+- Hooks for React integration in `src/business/hooks/`
+
+### Dependency Injection
+- Container pattern in `src/business/core/container/`
+- Environment-based configuration in `src/di/`
+
+## Development Guidelines
+
+### File Naming Conventions
+- Interfaces: `*.interface.ts`
+- Web implementations: `*.web.ts`
+- React Native implementations: `*.reactnative.ts`
+- Tests: `*.test.ts` or `*.spec.ts`
+- Business operations: `*-operations.ts`
+
+### Code Organization
+- Group related functionality in directories
+- Use index files for clean exports
+- Separate interfaces from implementations
+- Keep platform-specific code isolated
+
+### TypeScript Best Practices
+- Use strict typing throughout
+- Define interfaces for all data structures
+- Use generics for reusable components
+- Export types alongside implementations
+
+## Testing Strategy
+- Unit tests in `__tests__` directories
+- React hooks testing with @testing-library/react
+- Platform-agnostic business logic testing
+- Mock external dependencies
+
+## Key Dependencies
+- React Native compatible packages only
+- Firebase for backend services
+- Blockchain: @solana/web3.js, viem
+- Crypto: @noble/hashes, bs58
+- Testing: Vitest, @testing-library/react
+
+## AI Development Tips
+
+### When adding new features:
+1. Start with interface definition in `types/`
+2. Implement business logic in `business/core/`
+3. Create platform-specific implementations
+4. Add React hooks if needed
+5. Write comprehensive tests
+
+### When debugging:
+- Check platform detection logic first
+- Verify interface implementations
+- Look at dependency injection setup
+- Check environment configuration
+
+### Common patterns to follow:
+- Use dependency injection for external services
+- Implement error handling consistently
+- Add proper TypeScript types
+- Follow existing naming conventions
+- Write tests for all business logic
+
+## External Integrations
+- WildDuck email server (via symbolic link)
+- Mail indexer service (via symbolic link)
+- Solana blockchain
+- Firebase services
+- RevenueCat (mobile subscriptions)
+
+## Build & Test Commands
+- `npm run build` - TypeScript compilation
+- `npm test` - Run all tests with Vitest
+- `npm run test:run` - Run tests once
+- `npm run clean` - Clean dist directory

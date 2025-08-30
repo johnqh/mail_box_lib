@@ -4,19 +4,21 @@
  */
 
 import {
-  NavigationService,
-  NavigationHook,
   LocationHook,
   NavigationConfig,
-  NavigationOptions
-} from "../../types";
+  NavigationHook,
+  NavigationOptions,
+  NavigationService,
+} from '../../types';
 
 let navigationService: NavigationService;
 
 /**
  * Get platform-appropriate navigation service
  */
-function createNavigationService(config?: Partial<NavigationConfig>): NavigationService {
+function createNavigationService(
+  config?: Partial<NavigationConfig>
+): NavigationService {
   // Platform detection - web vs React Native
   if (typeof window !== 'undefined') {
     // Web environment
@@ -24,7 +26,9 @@ function createNavigationService(config?: Partial<NavigationConfig>): Navigation
     return createWebNavigationService(config);
   } else {
     // React Native environment
-    const { createReactNativeNavigationService } = require('./navigation.reactnative');
+    const {
+      createReactNativeNavigationService,
+    } = require('./navigation.reactnative');
     return createReactNativeNavigationService(config);
   }
 }
@@ -32,7 +36,9 @@ function createNavigationService(config?: Partial<NavigationConfig>): Navigation
 /**
  * Get the default navigation service instance (singleton pattern)
  */
-export function getNavigationService(config?: Partial<NavigationConfig>): NavigationService {
+export function getNavigationService(
+  config?: Partial<NavigationConfig>
+): NavigationService {
   if (!navigationService) {
     navigationService = createNavigationService(config);
   }
@@ -61,7 +67,7 @@ export function useNavigation(): NavigationHook {
     searchParams: currentState.searchParams,
     params: currentState.params,
     canGoBack: service.canGoBack(),
-    isSupported: service.isSupported()
+    isSupported: service.isSupported(),
   };
 }
 
@@ -74,9 +80,10 @@ export function useLocation(): LocationHook {
   const currentState = service.getCurrentState();
 
   // Build search string from searchParams
-  const searchString = Object.keys(currentState.searchParams).length > 0 
-    ? '?' + new URLSearchParams(currentState.searchParams).toString()
-    : '';
+  const searchString =
+    Object.keys(currentState.searchParams).length > 0
+      ? `?${new URLSearchParams(currentState.searchParams).toString()}`
+      : '';
 
   return {
     pathname: currentState.currentPath,
@@ -84,7 +91,7 @@ export function useLocation(): LocationHook {
     searchParams: currentState.searchParams,
     hash: '', // Not commonly used in mobile apps
     state: null, // Would need to be tracked separately
-    key: currentState.currentPath // Simplified key generation
+    key: currentState.currentPath, // Simplified key generation
   };
 }
 
@@ -92,20 +99,27 @@ export function useLocation(): LocationHook {
  * Platform-agnostic search params hook
  * Drop-in replacement for React Router's useSearchParams
  */
-export function useSearchParams(): [URLSearchParams, (params: URLSearchParams | Record<string, string>) => void] {
+export function useSearchParams(): [
+  URLSearchParams,
+  (params: URLSearchParams | Record<string, string>) => void,
+] {
   const service = getNavigationService();
   const currentState = service.getCurrentState();
-  
+
   const searchParams = new URLSearchParams(currentState.searchParams);
-  
-  const setSearchParams = (params: URLSearchParams | Record<string, string>) => {
-    const newSearchParams = params instanceof URLSearchParams 
-      ? Object.fromEntries(params.entries())
-      : params;
-    
+
+  const setSearchParams = (
+    params: URLSearchParams | Record<string, string>
+  ) => {
+    const newSearchParams =
+      params instanceof URLSearchParams
+        ? Object.fromEntries(params.entries())
+        : params;
+
     const newSearch = new URLSearchParams(newSearchParams).toString();
-    const newPath = currentState.currentPath + (newSearch ? `?${newSearch}` : '');
-    
+    const newPath =
+      currentState.currentPath + (newSearch ? `?${newSearch}` : '');
+
     service.replace(newPath);
   };
 
@@ -219,7 +233,7 @@ export const navigationHelper = {
   canGoBack: () => {
     const service = getNavigationService();
     return service.canGoBack();
-  }
+  },
 };
 
 // Note: NavigationState interface is available from business/core/navigation

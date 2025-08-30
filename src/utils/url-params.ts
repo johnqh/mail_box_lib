@@ -99,12 +99,14 @@ class SimpleURLSearchParams implements URLSearchParamsLike {
 /**
  * Create a URLSearchParams instance with cross-platform compatibility
  */
-export function createURLSearchParams(init?: string | Record<string, string> | string[][]): URLSearchParamsLike {
+export function createURLSearchParams(
+  init?: string | Record<string, string> | string[][]
+): URLSearchParamsLike {
   // Check if native URLSearchParams is available
   if (typeof URLSearchParams !== 'undefined') {
     return new URLSearchParams(init as any);
   }
-  
+
   // Fall back to our implementation for React Native or other environments
   return new SimpleURLSearchParams(init);
 }
@@ -112,15 +114,17 @@ export function createURLSearchParams(init?: string | Record<string, string> | s
 /**
  * Convenience function to create URL search params from an object
  */
-export function createSearchParams(params: Record<string, string | number | boolean>): URLSearchParamsLike {
+export function createSearchParams(
+  params: Record<string, string | number | boolean>
+): URLSearchParamsLike {
   const searchParams = createURLSearchParams();
-  
+
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== null) {
       searchParams.append(key, String(value));
     }
   }
-  
+
   return searchParams;
 }
 
@@ -137,10 +141,10 @@ export function searchParamsToString(params: URLSearchParamsLike): string {
 export function parseSearchParams(queryString: string): Record<string, string> {
   const params = createURLSearchParams(queryString);
   const result: Record<string, string> = {};
-  
+
   params.forEach((value, key) => {
     result[key] = value;
   });
-  
+
   return result;
 }

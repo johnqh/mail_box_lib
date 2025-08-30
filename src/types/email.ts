@@ -35,7 +35,12 @@ export interface User {
   emailAddresses: EmailAddress[];
 }
 
-import { ChainType, Theme, FontSize, EmailFolder } from "../business/core/enums";
+import {
+  ChainType,
+  EmailFolder,
+  FontSize,
+  Theme,
+} from '../business/core/enums';
 
 // WalletUserData is now imported from auth.interface.ts (more comprehensive definition)
 import type { WalletUserData } from './services/auth.interface';

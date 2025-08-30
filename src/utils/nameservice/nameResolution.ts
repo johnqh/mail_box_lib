@@ -13,12 +13,12 @@ const publicClient = createPublicClient({
   transport: http('https://eth.llamarpc.com', {
     retryCount: 2,
     retryDelay: 500,
-    timeout: 5000
-  })
+    timeout: 5000,
+  }),
 });
 
 // Cache for resolved names
-const resolverCache = new Map<string, { address: string, timestamp: number }>();
+const resolverCache = new Map<string, { address: string; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 export interface NameResolutionResult {
@@ -65,14 +65,14 @@ export async function resolveENSName(name: string): Promise<string | null> {
 
     console.log('Resolving ENS name:', name);
     const address = await publicClient.getEnsAddress({
-      name: name
+      name,
     });
 
     if (address) {
       // Cache the result
-      resolverCache.set(name.toLowerCase(), { 
-        address: address, 
-        timestamp: Date.now() 
+      resolverCache.set(name.toLowerCase(), {
+        address,
+        timestamp: Date.now(),
       });
       console.log('ENS resolution successful:', name, '->', address);
       return address;
@@ -99,7 +99,7 @@ export async function resolveSNSName(name: string): Promise<string | null> {
 
     console.log('SNS resolution not yet implemented for:', name);
     // TODO: Implement actual SNS resolution when available
-    
+
     return null;
   } catch (error) {
     console.error('SNS resolution failed:', error);
@@ -110,9 +110,11 @@ export async function resolveSNSName(name: string): Promise<string | null> {
 /**
  * Resolve any name or address to a valid wallet address
  */
-export async function resolveNameOrAddress(input: string): Promise<NameResolutionResult | null> {
+export async function resolveNameOrAddress(
+  input: string
+): Promise<NameResolutionResult | null> {
   const trimmedInput = input.trim();
-  
+
   if (!trimmedInput) {
     return null;
   }
@@ -122,7 +124,7 @@ export async function resolveNameOrAddress(input: string): Promise<NameResolutio
     return {
       address: trimmedInput,
       type: 'address',
-      originalInput: input
+      originalInput: input,
     };
   }
 
@@ -133,7 +135,7 @@ export async function resolveNameOrAddress(input: string): Promise<NameResolutio
       return {
         address,
         type: 'ens',
-        originalInput: input
+        originalInput: input,
       };
     }
   }
@@ -145,7 +147,7 @@ export async function resolveNameOrAddress(input: string): Promise<NameResolutio
       return {
         address,
         type: 'sns',
-        originalInput: input
+        originalInput: input,
       };
     }
   }
@@ -156,9 +158,12 @@ export async function resolveNameOrAddress(input: string): Promise<NameResolutio
 /**
  * Validate input and provide helpful error messages
  */
-export function validateNameOrAddressInput(input: string): { isValid: boolean; error?: string } {
+export function validateNameOrAddressInput(input: string): {
+  isValid: boolean;
+  error?: string;
+} {
   const trimmedInput = input.trim();
-  
+
   if (!trimmedInput) {
     return { isValid: false, error: 'Please enter a delegate address or name' };
   }
@@ -180,30 +185,34 @@ export function validateNameOrAddressInput(input: string): { isValid: boolean; e
 
   // Check if it might be an incomplete domain
   if (trimmedInput.includes('.')) {
-    return { 
-      isValid: false, 
-      error: 'Unsupported domain. Use .eth, .box (ENS) or .sol (SNS) domains, or a wallet address' 
+    return {
+      isValid: false,
+      error:
+        'Unsupported domain. Use .eth, .box (ENS) or .sol (SNS) domains, or a wallet address',
     };
   }
 
   // If it looks like an address but is invalid
   if (trimmedInput.startsWith('0x')) {
-    return { 
-      isValid: false, 
-      error: 'Invalid wallet address format' 
+    return {
+      isValid: false,
+      error: 'Invalid wallet address format',
     };
   }
 
-  return { 
-    isValid: false, 
-    error: 'Please enter a valid wallet address, ENS name (.eth/.box), or SNS name (.sol)' 
+  return {
+    isValid: false,
+    error:
+      'Please enter a valid wallet address, ENS name (.eth/.box), or SNS name (.sol)',
   };
 }
 
 /**
  * Get display text for resolved name
  */
-export function getDisplayTextForResolution(result: NameResolutionResult): string {
+export function getDisplayTextForResolution(
+  result: NameResolutionResult
+): string {
   switch (result.type) {
     case 'ens':
       return `${result.originalInput} → ${result.address.slice(0, 6)}...${result.address.slice(-4)}`;

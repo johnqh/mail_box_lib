@@ -2,7 +2,7 @@
  * Platform-agnostic storage service interface
  */
 
-import { StorageType } from "../../business/core/enums";
+import { StorageType } from '../../business/core/enums';
 
 export interface StorageService {
   /**

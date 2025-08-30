@@ -1,5 +1,5 @@
 /**
- * Notification utilities  
+ * Notification utilities
  */
 
 // Web implementation
@@ -12,4 +12,7 @@ export * from './notification.reactnative';
 export * from './notification';
 
 // Re-export notification types from centralized types
-export type { NotificationClient, NotificationContextProvider } from "../../types";
+export type {
+  NotificationClient,
+  NotificationContextProvider,
+} from '../../types';

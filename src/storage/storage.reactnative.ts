@@ -1,26 +1,26 @@
 /**
  * React Native implementation of platform storage using AsyncStorage
- * 
+ *
  * This file shows how to implement the storage interface for React Native.
  * To use this in a React Native app:
- * 
+ *
  * 1. Install AsyncStorage: npm install @react-native-async-storage/async-storage
  * 2. Import AsyncStorage from '@react-native-async-storage/async-storage'
  * 3. Use this implementation instead of the web storage
- * 
+ *
  * Example usage in React Native:
- * 
+ *
  * import { ReactNativeStorage } from './storage.reactnative';
  * import { StorageManager } from './storage';
- * 
+ *
  * const reactNativeStorage = new ReactNativeStorage();
- * const walletStorage = new StorageManager({ 
- *   prefix: 'walletUser', 
- *   platformStorage: reactNativeStorage 
+ * const walletStorage = new StorageManager({
+ *   prefix: 'walletUser',
+ *   platformStorage: reactNativeStorage
  * });
  */
 
-import { PlatformStorage } from "../types";
+import { PlatformStorage } from '../types';
 
 // Mock AsyncStorage interface for documentation purposes
 interface AsyncStorageInterface {
@@ -87,23 +87,23 @@ export class ReactNativeStorage implements PlatformStorage {
 
 /**
  * Example of how to set up storage in React Native:
- * 
+ *
  * // In your React Native app:
  * import AsyncStorage from '@react-native-async-storage/async-storage';
  * import { ReactNativeStorage } from './utils/storage.reactnative';
  * import { StorageManager } from './utils/storage';
- * 
+ *
  * const reactNativeStorage = new ReactNativeStorage(AsyncStorage);
- * 
- * export const appStorage = new StorageManager({ 
- *   platformStorage: reactNativeStorage 
+ *
+ * export const appStorage = new StorageManager({
+ *   platformStorage: reactNativeStorage
  * });
- * 
- * export const walletStorage = new StorageManager({ 
+ *
+ * export const walletStorage = new StorageManager({
  *   prefix: 'walletUser',
  *   ttl: 7 * 24 * 60 * 60 * 1000,
  *   platformStorage: reactNativeStorage
  * });
- * 
+ *
  * // The rest of your business logic remains exactly the same!
  */

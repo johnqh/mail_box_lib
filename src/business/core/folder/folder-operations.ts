@@ -2,7 +2,7 @@
  * Business logic for email folder operations
  */
 
-import { StandardEmailFolder, EmailFolder, EmailFolderUtils } from '../enums';
+import { EmailFolder, EmailFolderUtils, StandardEmailFolder } from '../enums';
 
 export interface FolderInfo {
   name: EmailFolder;
@@ -25,7 +25,6 @@ export interface FolderOperations {
 }
 
 export class DefaultFolderOperations implements FolderOperations {
-  
   async createCustomFolder(name: string): Promise<FolderInfo> {
     const validation = this.validateFolderName(name);
     if (!validation.isValid) {
@@ -40,7 +39,7 @@ export class DefaultFolderOperations implements FolderOperations {
       isStandard: false,
       isCustom: true,
       count: 0,
-      unreadCount: 0
+      unreadCount: 0,
     };
   }
 
@@ -81,7 +80,7 @@ export class DefaultFolderOperations implements FolderOperations {
       isStandard: EmailFolderUtils.isStandardFolder(folder),
       isCustom: EmailFolderUtils.isCustomFolder(folder),
       count: 0,
-      unreadCount: 0
+      unreadCount: 0,
     };
   }
 
@@ -93,13 +92,19 @@ export class DefaultFolderOperations implements FolderOperations {
 
     // Check if name is too long
     if (name.length > 50) {
-      return { isValid: false, error: 'Folder name cannot be longer than 50 characters' };
+      return {
+        isValid: false,
+        error: 'Folder name cannot be longer than 50 characters',
+      };
     }
 
     // Check for invalid characters
     const invalidChars = /[<>:"/\\|?*]/;
     if (invalidChars.test(name)) {
-      return { isValid: false, error: 'Folder name contains invalid characters' };
+      return {
+        isValid: false,
+        error: 'Folder name contains invalid characters',
+      };
     }
 
     // Check if it conflicts with standard folder names
@@ -117,7 +122,7 @@ export class DefaultFolderOperations implements FolderOperations {
       isStandard: true,
       isCustom: false,
       count: 0, // In real implementation, get from email service
-      unreadCount: 0
+      unreadCount: 0,
     }));
   }
 

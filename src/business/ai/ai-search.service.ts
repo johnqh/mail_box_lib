@@ -4,7 +4,7 @@
  */
 
 import { SearchResult } from './ai-types';
-import { Email } from "../../types/email";
+import { Email } from '../../types/email';
 
 export interface AISearchService {
   semanticSearch(query: string, emails: Email[]): Promise<SearchResult[]>;
@@ -16,7 +16,14 @@ export interface AISearchService {
 }
 
 export interface SearchCategory {
-  category: 'sender' | 'subject' | 'content' | 'date' | 'web3' | 'financial' | 'mixed';
+  category:
+    | 'sender'
+    | 'subject'
+    | 'content'
+    | 'date'
+    | 'web3'
+    | 'financial'
+    | 'mixed';
   confidence: number;
   extractedTerms: {
     type: 'person' | 'date' | 'amount' | 'address' | 'keyword';
@@ -55,12 +62,41 @@ export interface EmailIndex {
 class AISearchServiceImpl implements AISearchService {
   private searchIndex: Map<string, EmailIndex> = new Map();
   private readonly STOP_WORDS = new Set([
-    'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from',
-    'has', 'he', 'in', 'is', 'it', 'its', 'of', 'on', 'that', 'the',
-    'to', 'was', 'will', 'with', 'you', 'your', 'have', 'had', 'this'
+    'a',
+    'an',
+    'and',
+    'are',
+    'as',
+    'at',
+    'be',
+    'by',
+    'for',
+    'from',
+    'has',
+    'he',
+    'in',
+    'is',
+    'it',
+    'its',
+    'of',
+    'on',
+    'that',
+    'the',
+    'to',
+    'was',
+    'will',
+    'with',
+    'you',
+    'your',
+    'have',
+    'had',
+    'this',
   ]);
 
-  async semanticSearch(query: string, emails: Email[]): Promise<SearchResult[]> {
+  async semanticSearch(
+    query: string,
+    emails: Email[]
+  ): Promise<SearchResult[]> {
     try {
       if (!query.trim()) return [];
 
@@ -74,25 +110,23 @@ class AISearchServiceImpl implements AISearchService {
 
       for (const email of emails) {
         const relevance = this.calculateRelevance(email, searchTokens, query);
-        if (relevance > 0.1) { // Minimum relevance threshold
+        if (relevance > 0.1) {
+          // Minimum relevance threshold
           const highlights = this.generateHighlights(email, searchTokens);
           const summary = this.generateSearchSummary(email, query);
-          
+
           results.push({
             email,
             relevance,
             matchedFields: this.getMatchedFields(email, searchTokens),
             summary,
-            highlights
+            highlights,
           });
         }
       }
 
       // Sort by relevance and return top results
-      return results
-        .sort((a, b) => b.relevance - a.relevance)
-        .slice(0, 50); // Limit to top 50 results
-
+      return results.sort((a, b) => b.relevance - a.relevance).slice(0, 50); // Limit to top 50 results
     } catch (error) {
       console.error('Semantic search failed:', error);
       return [];
@@ -104,7 +138,11 @@ class AISearchServiceImpl implements AISearchService {
     const input = userInput.toLowerCase().trim();
 
     // Web3-specific suggestions
-    if (input.includes('eth') || input.includes('bitcoin') || input.includes('crypto')) {
+    if (
+      input.includes('eth') ||
+      input.includes('bitcoin') ||
+      input.includes('crypto')
+    ) {
       suggestions.push(
         'transactions from last month',
         'DeFi protocol emails',
@@ -114,10 +152,14 @@ class AISearchServiceImpl implements AISearchService {
     }
 
     // Date-related suggestions
-    if (input.includes('today') || input.includes('yesterday') || input.includes('week')) {
+    if (
+      input.includes('today') ||
+      input.includes('yesterday') ||
+      input.includes('week')
+    ) {
       suggestions.push(
         'emails from today',
-        'last week\'s important emails',
+        "last week's important emails",
         'monthly newsletters',
         'deadline reminders this week'
       );
@@ -134,7 +176,11 @@ class AISearchServiceImpl implements AISearchService {
     }
 
     // Action-related suggestions
-    if (input.includes('action') || input.includes('todo') || input.includes('urgent')) {
+    if (
+      input.includes('action') ||
+      input.includes('todo') ||
+      input.includes('urgent')
+    ) {
       suggestions.push(
         'emails requiring action',
         'urgent messages',
@@ -144,7 +190,11 @@ class AISearchServiceImpl implements AISearchService {
     }
 
     // Financial suggestions
-    if (input.includes('payment') || input.includes('invoice') || input.includes('money')) {
+    if (
+      input.includes('payment') ||
+      input.includes('invoice') ||
+      input.includes('money')
+    ) {
       suggestions.push(
         'payment confirmations',
         'invoice notifications',
@@ -173,10 +223,13 @@ class AISearchServiceImpl implements AISearchService {
     for (const otherEmail of allEmails) {
       if (otherEmail.id === email.id) continue;
 
-      const targetTokens = this.tokenizeText(`${otherEmail.subject} ${otherEmail.body}`);
+      const targetTokens = this.tokenizeText(
+        `${otherEmail.subject} ${otherEmail.body}`
+      );
       const similarity = this.calculateSimilarity(sourceTokens, targetTokens);
 
-      if (similarity > 0.3) { // Minimum similarity threshold
+      if (similarity > 0.3) {
+        // Minimum similarity threshold
         similarities.push({ email: otherEmail, score: similarity });
       }
     }
@@ -196,11 +249,13 @@ class AISearchServiceImpl implements AISearchService {
     const emailPattern = /[\w.-]+@[\w.-]+\.\w+/g;
     const emailMatches = query.match(emailPattern);
     if (emailMatches) {
-      extractedTerms.push(...emailMatches.map(email => ({
-        type: 'person' as const,
-        value: email,
-        confidence: 0.9
-      })));
+      extractedTerms.push(
+        ...emailMatches.map(email => ({
+          type: 'person' as const,
+          value: email,
+          confidence: 0.9,
+        }))
+      );
       category = 'sender';
       confidence = 0.8;
     }
@@ -209,11 +264,13 @@ class AISearchServiceImpl implements AISearchService {
     const web3AddressPattern = /0x[a-fA-F0-9]{40}/g;
     const addressMatches = query.match(web3AddressPattern);
     if (addressMatches) {
-      extractedTerms.push(...addressMatches.map(addr => ({
-        type: 'address' as const,
-        value: addr,
-        confidence: 0.95
-      })));
+      extractedTerms.push(
+        ...addressMatches.map(addr => ({
+          type: 'address' as const,
+          value: addr,
+          confidence: 0.95,
+        }))
+      );
       category = 'web3';
       confidence = 0.9;
     }
@@ -223,17 +280,19 @@ class AISearchServiceImpl implements AISearchService {
       /\b\d{1,2}[-/]\d{1,2}[-/]\d{4}\b/g,
       /\b(today|yesterday|tomorrow)\b/gi,
       /\b(last|next)\s+(week|month|year)\b/gi,
-      /\b(january|february|march|april|may|june|july|august|september|october|november|december)\b/gi
+      /\b(january|february|march|april|may|june|july|august|september|october|november|december)\b/gi,
     ];
 
     for (const pattern of datePatterns) {
       const matches = query.match(pattern);
       if (matches) {
-        extractedTerms.push(...matches.map(date => ({
-          type: 'date' as const,
-          value: date,
-          confidence: 0.8
-        })));
+        extractedTerms.push(
+          ...matches.map(date => ({
+            type: 'date' as const,
+            value: date,
+            confidence: 0.8,
+          }))
+        );
         if (category === 'mixed') {
           category = 'date';
           confidence = 0.7;
@@ -242,14 +301,17 @@ class AISearchServiceImpl implements AISearchService {
     }
 
     // Check for financial amounts
-    const amountPattern = /[\$€£¥]\s*\d+(?:,\d{3})*(?:\.\d{2})?|\d+\s*(ETH|BTC|USD|EUR)/gi;
+    const amountPattern =
+      /[\$€£¥]\s*\d+(?:,\d{3})*(?:\.\d{2})?|\d+\s*(ETH|BTC|USD|EUR)/gi;
     const amountMatches = query.match(amountPattern);
     if (amountMatches) {
-      extractedTerms.push(...amountMatches.map(amount => ({
-        type: 'amount' as const,
-        value: amount,
-        confidence: 0.85
-      })));
+      extractedTerms.push(
+        ...amountMatches.map(amount => ({
+          type: 'amount' as const,
+          value: amount,
+          confidence: 0.85,
+        }))
+      );
       category = 'financial';
       confidence = 0.8;
     }
@@ -261,7 +323,7 @@ class AISearchServiceImpl implements AISearchService {
         extractedTerms.push({
           type: 'keyword',
           value: keyword,
-          confidence: 0.6
+          confidence: 0.6,
         });
       }
     });
@@ -269,7 +331,7 @@ class AISearchServiceImpl implements AISearchService {
     return {
       category,
       confidence,
-      extractedTerms
+      extractedTerms,
     };
   }
 
@@ -277,10 +339,12 @@ class AISearchServiceImpl implements AISearchService {
     this.searchIndex.clear();
 
     for (const email of emails) {
-      const tokens = this.tokenizeText(`${email.subject} ${email.body} ${email.from}`);
+      const tokens = this.tokenizeText(
+        `${email.subject} ${email.body} ${email.from}`
+      );
       const entities = this.extractSearchEntities(email);
       const categories = this.categorizeEmailForSearch(email);
-      
+
       // Calculate weights for different fields
       const weights: { [key: string]: number } = {};
       this.tokenizeText(email.subject).forEach(token => {
@@ -298,14 +362,16 @@ class AISearchServiceImpl implements AISearchService {
         tokens,
         entities,
         categories,
-        weights
+        weights,
       };
 
       this.searchIndex.set(email.id, index);
     }
   }
 
-  async getSearchInsights(searchHistory: SearchQuery[]): Promise<SearchInsights> {
+  async getSearchInsights(
+    searchHistory: SearchQuery[]
+  ): Promise<SearchInsights> {
     const termFrequency: { [key: string]: number } = {};
     const timeDistribution = new Array(24).fill(0);
     const categoryCount: { [key: string]: number } = {};
@@ -323,7 +389,8 @@ class AISearchServiceImpl implements AISearchService {
 
       // Categorize queries
       const category = await this.categorizeSearchQuery(query.query);
-      categoryCount[category.category] = (categoryCount[category.category] || 0) + 1;
+      categoryCount[category.category] =
+        (categoryCount[category.category] || 0) + 1;
     }
 
     // Generate top terms
@@ -337,7 +404,7 @@ class AISearchServiceImpl implements AISearchService {
     const commonCategories = Object.entries(categoryCount)
       .map(([category, count]) => ({
         category,
-        percentage: Math.round((count / totalQueries) * 100)
+        percentage: Math.round((count / totalQueries) * 100),
       }))
       .sort((a, b) => b.percentage - a.percentage);
 
@@ -349,12 +416,12 @@ class AISearchServiceImpl implements AISearchService {
       topSearchTerms,
       searchPatterns: {
         timeOfDay: timeDistribution,
-        commonCategories
+        commonCategories,
       },
       suggestions: {
         savedSearches,
-        improvements
-      }
+        improvements,
+      },
     };
   }
 
@@ -375,7 +442,11 @@ class AISearchServiceImpl implements AISearchService {
       .filter(token => token.length > 2);
   }
 
-  private calculateRelevance(email: Email, searchTokens: string[], originalQuery: string): number {
+  private calculateRelevance(
+    email: Email,
+    searchTokens: string[],
+    originalQuery: string
+  ): number {
     const index = this.searchIndex.get(email.id);
     if (!index) return 0;
 
@@ -389,8 +460,8 @@ class AISearchServiceImpl implements AISearchService {
       }
 
       // Partial matches
-      const partialMatches = index.tokens.filter(indexToken => 
-        indexToken.includes(token) || token.includes(indexToken)
+      const partialMatches = index.tokens.filter(
+        indexToken => indexToken.includes(token) || token.includes(indexToken)
       );
       if (partialMatches.length > 0) {
         relevanceScore += 0.5;
@@ -414,7 +485,10 @@ class AISearchServiceImpl implements AISearchService {
     return Math.min(relevanceScore / maxPossibleScore, 1);
   }
 
-  private generateHighlights(email: Email, searchTokens: string[]): SearchResult['highlights'] {
+  private generateHighlights(
+    email: Email,
+    searchTokens: string[]
+  ): SearchResult['highlights'] {
     const highlights: SearchResult['highlights'] = [];
 
     // Highlight in subject
@@ -438,7 +512,11 @@ class AISearchServiceImpl implements AISearchService {
     return highlights;
   }
 
-  private createHighlight(text: string, searchTokens: string[], maxLength: number = 100): string {
+  private createHighlight(
+    text: string,
+    searchTokens: string[],
+    maxLength: number = 100
+  ): string {
     let highlightedText = text;
     let hasHighlight = false;
 
@@ -458,11 +536,12 @@ class AISearchServiceImpl implements AISearchService {
       if (markIndex > -1) {
         const start = Math.max(0, markIndex - maxLength / 3);
         const end = start + maxLength;
-        highlightedText = (start > 0 ? '...' : '') + 
-                         highlightedText.substring(start, end) + 
-                         (end < text.length ? '...' : '');
+        highlightedText =
+          (start > 0 ? '...' : '') +
+          highlightedText.substring(start, end) +
+          (end < text.length ? '...' : '');
       } else {
-        highlightedText = highlightedText.substring(0, maxLength) + '...';
+        highlightedText = `${highlightedText.substring(0, maxLength)}...`;
       }
     }
 
@@ -472,7 +551,9 @@ class AISearchServiceImpl implements AISearchService {
   private getMatchedFields(email: Email, searchTokens: string[]): string[] {
     const matchedFields: string[] = [];
 
-    if (searchTokens.some(token => email.subject.toLowerCase().includes(token))) {
+    if (
+      searchTokens.some(token => email.subject.toLowerCase().includes(token))
+    ) {
       matchedFields.push('subject');
     }
     if (searchTokens.some(token => email.body.toLowerCase().includes(token))) {
@@ -488,29 +569,29 @@ class AISearchServiceImpl implements AISearchService {
   private generateSearchSummary(email: Email, query: string): string {
     const relevantSentence = this.findMostRelevantSentence(email.body, query);
     if (relevantSentence) {
-      return relevantSentence.length > 150 
-        ? relevantSentence.substring(0, 150) + '...'
+      return relevantSentence.length > 150
+        ? `${relevantSentence.substring(0, 150)}...`
         : relevantSentence;
     }
-    
-    return email.body.length > 150 
-      ? email.body.substring(0, 150) + '...'
+
+    return email.body.length > 150
+      ? `${email.body.substring(0, 150)}...`
       : email.body;
   }
 
   private findMostRelevantSentence(text: string, query: string): string {
     const sentences = text.split(/[.!?]+/).filter(s => s.length > 10);
     const queryTokens = this.tokenizeQuery(query);
-    
+
     let bestSentence = '';
     let bestScore = 0;
 
     for (const sentence of sentences) {
       const sentenceTokens = this.tokenizeText(sentence);
-      const matchCount = queryTokens.filter(token => 
+      const matchCount = queryTokens.filter(token =>
         sentenceTokens.some(sToken => sToken.includes(token))
       ).length;
-      
+
       if (matchCount > bestScore) {
         bestScore = matchCount;
         bestSentence = sentence.trim();
@@ -525,7 +606,7 @@ class AISearchServiceImpl implements AISearchService {
     const set2 = new Set(tokens2);
     const intersection = new Set([...set1].filter(x => set2.has(x)));
     const union = new Set([...set1, ...set2]);
-    
+
     return intersection.size / union.size; // Jaccard similarity
   }
 
@@ -568,14 +649,16 @@ class AISearchServiceImpl implements AISearchService {
     return categories;
   }
 
-  private generateSavedSearchSuggestions(topTerms: { term: string; frequency: number }[]): string[] {
+  private generateSavedSearchSuggestions(
+    topTerms: { term: string; frequency: number }[]
+  ): string[] {
     const suggestions: string[] = [];
-    
+
     // Create combinations of frequent terms
     if (topTerms.length >= 2) {
       suggestions.push(`${topTerms[0].term} AND ${topTerms[1].term}`);
     }
-    
+
     // Add common search patterns
     suggestions.push(
       'unread emails from this week',
@@ -588,15 +671,15 @@ class AISearchServiceImpl implements AISearchService {
 
   private generateSearchImprovements(searchHistory: SearchQuery[]): string[] {
     const improvements: string[] = [];
-    
+
     if (searchHistory.some(q => q.resultsCount === 0)) {
       improvements.push('Try using broader search terms or check spelling');
     }
-    
+
     if (searchHistory.some(q => q.resultsCount > 100)) {
       improvements.push('Use more specific search terms to narrow results');
     }
-    
+
     improvements.push(
       'Use quotes for exact phrase matches',
       'Try searching by sender, date range, or keywords',

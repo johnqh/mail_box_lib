@@ -3,20 +3,20 @@
  */
 
 import {
-  NotificationService,
-  NotificationOptions,
-  NotificationResult,
-  NotificationPermissionResult,
   NotificationCapabilities,
-  NotificationConfig
-} from "../../types";
+  NotificationConfig,
+  NotificationOptions,
+  NotificationPermissionResult,
+  NotificationResult,
+  NotificationService,
+} from '../../types';
 
 const DEFAULT_CONFIG: NotificationConfig = {
   enableAutoClose: true,
   autoCloseDelay: 5000,
   defaultIcon: '/favicon.ico',
   enableDebugLogging: false,
-  fallbackToAlert: false
+  fallbackToAlert: false,
 };
 
 export class WebNotificationService implements NotificationService {
@@ -54,7 +54,7 @@ export class WebNotificationService implements NotificationService {
       return {
         granted: false,
         permission: 'denied',
-        error: 'Notifications not supported'
+        error: 'Notifications not supported',
       };
     }
 
@@ -63,37 +63,43 @@ export class WebNotificationService implements NotificationService {
       return {
         granted: permission === 'granted',
         permission,
-        error: permission === 'denied' ? 'Permission denied by user' : undefined
+        error:
+          permission === 'denied' ? 'Permission denied by user' : undefined,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to request permission';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to request permission';
       this.log('Error requesting permission:', error);
       return {
         granted: false,
         permission: 'denied',
-        error: errorMessage
+        error: errorMessage,
       };
     }
   }
 
-  async showNotification(title: string, options: NotificationOptions = {}): Promise<NotificationResult> {
+  async showNotification(
+    title: string,
+    options: NotificationOptions = {}
+  ): Promise<NotificationResult> {
     if (!this.isSupported()) {
       return {
         success: false,
-        error: 'Notifications not supported'
+        error: 'Notifications not supported',
       };
     }
 
     if (!this.hasPermission()) {
       return {
         success: false,
-        error: 'Notification permission not granted'
+        error: 'Notification permission not granted',
       };
     }
 
     try {
-      const notificationId = options.tag || `notification-${Date.now()}-${Math.random()}`;
-      
+      const notificationId =
+        options.tag || `notification-${Date.now()}-${Math.random()}`;
+
       const notification = new Notification(title, {
         body: options.body,
         icon: options.icon || this.config.defaultIcon,
@@ -101,25 +107,25 @@ export class WebNotificationService implements NotificationService {
         tag: options.tag,
         requireInteraction: options.requireInteraction,
         silent: options.silent,
-        data: options.data
+        data: options.data,
       });
 
       // Store notification reference
       this.activeNotifications.set(notificationId, notification);
 
       // Set up click handler
-      notification.onclick = (event) => {
+      notification.onclick = event => {
         this.log('Notification clicked:', { title, data: options.data });
-        
+
         // Focus window if possible
         if (typeof window !== 'undefined') {
           window.focus();
         }
-        
+
         // Close notification
         notification.close();
         this.activeNotifications.delete(notificationId);
-        
+
         // Call custom click handler
         if (this.clickHandler) {
           this.clickHandler(options.data);
@@ -132,7 +138,7 @@ export class WebNotificationService implements NotificationService {
       };
 
       // Set up error handler
-      notification.onerror = (error) => {
+      notification.onerror = error => {
         this.log('Notification error:', error);
         this.activeNotifications.delete(notificationId);
       };
@@ -151,14 +157,15 @@ export class WebNotificationService implements NotificationService {
 
       return {
         success: true,
-        notificationId
+        notificationId,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to show notification';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to show notification';
       this.log('Error showing notification:', error);
       return {
         success: false,
-        error: errorMessage
+        error: errorMessage,
       };
     }
   }
@@ -207,7 +214,7 @@ export class WebNotificationService implements NotificationService {
         supportsBadge: false,
         supportsData: false,
         supportsSound: false,
-        supportsVibration: false
+        supportsVibration: false,
       };
     }
 
@@ -218,7 +225,7 @@ export class WebNotificationService implements NotificationService {
       supportsData: true,
       supportsSound: !('silent' in Notification.prototype), // Inverted logic
       supportsVibration: 'vibrate' in navigator,
-      maxActions: 2 // Standard browser limit
+      maxActions: 2, // Standard browser limit
     };
   }
 
@@ -232,7 +239,9 @@ export class WebNotificationService implements NotificationService {
 /**
  * Create a web notification service instance
  */
-export function createWebNotificationService(config?: Partial<NotificationConfig>): NotificationService {
+export function createWebNotificationService(
+  config?: Partial<NotificationConfig>
+): NotificationService {
   return new WebNotificationService(config);
 }
 

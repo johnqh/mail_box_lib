@@ -2,25 +2,39 @@
  * Web implementation of analytics client using Firebase Analytics
  */
 
-import { AnalyticsClient, AnalyticsEvent, AnalyticsEventData } from "../../types";
+import {
+  AnalyticsClient,
+  AnalyticsEvent,
+  AnalyticsEventData,
+} from '../../types';
 
 /**
  * Web analytics client using Firebase Analytics
  * This implementation maintains current Firebase behavior
  */
 export class WebAnalyticsClient implements AnalyticsClient {
-  private firebaseTrackEvent: (event: AnalyticsEvent | AnalyticsEventData) => void;
+  private firebaseTrackEvent: (
+    event: AnalyticsEvent | AnalyticsEventData
+  ) => void;
   private firebaseSetUserProperties: (properties: Record<string, any>) => void;
   private firebaseSetUserId: (userId: string | null) => void;
   private firebaseSetAnalyticsEnabled: (enabled: boolean) => void;
-  private firebaseSetCurrentScreen: (screenName: string, screenClass?: string) => void;
+  private firebaseSetCurrentScreen: (
+    screenName: string,
+    screenClass?: string
+  ) => void;
 
   constructor(
     firebaseTrackEvent: (event: AnalyticsEvent | AnalyticsEventData) => void,
-    firebaseSetUserProperties: (properties: Record<string, any>) => void = () => {},
+    firebaseSetUserProperties: (
+      properties: Record<string, any>
+    ) => void = () => {},
     firebaseSetUserId: (userId: string | null) => void = () => {},
     firebaseSetAnalyticsEnabled: (enabled: boolean) => void = () => {},
-    firebaseSetCurrentScreen: (screenName: string, screenClass?: string) => void = () => {}
+    firebaseSetCurrentScreen: (
+      screenName: string,
+      screenClass?: string
+    ) => void = () => {}
   ) {
     this.firebaseTrackEvent = firebaseTrackEvent;
     this.firebaseSetUserProperties = firebaseSetUserProperties;

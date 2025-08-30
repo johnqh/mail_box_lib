@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 type SetValue<T> = T | ((prevValue: T) => T);
 
@@ -35,27 +35,36 @@ export function useLocalStorage<T>(
   const [storedValue, setStoredValue] = useState<T>(getStoredValue);
 
   // Update localStorage when value changes
-  const setValue = useCallback((value: SetValue<T>) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      
-      setStoredValue(valueToStore);
-      
-      // Check if localStorage is available (web environment)
-      if (typeof window !== 'undefined' && window.localStorage) {
-        window.localStorage.setItem(key, serialize(valueToStore));
-        
-        // Dispatch custom event for cross-tab synchronization (web only)
-        if (typeof window.dispatchEvent === 'function' && typeof CustomEvent !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('local-storage', {
-            detail: { key, value: valueToStore }
-          }));
+  const setValue = useCallback(
+    (value: SetValue<T>) => {
+      try {
+        const valueToStore =
+          value instanceof Function ? value(storedValue) : value;
+
+        setStoredValue(valueToStore);
+
+        // Check if localStorage is available (web environment)
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem(key, serialize(valueToStore));
+
+          // Dispatch custom event for cross-tab synchronization (web only)
+          if (
+            typeof window.dispatchEvent === 'function' &&
+            typeof CustomEvent !== 'undefined'
+          ) {
+            window.dispatchEvent(
+              new CustomEvent('local-storage', {
+                detail: { key, value: valueToStore },
+              })
+            );
+          }
         }
+      } catch (error) {
+        console.error(`Error setting localStorage key "${key}":`, error);
       }
-    } catch (error) {
-      console.error(`Error setting localStorage key "${key}":`, error);
-    }
-  }, [key, serialize, storedValue]);
+    },
+    [key, serialize, storedValue]
+  );
 
   // Remove value from localStorage
   const removeValue = useCallback(() => {
@@ -63,12 +72,17 @@ export function useLocalStorage<T>(
       if (typeof window !== 'undefined' && window.localStorage) {
         window.localStorage.removeItem(key);
         setStoredValue(initialValue);
-        
+
         // Dispatch custom event for cross-tab synchronization (web only)
-        if (typeof window.dispatchEvent === 'function' && typeof CustomEvent !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('local-storage', {
-            detail: { key, value: null }
-          }));
+        if (
+          typeof window.dispatchEvent === 'function' &&
+          typeof CustomEvent !== 'undefined'
+        ) {
+          window.dispatchEvent(
+            new CustomEvent('local-storage', {
+              detail: { key, value: null },
+            })
+          );
         }
       } else {
         setStoredValue(initialValue);
@@ -90,7 +104,10 @@ export function useLocalStorage<T>(
         try {
           setStoredValue(deserialize(e.newValue));
         } catch (error) {
-          console.error(`Error parsing localStorage value for key "${key}":`, error);
+          console.error(
+            `Error parsing localStorage value for key "${key}":`,
+            error
+          );
         }
       }
     };

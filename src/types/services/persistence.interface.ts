@@ -3,7 +3,7 @@
  * Handles data persistence across different storage mechanisms
  */
 
-import { StorageType, RequestStatus } from "../../business/core/enums";
+import { RequestStatus, StorageType } from '../../business/core/enums';
 
 export interface PersistenceOptions {
   ttl?: number; // Time to live in milliseconds
@@ -111,7 +111,12 @@ export interface DatabaseService {
   /**
    * Store record with index support
    */
-  put<T>(table: string, key: string, record: T, indexes?: Record<string, any>): Promise<void>;
+  put<T>(
+    table: string,
+    key: string,
+    record: T,
+    indexes?: Record<string, any>
+  ): Promise<void>;
 
   /**
    * Get record by key
@@ -163,7 +168,12 @@ export interface UserPersistenceService {
   /**
    * Store user data
    */
-  storeUserData<T>(userId: string, key: string, data: T, options?: PersistenceOptions): Promise<void>;
+  storeUserData<T>(
+    userId: string,
+    key: string,
+    data: T,
+    options?: PersistenceOptions
+  ): Promise<void>;
 
   /**
    * Retrieve user data
@@ -253,10 +263,14 @@ export interface PersistenceServiceFactory {
   /**
    * Create user persistence service
    */
-  createUserPersistenceService(storageType: StorageType): UserPersistenceService;
+  createUserPersistenceService(
+    storageType: StorageType
+  ): UserPersistenceService;
 
   /**
    * Create settings persistence service
    */
-  createSettingsPersistenceService(storageType: StorageType): SettingsPersistenceService;
+  createSettingsPersistenceService(
+    storageType: StorageType
+  ): SettingsPersistenceService;
 }

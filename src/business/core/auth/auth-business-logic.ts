@@ -2,8 +2,8 @@
  * Platform-agnostic authentication business logic
  */
 
-import { ChainType, AuthStatus } from "../enums";
-import { EmailAddress } from "../../../types/email";
+import { AuthStatus, ChainType } from '../enums';
+import { EmailAddress } from '../../../types/email';
 
 // Extended EmailAddress interface for business logic
 interface ExtendedEmailAddress extends EmailAddress {
@@ -24,7 +24,10 @@ export interface AuthBusinessLogic {
   /**
    * Check if email address requires subscription
    */
-  requiresSubscription(emailAddress: EmailAddress, hasActiveSubscription: boolean): boolean;
+  requiresSubscription(
+    emailAddress: EmailAddress,
+    hasActiveSubscription: boolean
+  ): boolean;
 
   /**
    * Get authentication status display text
@@ -39,7 +42,10 @@ export interface AuthBusinessLogic {
   /**
    * Generate user display name from wallet data
    */
-  generateUserDisplayName(walletAddress: string, emailAddresses: EmailAddress[]): string;
+  generateUserDisplayName(
+    walletAddress: string,
+    emailAddresses: EmailAddress[]
+  ): string;
 
   /**
    * Validate signature format
@@ -66,7 +72,8 @@ export class DefaultAuthBusinessLogic implements AuthBusinessLogic {
   private readonly AUTH_EXPIRATION_HOURS = 24; // 24 hours default
 
   generateAuthMessage(nonce?: string): string {
-    const actualNonce = nonce || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const actualNonce =
+      nonce || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     return `Authenticate with 0xMail\nNonce: ${actualNonce}`;
   }
 
@@ -79,22 +86,29 @@ export class DefaultAuthBusinessLogic implements AuthBusinessLogic {
       case ChainType.EVM:
         // EVM address validation (0x followed by 40 hex characters)
         return /^0x[a-fA-F0-9]{40}$/.test(address);
-      
+
       case ChainType.SOLANA:
         // Solana address validation (base58 encoded, 32-44 characters)
         return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
-      
+
       default:
         // Unknown chain type, basic validation
         return address.length > 10 && address.length < 100;
     }
   }
 
-  requiresSubscription(emailAddress: EmailAddress, hasActiveSubscription: boolean): boolean {
+  requiresSubscription(
+    emailAddress: EmailAddress,
+    hasActiveSubscription: boolean
+  ): boolean {
     // ENS and SNS domains require subscription
-    const isENS = emailAddress.id.startsWith('ens_') || emailAddress.email.endsWith('.eth@0xmail.box');
-    const isSNS = emailAddress.id.startsWith('sns_') || emailAddress.email.endsWith('.sol@0xmail.box');
-    
+    const isENS =
+      emailAddress.id.startsWith('ens_') ||
+      emailAddress.email.endsWith('.eth@0xmail.box');
+    const isSNS =
+      emailAddress.id.startsWith('sns_') ||
+      emailAddress.email.endsWith('.sol@0xmail.box');
+
     return (isENS || isSNS) && !hasActiveSubscription;
   }
 
@@ -115,10 +129,13 @@ export class DefaultAuthBusinessLogic implements AuthBusinessLogic {
     return status === AuthStatus.VERIFIED;
   }
 
-  generateUserDisplayName(walletAddress: string, emailAddresses: EmailAddress[]): string {
+  generateUserDisplayName(
+    walletAddress: string,
+    emailAddresses: EmailAddress[]
+  ): string {
     // Try to use the first ENS or SNS name
-    const namedAddress = emailAddresses.find(addr => 
-      addr.id.startsWith('ens_') || addr.id.startsWith('sns_')
+    const namedAddress = emailAddresses.find(
+      addr => addr.id.startsWith('ens_') || addr.id.startsWith('sns_')
     );
 
     if (namedAddress) {
@@ -139,11 +156,11 @@ export class DefaultAuthBusinessLogic implements AuthBusinessLogic {
       case ChainType.EVM:
         // Ethereum signature validation (0x followed by 130 hex characters)
         return /^0x[a-fA-F0-9]{130}$/.test(signature);
-      
+
       case ChainType.SOLANA:
         // Solana signature validation (base58 encoded, typically 87-88 characters)
         return /^[1-9A-HJ-NP-Za-km-z]{87,88}$/.test(signature);
-      
+
       default:
         // Basic validation for unknown chain types
         return signature.length > 50;
@@ -152,7 +169,9 @@ export class DefaultAuthBusinessLogic implements AuthBusinessLogic {
 
   isAuthExpired(createdAt: Date, expirationHours?: number): boolean {
     const hours = expirationHours || this.AUTH_EXPIRATION_HOURS;
-    const expirationTime = new Date(createdAt.getTime() + hours * 60 * 60 * 1000);
+    const expirationTime = new Date(
+      createdAt.getTime() + hours * 60 * 60 * 1000
+    );
     return new Date() > expirationTime;
   }
 
@@ -173,7 +192,7 @@ export class DefaultAuthBusinessLogic implements AuthBusinessLogic {
     if (!address || address.length < 10) {
       return address;
     }
-    
+
     // Show first 6 and last 4 characters with ellipsis
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   }
@@ -186,7 +205,10 @@ export interface EmailAddressBusinessLogic {
   /**
    * Generate email addresses for a wallet
    */
-  generateEmailAddressesForWallet(walletAddress: string, chainType: ChainType): EmailAddress[];
+  generateEmailAddressesForWallet(
+    walletAddress: string,
+    chainType: ChainType
+  ): EmailAddress[];
 
   /**
    * Check if email address is primary
@@ -201,7 +223,9 @@ export interface EmailAddressBusinessLogic {
   /**
    * Get email type (direct, ENS, SNS)
    */
-  getEmailAddressType(emailAddress: EmailAddress): 'direct' | 'ens' | 'sns' | 'custom';
+  getEmailAddressType(
+    emailAddress: EmailAddress
+  ): 'direct' | 'ens' | 'sns' | 'custom';
 
   /**
    * Get display name for email address
@@ -209,16 +233,21 @@ export interface EmailAddressBusinessLogic {
   getEmailAddressDisplayName(emailAddress: EmailAddress): string;
 }
 
-export class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLogic {
-  generateEmailAddressesForWallet(walletAddress: string, chainType: ChainType): EmailAddress[] {
+export class DefaultEmailAddressBusinessLogic
+  implements EmailAddressBusinessLogic
+{
+  generateEmailAddressesForWallet(
+    walletAddress: string,
+    chainType: ChainType
+  ): EmailAddress[] {
     const addresses: EmailAddress[] = [
       {
         id: `direct_${walletAddress}`,
         name: this.formatAddressForDisplay(walletAddress),
         email: `${walletAddress}@0xmail.box`,
         isPrimary: true,
-        isActive: true
-      }
+        isActive: true,
+      },
     ];
 
     // Add ENS support for EVM chains
@@ -228,7 +257,7 @@ export class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLog
         name: 'ENS Domain',
         email: 'your-domain.eth@0xmail.box',
         isPrimary: false,
-        isActive: true
+        isActive: true,
       });
     }
 
@@ -239,7 +268,7 @@ export class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLog
         name: 'SNS Domain',
         email: 'your-domain.sol@0xmail.box',
         isPrimary: false,
-        isActive: true
+        isActive: true,
       });
     }
 
@@ -259,7 +288,7 @@ export class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLog
       // Then by type priority: direct, ENS, SNS, custom
       const aPriority = this.getAddressPriority(a);
       const bPriority = this.getAddressPriority(b);
-      
+
       if (aPriority !== bPriority) {
         return aPriority - bPriority;
       }
@@ -269,7 +298,9 @@ export class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLog
     });
   }
 
-  getEmailAddressType(emailAddress: EmailAddress): 'direct' | 'ens' | 'sns' | 'custom' {
+  getEmailAddressType(
+    emailAddress: EmailAddress
+  ): 'direct' | 'ens' | 'sns' | 'custom' {
     if (emailAddress.id.startsWith('ens_')) return 'ens';
     if (emailAddress.id.startsWith('sns_')) return 'sns';
     if (emailAddress.id.startsWith('direct_')) return 'direct';
@@ -288,11 +319,16 @@ export class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLog
   private getAddressPriority(emailAddress: EmailAddress): number {
     const type = this.getEmailAddressType(emailAddress);
     switch (type) {
-      case 'direct': return 1;
-      case 'ens': return 2;
-      case 'sns': return 3;
-      case 'custom': return 4;
-      default: return 5;
+      case 'direct':
+        return 1;
+      case 'ens':
+        return 2;
+      case 'sns':
+        return 3;
+      case 'custom':
+        return 4;
+      default:
+        return 5;
     }
   }
 }

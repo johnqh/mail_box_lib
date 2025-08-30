@@ -5,7 +5,7 @@
 // Analytics utilities
 export * from './analytics';
 
-// Navigation utilities  
+// Navigation utilities
 export * from './navigation';
 
 // Notification utilities

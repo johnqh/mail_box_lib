@@ -2,7 +2,12 @@
  * Web implementation of network client using fetch API
  */
 
-import { NetworkClient, NetworkResponse, NetworkRequestOptions, NetworkError } from "../types";
+import {
+  NetworkClient,
+  NetworkError,
+  NetworkRequestOptions,
+  NetworkResponse,
+} from '../types';
 
 /**
  * Web network client using the Fetch API
@@ -15,13 +20,16 @@ export class WebNetworkClient implements NetworkClient {
     this.defaultTimeout = defaultTimeout;
   }
 
-  async request<T = any>(url: string, options: NetworkRequestOptions = {}): Promise<NetworkResponse<T>> {
+  async request<T = any>(
+    url: string,
+    options: NetworkRequestOptions = {}
+  ): Promise<NetworkResponse<T>> {
     const {
       method = 'GET',
       headers = {},
       body,
       timeout = this.defaultTimeout,
-      signal
+      signal,
     } = options;
 
     // Create abort controller for timeout if no signal provided
@@ -36,7 +44,7 @@ export class WebNetworkClient implements NetworkClient {
         method,
         headers,
         body,
-        signal: finalSignal
+        signal: finalSignal,
       });
 
       clearTimeout(timeoutId);
@@ -44,13 +52,13 @@ export class WebNetworkClient implements NetworkClient {
       // Parse response data
       let data: T;
       const contentType = response.headers.get('content-type') || '';
-      
+
       if (contentType.includes('application/json')) {
         data = await response.json();
       } else if (contentType.includes('text/')) {
-        data = await response.text() as unknown as T;
+        data = (await response.text()) as unknown as T;
       } else {
-        data = await response.blob() as unknown as T;
+        data = (await response.blob()) as unknown as T;
       }
 
       // Convert headers to plain object
@@ -64,7 +72,7 @@ export class WebNetworkClient implements NetworkClient {
         status: response.status,
         statusText: response.statusText,
         data,
-        headers: responseHeaders
+        headers: responseHeaders,
       };
 
       if (!response.ok) {
@@ -73,7 +81,7 @@ export class WebNetworkClient implements NetworkClient {
         if (data && typeof data === 'object' && 'message' in data) {
           errorMessage += ` - ${(data as any).message}`;
         }
-        
+
         throw new NetworkError(
           errorMessage,
           response.status,
@@ -93,7 +101,12 @@ export class WebNetworkClient implements NetworkClient {
 
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
-          throw new NetworkError('Request timeout', 408, 'Request Timeout', url);
+          throw new NetworkError(
+            'Request timeout',
+            408,
+            'Request Timeout',
+            url
+          );
         }
         throw new NetworkError(error.message, 0, 'Network Error', url);
       }
@@ -102,47 +115,79 @@ export class WebNetworkClient implements NetworkClient {
     }
   }
 
-  async get<T = any>(url: string, options: Omit<NetworkRequestOptions, 'method' | 'body'> = {}): Promise<NetworkResponse<T>> {
+  async get<T = any>(
+    url: string,
+    options: Omit<NetworkRequestOptions, 'method' | 'body'> = {}
+  ): Promise<NetworkResponse<T>> {
     return this.request<T>(url, { ...options, method: 'GET' });
   }
 
-  async post<T = any>(url: string, body?: any, options: Omit<NetworkRequestOptions, 'method'> = {}): Promise<NetworkResponse<T>> {
-    const requestBody = typeof body === 'object' && body !== null && !(body instanceof FormData) && !(body instanceof Blob)
-      ? JSON.stringify(body)
-      : body;
+  async post<T = any>(
+    url: string,
+    body?: any,
+    options: Omit<NetworkRequestOptions, 'method'> = {}
+  ): Promise<NetworkResponse<T>> {
+    const requestBody =
+      typeof body === 'object' &&
+      body !== null &&
+      !(body instanceof FormData) &&
+      !(body instanceof Blob)
+        ? JSON.stringify(body)
+        : body;
 
     const headers = { ...options.headers };
-    if (typeof body === 'object' && body !== null && !(body instanceof FormData) && !(body instanceof Blob)) {
+    if (
+      typeof body === 'object' &&
+      body !== null &&
+      !(body instanceof FormData) &&
+      !(body instanceof Blob)
+    ) {
       headers['Content-Type'] = 'application/json';
     }
 
-    return this.request<T>(url, { 
-      ...options, 
-      method: 'POST', 
+    return this.request<T>(url, {
+      ...options,
+      method: 'POST',
       body: requestBody,
-      headers 
+      headers,
     });
   }
 
-  async put<T = any>(url: string, body?: any, options: Omit<NetworkRequestOptions, 'method'> = {}): Promise<NetworkResponse<T>> {
-    const requestBody = typeof body === 'object' && body !== null && !(body instanceof FormData) && !(body instanceof Blob)
-      ? JSON.stringify(body)
-      : body;
+  async put<T = any>(
+    url: string,
+    body?: any,
+    options: Omit<NetworkRequestOptions, 'method'> = {}
+  ): Promise<NetworkResponse<T>> {
+    const requestBody =
+      typeof body === 'object' &&
+      body !== null &&
+      !(body instanceof FormData) &&
+      !(body instanceof Blob)
+        ? JSON.stringify(body)
+        : body;
 
     const headers = { ...options.headers };
-    if (typeof body === 'object' && body !== null && !(body instanceof FormData) && !(body instanceof Blob)) {
+    if (
+      typeof body === 'object' &&
+      body !== null &&
+      !(body instanceof FormData) &&
+      !(body instanceof Blob)
+    ) {
       headers['Content-Type'] = 'application/json';
     }
 
-    return this.request<T>(url, { 
-      ...options, 
-      method: 'PUT', 
+    return this.request<T>(url, {
+      ...options,
+      method: 'PUT',
       body: requestBody,
-      headers 
+      headers,
     });
   }
 
-  async delete<T = any>(url: string, options: Omit<NetworkRequestOptions, 'method' | 'body'> = {}): Promise<NetworkResponse<T>> {
+  async delete<T = any>(
+    url: string,
+    options: Omit<NetworkRequestOptions, 'method' | 'body'> = {}
+  ): Promise<NetworkResponse<T>> {
     return this.request<T>(url, { ...options, method: 'DELETE' });
   }
 }

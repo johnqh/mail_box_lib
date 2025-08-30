@@ -3,13 +3,39 @@
  * Manages all services and their dependencies
  */
 
-import { EmailService, MailboxService, EmailAddressService } from "../../../types/services";
-import { AuthService, AuthStorageService, AuthEmailAddressService, AuthManager } from "../../../types/services";
-import { EmailOperations, DefaultEmailOperations } from '../email/email-operations';
-import { MailboxOperations, DefaultMailboxOperations } from '../mailbox/mailbox-operations';
-import { NavigationOperations, DefaultNavigationOperations } from '../navigation/navigation-state';
-import { AuthBusinessLogic, DefaultAuthBusinessLogic, EmailAddressBusinessLogic, DefaultEmailAddressBusinessLogic } from '../auth/auth-business-logic';
-import { FolderOperations, DefaultFolderOperations } from '../folder/folder-operations';
+import {
+  EmailAddressService,
+  EmailService,
+  MailboxService,
+} from '../../../types/services';
+import {
+  AuthEmailAddressService,
+  AuthManager,
+  AuthService,
+  AuthStorageService,
+} from '../../../types/services';
+import {
+  DefaultEmailOperations,
+  EmailOperations,
+} from '../email/email-operations';
+import {
+  DefaultMailboxOperations,
+  MailboxOperations,
+} from '../mailbox/mailbox-operations';
+import {
+  DefaultNavigationOperations,
+  NavigationOperations,
+} from '../navigation/navigation-state';
+import {
+  AuthBusinessLogic,
+  DefaultAuthBusinessLogic,
+  DefaultEmailAddressBusinessLogic,
+  EmailAddressBusinessLogic,
+} from '../auth/auth-business-logic';
+import {
+  DefaultFolderOperations,
+  FolderOperations,
+} from '../folder/folder-operations';
 import { PlatformType } from '../enums';
 
 // Storage interface for platform abstraction
@@ -30,7 +56,11 @@ export interface PlatformAnalytics {
 
 // Notification interface for platform abstraction
 export interface PlatformNotifications {
-  showNotification(title: string, message: string, type: 'info' | 'success' | 'warning' | 'error'): void;
+  showNotification(
+    title: string,
+    message: string,
+    type: 'info' | 'success' | 'warning' | 'error'
+  ): void;
   requestPermission(): Promise<boolean>;
   scheduleNotification(title: string, message: string, delay: number): void;
 }
@@ -72,7 +102,11 @@ export class ServiceContainer {
   constructor(private config: ServiceContainerConfig) {}
 
   // Register a service factory
-  register<T>(key: string, factory: (container: ServiceContainer) => T, singleton: boolean = true): void {
+  register<T>(
+    key: string,
+    factory: (container: ServiceContainer) => T,
+    singleton: boolean = true
+  ): void {
     this.services.set(key, { factory, singleton });
   }
 
@@ -154,16 +188,36 @@ export const ServiceKeys = {
 /**
  * Factory function to create a pre-configured service container
  */
-export function createServiceContainer(config: ServiceContainerConfig): ServiceContainer {
+export function createServiceContainer(
+  config: ServiceContainerConfig
+): ServiceContainer {
   const container = new ServiceContainer(config);
 
   // Register business logic services (platform-agnostic)
-  container.register(ServiceKeys.EMAIL_OPERATIONS, () => new DefaultEmailOperations());
-  container.register(ServiceKeys.MAILBOX_OPERATIONS, () => new DefaultMailboxOperations());
-  container.register(ServiceKeys.FOLDER_OPERATIONS, () => new DefaultFolderOperations());
-  container.register(ServiceKeys.NAVIGATION_OPERATIONS, () => new DefaultNavigationOperations());
-  container.register(ServiceKeys.AUTH_BUSINESS_LOGIC, () => new DefaultAuthBusinessLogic());
-  container.register(ServiceKeys.EMAIL_ADDRESS_BUSINESS_LOGIC, () => new DefaultEmailAddressBusinessLogic());
+  container.register(
+    ServiceKeys.EMAIL_OPERATIONS,
+    () => new DefaultEmailOperations()
+  );
+  container.register(
+    ServiceKeys.MAILBOX_OPERATIONS,
+    () => new DefaultMailboxOperations()
+  );
+  container.register(
+    ServiceKeys.FOLDER_OPERATIONS,
+    () => new DefaultFolderOperations()
+  );
+  container.register(
+    ServiceKeys.NAVIGATION_OPERATIONS,
+    () => new DefaultNavigationOperations()
+  );
+  container.register(
+    ServiceKeys.AUTH_BUSINESS_LOGIC,
+    () => new DefaultAuthBusinessLogic()
+  );
+  container.register(
+    ServiceKeys.EMAIL_ADDRESS_BUSINESS_LOGIC,
+    () => new DefaultEmailAddressBusinessLogic()
+  );
 
   return container;
 }
@@ -180,19 +234,27 @@ export class ServiceResolver {
   }
 
   getMailboxOperations(): MailboxOperations {
-    return this.container.get<MailboxOperations>(ServiceKeys.MAILBOX_OPERATIONS);
+    return this.container.get<MailboxOperations>(
+      ServiceKeys.MAILBOX_OPERATIONS
+    );
   }
 
   getNavigationOperations(): NavigationOperations {
-    return this.container.get<NavigationOperations>(ServiceKeys.NAVIGATION_OPERATIONS);
+    return this.container.get<NavigationOperations>(
+      ServiceKeys.NAVIGATION_OPERATIONS
+    );
   }
 
   getAuthBusinessLogic(): AuthBusinessLogic {
-    return this.container.get<AuthBusinessLogic>(ServiceKeys.AUTH_BUSINESS_LOGIC);
+    return this.container.get<AuthBusinessLogic>(
+      ServiceKeys.AUTH_BUSINESS_LOGIC
+    );
   }
 
   getEmailAddressBusinessLogic(): EmailAddressBusinessLogic {
-    return this.container.get<EmailAddressBusinessLogic>(ServiceKeys.EMAIL_ADDRESS_BUSINESS_LOGIC);
+    return this.container.get<EmailAddressBusinessLogic>(
+      ServiceKeys.EMAIL_ADDRESS_BUSINESS_LOGIC
+    );
   }
 
   // Platform services
@@ -226,7 +288,9 @@ export class ServiceResolver {
   }
 
   getEmailAddressService(): EmailAddressService {
-    return this.container.get<EmailAddressService>(ServiceKeys.EMAIL_ADDRESS_SERVICE);
+    return this.container.get<EmailAddressService>(
+      ServiceKeys.EMAIL_ADDRESS_SERVICE
+    );
   }
 
   // Auth services
@@ -235,11 +299,15 @@ export class ServiceResolver {
   }
 
   getAuthStorageService(): AuthStorageService {
-    return this.container.get<AuthStorageService>(ServiceKeys.AUTH_STORAGE_SERVICE);
+    return this.container.get<AuthStorageService>(
+      ServiceKeys.AUTH_STORAGE_SERVICE
+    );
   }
 
   getAuthEmailAddressService(): AuthEmailAddressService {
-    return this.container.get<AuthEmailAddressService>(ServiceKeys.AUTH_EMAIL_ADDRESS_SERVICE);
+    return this.container.get<AuthEmailAddressService>(
+      ServiceKeys.AUTH_EMAIL_ADDRESS_SERVICE
+    );
   }
 
   getAuthManager(): AuthManager {

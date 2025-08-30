@@ -4,18 +4,18 @@
  */
 
 import {
-  NavigationService,
+  NavigationConfig,
   NavigationOptions,
+  NavigationService,
   NavigationState,
-  NavigationConfig
-} from "../../types";
+} from '../../types';
 
 const DEFAULT_CONFIG: NavigationConfig = {
   enableBackGesture: false, // Not applicable to web
   enableSwipeGesture: false, // Not applicable to web
   animationType: 'none', // Not applicable to web
   enableAnalytics: true,
-  fallbackPath: '/'
+  fallbackPath: '/',
 };
 
 export class WebNavigationService implements NavigationService {
@@ -26,7 +26,7 @@ export class WebNavigationService implements NavigationService {
   constructor(config: Partial<NavigationConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.currentState = this.buildCurrentState();
-    
+
     // Listen to browser navigation events
     if (typeof window !== 'undefined') {
       window.addEventListener('popstate', this.handlePopState.bind(this));
@@ -43,10 +43,10 @@ export class WebNavigationService implements NavigationService {
       if (typeof window !== 'undefined' && window.history) {
         const method = options.replace ? 'replaceState' : 'pushState';
         window.history[method](options.state || null, '', path);
-        
+
         this.updateCurrentState();
         this.notifyListeners();
-        
+
         if (this.config.enableAnalytics) {
           this.trackNavigation('navigate', path);
         }
@@ -65,7 +65,7 @@ export class WebNavigationService implements NavigationService {
     try {
       if (this.canGoBack() && typeof window !== 'undefined' && window.history) {
         window.history.back();
-        
+
         if (this.config.enableAnalytics) {
           this.trackNavigation('back');
         }
@@ -86,9 +86,13 @@ export class WebNavigationService implements NavigationService {
     }
 
     try {
-      if (this.canGoForward() && typeof window !== 'undefined' && window.history) {
+      if (
+        this.canGoForward() &&
+        typeof window !== 'undefined' &&
+        window.history
+      ) {
         window.history.forward();
-        
+
         if (this.config.enableAnalytics) {
           this.trackNavigation('forward');
         }
@@ -146,7 +150,7 @@ export class WebNavigationService implements NavigationService {
 
   addListener(listener: (state: NavigationState) => void): () => void {
     this.listeners.push(listener);
-    
+
     // Return cleanup function
     return () => {
       const index = this.listeners.indexOf(listener);
@@ -168,7 +172,7 @@ export class WebNavigationService implements NavigationService {
     return {
       currentPath: this.getCurrentPath(),
       params: this.getParams(),
-      searchParams: this.getSearchParams()
+      searchParams: this.getSearchParams(),
     };
   }
 
@@ -176,14 +180,14 @@ export class WebNavigationService implements NavigationService {
     const previousPath = this.currentState.currentPath;
     this.currentState = {
       ...this.buildCurrentState(),
-      previousPath
+      previousPath,
     };
   }
 
   private handlePopState(): void {
     this.updateCurrentState();
     this.notifyListeners();
-    
+
     if (this.config.enableAnalytics) {
       this.trackNavigation('popstate', this.currentState.currentPath);
     }
@@ -201,14 +205,19 @@ export class WebNavigationService implements NavigationService {
 
   private trackNavigation(type: string, path?: string): void {
     // In a real app, you would integrate with your analytics service here
-    console.debug(`[Navigation Analytics] ${type}:`, path || this.currentState.currentPath);
+    console.debug(
+      `[Navigation Analytics] ${type}:`,
+      path || this.currentState.currentPath
+    );
   }
 }
 
 /**
  * Create a web navigation service instance
  */
-export function createWebNavigationService(config?: Partial<NavigationConfig>): NavigationService {
+export function createWebNavigationService(
+  config?: Partial<NavigationConfig>
+): NavigationService {
   return new WebNavigationService(config);
 }
 
@@ -234,7 +243,9 @@ export const webNavigationHelpers = {
     return {
       currentPath: location.pathname || '/',
       params: location.params || {},
-      searchParams: location.search ? Object.fromEntries(new URLSearchParams(location.search)) : {}
+      searchParams: location.search
+        ? Object.fromEntries(new URLSearchParams(location.search))
+        : {},
     };
-  }
+  },
 };

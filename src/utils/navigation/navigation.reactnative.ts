@@ -4,18 +4,18 @@
  */
 
 import {
-  NavigationService,
+  NavigationConfig,
   NavigationOptions,
+  NavigationService,
   NavigationState,
-  NavigationConfig
-} from "../../types";
+} from '../../types';
 
 const DEFAULT_CONFIG: NavigationConfig = {
   enableBackGesture: true,
   enableSwipeGesture: true,
   animationType: 'slide',
   enableAnalytics: true,
-  fallbackPath: '/'
+  fallbackPath: '/',
 };
 
 export class ReactNativeNavigationService implements NavigationService {
@@ -46,13 +46,13 @@ export class ReactNativeNavigationService implements NavigationService {
     try {
       // In React Native with React Navigation, you would use:
       // this.navigationRef?.navigate(path, options);
-      
+
       console.log(`[RN Navigation] Navigate to: ${path}`, options);
-      
+
       // Mock implementation for development
       this.updateCurrentState(path);
       this.notifyListeners();
-      
+
       if (this.config.enableAnalytics) {
         this.trackNavigation('navigate', path);
       }
@@ -74,14 +74,16 @@ export class ReactNativeNavigationService implements NavigationService {
       // } else if (fallbackPath) {
       //   this.navigate(fallbackPath);
       // }
-      
+
       console.log(`[RN Navigation] Go back, fallback: ${fallbackPath}`);
-      
+
       if (this.canGoBack()) {
         // Mock going back
-        this.updateCurrentState(this.currentState.previousPath || this.config.fallbackPath || '/');
+        this.updateCurrentState(
+          this.currentState.previousPath || this.config.fallbackPath || '/'
+        );
         this.notifyListeners();
-        
+
         if (this.config.enableAnalytics) {
           this.trackNavigation('back');
         }
@@ -107,13 +109,13 @@ export class ReactNativeNavigationService implements NavigationService {
     try {
       // In React Native with React Navigation, you would use:
       // this.navigationRef?.replace(path, options);
-      
+
       console.log(`[RN Navigation] Replace with: ${path}`, options);
-      
+
       // Mock implementation
       this.updateCurrentState(path);
       this.notifyListeners();
-      
+
       if (this.config.enableAnalytics) {
         this.trackNavigation('replace', path);
       }
@@ -129,7 +131,7 @@ export class ReactNativeNavigationService implements NavigationService {
   getCurrentPath(): string {
     // In React Native with React Navigation, you would use:
     // return this.navigationRef?.getCurrentRoute()?.name || '/';
-    
+
     return this.currentState.currentPath;
   }
 
@@ -142,14 +144,14 @@ export class ReactNativeNavigationService implements NavigationService {
   getParams(): Record<string, string> {
     // In React Native with React Navigation, you would use:
     // return this.navigationRef?.getCurrentRoute()?.params || {};
-    
+
     return this.currentState.params;
   }
 
   canGoBack(): boolean {
     // In React Native with React Navigation, you would use:
     // return this.navigationRef?.canGoBack() || false;
-    
+
     return Boolean(this.currentState.previousPath);
   }
 
@@ -160,13 +162,13 @@ export class ReactNativeNavigationService implements NavigationService {
 
   addListener(listener: (state: NavigationState) => void): () => void {
     this.listeners.push(listener);
-    
+
     // In React Native with React Navigation, you would also add:
     // const unsubscribe = this.navigationRef?.addListener('state', (e) => {
     //   const state = this.convertNavigationState(e.data.state);
     //   listener(state);
     // });
-    
+
     // Return cleanup function
     return () => {
       const index = this.listeners.indexOf(listener);
@@ -180,7 +182,7 @@ export class ReactNativeNavigationService implements NavigationService {
   isSupported(): boolean {
     // In React Native, you would check:
     // return this.navigationRef !== null;
-    
+
     // For development, assume it's supported in React Native environment
     return typeof window === 'undefined';
   }
@@ -189,7 +191,7 @@ export class ReactNativeNavigationService implements NavigationService {
     return {
       currentPath: '/',
       params: {},
-      searchParams: {}
+      searchParams: {},
     };
   }
 
@@ -199,7 +201,7 @@ export class ReactNativeNavigationService implements NavigationService {
       currentPath: newPath || this.currentState.currentPath,
       previousPath,
       params: {}, // Would be extracted from navigation state
-      searchParams: {} // Would be extracted from navigation state
+      searchParams: {}, // Would be extracted from navigation state
     };
   }
 
@@ -215,14 +217,19 @@ export class ReactNativeNavigationService implements NavigationService {
 
   private trackNavigation(type: string, path?: string): void {
     // In a real app, you would integrate with your analytics service here
-    console.debug(`[RN Navigation Analytics] ${type}:`, path || this.currentState.currentPath);
+    console.debug(
+      `[RN Navigation Analytics] ${type}:`,
+      path || this.currentState.currentPath
+    );
   }
 }
 
 /**
  * Create a React Native navigation service instance
  */
-export function createReactNativeNavigationService(config?: Partial<NavigationConfig>): NavigationService {
+export function createReactNativeNavigationService(
+  config?: Partial<NavigationConfig>
+): NavigationService {
   return new ReactNativeNavigationService(config);
 }
 
@@ -246,7 +253,7 @@ export const reactNativeNavigationHelpers = {
     return {
       currentPath: rnState?.routes?.[rnState.index]?.name || '/',
       params: rnState?.routes?.[rnState.index]?.params || {},
-      searchParams: {} // React Navigation doesn't use search params
+      searchParams: {}, // React Navigation doesn't use search params
     };
   },
 
@@ -257,7 +264,7 @@ export const reactNativeNavigationHelpers = {
     gestureEnabled: config.enableBackGesture,
     animationTypeForReplace: config.animationType,
     // Add more React Navigation specific options
-  })
+  }),
 };
 
 // Export singleton instance for React Native

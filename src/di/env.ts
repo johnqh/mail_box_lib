@@ -3,7 +3,7 @@
  * Automatically selects the appropriate environment provider based on platform
  */
 
-import { EnvProvider, AppConfig } from "../types";
+import { AppConfig, EnvProvider } from '../types';
 
 let envProvider: EnvProvider;
 let appConfig: AppConfig;
@@ -22,7 +22,10 @@ function createEnvProvider(): EnvProvider {
   } else {
     // React Native environment
     // For now, fall back to web logger, but React Native apps should use env.reactnative.ts directly
-    const { ReactNativeEnvProvider, createReactNativeAppConfig } = require('./env.reactnative');
+    const {
+      ReactNativeEnvProvider,
+      createReactNativeAppConfig,
+    } = require('./env.reactnative');
     const provider = new ReactNativeEnvProvider();
     appConfig = createReactNativeAppConfig(provider);
     return provider;
@@ -55,8 +58,9 @@ export function getAppConfig(): AppConfig {
 export const env = {
   isDevelopment: () => getEnvProvider().isDevelopment(),
   isProduction: () => getEnvProvider().isProduction(),
-  get: (key: string, defaultValue?: string) => getEnvProvider().get(key as any, defaultValue),
+  get: (key: string, defaultValue?: string) =>
+    getEnvProvider().get(key as any, defaultValue),
 };
 
 // Re-export types for convenience
-export type { EnvProvider, AppConfig, EnvironmentVariables } from "../types";
+export type { EnvProvider, AppConfig, EnvironmentVariables } from '../types';

@@ -59,7 +59,10 @@ export interface NotificationService {
    * @param options Notification options
    * @returns Promise with operation result
    */
-  showNotification(title: string, options?: NotificationOptions): Promise<NotificationResult>;
+  showNotification(
+    title: string,
+    options?: NotificationOptions
+  ): Promise<NotificationResult>;
 
   /**
    * Close a notification by ID
@@ -116,7 +119,10 @@ export interface NotificationConfig {
 export interface NotificationClient {
   service: NotificationService;
   config: NotificationConfig;
-  show(title: string, options?: NotificationOptions): Promise<NotificationResult>;
+  show(
+    title: string,
+    options?: NotificationOptions
+  ): Promise<NotificationResult>;
   requestPermissions(): Promise<NotificationPermissionResult>;
 }
 

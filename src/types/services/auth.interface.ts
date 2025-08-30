@@ -3,8 +3,8 @@
  * This interface defines the contract for authentication operations that work across web and React Native
  */
 
-import { ChainType, AuthStatus } from "../../business/core/enums";
-import { EmailAddress } from "../email";
+import { AuthStatus, ChainType } from '../../business/core/enums';
+import { EmailAddress } from '../email';
 
 export interface WalletUserData {
   id: string;
@@ -69,13 +69,17 @@ export interface AuthService {
    * Listen for wallet connection changes
    * @param callback Function to call when connection status changes
    */
-  onConnectionChange(callback: (address: string | null, chainType: ChainType) => void): void;
+  onConnectionChange(
+    callback: (address: string | null, chainType: ChainType) => void
+  ): void;
 
   /**
    * Remove connection change listener
    * @param callback Function to remove from listeners
    */
-  offConnectionChange(callback: (address: string | null, chainType: ChainType) => void): void;
+  offConnectionChange(
+    callback: (address: string | null, chainType: ChainType) => void
+  ): void;
 }
 
 /**
@@ -120,7 +124,10 @@ export interface AuthEmailAddressService {
    * @param chainType Chain type
    * @returns Promise<EmailAddress[]> with generated email addresses
    */
-  generateEmailAddresses(walletAddress: string, chainType: ChainType): Promise<EmailAddress[]>;
+  generateEmailAddresses(
+    walletAddress: string,
+    chainType: ChainType
+  ): Promise<EmailAddress[]>;
 
   /**
    * Refresh email addresses for a wallet address
@@ -128,7 +135,10 @@ export interface AuthEmailAddressService {
    * @param chainType Chain type
    * @returns Promise<EmailAddress[]> with refreshed email addresses
    */
-  refreshEmailAddresses(walletAddress: string, chainType: ChainType): Promise<EmailAddress[]>;
+  refreshEmailAddresses(
+    walletAddress: string,
+    chainType: ChainType
+  ): Promise<EmailAddress[]>;
 }
 
 /**

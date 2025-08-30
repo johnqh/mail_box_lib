@@ -3,14 +3,14 @@
  * Handles analytics event creation, validation, and processing
  */
 
-import { 
-  AnalyticsEvent, 
-  ChainType, 
-  WalletType, 
-  LoginMethod, 
-  EmailAction, 
+import {
+  AnalyticsEvent,
+  ChainType,
+  EmailAction,
+  EmailFolder,
+  LoginMethod,
   SubscriptionAction,
-  EmailFolder 
+  WalletType,
 } from '../enums';
 
 export interface AnalyticsEventData {
@@ -32,12 +32,20 @@ export interface AnalyticsOperations {
   /**
    * Create authentication event
    */
-  createAuthEvent(method: LoginMethod, walletType?: WalletType, chainType?: ChainType): AnalyticsEventData;
+  createAuthEvent(
+    method: LoginMethod,
+    walletType?: WalletType,
+    chainType?: ChainType
+  ): AnalyticsEventData;
 
   /**
    * Create email action event
    */
-  createEmailActionEvent(action: EmailAction, emailId: string, folder?: EmailFolder): AnalyticsEventData;
+  createEmailActionEvent(
+    action: EmailAction,
+    emailId: string,
+    folder?: EmailFolder
+  ): AnalyticsEventData;
 
   /**
    * Create page view event
@@ -47,7 +55,12 @@ export interface AnalyticsOperations {
   /**
    * Create subscription event
    */
-  createSubscriptionEvent(action: SubscriptionAction, planType?: string, amount?: number, currency?: string): AnalyticsEventData;
+  createSubscriptionEvent(
+    action: SubscriptionAction,
+    planType?: string,
+    amount?: number,
+    currency?: string
+  ): AnalyticsEventData;
 
   /**
    * Create search event
@@ -57,12 +70,21 @@ export interface AnalyticsOperations {
   /**
    * Create error event
    */
-  createErrorEvent(errorType: string, errorMessage: string, pageName?: string): AnalyticsEventData;
+  createErrorEvent(
+    errorType: string,
+    errorMessage: string,
+    pageName?: string
+  ): AnalyticsEventData;
 
   /**
    * Create A/B test event
    */
-  createABTestEvent(testName: string, variant: string, action: 'viewed' | 'converted', conversionType?: string): AnalyticsEventData;
+  createABTestEvent(
+    testName: string,
+    variant: string,
+    action: 'viewed' | 'converted',
+    conversionType?: string
+  ): AnalyticsEventData;
 
   /**
    * Create navigation event
@@ -72,7 +94,10 @@ export interface AnalyticsOperations {
   /**
    * Create folder switch event
    */
-  createFolderSwitchEvent(fromFolder: EmailFolder, toFolder: EmailFolder): AnalyticsEventData;
+  createFolderSwitchEvent(
+    fromFolder: EmailFolder,
+    toFolder: EmailFolder
+  ): AnalyticsEventData;
 
   /**
    * Validate event data
@@ -98,7 +123,7 @@ export interface AnalyticsOperations {
    * Merge event properties with common properties
    */
   mergeWithCommonProperties(
-    properties: Record<string, any>, 
+    properties: Record<string, any>,
     commonProperties: Record<string, any>
   ): Record<string, any>;
 
@@ -110,14 +135,21 @@ export interface AnalyticsOperations {
   /**
    * Transform event for different analytics providers
    */
-  transformEventForProvider(eventData: AnalyticsEventData, provider: 'firebase' | 'amplitude' | 'mixpanel'): any;
+  transformEventForProvider(
+    eventData: AnalyticsEventData,
+    provider: 'firebase' | 'amplitude' | 'mixpanel'
+  ): any;
 }
 
 export class DefaultAnalyticsOperations implements AnalyticsOperations {
   private readonly MAX_PROPERTY_LENGTH = 1000;
   private readonly MAX_EVENT_NAME_LENGTH = 40;
 
-  createAuthEvent(method: LoginMethod, walletType?: WalletType, chainType?: ChainType): AnalyticsEventData {
+  createAuthEvent(
+    method: LoginMethod,
+    walletType?: WalletType,
+    chainType?: ChainType
+  ): AnalyticsEventData {
     return {
       name: AnalyticsEvent.USER_LOGIN,
       properties: {
@@ -129,7 +161,11 @@ export class DefaultAnalyticsOperations implements AnalyticsOperations {
     };
   }
 
-  createEmailActionEvent(action: EmailAction, emailId: string, folder?: EmailFolder): AnalyticsEventData {
+  createEmailActionEvent(
+    action: EmailAction,
+    emailId: string,
+    folder?: EmailFolder
+  ): AnalyticsEventData {
     const eventMap: Record<EmailAction, AnalyticsEvent> = {
       [EmailAction.OPEN]: AnalyticsEvent.EMAIL_OPEN,
       [EmailAction.REPLY]: AnalyticsEvent.EMAIL_REPLY,
@@ -164,7 +200,12 @@ export class DefaultAnalyticsOperations implements AnalyticsOperations {
     };
   }
 
-  createSubscriptionEvent(action: SubscriptionAction, planType?: string, amount?: number, currency?: string): AnalyticsEventData {
+  createSubscriptionEvent(
+    action: SubscriptionAction,
+    planType?: string,
+    amount?: number,
+    currency?: string
+  ): AnalyticsEventData {
     const eventMap: Record<SubscriptionAction, AnalyticsEvent> = {
       [SubscriptionAction.VIEW]: AnalyticsEvent.SUBSCRIPTION_VIEW,
       [SubscriptionAction.PURCHASE]: AnalyticsEvent.SUBSCRIPTION_PURCHASE,
@@ -196,7 +237,11 @@ export class DefaultAnalyticsOperations implements AnalyticsOperations {
     };
   }
 
-  createErrorEvent(errorType: string, errorMessage: string, pageName?: string): AnalyticsEventData {
+  createErrorEvent(
+    errorType: string,
+    errorMessage: string,
+    pageName?: string
+  ): AnalyticsEventData {
     return {
       name: AnalyticsEvent.ERROR_OCCURRED,
       properties: {
@@ -208,9 +253,17 @@ export class DefaultAnalyticsOperations implements AnalyticsOperations {
     };
   }
 
-  createABTestEvent(testName: string, variant: string, action: 'viewed' | 'converted', conversionType?: string): AnalyticsEventData {
-    const eventName = action === 'viewed' ? AnalyticsEvent.AB_TEST_VIEWED : AnalyticsEvent.AB_TEST_CONVERTED;
-    
+  createABTestEvent(
+    testName: string,
+    variant: string,
+    action: 'viewed' | 'converted',
+    conversionType?: string
+  ): AnalyticsEventData {
+    const eventName =
+      action === 'viewed'
+        ? AnalyticsEvent.AB_TEST_VIEWED
+        : AnalyticsEvent.AB_TEST_CONVERTED;
+
     return {
       name: eventName,
       properties: {
@@ -234,7 +287,10 @@ export class DefaultAnalyticsOperations implements AnalyticsOperations {
     };
   }
 
-  createFolderSwitchEvent(fromFolder: EmailFolder, toFolder: EmailFolder): AnalyticsEventData {
+  createFolderSwitchEvent(
+    fromFolder: EmailFolder,
+    toFolder: EmailFolder
+  ): AnalyticsEventData {
     return {
       name: AnalyticsEvent.FOLDER_SWITCH,
       properties: {
@@ -263,7 +319,10 @@ export class DefaultAnalyticsOperations implements AnalyticsOperations {
     // Validate properties
     if (eventData.properties) {
       for (const [key, value] of Object.entries(eventData.properties)) {
-        if (typeof value === 'string' && value.length > this.MAX_PROPERTY_LENGTH) {
+        if (
+          typeof value === 'string' &&
+          value.length > this.MAX_PROPERTY_LENGTH
+        ) {
           return false;
         }
       }
@@ -272,7 +331,9 @@ export class DefaultAnalyticsOperations implements AnalyticsOperations {
     return true;
   }
 
-  sanitizeEventProperties(properties: Record<string, any>): Record<string, any> {
+  sanitizeEventProperties(
+    properties: Record<string, any>
+  ): Record<string, any> {
     const sanitized: Record<string, any> = {};
 
     for (const [key, value] of Object.entries(properties)) {
@@ -282,7 +343,7 @@ export class DefaultAnalyticsOperations implements AnalyticsOperations {
 
       // Sanitize key
       const sanitizedKey = this.sanitizeString(key).substring(0, 40);
-      
+
       // Sanitize value based on type
       if (typeof value === 'string') {
         sanitized[sanitizedKey] = this.sanitizeString(value);
@@ -325,7 +386,10 @@ export class DefaultAnalyticsOperations implements AnalyticsOperations {
     return properties;
   }
 
-  mergeWithCommonProperties(properties: Record<string, any>, commonProperties: Record<string, any>): Record<string, any> {
+  mergeWithCommonProperties(
+    properties: Record<string, any>,
+    commonProperties: Record<string, any>
+  ): Record<string, any> {
     return {
       ...commonProperties,
       ...properties,
@@ -333,10 +397,17 @@ export class DefaultAnalyticsOperations implements AnalyticsOperations {
     };
   }
 
-  shouldTrackEvent(eventName: string, properties: Record<string, any>): boolean {
+  shouldTrackEvent(
+    eventName: string,
+    properties: Record<string, any>
+  ): boolean {
     // Don't track sensitive events
     const sensitiveEvents = ['debug', 'test', 'internal'];
-    if (sensitiveEvents.some(sensitive => eventName.toLowerCase().includes(sensitive))) {
+    if (
+      sensitiveEvents.some(sensitive =>
+        eventName.toLowerCase().includes(sensitive)
+      )
+    ) {
       return false;
     }
 
@@ -348,7 +419,10 @@ export class DefaultAnalyticsOperations implements AnalyticsOperations {
     return true;
   }
 
-  transformEventForProvider(eventData: AnalyticsEventData, provider: 'firebase' | 'amplitude' | 'mixpanel'): any {
+  transformEventForProvider(
+    eventData: AnalyticsEventData,
+    provider: 'firebase' | 'amplitude' | 'mixpanel'
+  ): any {
     switch (provider) {
       case 'firebase':
         return {
