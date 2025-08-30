@@ -3,7 +3,7 @@
  * These functions are for data modification operations (POST/PUT/DELETE)
  */
 
-import { webAppConfig } from '../../di/env.web';
+import { AppConfig } from "../../types";
 
 export interface UploadMessageParams {
   raw?: string;
@@ -55,7 +55,7 @@ export interface SearchApplyParams {
 }
 
 const getWildDuckBaseUrl = (): string => {
-  return webAppConfig.wildDuckBackendUrl;
+  return 'https://0xmail.box';
 };
 
 /**

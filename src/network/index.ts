@@ -1,12 +1,6 @@
 /**
- * Network layer - Platform-agnostic networking implementations
+ * Network layer - Types and interfaces only
  */
-
-// Web implementation
-export * from './network.web';
-
-// React Native implementation
-export * from './network.reactnative';
 
 // API clients
 export * from './clients';

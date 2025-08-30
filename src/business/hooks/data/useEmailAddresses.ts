@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { EmailAddress } from '../../../types/email';
 import { getENSNames } from '../../../utils/nameservice/ens';
 import { getSNSNames } from '../../../utils/nameservice/sns';
-import { detectAddressType } from '../../../utils/auth/blockchainAuth';
+import { detectAddressType } from '../../../utils/blockchain/addressDetection';
 import { ChainType } from '../../../business/core/enums';
 
 export interface UseEmailAddressesReturn {

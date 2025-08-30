@@ -1,13 +1,10 @@
 /**
- * Analytics utilities
+ * Analytics utilities - Types and interfaces only
  */
-
-// Web implementation
-export * from './analytics.web';
-
-// React Native implementation
-export * from './analytics.reactnative';
 
 // Note: AnalyticsEvent enum is exported from business/core/enums
 // AnalyticsClient interface is available from business logic
-// Avoid duplicate exports to prevent conflicts
+// Platform-specific implementations are in the main project
+
+// Empty export to make this a valid module
+export {};

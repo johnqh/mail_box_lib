@@ -1,12 +1,6 @@
 /**
- * Notification utilities
+ * Notification utilities - Types and interfaces only
  */
-
-// Web implementation
-export * from './notification.web';
-
-// React Native implementation
-export * from './notification.reactnative';
 
 // General notification utilities
 export * from './notification';

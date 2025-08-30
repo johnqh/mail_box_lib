@@ -3,7 +3,7 @@
  * These functions are for data modification operations (POST/DELETE)
  */
 
-import { webAppConfig } from '../../di/env.web';
+import { AppConfig } from "../../types";
 
 export interface PreAuthParams {
   username: string;
@@ -21,8 +21,8 @@ export interface AuthenticateParams {
   ip?: string;
 }
 
-const getWildDuckBaseUrl = (): string => {
-  return webAppConfig.wildDuckBackendUrl;
+const getWildDuckBaseUrl = (appConfig: AppConfig): string => {
+  return appConfig.wildDuckBackendUrl;
 };
 
 /**
@@ -33,7 +33,7 @@ export class WildDuckAuthHelper {
   /**
    * Pre-authentication check
    */
-  static async preAuth(params: PreAuthParams): Promise<{
+  static async preAuth(appConfig: AppConfig, params: PreAuthParams): Promise<{
     success: boolean;
     id: string;
     username: string;
@@ -43,7 +43,7 @@ export class WildDuckAuthHelper {
     message?: string;
     nonce?: string;
   }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/preauth`, {
+    const response = await fetch(`${getWildDuckBaseUrl(appConfig)}/preauth`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ export class WildDuckAuthHelper {
   /**
    * Authenticate with blockchain signature
    */
-  static async authenticate(params: AuthenticateParams): Promise<{
+  static async authenticate(appConfig: AppConfig, params: AuthenticateParams): Promise<{
     success: boolean;
     id: string;
     username: string;
@@ -74,7 +74,7 @@ export class WildDuckAuthHelper {
     require2fa: string[];
     requirePasswordChange: boolean;
   }> {
-    const response = await fetch(`${getWildDuckBaseUrl()}/authenticate`, {
+    const response = await fetch(`${getWildDuckBaseUrl(appConfig)}/authenticate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ export class WildDuckAuthHelper {
   /**
    * Invalidate authentication token (logout)
    */
-  static async logout(token?: string): Promise<{ success: boolean }> {
+  static async logout(appConfig: AppConfig, token?: string): Promise<{ success: boolean }> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -105,7 +105,7 @@ export class WildDuckAuthHelper {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${getWildDuckBaseUrl()}/authenticate`, {
+    const response = await fetch(`${getWildDuckBaseUrl(appConfig)}/authenticate`, {
       method: 'DELETE',
       headers,
     });

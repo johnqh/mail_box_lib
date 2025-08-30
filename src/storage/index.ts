@@ -1,12 +1,6 @@
 /**
- * Storage layer - Platform-agnostic storage implementations
+ * Storage layer - Types and interfaces only
  */
-
-// Web implementation
-export * from './storage.web';
-
-// React Native implementation
-export * from './storage.reactnative';
 
 // Re-export storage types from centralized types
 export type { StorageProvider } from '../types';

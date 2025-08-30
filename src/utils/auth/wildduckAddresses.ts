@@ -3,7 +3,7 @@
  * These functions are for data modification operations (POST/PUT/DELETE)
  */
 
-import { webAppConfig } from '../../di/env.web';
+import { AppConfig } from '../../types';
 
 export interface CreateAddressParams {
   address: string;
@@ -56,8 +56,8 @@ export interface UpdateForwardedAddressParams {
   tags?: string[];
 }
 
-const getWildDuckBaseUrl = (): string => {
-  return webAppConfig.wildDuckBackendUrl;
+const getWildDuckBaseUrl = (appConfig: AppConfig): string => {
+  return appConfig.wildDuckBackendUrl;
 };
 
 /**
@@ -69,11 +69,12 @@ export class WildDuckAddressHelper {
    * Create new address for user
    */
   static async createUserAddress(
+    appConfig: AppConfig,
     userId: string,
     params: CreateAddressParams
   ): Promise<{ success: boolean; id: string }> {
     const response = await fetch(
-      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/addresses`,
+      `${getWildDuckBaseUrl(appConfig)}/users/${encodeURIComponent(userId)}/addresses`,
       {
         method: 'POST',
         headers: {
@@ -97,13 +98,13 @@ export class WildDuckAddressHelper {
   /**
    * Update user address information
    */
-  static async updateUserAddress(
+  static async updateUserAddress(appConfig: AppConfig, 
     userId: string,
     addressId: string,
     params: UpdateAddressParams
   ): Promise<{ success: boolean }> {
     const response = await fetch(
-      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/addresses/${encodeURIComponent(addressId)}`,
+      `${getWildDuckBaseUrl(appConfig)}/users/${encodeURIComponent(userId)}/addresses/${encodeURIComponent(addressId)}`,
       {
         method: 'PUT',
         headers: {
@@ -127,12 +128,12 @@ export class WildDuckAddressHelper {
   /**
    * Delete user address
    */
-  static async deleteUserAddress(
+  static async deleteUserAddress(appConfig: AppConfig, 
     userId: string,
     address: string
   ): Promise<{ success: boolean }> {
     const response = await fetch(
-      `${getWildDuckBaseUrl()}/users/${encodeURIComponent(userId)}/addresses/${encodeURIComponent(address)}`,
+      `${getWildDuckBaseUrl(appConfig)}/users/${encodeURIComponent(userId)}/addresses/${encodeURIComponent(address)}`,
       {
         method: 'DELETE',
         headers: {
@@ -155,11 +156,11 @@ export class WildDuckAddressHelper {
   /**
    * Create new forwarded address
    */
-  static async createForwardedAddress(
+  static async createForwardedAddress(appConfig: AppConfig, 
     params: CreateForwardedAddressParams
   ): Promise<{ success: boolean; id: string }> {
     const response = await fetch(
-      `${getWildDuckBaseUrl()}/addresses/forwarded`,
+      `${getWildDuckBaseUrl(appConfig)}/addresses/forwarded`,
       {
         method: 'POST',
         headers: {
@@ -183,12 +184,12 @@ export class WildDuckAddressHelper {
   /**
    * Update forwarded address information
    */
-  static async updateForwardedAddress(
+  static async updateForwardedAddress(appConfig: AppConfig, 
     addressId: string,
     params: UpdateForwardedAddressParams
   ): Promise<{ success: boolean }> {
     const response = await fetch(
-      `${getWildDuckBaseUrl()}/addresses/forwarded/${encodeURIComponent(addressId)}`,
+      `${getWildDuckBaseUrl(appConfig)}/addresses/forwarded/${encodeURIComponent(addressId)}`,
       {
         method: 'PUT',
         headers: {
@@ -212,11 +213,11 @@ export class WildDuckAddressHelper {
   /**
    * Delete forwarded address
    */
-  static async deleteForwardedAddress(
+  static async deleteForwardedAddress(appConfig: AppConfig, 
     address: string
   ): Promise<{ success: boolean }> {
     const response = await fetch(
-      `${getWildDuckBaseUrl()}/addresses/forwarded/${encodeURIComponent(address)}`,
+      `${getWildDuckBaseUrl(appConfig)}/addresses/forwarded/${encodeURIComponent(address)}`,
       {
         method: 'DELETE',
         headers: {
@@ -239,12 +240,12 @@ export class WildDuckAddressHelper {
   /**
    * Rename domain in addresses
    */
-  static async renameDomain(
+  static async renameDomain(appConfig: AppConfig, 
     oldDomain: string,
     newDomain: string
   ): Promise<{ success: boolean; modified: number }> {
     const response = await fetch(
-      `${getWildDuckBaseUrl()}/addresses/renameDomain`,
+      `${getWildDuckBaseUrl(appConfig)}/addresses/renameDomain`,
       {
         method: 'PUT',
         headers: {
