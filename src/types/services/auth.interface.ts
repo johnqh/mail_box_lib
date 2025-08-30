@@ -3,10 +3,8 @@
  * This interface defines the contract for authentication operations that work across web and React Native
  */
 
-import { ChainType } from '../utils/addressDetection';
-import { EmailAddress } from '../types';
-
-export type AuthStatus = 'disconnected' | 'connected' | 'verified';
+import { ChainType, AuthStatus } from "../../business/core/enums";
+import { EmailAddress } from "../email";
 
 export interface WalletUserData {
   id: string;

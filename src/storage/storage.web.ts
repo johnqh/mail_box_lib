@@ -2,7 +2,7 @@
  * Web implementation of platform storage using localStorage
  */
 
-import { PlatformStorage, AdvancedPlatformStorage } from './../types/storage';
+import { PlatformStorage, AdvancedPlatformStorage } from "../types";
 
 /**
  * Basic web storage implementation using localStorage

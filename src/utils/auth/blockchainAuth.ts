@@ -3,7 +3,10 @@
  * Compatible with WildDuck's blockchain authentication system
  */
 
-import { ChainType } from './addressDetection';
+import { ChainType } from '../blockchain/addressDetection';
+
+// Re-export for convenience
+export { detectAddressType } from '../blockchain/addressDetection';
 
 export interface SigninMessage {
   domain: string;

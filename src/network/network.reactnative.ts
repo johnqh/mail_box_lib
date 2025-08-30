@@ -3,7 +3,7 @@
  * This shows how to implement the NetworkClient for React Native
  */
 
-import { NetworkClient, NetworkResponse, NetworkRequestOptions, NetworkError } from './../types/network';
+import { NetworkClient, NetworkResponse, NetworkRequestOptions, NetworkError } from "../types";
 
 /**
  * React Native network client implementation

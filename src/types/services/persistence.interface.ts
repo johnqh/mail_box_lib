@@ -3,7 +3,7 @@
  * Handles data persistence across different storage mechanisms
  */
 
-import { StorageType, RequestStatus } from '../business-logic/enums';
+import { StorageType, RequestStatus } from "../../business/core/enums";
 
 export interface PersistenceOptions {
   ttl?: number; // Time to live in milliseconds

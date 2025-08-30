@@ -8,3 +8,9 @@ export * from './useAsync';
 export * from './useAsyncOperation';
 export * from './useOptimizedState';
 export * from './useLocalStorage';
+
+// Data layer hooks
+export * from './data/useEmail';
+export * from './data/useEmails';
+export * from './data/useEmailAddresses';
+export * from './data/useMailBoxes';

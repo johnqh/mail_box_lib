@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { emailToUserId, WildDuckMailbox } from '../config/api';
-import { MailboxService, Mailbox as ServiceMailbox } from '../services/email.interface';
-import { webMailboxService } from '../services/email.web';
-import { mockMailboxService } from '../services/email.mock';
-import { useWildduckMailboxes } from '../hooks/useWildduckMailboxes';
+import { emailToUserId } from '../../../network/clients/wildduck';
+import { WildDuckMailbox } from '../../../types/api';
+import { MailboxService, Mailbox as ServiceMailbox } from "../../../types/services";
+// Services will be injected through options or dependency injection
 
 export interface MailBox {
   id: string;
@@ -26,6 +25,8 @@ interface UseMailBoxesReturn {
 
 interface UseMailBoxesOptions {
   mailboxService?: MailboxService;
+  mockMailboxService?: MailboxService;
+  getMailboxes?: (userId: string, options: any) => Promise<any[]>;
 }
 
 // Helper function to get icon for mailbox based on special use or name
@@ -78,11 +79,10 @@ export const useMailBoxes = (
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Use WildDuck hooks directly
-  const { getMailboxes, isLoading: wildduckLoading, error: wildduckError } = useWildduckMailboxes();
-
-  // Use provided mailbox service or default to web service with mock fallback
-  const mailboxService = options.mailboxService || webMailboxService;
+  // Use provided services (must be injected by caller)
+  const mailboxService = options.mailboxService;
+  const mockMailboxService = options.mockMailboxService;
+  const getMailboxes = options.getMailboxes;
 
   const fetchMailBoxes = useCallback(async (emailId: string) => {
     if (!emailId) {
@@ -111,7 +111,11 @@ export const useMailBoxes = (
         console.log('Derived user ID from email:', selectedEmail.email, '→', wildDuckUserId);
       }
       
-      // Use WildDuck hook directly
+      // Use WildDuck mailboxes function if provided
+      if (!getMailboxes) {
+        throw new Error('getMailboxes function not provided');
+      }
+      
       const wildDuckMailboxes = await getMailboxes(wildDuckUserId, {
         specialUse: true,
         counters: true,
@@ -135,7 +139,11 @@ export const useMailBoxes = (
       console.warn('WildDuck hook failed, falling back to service layer:', err);
       
       try {
-        // Fallback to service layer (which may use mock data)
+        // Fallback to mailbox service if provided
+        if (!mailboxService) {
+          throw new Error('Mailbox service not provided for fallback');
+        }
+        
         const wildDuckUserId = userId || emailToUserId(emailAddresses.find(addr => addr.id === emailId)?.email || '');
         const serviceMailboxes = await mailboxService.getMailboxes(wildDuckUserId);
         const convertedMailboxes = serviceMailboxes
@@ -155,6 +163,10 @@ export const useMailBoxes = (
         
         try {
           // Final fallback to mock service for development
+          if (!mockMailboxService) {
+            throw new Error('Mock mailbox service not provided');
+          }
+          
           const mockServiceMailboxes = await mockMailboxService.getMailboxes(emailId);
           const mockMailBoxes = mockServiceMailboxes
             .filter(mailbox => !mailbox.hidden)
@@ -177,7 +189,7 @@ export const useMailBoxes = (
     } finally {
       setLoading(false);
     }
-  }, [emailAddresses, getMailboxes, mailboxService, userId]);
+  }, [emailAddresses, getMailboxes, mailboxService, mockMailboxService, userId]);
 
   const refreshMailBoxes = useCallback(async () => {
     await fetchMailBoxes(emailAddressId);

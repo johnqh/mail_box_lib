@@ -2,7 +2,7 @@
  * Web implementation of network client using fetch API
  */
 
-import { NetworkClient, NetworkResponse, NetworkRequestOptions, NetworkError } from './../types/network';
+import { NetworkClient, NetworkResponse, NetworkRequestOptions, NetworkError } from "../types";
 
 /**
  * Web network client using the Fetch API

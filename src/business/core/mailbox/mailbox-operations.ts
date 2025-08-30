@@ -2,7 +2,7 @@
  * Platform-agnostic mailbox business logic operations
  */
 
-import { MailBox } from '../../middleware/useMailBoxes';
+import { MailBox } from '../../hooks/data/useMailBoxes';
 
 export interface MailboxOperations {
   /**

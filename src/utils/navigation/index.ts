@@ -11,5 +11,6 @@ export * from './navigation.reactnative';
 // General navigation utilities
 export * from './navigation';
 
-// Re-export navigation types from centralized types
-export type { NavigationService, NavigationHook, LocationHook, NavigationConfig } from '../../types/navigation';
+// Note: NavigationState interface is exported from business/core/navigation
+// Navigation service types are available from business logic
+// Avoid duplicate exports to prevent conflicts

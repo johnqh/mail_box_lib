@@ -2,21 +2,21 @@
  * Web implementation of analytics client using Firebase Analytics
  */
 
-import { AnalyticsClient, AnalyticsEvent } from './../../types/analytics';
+import { AnalyticsClient, AnalyticsEvent, AnalyticsEventData } from "../../types";
 
 /**
  * Web analytics client using Firebase Analytics
  * This implementation maintains current Firebase behavior
  */
 export class WebAnalyticsClient implements AnalyticsClient {
-  private firebaseTrackEvent: (event: AnalyticsEvent) => void;
+  private firebaseTrackEvent: (event: AnalyticsEvent | AnalyticsEventData) => void;
   private firebaseSetUserProperties: (properties: Record<string, any>) => void;
   private firebaseSetUserId: (userId: string | null) => void;
   private firebaseSetAnalyticsEnabled: (enabled: boolean) => void;
   private firebaseSetCurrentScreen: (screenName: string, screenClass?: string) => void;
 
   constructor(
-    firebaseTrackEvent: (event: AnalyticsEvent) => void,
+    firebaseTrackEvent: (event: AnalyticsEvent | AnalyticsEventData) => void,
     firebaseSetUserProperties: (properties: Record<string, any>) => void = () => {},
     firebaseSetUserId: (userId: string | null) => void = () => {},
     firebaseSetAnalyticsEnabled: (enabled: boolean) => void = () => {},
@@ -29,7 +29,7 @@ export class WebAnalyticsClient implements AnalyticsClient {
     this.firebaseSetCurrentScreen = firebaseSetCurrentScreen;
   }
 
-  trackEvent(event: AnalyticsEvent): void {
+  trackEvent(event: AnalyticsEvent | AnalyticsEventData): void {
     try {
       this.firebaseTrackEvent(event);
     } catch (error) {
@@ -74,7 +74,7 @@ export class WebAnalyticsClient implements AnalyticsClient {
  * Create web analytics client from Firebase context
  */
 export const createWebAnalyticsClient = (
-  trackEvent: (event: AnalyticsEvent) => void,
+  trackEvent: (event: AnalyticsEvent | AnalyticsEventData) => void,
   setUserProperties?: (properties: Record<string, any>) => void,
   setUserId?: (userId: string | null) => void,
   setAnalyticsEnabled?: (enabled: boolean) => void,

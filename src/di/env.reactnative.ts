@@ -2,7 +2,7 @@
  * React Native implementation of environment variable provider
  */
 
-import { EnvProvider, EnvironmentVariables, AppConfig } from '../types/environment';
+import { EnvProvider, EnvironmentVariables, AppConfig } from "../types";
 
 /**
  * React Native environment provider
@@ -65,6 +65,7 @@ export const createReactNativeAppConfig = (envProvider: EnvProvider): AppConfig 
   return {
     wildDuckApiToken: envProvider.get('VITE_WILDDUCK_API_TOKEN', ''),
     wildDuckBackendUrl: envProvider.get('VITE_WILDDUCK_BACKEND_URL', 'http://localhost:8080'),
+    indexerBackendUrl: envProvider.get('VITE_INDEXER_BACKEND_URL', 'https://indexer.0xmail.box'),
     revenueCatApiKey: envProvider.get('VITE_REVENUECAT_API_KEY', ''),
     walletConnectProjectId: envProvider.get('VITE_WALLETCONNECT_PROJECT_ID', '2f05ae7f5c7d8e3a6b8c4f3e8a7d9b1c'),
     privyAppId: envProvider.get('VITE_PRIVY_APP_ID', ''),

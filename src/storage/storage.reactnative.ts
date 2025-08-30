@@ -20,7 +20,7 @@
  * });
  */
 
-import { PlatformStorage } from './../types/storage';
+import { PlatformStorage } from "../types";
 
 // Mock AsyncStorage interface for documentation purposes
 interface AsyncStorageInterface {

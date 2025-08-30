@@ -3,8 +3,15 @@
  * This interface can be implemented for web (Firebase) or React Native (different analytics providers)
  */
 
-export interface AnalyticsEvent {
-  name: string;
+// AnalyticsEvent is now imported from business logic enums (enum takes precedence over interface)
+import { AnalyticsEvent } from '../business/core/enums';
+export { AnalyticsEvent };
+
+/**
+ * Analytics event data interface for passing event with parameters
+ */
+export interface AnalyticsEventData {
+  event: AnalyticsEvent;
   parameters?: Record<string, any>;
 }
 
@@ -15,9 +22,9 @@ export interface AnalyticsEvent {
 export interface AnalyticsClient {
   /**
    * Track an analytics event
-   * @param event Event data with name and parameters
+   * @param event Event enum value or event data with parameters
    */
-  trackEvent(event: AnalyticsEvent): void;
+  trackEvent(event: AnalyticsEvent | AnalyticsEventData): void;
 
   /**
    * Set user properties for analytics

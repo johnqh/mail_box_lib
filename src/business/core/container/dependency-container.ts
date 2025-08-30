@@ -3,8 +3,8 @@
  * Manages all services and their dependencies
  */
 
-import { EmailService, MailboxService, EmailAddressService } from '../../services/email.interface';
-import { AuthService, AuthStorageService, AuthEmailAddressService, AuthManager } from '../../services/auth.interface';
+import { EmailService, MailboxService, EmailAddressService } from "../../../types/services";
+import { AuthService, AuthStorageService, AuthEmailAddressService, AuthManager } from "../../../types/services";
 import { EmailOperations, DefaultEmailOperations } from '../email/email-operations';
 import { MailboxOperations, DefaultMailboxOperations } from '../mailbox/mailbox-operations';
 import { NavigationOperations, DefaultNavigationOperations } from '../navigation/navigation-state';
@@ -51,7 +51,7 @@ export interface PlatformNetwork {
 }
 
 // Configuration interface
-export interface AppConfig {
+export interface ServiceContainerConfig {
   apiBaseUrl: string;
   apiToken?: string;
   revenueCatApiKey?: string;
@@ -69,7 +69,7 @@ export class ServiceContainer {
   private services = new Map<string, any>();
   private singletons = new Map<string, any>();
 
-  constructor(private config: AppConfig) {}
+  constructor(private config: ServiceContainerConfig) {}
 
   // Register a service factory
   register<T>(key: string, factory: (container: ServiceContainer) => T, singleton: boolean = true): void {
@@ -105,7 +105,7 @@ export class ServiceContainer {
   }
 
   // Get configuration
-  getConfig(): AppConfig {
+  getConfig(): ServiceContainerConfig {
     return { ...this.config };
   }
 
@@ -154,7 +154,7 @@ export const ServiceKeys = {
 /**
  * Factory function to create a pre-configured service container
  */
-export function createServiceContainer(config: AppConfig): ServiceContainer {
+export function createServiceContainer(config: ServiceContainerConfig): ServiceContainer {
   const container = new ServiceContainer(config);
 
   // Register business logic services (platform-agnostic)
@@ -247,7 +247,7 @@ export class ServiceResolver {
   }
 
   // Configuration
-  getConfig(): AppConfig {
+  getConfig(): ServiceContainerConfig {
     return this.container.getConfig();
   }
 }

@@ -3,7 +3,7 @@
  * Automatically selects the appropriate notification implementation based on platform
  */
 
-import { NotificationService, NotificationConfig } from './../../types/notification';
+import { NotificationService, NotificationConfig } from "../../types";
 
 let notificationService: NotificationService;
 
@@ -159,4 +159,4 @@ export type {
   NotificationPermissionResult,
   NotificationCapabilities,
   NotificationConfig
-} from './../../types/notification';
+} from "../../types";

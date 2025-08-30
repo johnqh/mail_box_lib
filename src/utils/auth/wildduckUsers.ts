@@ -3,7 +3,7 @@
  * These functions are for data modification operations (POST/PUT/DELETE)
  */
 
-import { webAppConfig } from './env.web';
+import { webAppConfig } from '../../di/env.web';
 
 export interface CreateUserParams {
   username: string;

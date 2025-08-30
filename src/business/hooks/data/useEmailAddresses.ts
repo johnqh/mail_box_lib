@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
-import { EmailAddress } from '../types';
-import { getENSNames } from '../utils/ens';
-import { getSNSNames } from '../utils/sns';
-import { ChainType, detectAddressType } from '../utils/addressDetection';
+import { EmailAddress } from "../../../types/email";
+import { getENSNames } from '../../../utils/nameservice/ens';
+import { getSNSNames } from '../../../utils/nameservice/sns';
+import { detectAddressType } from '../../../utils/auth/blockchainAuth';
+import { ChainType } from '../../../business/core/enums';
 
 export interface UseEmailAddressesReturn {
   emailAddresses: EmailAddress[];
@@ -126,7 +127,7 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
     // Prepare parallel fetching of name services
     const fetchPromises: Promise<EmailAddress[]>[] = [];
     
-    if (chainType === 'solana') {
+    if (chainType === ChainType.SOLANA) {
       // For Solana, fetch SNS names
       fetchPromises.push(
         createSNSEmailAddresses(walletAddress, idCounter).catch(error => {
@@ -134,7 +135,7 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
           return []; // Return empty array on error to continue processing
         })
       );
-    } else if (chainType === 'evm') {
+    } else if (chainType === ChainType.EVM) {
       // For EVM, fetch ENS addresses
       fetchPromises.push(
         createENSEmailAddresses(walletAddress, idCounter).catch(error => {

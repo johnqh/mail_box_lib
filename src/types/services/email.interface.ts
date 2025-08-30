@@ -3,7 +3,8 @@
  * This interface defines the contract for email operations that work across web and React Native
  */
 
-import { Email } from '../types';
+import { Email, EmailAddress } from "../email";
+export { EmailAddress };
 
 export interface EmailListOptions {
   limit?: number;
@@ -116,11 +117,7 @@ export interface Mailbox {
   unseen?: number;
 }
 
-export interface EmailAddress {
-  id: string;
-  address: string;
-  main: boolean;
-}
+// EmailAddress is now imported at the top to consolidate definitions
 
 /**
  * Mock data provider interface for development/testing

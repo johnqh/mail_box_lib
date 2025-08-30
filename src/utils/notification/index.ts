@@ -12,4 +12,4 @@ export * from './notification.reactnative';
 export * from './notification';
 
 // Re-export notification types from centralized types
-export type { NotificationClient, NotificationContextProvider } from '../../types/notification';
+export type { NotificationClient, NotificationContextProvider } from "../../types";

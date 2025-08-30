@@ -2,7 +2,7 @@
  * Platform-agnostic analytics service interface
  */
 
-import { AnalyticsEvent, ChainType, WalletType, LoginMethod } from '../business-logic/enums';
+import { AnalyticsEvent, ChainType, WalletType, LoginMethod } from "../../business/core/enums";
 
 export interface AnalyticsEventProperties {
   [key: string]: string | number | boolean | undefined;

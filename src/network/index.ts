@@ -12,5 +12,5 @@ export * from './network.reactnative';
 export * from './clients';
 
 // Re-export network types from centralized types
-export type { NetworkClient, NetworkResponse, NetworkRequestOptions } from '../types/network';
-export { NetworkError } from '../types/network';
+export type { NetworkClient, NetworkResponse, NetworkRequestOptions } from "../types";
+export { NetworkError } from "../types";

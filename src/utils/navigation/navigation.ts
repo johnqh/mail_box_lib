@@ -9,7 +9,7 @@ import {
   LocationHook,
   NavigationConfig,
   NavigationOptions
-} from './../../types/navigation';
+} from "../../types";
 
 let navigationService: NavigationService;
 
@@ -222,12 +222,6 @@ export const navigationHelper = {
   }
 };
 
-// Re-export types for convenience
-export type {
-  NavigationService,
-  NavigationHook,
-  LocationHook,
-  NavigationConfig,
-  NavigationOptions,
-  NavigationState
-} from './../../types/navigation';
+// Note: NavigationState interface is available from business/core/navigation
+// Other navigation types are available from the main library exports
+// Avoid duplicate exports to prevent conflicts

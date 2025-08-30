@@ -3,7 +3,7 @@
  * Contains all email-related business rules and operations that can be used across web and React Native
  */
 
-import { Email } from '../../types';
+import { Email } from "../../../types/email";
 
 // Extended Email interface for business logic
 interface ExtendedEmail extends Email {

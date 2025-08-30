@@ -10,7 +10,7 @@ import {
   Web3Entity, 
   AIProcessingOptions 
 } from './ai-types';
-import { Email } from '../../types';
+import { Email } from "../../types/email";
 
 export interface AIEmailService {
   categorizeEmail(email: Email, options?: AIProcessingOptions): Promise<EmailCategory>;

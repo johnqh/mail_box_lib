@@ -4,7 +4,7 @@
  */
 
 import { TransactionAnalysis, Web3Entity } from './ai-types';
-import { ChainType } from '../../utils/addressDetection';
+import { ChainType } from "../../utils/blockchain";
 
 export interface AIWeb3Service {
   analyzeTransaction(txHash: string, chainType: ChainType): Promise<TransactionAnalysis>;

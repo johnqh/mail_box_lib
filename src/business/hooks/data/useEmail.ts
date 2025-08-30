@@ -1,10 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Email } from '../types';
-import { EmailService } from '../services/email.interface';
-import { webEmailService } from '../services/email.web';
-import { mockEmailService } from '../services/email.mock';
-import { useWildduckMessages } from '../hooks/useWildduckMessages';
-import { WildDuckMessageResponse } from '../config/api';
+import { Email } from "../../../types/email";
+import { EmailService } from "../../../types/services";
+// Services will be injected through options or dependency injection
+import { WildDuckMessageResponse, WildDuckMessageDetail } from '../../../types/api';
 
 interface UseEmailReturn {
   email: Email | null;
@@ -15,10 +13,17 @@ interface UseEmailReturn {
 
 interface UseEmailOptions {
   emailService?: EmailService;
+  mockEmailService?: EmailService;
+  getMessage?: (userId: string, messageId: string) => Promise<any>;
 }
 
 // Convert WildDuck full message to our Email interface
-const convertFullWildDuckMessage = (wildDuckMessage: WildDuckMessageResponse): Email => {
+const convertFullWildDuckMessage = (response: WildDuckMessageResponse): Email => {
+  if (!response.success || !response.data) {
+    throw new Error(response.error || 'Failed to get message data');
+  }
+  
+  const wildDuckMessage = response.data;
   return {
     id: wildDuckMessage.id,
     from: wildDuckMessage.from?.address || 'unknown@0xmail.box',
@@ -42,11 +47,10 @@ export const useEmail = (
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Use WildDuck hooks directly
-  const { getMessage, isLoading: wildduckLoading, error: wildduckError } = useWildduckMessages();
-
-  // Use provided email service or default to web service with mock fallback
-  const emailService = options.emailService || webEmailService;
+  // Use provided services (must be injected by caller)
+  const emailService = options.emailService;
+  const mockEmailService = options.mockEmailService;
+  const getMessage = options.getMessage;
 
   const fetchEmail = useCallback(async (id: string | null) => {
     if (!id) {
@@ -61,21 +65,24 @@ export const useEmail = (
     try {
       console.log('Fetching email with ID:', id);
       
-      if (userId) {
-        // Use WildDuck hook directly
+      if (userId && getMessage) {
+        // Use WildDuck getMessage function if provided
         const wildDuckMessage = await getMessage(userId, id);
         const convertedEmail = convertFullWildDuckMessage(wildDuckMessage);
         setEmail(convertedEmail);
-        console.log('Successfully fetched full email from WildDuck hook');
+        console.log('Successfully fetched full email from WildDuck');
         setError(null);
       } else {
-        throw new Error('No user ID provided for email fetch');
+        throw new Error('No user ID or getMessage function provided');
       }
     } catch (err) {
       console.warn('WildDuck hook failed, falling back to service layer:', err);
       
       try {
-        // Fallback to service layer (which may use mock data)
+        // Fallback to email service if provided
+        if (!emailService) {
+          throw new Error('Email service not provided for fallback');
+        }
         const fallbackEmail = await emailService.getEmail(userId || 'user', id);
         setEmail(fallbackEmail);
         setError(null);
@@ -85,6 +92,9 @@ export const useEmail = (
         
         try {
           // Final fallback to mock service for development
+          if (!mockEmailService) {
+            throw new Error('Mock email service not provided');
+          }
           const mockEmail = await mockEmailService.getEmail(userId || 'user', id);
           setEmail(mockEmail);
           setError(null);
@@ -98,7 +108,7 @@ export const useEmail = (
     } finally {
       setLoading(false);
     }
-  }, [userId, getMessage, emailService]);
+  }, [userId, getMessage, emailService, mockEmailService]);
 
   const refreshEmail = useCallback(async () => {
     await fetchEmail(emailId);

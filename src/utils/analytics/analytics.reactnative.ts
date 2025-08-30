@@ -3,7 +3,7 @@
  * This shows how to implement the AnalyticsClient for React Native
  */
 
-import { AnalyticsClient, AnalyticsEvent } from './../../types/analytics';
+import { AnalyticsClient, AnalyticsEvent, AnalyticsEventData } from "../../types";
 
 /**
  * React Native analytics client implementation
@@ -18,19 +18,32 @@ export class ReactNativeAnalyticsClient implements AnalyticsClient {
     console.log('React Native Analytics Client initialized');
   }
 
-  trackEvent(event: AnalyticsEvent): void {
+  trackEvent(event: AnalyticsEvent | AnalyticsEventData): void {
     if (!this.enabled) return;
 
     try {
+      let eventName: string;
+      let parameters: Record<string, any> | undefined;
+
+      if (typeof event === 'string') {
+        // It's an AnalyticsEvent enum value
+        eventName = event;
+        parameters = undefined;
+      } else {
+        // It's an AnalyticsEventData object
+        eventName = event.event;
+        parameters = event.parameters;
+      }
+
       // In React Native, you would use something like:
       // import analytics from '@react-native-firebase/analytics';
-      // analytics().logEvent(event.name, event.parameters);
+      // analytics().logEvent(eventName, parameters);
       
       // Or for other providers like Mixpanel:
       // import { Mixpanel } from 'mixpanel-react-native';
-      // Mixpanel.track(event.name, event.parameters);
+      // Mixpanel.track(eventName, parameters);
 
-      console.log('RN Analytics Event:', event.name, event.parameters);
+      console.log('RN Analytics Event:', eventName, parameters);
     } catch (error) {
       console.warn('React Native analytics tracking failed:', error);
     }

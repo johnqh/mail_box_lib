@@ -1,6 +1,6 @@
 import { isAddress as isEvmAddress } from 'viem';
 import { PublicKey } from '@solana/web3.js';
-import { ChainType } from '../business-logic/enums';
+import { ChainType } from "../../business/core/enums";
 
 // Re-export ChainType for backward compatibility
 export { ChainType };

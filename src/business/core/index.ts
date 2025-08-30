@@ -6,17 +6,29 @@
  * dependencies and focus purely on business rules and data transformations.
  */
 
+// Core enums and types
+export * from './enums';
+
+// Analytics operations
+export * from './analytics';
+
 // Email operations
 export * from './email/email-operations';
 
 // Mailbox operations
 export * from './mailbox/mailbox-operations';
 
+// Folder operations
+export * from './folder/folder-operations';
+
 // Navigation and UI state
 export * from './navigation/navigation-state';
 
 // Authentication business logic
 export * from './auth/auth-business-logic';
+
+// Dependency injection container
+export * from './container';
 
 /**
  * Factory function to create all business logic operations with default implementations
@@ -58,7 +70,7 @@ export function createBusinessLogicServicesSync() {
  *   DefaultEmailOperations, 
  *   DefaultMailboxOperations,
  *   NavigationStateManager
- * } from './business-logic';
+ * } from '@0xmail/lib';
  * 
  * const emailOps = new DefaultEmailOperations();
  * const mailboxOps = new DefaultMailboxOperations();

@@ -3,9 +3,14 @@
  * Handles user authentication and session management for WildDuck API
  */
 
-import { wildDuckAPI } from '../config/api';
 import { formatSignatureForWildDuck } from './blockchainAuth';
-import { ChainType } from './addressDetection';
+import { ChainType } from '../../business/core/enums';
+
+// Type definition for WildDuck API client interface
+export interface WildDuckAPIClient {
+  authenticate(username: string, signature: string, nonce: string, scope?: string): Promise<any>;
+  authenticateWithPassword(username: string, password: string, scope?: string): Promise<any>;
+}
 
 // Storage key utility functions
 export const getWildDuckStorageKeys = (username: string) => {
@@ -99,6 +104,7 @@ const getCachedAuthData = (username: string): WildDuckAuthResult | null => {
  */
 export const getWildDuckUserId = async (
   username: string,
+  wildDuckAPI: WildDuckAPIClient,
   options?: {
     forceReauth?: boolean;
     signMessage?: (message: string) => Promise<string>;
@@ -182,7 +188,8 @@ export const getWildDuckUserId = async (
  */
 export const authenticateWithPassword = async (
   username: string,
-  password: string
+  password: string,
+  wildDuckAPI: WildDuckAPIClient
 ): Promise<WildDuckAuthResult> => {
   try {
     const authResponse = await wildDuckAPI.authenticateWithPassword(

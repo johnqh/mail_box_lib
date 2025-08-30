@@ -4,7 +4,7 @@
  */
 
 import { SearchResult } from './ai-types';
-import { Email } from '../../types';
+import { Email } from "../../types/email";
 
 export interface AISearchService {
   semanticSearch(query: string, emails: Email[]): Promise<SearchResult[]>;

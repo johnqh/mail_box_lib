@@ -3,7 +3,7 @@
  * Automatically selects the appropriate environment provider based on platform
  */
 
-import { EnvProvider, AppConfig } from '../types/environment';
+import { EnvProvider, AppConfig } from "../types";
 
 let envProvider: EnvProvider;
 let appConfig: AppConfig;
@@ -59,4 +59,4 @@ export const env = {
 };
 
 // Re-export types for convenience
-export type { EnvProvider, AppConfig, EnvironmentVariables } from '../types/environment';
+export type { EnvProvider, AppConfig, EnvironmentVariables } from "../types";

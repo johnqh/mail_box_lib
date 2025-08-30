@@ -2,8 +2,7 @@
  * Platform-agnostic navigation and UI state business logic
  */
 
-export type MobileView = 'emailAddresses' | 'folders' | 'emails' | 'emailBody';
-export type MediumView = 'left' | 'right';
+import { MobileView, MediumView } from '../enums';
 
 export interface NavigationState {
   // Mobile navigation
@@ -76,13 +75,13 @@ export class DefaultNavigationOperations implements NavigationOperations {
     selectedFolder?: { name: string };
   }): string {
     switch (view) {
-      case 'emailAddresses':
+      case MobileView.EMAIL_ADDRESSES:
         return 'Email Addresses';
-      case 'folders':
+      case MobileView.FOLDERS:
         return 'Mailboxes';
-      case 'emails':
+      case MobileView.EMAILS:
         return context.selectedFolder?.name || 'Emails';
-      case 'emailBody':
+      case MobileView.EMAIL_BODY:
         return context.selectedEmail?.subject || 'Email';
       default:
         return 'Mail';
@@ -91,33 +90,33 @@ export class DefaultNavigationOperations implements NavigationOperations {
 
   handleMobileBack(currentView: MobileView): MobileView {
     switch (currentView) {
-      case 'emailBody':
-        return 'emails';
-      case 'emails':
-        return 'folders';
-      case 'folders':
-        return 'emailAddresses';
-      case 'emailAddresses':
+      case MobileView.EMAIL_BODY:
+        return MobileView.EMAILS;
+      case MobileView.EMAILS:
+        return MobileView.FOLDERS;
+      case MobileView.FOLDERS:
+        return MobileView.EMAIL_ADDRESSES;
+      case MobileView.EMAIL_ADDRESSES:
       default:
-        return 'emailAddresses';
+        return MobileView.EMAIL_ADDRESSES;
     }
   }
 
   getNextMobileView(currentView: MobileView, action: 'selectAddress' | 'selectFolder' | 'selectEmail'): MobileView {
     switch (action) {
       case 'selectAddress':
-        return 'folders';
+        return MobileView.FOLDERS;
       case 'selectFolder':
-        return 'emails';
+        return MobileView.EMAILS;
       case 'selectEmail':
-        return 'emailBody';
+        return MobileView.EMAIL_BODY;
       default:
         return currentView;
     }
   }
 
   shouldShowMobileBackButton(view: MobileView): boolean {
-    return view !== 'emailAddresses';
+    return view !== MobileView.EMAIL_ADDRESSES;
   }
 
   getBreadcrumb(state: NavigationState, context: {
@@ -126,7 +125,7 @@ export class DefaultNavigationOperations implements NavigationOperations {
     selectedEmail?: { subject: string };
   }): Array<{ label: string; view: MobileView; id?: string }> {
     const breadcrumb = [
-      { label: 'Addresses', view: 'emailAddresses' as MobileView }
+      { label: 'Addresses', view: MobileView.EMAIL_ADDRESSES }
     ];
 
     if (state.selectedEmailAddressId) {
@@ -134,7 +133,7 @@ export class DefaultNavigationOperations implements NavigationOperations {
       if (emailAddress) {
         breadcrumb.push({
           label: 'Folders',
-          view: 'folders' as MobileView
+          view: MobileView.FOLDERS
         });
       }
     }
@@ -144,7 +143,7 @@ export class DefaultNavigationOperations implements NavigationOperations {
       if (folder) {
         breadcrumb.push({
           label: folder.name,
-          view: 'emails' as MobileView
+          view: MobileView.EMAILS
         });
       }
     }
@@ -152,7 +151,7 @@ export class DefaultNavigationOperations implements NavigationOperations {
     if (state.selectedEmailId && context.selectedEmail) {
       breadcrumb.push({
         label: context.selectedEmail.subject,
-        view: 'emailBody' as MobileView
+        view: MobileView.EMAIL_BODY
       });
     }
 
@@ -166,10 +165,10 @@ export class DefaultNavigationOperations implements NavigationOperations {
     showEmailViewer: boolean;
   } {
     return {
-      showEmailAddresses: view === 'emailAddresses',
-      showFolders: view === 'folders',
-      showEmails: view === 'emails',
-      showEmailViewer: view === 'emailBody'
+      showEmailAddresses: view === MobileView.EMAIL_ADDRESSES,
+      showFolders: view === MobileView.FOLDERS,
+      showEmails: view === MobileView.EMAILS,
+      showEmailViewer: view === MobileView.EMAIL_BODY
     };
   }
 }
@@ -187,8 +186,8 @@ export class NavigationStateManager {
   ) {
     this.operations = operations;
     this.state = {
-      mobileView: 'emailAddresses',
-      mediumView: 'left',
+      mobileView: MobileView.EMAIL_ADDRESSES,
+      mediumView: MediumView.LEFT,
       selectedEmailId: null,
       selectedFolderId: null,
       selectedEmailAddressId: null,
@@ -230,7 +229,7 @@ export class NavigationStateManager {
     this.updateState({
       selectedEmailId: emailId,
       mobileView: this.operations.getNextMobileView(this.state.mobileView, 'selectEmail'),
-      mediumView: 'right'
+      mediumView: MediumView.RIGHT
     });
   }
 
@@ -240,12 +239,12 @@ export class NavigationStateManager {
     const updates: Partial<NavigationState> = { mobileView: newView };
     
     // Clear selections based on navigation
-    if (newView === 'emails') {
+    if (newView === MobileView.EMAILS) {
       updates.selectedEmailId = null;
-    } else if (newView === 'folders') {
+    } else if (newView === MobileView.FOLDERS) {
       updates.selectedEmailId = null;
       updates.selectedFolderId = null;
-    } else if (newView === 'emailAddresses') {
+    } else if (newView === MobileView.EMAIL_ADDRESSES) {
       updates.selectedEmailId = null;
       updates.selectedFolderId = null;
       updates.selectedEmailAddressId = null;
@@ -257,7 +256,7 @@ export class NavigationStateManager {
   goMediumBack(): void {
     this.updateState({
       selectedEmailId: null,
-      mediumView: 'left'
+      mediumView: MediumView.LEFT
     });
   }
 

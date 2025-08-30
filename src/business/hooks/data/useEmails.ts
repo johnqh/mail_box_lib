@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Email } from '../types';
-import { emailToUserId, WildDuckMessage, WildDuckMessageResponse } from '../config/api';
-import { EmailService, EmailListOptions } from '../services/email.interface';
-import { webEmailService } from '../services/email.web';
-import { mockEmailService } from '../services/email.mock';
-import { useWildduckMessages } from '../hooks/useWildduckMessages';
+import { Email } from "../../../types/email";
+import { emailToUserId } from '../../../network/clients/wildduck';
+import { WildDuckMessage, WildDuckMessageResponse } from '../../../types/api';
+import { EmailService, EmailListOptions } from "../../../types/services";
+// Services will be injected through options or dependency injection
 
 interface UseEmailsReturn {
   emails: Email[];
@@ -16,6 +15,8 @@ interface UseEmailsReturn {
 
 interface UseEmailsOptions {
   emailService?: EmailService;
+  mockEmailService?: EmailService;
+  getMessages?: (userId: string, boxId: string, options: any) => Promise<any[]>;
   limit?: number;
   page?: number;
   order?: 'asc' | 'desc';
@@ -47,11 +48,10 @@ export const useEmails = (
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Use WildDuck hooks directly
-  const { getMessages, isLoading: wildduckLoading, error: wildduckError } = useWildduckMessages();
-  
-  // Use provided email service or default to web service with mock fallback
-  const emailService = options.emailService || webEmailService;
+  // Use provided services (must be injected by caller)
+  const emailService = options.emailService;
+  const mockEmailService = options.mockEmailService;
+  const getMessages = options.getMessages;
 
   const fetchEmails = useCallback(async (emailId: string, boxId: string) => {
     if (!emailId || !boxId) {
@@ -72,7 +72,11 @@ export const useEmails = (
       const userId = emailToUserId(selectedEmail.email);
       console.log(`Fetching emails for user: ${userId}, mailbox: ${boxId}`);
       
-      // Use WildDuck hook directly
+      // Use WildDuck messages function if provided
+      if (!getMessages) {
+        throw new Error('getMessages function not provided');
+      }
+      
       const fetchOptions = {
         limit: options.limit || 50,
         page: options.page || 1,
@@ -88,7 +92,11 @@ export const useEmails = (
       console.warn('WildDuck hook failed, falling back to service layer:', err);
       
       try {
-        // Fallback to service layer (which may use mock data)
+        // Fallback to email service if provided
+        if (!emailService) {
+          throw new Error('Email service not provided for fallback');
+        }
+        
         const fetchOptions: EmailListOptions = {
           limit: options.limit || 50,
           page: options.page || 1,
@@ -103,6 +111,10 @@ export const useEmails = (
         
         try {
           // Final fallback to mock service for development
+          if (!mockEmailService) {
+            throw new Error('Mock email service not provided');
+          }
+          
           const mockEmails = await mockEmailService.getEmails(emailId, boxId, {
             limit: options.limit || 50,
             page: options.page || 1,
@@ -120,7 +132,7 @@ export const useEmails = (
     } finally {
       setLoading(false);
     }
-  }, [emailAddresses, getMessages, emailService, options.limit, options.page, options.order]);
+  }, [emailAddresses, getMessages, emailService, mockEmailService, options.limit, options.page, options.order]);
 
   const refreshEmails = useCallback(async () => {
     await fetchEmails(emailAddressId, mailBoxId);

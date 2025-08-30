@@ -2,9 +2,8 @@
  * Platform-agnostic authentication business logic
  */
 
-import { ChainType } from '../../utils/addressDetection';
-import { EmailAddress } from '../../types';
-import { AuthStatus } from '../../services/auth.interface';
+import { ChainType, AuthStatus } from "../enums";
+import { EmailAddress } from "../../../types/email";
 
 // Extended EmailAddress interface for business logic
 interface ExtendedEmailAddress extends EmailAddress {
@@ -77,11 +76,11 @@ export class DefaultAuthBusinessLogic implements AuthBusinessLogic {
     }
 
     switch (chainType) {
-      case 'evm':
+      case ChainType.EVM:
         // EVM address validation (0x followed by 40 hex characters)
         return /^0x[a-fA-F0-9]{40}$/.test(address);
       
-      case 'solana':
+      case ChainType.SOLANA:
         // Solana address validation (base58 encoded, 32-44 characters)
         return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
       
@@ -101,11 +100,11 @@ export class DefaultAuthBusinessLogic implements AuthBusinessLogic {
 
   getAuthStatusText(status: AuthStatus): string {
     switch (status) {
-      case 'disconnected':
+      case AuthStatus.DISCONNECTED:
         return 'Not connected';
-      case 'connected':
+      case AuthStatus.CONNECTED:
         return 'Connected - Please verify';
-      case 'verified':
+      case AuthStatus.VERIFIED:
         return 'Authenticated';
       default:
         return 'Unknown status';
@@ -113,7 +112,7 @@ export class DefaultAuthBusinessLogic implements AuthBusinessLogic {
   }
 
   canAccessProtectedFeatures(status: AuthStatus): boolean {
-    return status === 'verified';
+    return status === AuthStatus.VERIFIED;
   }
 
   generateUserDisplayName(walletAddress: string, emailAddresses: EmailAddress[]): string {
@@ -137,11 +136,11 @@ export class DefaultAuthBusinessLogic implements AuthBusinessLogic {
     }
 
     switch (chainType) {
-      case 'evm':
+      case ChainType.EVM:
         // Ethereum signature validation (0x followed by 130 hex characters)
         return /^0x[a-fA-F0-9]{130}$/.test(signature);
       
-      case 'solana':
+      case ChainType.SOLANA:
         // Solana signature validation (base58 encoded, typically 87-88 characters)
         return /^[1-9A-HJ-NP-Za-km-z]{87,88}$/.test(signature);
       
@@ -159,11 +158,11 @@ export class DefaultAuthBusinessLogic implements AuthBusinessLogic {
 
   getChainDisplayName(chainType: ChainType): string {
     switch (chainType) {
-      case 'evm':
+      case ChainType.EVM:
         return 'EVM Chain';
-      case 'solana':
+      case ChainType.SOLANA:
         return 'Solana';
-      case 'unknown':
+      case ChainType.UNKNOWN:
         return 'Unknown Chain';
       default:
         return 'Blockchain';
@@ -223,7 +222,7 @@ export class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLog
     ];
 
     // Add ENS support for EVM chains
-    if (chainType === 'evm') {
+    if (chainType === ChainType.EVM) {
       addresses.push({
         id: `ens_${walletAddress}`,
         name: 'ENS Domain',
@@ -234,7 +233,7 @@ export class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLog
     }
 
     // Add SNS support for Solana
-    if (chainType === 'solana') {
+    if (chainType === ChainType.SOLANA) {
       addresses.push({
         id: `sns_${walletAddress}`,
         name: 'SNS Domain',

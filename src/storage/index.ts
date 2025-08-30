@@ -9,4 +9,4 @@ export * from './storage.web';
 export * from './storage.reactnative';
 
 // Re-export storage types from centralized types
-export type { StorageProvider } from '../types/storage';
+export type { StorageProvider } from "../types";

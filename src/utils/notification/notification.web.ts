@@ -9,7 +9,7 @@ import {
   NotificationPermissionResult,
   NotificationCapabilities,
   NotificationConfig
-} from './../../types/notification';
+} from "../../types";
 
 const DEFAULT_CONFIG: NotificationConfig = {
   enableAutoClose: true,
