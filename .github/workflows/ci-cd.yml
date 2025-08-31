@@ -1,0 +1,139 @@
+name: CI/CD - Test and Release
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+        types: [closed]
+
+env:
+    NPM_MODULE_NAME: "@johnqh/lib"
+
+jobs:
+    test:
+        name: Run Tests
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                node: [18.x, 20.x]
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Use Node.js ${{ matrix.node }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ matrix.node }}
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run type checking
+              run: npm run typecheck
+
+            - name: Run linting
+              run: npm run lint
+
+            - name: Run tests
+              run: npm test
+
+            - name: Build project
+              run: npm run build
+
+    check_for_release:
+        runs-on: ubuntu-latest
+        outputs:
+            should_release: ${{ steps.check.outputs.should_release }}
+            version: ${{ steps.check.outputs.version }}
+            version_tag: ${{ steps.check.outputs.version_tag }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Check if should trigger release
+              id: check
+              run: |
+                  # Skip only if explicitly marked with [skip ci] or [skip-ci]
+                  COMMIT_MSG=$(git log -1 --pretty=%s)
+                  echo "Commit message: $COMMIT_MSG"
+                  
+                  # Skip release only for PR events that weren't merged
+                  if [[ "${{ github.event_name }}" == "pull_request" ]] && [[ "${{ github.event.action }}" != "closed" || "${{ github.event.pull_request.merged }}" != "true" ]]; then
+                    echo "should_release=false" >> $GITHUB_OUTPUT
+                    echo "PR not merged, skipping release"
+                    exit 0
+                  fi
+                  
+                  # Skip only if explicitly marked to skip CI
+                  if [[ "$COMMIT_MSG" == *"[skip ci]"* ]] || [[ "$COMMIT_MSG" == *"[skip-ci]"* ]]; then
+                    echo "should_release=false" >> $GITHUB_OUTPUT
+                    echo "Commit marked to skip CI: $COMMIT_MSG"
+                  else
+                    echo "should_release=true" >> $GITHUB_OUTPUT
+                    
+                    # Get current version from package.json
+                    CURRENT_VERSION=$(node -p "require('./package.json').version")
+                    
+                    echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+                    echo "version_tag=v$CURRENT_VERSION" >> $GITHUB_OUTPUT
+                    echo "Will release version: $CURRENT_VERSION for commit: $COMMIT_MSG"
+                  fi
+
+    release_npm:
+        needs: [test, check_for_release]
+        if: ${{ needs.check_for_release.outputs.should_release == 'true' }}
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            id-token: write
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 18
+                  registry-url: 'https://registry.npmjs.org'
+
+            - name: Verify package version
+              run: |
+                  echo "Using version: ${{ needs.check_for_release.outputs.version }}"
+                  echo "Package.json version: $(node -p "require('./package.json').version")"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Build project
+              run: npm run build
+
+            - name: Create GitHub Release
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: ${{ needs.check_for_release.outputs.version_tag }}
+                  name: Release ${{ needs.check_for_release.outputs.version }}
+                  generate_release_notes: true
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Publish to NPM
+              run: npm publish --access public
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+            - name: Notify deployment success
+              if: success()
+              run: |
+                  echo "🚀 Release ${{ needs.check_for_release.outputs.version }} deployed successfully!"
+                  echo "• NPM: https://www.npmjs.com/package/@johnqh/lib/v/${{ needs.check_for_release.outputs.version }}"
+                  echo "• GitHub: https://github.com/${{ github.repository }}/releases/tag/${{ needs.check_for_release.outputs.version_tag }}"
+
+            - name: Notify deployment failure  
+              if: failure()
+              run: |
+                  echo "❌ Release deployment FAILED for commit ${{ github.sha }}"
+                  echo "Check: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
