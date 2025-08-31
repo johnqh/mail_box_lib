@@ -15,14 +15,15 @@ function createNotificationService(
 ): NotificationService {
   // Platform detection - web vs React Native
   if (typeof window !== 'undefined' && 'Notification' in window) {
-    // Web environment with Notification API
+    // Web environment with Notification API - dynamic import for platform-specific code
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { createWebNotificationService } = require('./notification.web');
     return createWebNotificationService(config);
   } else {
-    // React Native environment
+    // React Native environment - dynamic import for platform-specific code
     const {
       createReactNativeNotificationService,
-    } = require('./notification.reactnative');
+    } = require('./notification.reactnative'); // eslint-disable-line @typescript-eslint/no-require-imports
     return createReactNativeNotificationService(config);
   }
 }

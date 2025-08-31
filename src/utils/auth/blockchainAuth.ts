@@ -141,7 +141,8 @@ export const formatSignatureForWildDuck = (
           `Invalid Solana signature length: expected 64, got ${signature.length}`
         );
       }
-      // Convert Uint8Array to base58 (not base64)
+      // Convert Uint8Array to base58 (not base64) - dynamic import for crypto library
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const bs58 = require('bs58');
       return bs58.encode(signature);
     }
@@ -265,7 +266,8 @@ const isSolanaAddress = (address: string): boolean => {
     if (!base58Regex.test(address)) {
       return false;
     }
-    // Basic length validation for base58 decoded
+    // Basic length validation for base58 decoded - dynamic import for crypto library
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const bs58 = require('bs58');
     const decoded = bs58.decode(address);
     return decoded.length === 32;

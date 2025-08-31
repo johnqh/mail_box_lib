@@ -21,14 +21,15 @@ function createNavigationService(
 ): NavigationService {
   // Platform detection - web vs React Native
   if (typeof window !== 'undefined') {
-    // Web environment
+    // Web environment - dynamic import for platform-specific code
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { createWebNavigationService } = require('./navigation.web');
     return createWebNavigationService(config);
   } else {
-    // React Native environment
+    // React Native environment - dynamic import for platform-specific code
     const {
       createReactNativeNavigationService,
-    } = require('./navigation.reactnative');
+    } = require('./navigation.reactnative'); // eslint-disable-line @typescript-eslint/no-require-imports
     return createReactNativeNavigationService(config);
   }
 }

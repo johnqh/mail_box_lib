@@ -14,18 +14,19 @@ let appConfig: AppConfig;
 function createEnvProvider(): EnvProvider {
   // Platform detection - web vs React Native
   if (typeof window !== 'undefined') {
-    // Web environment
+    // Web environment - dynamic import for platform-specific code
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { WebEnvProvider, createWebAppConfig } = require('./env.web');
     const provider = new WebEnvProvider();
     appConfig = createWebAppConfig(provider);
     return provider;
   } else {
-    // React Native environment
+    // React Native environment - dynamic import for platform-specific code
     // For now, fall back to web logger, but React Native apps should use env.reactnative.ts directly
     const {
       ReactNativeEnvProvider,
       createReactNativeAppConfig,
-    } = require('./env.reactnative');
+    } = require('./env.reactnative'); // eslint-disable-line @typescript-eslint/no-require-imports
     const provider = new ReactNativeEnvProvider();
     appConfig = createReactNativeAppConfig(provider);
     return provider;
