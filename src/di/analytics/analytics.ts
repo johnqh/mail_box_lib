@@ -4,7 +4,7 @@
  */
 
 // AnalyticsEvent is now imported from business logic enums (enum takes precedence over interface)
-import { AnalyticsEvent } from '../business/core/enums';
+import { AnalyticsEvent } from '../../business/core/enums';
 export { AnalyticsEvent };
 
 /**

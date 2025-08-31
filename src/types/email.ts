@@ -43,7 +43,7 @@ import {
 } from '../business/core/enums';
 
 // WalletUserData is now imported from auth.interface.ts (more comprehensive definition)
-import type { WalletUserData } from './services/auth.interface';
+import type { WalletUserData } from '../di/auth/auth.interface';
 export type { WalletUserData };
 
 // Re-export types from enums for backward compatibility

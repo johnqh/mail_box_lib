@@ -5,6 +5,49 @@
 // Business Logic - Core business operations and enums (Goal 4)
 export * from './business';
 
+// Dependency Injection - Interfaces only (Goal 2) - Selective exports to avoid conflicts
+export type {
+  // Environment types
+  EnvProvider,
+  AppConfig,
+  EnvironmentVariables,
+  // Auth types
+  AuthService,
+  AuthStorageService,
+  AuthEmailAddressService,
+  AuthManager,
+  WalletUserData,
+  // Analytics types
+  AnalyticsService,
+  AnalyticsClient,
+  AnalyticsContextProvider,
+  AnalyticsEventData,
+  AnalyticsConfig,
+  AnalyticsEventProperties,
+  // Navigation types
+  NavigationService,
+  NavigationOptions,
+  NavigationConfig,
+  NavigationHook,
+  LocationHook,
+  NavigationState,
+  // Notification types
+  NotificationService,
+  NotificationOptions,
+  NotificationResult,
+  NotificationPermissionResult,
+  NotificationCapabilities,
+  NotificationConfig,
+  NotificationClient,
+  NotificationContextProvider,
+  // Storage types
+  PlatformStorage,
+  AdvancedPlatformStorage,
+  StorageProvider,
+  StorageService,
+  SerializedStorageService,
+} from './di';
+
 // Infrastructure - Separated networking and storage logic (Goal 3)
 export * from './network';
 export * from './storage';
@@ -19,7 +62,6 @@ export {
   EmailAddress,
   Folder,
   User,
-  WalletUserData,
   Theme,
   FontSize,
   // API types
@@ -91,35 +133,15 @@ export {
   ApiClientConfig,
   // UI types
   DocSection,
-  // Service interface types
-  AuthManager,
-  AuthService,
-  AuthStorageService,
-  AuthEmailAddressService,
+  // Service interface types (email and persistence only)
   EmailService,
   MailboxService,
   EmailAddressService,
   EmailListOptions,
   Mailbox,
   MockDataProvider,
-  StorageService,
-  SerializedStorageService,
-  AnalyticsService,
-  AnalyticsClient,
-  AnalyticsContextProvider,
-  AnalyticsEventData,
-  AnalyticsConfig,
-  AnalyticsEventProperties,
   PersistenceService,
   PersistenceOptions,
   PersistenceResult,
   StorageInfo,
-  // Environment types
-  AppConfig,
-  EnvironmentVariables,
-  EnvProvider,
-  // Storage types
-  PlatformStorage,
-  AdvancedPlatformStorage,
-  StorageProvider,
 } from './types';

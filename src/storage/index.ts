@@ -3,4 +3,4 @@
  */
 
 // Re-export storage types from centralized types
-export type { StorageProvider } from '../types';
+export type { StorageProvider } from '../di/storage/storage';

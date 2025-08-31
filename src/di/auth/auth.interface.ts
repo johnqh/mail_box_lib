@@ -4,7 +4,7 @@
  */
 
 import { AuthStatus, ChainType } from '../../business/core/enums';
-import { EmailAddress } from '../email';
+import { EmailAddress } from '../../types/email';
 
 export interface WalletUserData {
   id: string;

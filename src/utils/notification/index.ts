@@ -9,4 +9,4 @@ export * from './notification';
 export type {
   NotificationClient,
   NotificationContextProvider,
-} from '../../types';
+} from '../../di';
