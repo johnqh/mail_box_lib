@@ -9,18 +9,15 @@ declare const sessionStorage: Storage;
 // Determine API base URL based on Cloudflare worker configuration
 const getApiBaseUrl = (config: AppConfig): string => {
   if (config.useCloudflareWorker && config.cloudflareWorkerUrl) {
-    console.log('🌐 Using Cloudflare Worker proxy for WildDuck API');
     return config.cloudflareWorkerUrl;
   }
 
   // Use configured WildDuck backend URL (from environment variable) or fallback to 0xmail.box
   const backendUrl = config.wildDuckBackendUrl;
   if (backendUrl && backendUrl !== 'http://localhost:8080') {
-    console.log('🔗 Using configured WildDuck backend URL:', backendUrl);
     return backendUrl;
   }
 
-  console.log('🔗 Using default WildDuck API connection');
   return 'https://0xmail.box';
 };
 
@@ -115,22 +112,8 @@ class WildDuckAPI {
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
 
-    console.log(`🔗 API Request: ${options.method || 'GET'} ${url}`);
-
-    if (this.useCloudflare) {
-      console.log(`🌐 Using Cloudflare Worker proxy`);
-    }
-
-    // Log if API token is present
-    if (this.headers['X-Access-Token']) {
-      console.log(
-        '🔑 API Token present (length:',
-        this.headers['X-Access-Token'].length,
-        ')'
-      );
-    } else if (this.headers['Authorization']) {
-      console.log('🔑 Authorization header present');
-    } else {
+    // Warn if no API authentication headers found
+    if (!this.headers['X-Access-Token'] && !this.headers['Authorization']) {
       console.warn('⚠️ No API authentication headers found!');
     }
 
@@ -149,7 +132,6 @@ class WildDuckAPI {
           : options.body) as string | FormData | Blob | undefined,
       });
 
-      console.log('✅ API Response received:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ API Request failed:', error);
@@ -184,7 +166,6 @@ class WildDuckAPI {
       },
     });
 
-    console.log('🔍 WildDuck pre-auth response:', response);
     return response;
   }
 
@@ -224,20 +205,11 @@ class WildDuckAPI {
       },
     });
 
-    // Log the authentication response to see what WildDuck returns
-    console.log('🔐 WildDuck authentication response:', response);
-
     // Store the user ID in session storage if authentication is successful
     if (response.success && response.id) {
       try {
         const keys = getWildDuckStorageKeys(username);
         sessionStorage.setItem(keys.userId, response.id);
-        console.log(
-          '✅ Stored WildDuck user ID:',
-          response.id,
-          'for username:',
-          username
-        );
       } catch (e) {
         console.warn('Failed to store user ID in session storage:', e);
       }
@@ -290,20 +262,11 @@ class WildDuckAPI {
       },
     });
 
-    // Log the authentication response to see what WildDuck returns
-    console.log('🔐 WildDuck password auth response:', response);
-
     // Store the user ID in session storage if authentication is successful
     if (response.success && response.id) {
       try {
         const keys = getWildDuckStorageKeys(username);
         sessionStorage.setItem(keys.userId, response.id);
-        console.log(
-          '✅ Stored WildDuck user ID:',
-          response.id,
-          'for username:',
-          username
-        );
       } catch (e) {
         console.warn('Failed to store user ID in session storage:', e);
       }
@@ -321,8 +284,6 @@ class WildDuckAPI {
   }> {
     // Validate user ID format
     const validatedUserId = validateUserId(userId);
-
-    console.log('👤 Fetching user info for user ID:', validatedUserId);
 
     return this.request<{
       success: boolean;
@@ -354,8 +315,6 @@ class WildDuckAPI {
 
     const query = queryParams.toString();
     const endpoint = `${API_CONFIG.ENDPOINTS.MAILBOXES(validatedUserId)}${query ? `?${query}` : ''}`;
-
-    console.log('📧 Fetching mailboxes for user ID:', validatedUserId);
 
     return this.request<WildDuckMailboxResponse>(endpoint);
   }
@@ -389,13 +348,6 @@ class WildDuckAPI {
     const query = queryParams.toString();
     const endpoint = `${API_CONFIG.ENDPOINTS.MESSAGES(validatedUserId, mailboxId)}${query ? `?${query}` : ''}`;
 
-    console.log(
-      '📨 Fetching messages for user ID:',
-      validatedUserId,
-      'mailbox ID:',
-      mailboxId
-    );
-
     return this.request<WildDuckMessagesResponse>(endpoint);
   }
 
@@ -419,13 +371,6 @@ class WildDuckAPI {
       messageId
     );
 
-    console.log(
-      '📩 Fetching message for user ID:',
-      validatedUserId,
-      'message ID:',
-      messageId
-    );
-
     return this.request<WildDuckMessageResponse>(endpoint);
   }
 
@@ -438,8 +383,6 @@ class WildDuckAPI {
     const validatedUserId = validateUserId(userId);
 
     const endpoint = API_CONFIG.ENDPOINTS.ADDRESSES(validatedUserId);
-
-    console.log('📧 Fetching addresses for user ID:', validatedUserId);
 
     return this.request<{
       success: boolean;
@@ -732,13 +675,6 @@ export const emailToUserId = (emailAddress: string): string => {
     username = username.split('@')[0]; // Extract just the address part
   }
 
-  console.log(
-    '🔍 Looking for user ID for email:',
-    emailAddress,
-    '→ username:',
-    username
-  );
-
   try {
     const keys = getWildDuckStorageKeys(username);
 
@@ -751,22 +687,12 @@ export const emailToUserId = (emailAddress: string): string => {
 
     for (const { key, type } of storageKeys) {
       const stored = sessionStorage.getItem(key);
-      console.log(
-        `🔍 Checking ${type} key "${key}":`,
-        stored ? `found (${stored.substring(0, 10)}...)` : 'not found'
-      );
       if (stored) {
         // Check if it's a cached auth object
         if (type === 'cache') {
           try {
             const parsed = JSON.parse(stored);
             if (parsed.userId && isValidObjectId(parsed.userId)) {
-              console.log(
-                '📋 Retrieved cached WildDuck user ID:',
-                parsed.userId,
-                'for:',
-                username
-              );
               return parsed.userId;
             }
           } catch {
@@ -774,12 +700,6 @@ export const emailToUserId = (emailAddress: string): string => {
           }
         } else if (isValidObjectId(stored)) {
           // Valid MongoDB ObjectId format
-          console.log(
-            '📋 Retrieved stored WildDuck user ID:',
-            stored,
-            'for:',
-            username
-          );
           return stored;
         } else {
           console.warn(

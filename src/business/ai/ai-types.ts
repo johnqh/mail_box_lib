@@ -3,6 +3,8 @@
  * Defines the contract for AI services and data structures
  */
 
+import { Email } from '../../types/email';
+
 export interface EmailCategory {
   primary:
     | 'priority'
@@ -91,7 +93,7 @@ export interface SmartReply {
 }
 
 export interface SearchResult {
-  email: any; // Email type from main types
+  email: Email;
   relevance: number;
   matchedFields: string[];
   summary: string;

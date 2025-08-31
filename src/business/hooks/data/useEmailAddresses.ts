@@ -59,7 +59,6 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
             isActive: true,
           });
         });
-
       } catch (error) {
         console.error('Error fetching SNS names:', error);
         // Don't throw - just return empty array to keep other addresses
@@ -81,8 +80,6 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
       try {
         const ensNames = await getENSNames(walletAddress);
 
-
-
         ensNames.forEach((ensName, index) => {
           const emailAddress = {
             id: `ens_${startId + index}`,
@@ -94,7 +91,6 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
 
           ensEmailAddresses.push(emailAddress);
         });
-
       } catch (error) {
         console.error('❌ Error fetching ENS names:', error);
         // Don't throw - just return empty array to keep other addresses
@@ -177,10 +173,8 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
 
           // Call progress callback with enhanced addresses
           progressCallback?.(allEmailAddresses);
-        } catch (error) {
-        }
+        } catch (error) {}
       }
-
 
       return allEmailAddresses;
     },

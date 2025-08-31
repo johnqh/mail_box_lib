@@ -85,7 +85,6 @@ export class PointsService {
 
     // Update local cache
     this.updateUserPointsCache(walletAddress, pointsAction);
-
   }
 
   // Get points value for different actions
@@ -241,7 +240,6 @@ export class PointsService {
       referralCode,
       points: 50, // Bonus points for successful referral
     });
-
   }
 
   // Generate claimable points (admin function - would be done by backend)

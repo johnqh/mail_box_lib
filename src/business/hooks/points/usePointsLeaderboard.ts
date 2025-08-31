@@ -184,7 +184,6 @@ export function usePointsLeaderboard(
           loading: false,
         }));
       } catch (error) {
-
         try {
           // Fallback to legacy points API
           const response = await pointsApiService.getLeaderboard(
@@ -233,7 +232,6 @@ export function usePointsLeaderboard(
         campaignsLoading: false,
       }));
     } catch (error) {
-
       try {
         // Fallback to legacy points API
         const response = await pointsApiService.getActiveCampaigns();
@@ -325,7 +323,6 @@ export function useTopUsers(
       );
       setTotalUsers(indexerResponse.pagination.totalUsers);
     } catch (err) {
-
       try {
         // Fallback to legacy points API
         const response = await pointsApiService.getLeaderboard(1, count);

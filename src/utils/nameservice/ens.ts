@@ -42,7 +42,6 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
     // Check cache first
     const cached = ensCache.get(address);
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      console.log('Returning cached ENS names for:', address);
       return cached.names;
     }
 
@@ -59,12 +58,6 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
           name: primaryName,
           address,
         });
-        console.log(
-          'Found primary ENS name:',
-          primaryName,
-          'for address:',
-          address
-        );
       }
     } catch (ensError) {
       console.warn('Primary ENS lookup failed:', ensError);
@@ -85,12 +78,6 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
 
         if (!alreadyExists) {
           ensNames.push(domain);
-          console.log(
-            'Found domain from ENS subgraph:',
-            domain.name,
-            'for address:',
-            address
-          );
         }
       });
     } catch (subgraphError) {
@@ -100,8 +87,6 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
     // Method 4: Try to check for .box domains on both mainnet and Optimism
     // .box domains are deployed on Optimism but also resolvable on mainnet
     try {
-      console.log('🔍 Checking for .box domains...');
-
       // Try known .box domains for this specific wallet address
       // For wallet 0x03280150272c3B45071bEbD4A937d250D151Db46
       const knownBoxDomains: Record<string, string[]> = {
@@ -110,7 +95,6 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
 
       if (knownBoxDomains[address]) {
         for (const boxName of knownBoxDomains[address]) {
-          console.log(`🔍 Checking known .box domain: ${boxName}`);
           try {
             const resolvedAddress = await publicClient.getEnsAddress({
               name: boxName,
@@ -124,10 +108,9 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
                 name: boxName,
                 address,
               });
-              console.log(`✅ Found known .box domain: ${boxName}`);
             }
           } catch {
-            console.log(`❌ Failed to resolve known .box domain: ${boxName}`);
+            // Silently ignore resolution failures for known domains
           }
         }
       }
@@ -139,9 +122,6 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
         const potentialBoxName = `${baseName}.box`;
 
         // Try mainnet first
-        console.log(
-          `🔍 Checking if ${potentialBoxName} resolves on mainnet...`
-        );
         try {
           const resolvedAddress = await publicClient.getEnsAddress({
             name: potentialBoxName,
@@ -155,20 +135,9 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
               name: potentialBoxName,
               address,
             });
-            console.log(
-              `✅ Found .box domain via mainnet: ${potentialBoxName}`
-            );
-          } else {
-            console.log(
-              `❌ ${potentialBoxName} on mainnet resolves to: ${resolvedAddress}`
-            );
           }
         } catch {
-          console.log(
-            `⚠️ ${potentialBoxName} not found on mainnet, trying Optimism...`
-          );
-
-          // Try Optimism
+          // Try Optimism if mainnet fails
           try {
             const resolvedAddress = await optimismClient.getEnsAddress({
               name: potentialBoxName,
@@ -182,24 +151,14 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
                 name: potentialBoxName,
                 address,
               });
-              console.log(
-                `✅ Found .box domain via Optimism: ${potentialBoxName}`
-              );
-            } else {
-              console.log(
-                `❌ ${potentialBoxName} on Optimism resolves to: ${resolvedAddress}`
-              );
             }
           } catch {
-            console.log(`❌ ${potentialBoxName} not found on Optimism either`);
+            // Silently ignore if not found on Optimism either
           }
         }
       }
 
       // Also try reverse resolution on Optimism for .box domains
-      console.log(
-        `🔍 Trying reverse resolution on Optimism for address: ${address}`
-      );
       try {
         const optimismName = await optimismClient.getEnsName({
           address: address as `0x${string}`,
@@ -216,13 +175,10 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
               name: optimismName,
               address,
             });
-            console.log(
-              `✅ Found .box domain via Optimism reverse resolution: ${optimismName}`
-            );
           }
         }
-      } catch (reverseError) {
-        console.log('⚠️ Optimism reverse resolution failed:', reverseError);
+      } catch {
+        // Silently ignore Optimism reverse resolution failures
       }
     } catch (boxError) {
       console.warn('Direct .box domain check failed:', boxError);
@@ -231,14 +187,12 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
     // Cache the result
     ensCache.set(address, { names: ensNames, timestamp: Date.now() });
 
-    console.log(`Total ENS names found for ${address}:`, ensNames.length);
     return ensNames;
   } catch (error) {
     console.error('Error fetching ENS names:', error);
     // Return cached value if available, even if expired
     const cached = ensCache.get(address);
     if (cached) {
-      console.log('Returning stale cached ENS names due to error');
       return cached.names;
     }
     return [];
@@ -250,8 +204,6 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
  */
 async function queryENSSubgraph(address: string): Promise<ENSName[]> {
   try {
-    console.log('🔍 Querying ENS subgraph for all domains owned by:', address);
-
     const subgraphUrl =
       'https://api.thegraph.com/subgraphs/name/ensdomains/ens';
     const query = `
@@ -291,27 +243,6 @@ async function queryENSSubgraph(address: string): Promise<ENSName[]> {
     }
 
     const data = await response.json();
-    console.log('🔍 ENS subgraph raw response:', JSON.stringify(data, null, 2));
-
-    // Log what we received
-    if (data.data?.domains) {
-      console.log(
-        `📊 Received ${data.data.domains.length} domains from subgraph`
-      );
-      data.data.domains.forEach((d: any, i: number) => {
-        console.log(`  Domain ${i}: ${d.name} (parent: ${d.parent?.name})`);
-      });
-    }
-    if (data.data?.registrations) {
-      console.log(
-        `📊 Received ${data.data.registrations.length} registrations from subgraph`
-      );
-      data.data.registrations.forEach((r: any, i: number) => {
-        console.log(
-          `  Registration ${i}: ${r.domain?.name} (parent: ${r.domain?.parent?.name})`
-        );
-      });
-    }
 
     const domains: ENSName[] = [];
     const seen = new Set<string>();
@@ -327,12 +258,6 @@ async function queryENSSubgraph(address: string): Promise<ENSName[]> {
         ) {
           domains.push({ name: domain.name, address });
           seen.add(domain.name);
-          const tld = domain.name.split('.').pop();
-          console.log(
-            `✅ Found ${tld} domain from subgraph domains: ${domain.name}`
-          );
-        } else if (domain.name && domain.name.endsWith('.addr.reverse')) {
-          console.log(`⚠️ Filtering out reverse record: ${domain.name}`);
         }
       });
     }
@@ -348,24 +273,10 @@ async function queryENSSubgraph(address: string): Promise<ENSName[]> {
         ) {
           domains.push({ name: reg.domain.name, address });
           seen.add(reg.domain.name);
-          const tld = reg.domain.name.split('.').pop();
-          console.log(
-            `✅ Found ${tld} domain from subgraph registrations: ${reg.domain.name}`
-          );
-        } else if (
-          reg.domain?.name &&
-          reg.domain.name.endsWith('.addr.reverse')
-        ) {
-          console.log(
-            `⚠️ Filtering out reverse record from registrations: ${reg.domain.name}`
-          );
         }
       });
     }
 
-    console.log(
-      `📊 Total unique domains found in ENS subgraph: ${domains.length}`
-    );
     return domains;
   } catch (error) {
     console.error('ENS subgraph query failed:', error);
