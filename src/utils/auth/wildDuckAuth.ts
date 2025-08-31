@@ -7,7 +7,7 @@ import { formatSignatureForWildDuck } from './blockchainAuth';
 import { ChainType } from '../../business/core/enums';
 
 // Platform-specific globals
-declare const fetch: typeof globalThis.fetch;
+declare const _fetch: typeof globalThis.fetch;
 declare const sessionStorage: Storage;
 
 // Type definition for WildDuck API client interface

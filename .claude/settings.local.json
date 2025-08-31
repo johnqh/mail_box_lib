@@ -28,7 +28,10 @@
       "Bash(sed:*)",
       "Bash(npx eslint:*)",
       "Bash(find:*)",
-      "Read(/dev/**)"
+      "Read(/dev/**)",
+      "Bash(npm ci:*)",
+      "Bash(gh repo view:*)",
+      "Bash(echo \"Exit code: $?\")"
     ],
     "deny": [],
     "ask": []

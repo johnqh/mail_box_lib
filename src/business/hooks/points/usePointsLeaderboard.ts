@@ -183,7 +183,7 @@ export function usePointsLeaderboard(
           },
           loading: false,
         }));
-      } catch (error) {
+      } catch {
         try {
           // Fallback to legacy points API
           const response = await pointsApiService.getLeaderboard(
@@ -205,14 +205,11 @@ export function usePointsLeaderboard(
             },
             loading: false,
           }));
-        } catch (fallbackError) {
+        } catch {
           setState(prev => ({
             ...prev,
             loading: false,
-            error:
-              fallbackError instanceof Error
-                ? fallbackError.message
-                : 'Failed to fetch leaderboard',
+            error: 'Failed to fetch leaderboard',
           }));
         }
       }
@@ -231,7 +228,7 @@ export function usePointsLeaderboard(
         campaigns: indexerCampaigns.map(convertIndexerCampaign),
         campaignsLoading: false,
       }));
-    } catch (error) {
+    } catch {
       try {
         // Fallback to legacy points API
         const response = await pointsApiService.getActiveCampaigns();
@@ -240,7 +237,7 @@ export function usePointsLeaderboard(
           campaigns: response.data.campaigns,
           campaignsLoading: false,
         }));
-      } catch (fallbackError) {
+      } catch {
         setState(prev => ({
           ...prev,
           campaignsLoading: false,
@@ -322,7 +319,7 @@ export function useTopUsers(
         indexerResponse.leaderboard.map(convertIndexerLeaderboardEntry)
       );
       setTotalUsers(indexerResponse.pagination.totalUsers);
-    } catch (err) {
+    } catch {
       try {
         // Fallback to legacy points API
         const response = await pointsApiService.getLeaderboard(1, count);

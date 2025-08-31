@@ -223,21 +223,21 @@ export class PointsService {
   }
 
   // Track referral click
-  public async trackReferralClick(referralCode: string): Promise<void> {
+  public async trackReferralClick(_referralCode: string): Promise<void> {
     // In real implementation, this would be sent to backend
   }
 
   // Process referral conversion (when referred user connects wallet)
   public async processReferralConversion(
-    referralCode: string,
-    newUserWallet: string
+    _referralCode: string,
+    _newUserWallet: string
   ): Promise<void> {
     // Extract referrer wallet from referral code
-    const referrerWallet = referralCode.split('_')[0];
+    const referrerWallet = _referralCode.split('_')[0];
 
     // Award points to referrer
     await this.awardPoints(referrerWallet, 'referral', {
-      referralCode,
+      referralCode: _referralCode,
       points: 50, // Bonus points for successful referral
     });
   }

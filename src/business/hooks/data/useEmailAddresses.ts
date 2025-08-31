@@ -149,11 +149,11 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
       } else if (chainType === ChainType.UNKNOWN) {
         // For unknown chain type, try both ENS and SNS in parallel to auto-detect
         fetchPromises.push(
-          createENSEmailAddresses(walletAddress, idCounter).catch(error => {
+          createENSEmailAddresses(walletAddress, idCounter).catch(_error => {
             return [];
           }),
           createSNSEmailAddresses(walletAddress, idCounter + 100).catch(
-            error => {
+            _error => {
               return [];
             }
           )
@@ -173,7 +173,9 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
 
           // Call progress callback with enhanced addresses
           progressCallback?.(allEmailAddresses);
-        } catch (error) {}
+        } catch {
+          // Ignore errors in progress callback
+        }
       }
 
       return allEmailAddresses;
