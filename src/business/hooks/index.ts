@@ -18,5 +18,5 @@ export * from './data/useMailBoxes';
 // Indexer hooks
 export * from './indexer/useIndexerPoints';
 
-// Points hooks  
+// Points hooks
 export * from './points/usePointsLeaderboard';

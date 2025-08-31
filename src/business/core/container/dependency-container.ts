@@ -32,10 +32,7 @@ import {
   DefaultEmailAddressBusinessLogic,
   EmailAddressBusinessLogic,
 } from '../auth/auth-business-logic';
-import {
-  DefaultFolderOperations,
-  FolderOperations,
-} from '../folder/folder-operations';
+import { DefaultFolderOperations } from '../folder/folder-operations';
 import { PlatformType } from '../enums';
 
 // Storage interface for platform abstraction

@@ -3,7 +3,10 @@
  * These functions are for data modification operations (POST/DELETE)
  */
 
-import { AppConfig } from "../../types";
+import { AppConfig } from '../../types';
+
+// Platform-specific global
+declare const fetch: typeof globalThis.fetch; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface PreAuthParams {
   username: string;
@@ -33,7 +36,10 @@ export class WildDuckAuthHelper {
   /**
    * Pre-authentication check
    */
-  static async preAuth(appConfig: AppConfig, params: PreAuthParams): Promise<{
+  static async preAuth(
+    appConfig: AppConfig,
+    params: PreAuthParams
+  ): Promise<{
     success: boolean;
     id: string;
     username: string;
@@ -65,7 +71,10 @@ export class WildDuckAuthHelper {
   /**
    * Authenticate with blockchain signature
    */
-  static async authenticate(appConfig: AppConfig, params: AuthenticateParams): Promise<{
+  static async authenticate(
+    appConfig: AppConfig,
+    params: AuthenticateParams
+  ): Promise<{
     success: boolean;
     id: string;
     username: string;
@@ -74,13 +83,16 @@ export class WildDuckAuthHelper {
     require2fa: string[];
     requirePasswordChange: boolean;
   }> {
-    const response = await fetch(`${getWildDuckBaseUrl(appConfig)}/authenticate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl(appConfig)}/authenticate`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -96,7 +108,10 @@ export class WildDuckAuthHelper {
   /**
    * Invalidate authentication token (logout)
    */
-  static async logout(appConfig: AppConfig, token?: string): Promise<{ success: boolean }> {
+  static async logout(
+    appConfig: AppConfig,
+    token?: string
+  ): Promise<{ success: boolean }> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -105,10 +120,13 @@ export class WildDuckAuthHelper {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${getWildDuckBaseUrl(appConfig)}/authenticate`, {
-      method: 'DELETE',
-      headers,
-    });
+    const response = await fetch(
+      `${getWildDuckBaseUrl(appConfig)}/authenticate`,
+      {
+        method: 'DELETE',
+        headers,
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();

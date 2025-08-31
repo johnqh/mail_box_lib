@@ -33,6 +33,15 @@ export * from './auth/auth-business-logic';
 // Dependency injection container
 export * from './container';
 
+// Direct imports for sync function
+import { DefaultEmailOperations } from './email/email-operations';
+import { DefaultMailboxOperations } from './mailbox/mailbox-operations';
+import { DefaultNavigationOperations } from './navigation/navigation-state';
+import {
+  DefaultAuthBusinessLogic,
+  DefaultEmailAddressBusinessLogic,
+} from './auth/auth-business-logic';
+
 /**
  * Factory function to create all business logic operations with default implementations
  */
@@ -60,16 +69,6 @@ export async function createBusinessLogicServices() {
  * Sync version of factory function for immediate use
  */
 export function createBusinessLogicServicesSync() {
-  const { DefaultEmailOperations } = require('./email/email-operations');
-  const { DefaultMailboxOperations } = require('./mailbox/mailbox-operations');
-  const {
-    DefaultNavigationOperations,
-  } = require('./navigation/navigation-state');
-  const {
-    DefaultAuthBusinessLogic,
-    DefaultEmailAddressBusinessLogic,
-  } = require('./auth/auth-business-logic');
-
   return {
     emailOps: new DefaultEmailOperations(),
     mailboxOps: new DefaultMailboxOperations(),

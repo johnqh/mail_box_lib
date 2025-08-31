@@ -1,6 +1,9 @@
 import { createPublicClient, http } from 'viem';
 import { mainnet, optimism } from 'viem/chains';
 
+// Platform-specific global
+declare const fetch: typeof globalThis.fetch;
+
 // Create a more reliable public client with optimized settings for faster lookups
 const publicClient = createPublicClient({
   chain: mainnet,
@@ -123,7 +126,7 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
               });
               console.log(`✅ Found known .box domain: ${boxName}`);
             }
-          } catch (err) {
+          } catch {
             console.log(`❌ Failed to resolve known .box domain: ${boxName}`);
           }
         }
@@ -160,7 +163,7 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
               `❌ ${potentialBoxName} on mainnet resolves to: ${resolvedAddress}`
             );
           }
-        } catch (mainnetError) {
+        } catch {
           console.log(
             `⚠️ ${potentialBoxName} not found on mainnet, trying Optimism...`
           );
@@ -187,7 +190,7 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
                 `❌ ${potentialBoxName} on Optimism resolves to: ${resolvedAddress}`
               );
             }
-          } catch (optimismError) {
+          } catch {
             console.log(`❌ ${potentialBoxName} not found on Optimism either`);
           }
         }

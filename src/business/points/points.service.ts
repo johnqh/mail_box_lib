@@ -1,3 +1,7 @@
+// Platform-specific globals
+declare const crypto: { randomUUID(): string };
+declare const localStorage: Storage;
+
 export interface PointsAction {
   id: string;
   walletAddress: string;

@@ -127,8 +127,8 @@ class AISearchServiceImpl implements AISearchService {
 
       // Sort by relevance and return top results
       return results.sort((a, b) => b.relevance - a.relevance).slice(0, 50); // Limit to top 50 results
-    } catch (error) {
-      console.error('Semantic search failed:', error);
+    } catch {
+      // Search failed, return empty results
       return [];
     }
   }
@@ -302,7 +302,7 @@ class AISearchServiceImpl implements AISearchService {
 
     // Check for financial amounts
     const amountPattern =
-      /[\$€£¥]\s*\d+(?:,\d{3})*(?:\.\d{2})?|\d+\s*(ETH|BTC|USD|EUR)/gi;
+      /[$€£¥]\s*\d+(?:,\d{3})*(?:\.\d{2})?|\d+\s*(ETH|BTC|USD|EUR)/gi;
     const amountMatches = query.match(amountPattern);
     if (amountMatches) {
       extractedTerms.push(
@@ -451,11 +451,11 @@ class AISearchServiceImpl implements AISearchService {
     if (!index) return 0;
 
     let relevanceScore = 0;
-    let matchCount = 0;
+    let _matchCount = 0;
 
     for (const token of searchTokens) {
       if (index.tokens.includes(token)) {
-        matchCount++;
+        _matchCount++;
         relevanceScore += index.weights[token] || 1;
       }
 

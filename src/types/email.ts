@@ -36,7 +36,7 @@ export interface User {
 }
 
 import {
-  ChainType,
+  ChainType as _ChainType,
   EmailFolder,
   FontSize,
   Theme,

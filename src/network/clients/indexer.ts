@@ -1,4 +1,12 @@
-import { AppConfig, NetworkClient, NetworkResponse, NetworkRequestOptions } from '../../types';
+import {
+  AppConfig,
+  NetworkClient,
+  NetworkRequestOptions,
+  NetworkResponse,
+} from '../../types';
+
+// Platform-specific global
+declare const fetch: typeof globalThis.fetch; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 /**
  * Indexer API client for interacting with mail_box_indexer v2.2.0
@@ -46,7 +54,9 @@ export class IndexerClient implements NetworkClient {
         status: response.status,
         statusText: response.statusText,
         data: responseData,
-        headers: response.headers ? Object.fromEntries(Array.from((response.headers as any).entries())) : {},
+        headers: response.headers
+          ? Object.fromEntries(Array.from((response.headers as any).entries()))
+          : {},
       };
     } catch (error) {
       throw new Error(
@@ -58,36 +68,50 @@ export class IndexerClient implements NetworkClient {
   /**
    * Make a GET request
    */
-  async get<T = any>(url: string, options?: Omit<NetworkRequestOptions, 'method' | 'body'>): Promise<NetworkResponse<T>> {
+  async get<T = any>(
+    url: string,
+    options?: Omit<NetworkRequestOptions, 'method' | 'body'>
+  ): Promise<NetworkResponse<T>> {
     return this.request<T>(url, { ...options, method: 'GET' });
   }
 
   /**
    * Make a POST request
    */
-  async post<T = any>(url: string, body?: any, options?: Omit<NetworkRequestOptions, 'method'>): Promise<NetworkResponse<T>> {
-    return this.request<T>(url, { 
-      ...options, 
-      method: 'POST', 
-      body: body ? JSON.stringify(body) : undefined 
+  async post<T = any>(
+    url: string,
+    body?: any,
+    options?: Omit<NetworkRequestOptions, 'method'>
+  ): Promise<NetworkResponse<T>> {
+    return this.request<T>(url, {
+      ...options,
+      method: 'POST',
+      body: body ? JSON.stringify(body) : undefined,
     });
   }
 
   /**
    * Make a PUT request
    */
-  async put<T = any>(url: string, body?: any, options?: Omit<NetworkRequestOptions, 'method'>): Promise<NetworkResponse<T>> {
-    return this.request<T>(url, { 
-      ...options, 
-      method: 'PUT', 
-      body: body ? JSON.stringify(body) : undefined 
+  async put<T = any>(
+    url: string,
+    body?: any,
+    options?: Omit<NetworkRequestOptions, 'method'>
+  ): Promise<NetworkResponse<T>> {
+    return this.request<T>(url, {
+      ...options,
+      method: 'PUT',
+      body: body ? JSON.stringify(body) : undefined,
     });
   }
 
   /**
    * Make a DELETE request
    */
-  async delete<T = any>(url: string, options?: Omit<NetworkRequestOptions, 'method' | 'body'>): Promise<NetworkResponse<T>> {
+  async delete<T = any>(
+    url: string,
+    options?: Omit<NetworkRequestOptions, 'method' | 'body'>
+  ): Promise<NetworkResponse<T>> {
     return this.request<T>(url, { ...options, method: 'DELETE' });
   }
 
@@ -99,7 +123,11 @@ export class IndexerClient implements NetworkClient {
    * Get email addresses for a wallet address (requires signature verification)
    * POST /emails
    */
-  async getEmailAddresses(walletAddress: string, signature: string, message?: string) {
+  async getEmailAddresses(
+    walletAddress: string,
+    signature: string,
+    message?: string
+  ) {
     const response = await this.post('/emails', {
       walletAddress,
       signature,
@@ -107,7 +135,9 @@ export class IndexerClient implements NetworkClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to get email addresses: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to get email addresses: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -117,7 +147,11 @@ export class IndexerClient implements NetworkClient {
    * Get delegation information for a wallet (requires signature verification)
    * POST /delegated
    */
-  async getDelegated(walletAddress: string, signature: string, message?: string) {
+  async getDelegated(
+    walletAddress: string,
+    signature: string,
+    message?: string
+  ) {
     const response = await this.post('/delegated', {
       walletAddress,
       signature,
@@ -125,7 +159,9 @@ export class IndexerClient implements NetworkClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to get delegation info: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to get delegation info: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -136,10 +172,14 @@ export class IndexerClient implements NetworkClient {
    * GET /delegatedTo/:walletAddress
    */
   async getDelegatedTo(walletAddress: string) {
-    const response = await this.get(`/delegatedTo/${encodeURIComponent(walletAddress)}`);
+    const response = await this.get(
+      `/delegatedTo/${encodeURIComponent(walletAddress)}`
+    );
 
     if (!response.ok) {
-      throw new Error(`Failed to get delegated addresses: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to get delegated addresses: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -149,13 +189,20 @@ export class IndexerClient implements NetworkClient {
    * Get deterministic message for signing
    * GET /message/:chainId/:walletAddress/:domain/:url
    */
-  async getMessage(chainId: number, walletAddress: string, domain: string, url: string) {
+  async getMessage(
+    chainId: number,
+    walletAddress: string,
+    domain: string,
+    url: string
+  ) {
     const response = await this.get(
       `/message/${chainId}/${encodeURIComponent(walletAddress)}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`
     );
 
     if (!response.ok) {
-      throw new Error(`Failed to get message: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to get message: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -166,13 +213,18 @@ export class IndexerClient implements NetworkClient {
    * POST /nonce/:walletAddress/create
    */
   async createNonce(walletAddress: string, signature: string, message: string) {
-    const response = await this.post(`/nonce/${encodeURIComponent(walletAddress)}/create`, {
-      signature,
-      message,
-    });
+    const response = await this.post(
+      `/nonce/${encodeURIComponent(walletAddress)}/create`,
+      {
+        signature,
+        message,
+      }
+    );
 
     if (!response.ok) {
-      throw new Error(`Failed to create nonce: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to create nonce: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -183,13 +235,18 @@ export class IndexerClient implements NetworkClient {
    * POST /nonce/:walletAddress
    */
   async getNonce(walletAddress: string, signature: string, message: string) {
-    const response = await this.post(`/nonce/${encodeURIComponent(walletAddress)}`, {
-      signature,
-      message,
-    });
+    const response = await this.post(
+      `/nonce/${encodeURIComponent(walletAddress)}`,
+      {
+        signature,
+        message,
+      }
+    );
 
     if (!response.ok) {
-      throw new Error(`Failed to get nonce: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to get nonce: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -199,7 +256,11 @@ export class IndexerClient implements NetworkClient {
    * Verify wallet signature
    * POST /verify
    */
-  async verifySignature(walletAddress: string, signature: string, message: string) {
+  async verifySignature(
+    walletAddress: string,
+    signature: string,
+    message: string
+  ) {
     const response = await this.post('/verify', {
       walletAddress,
       signature,
@@ -207,7 +268,9 @@ export class IndexerClient implements NetworkClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Signature verification failed: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Signature verification failed: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -218,10 +281,14 @@ export class IndexerClient implements NetworkClient {
    * GET /:walletAddress/entitlement/nameservice
    */
   async checkNameServiceEntitlement(walletAddress: string) {
-    const response = await this.get(`/${encodeURIComponent(walletAddress)}/entitlement/nameservice`);
+    const response = await this.get(
+      `/${encodeURIComponent(walletAddress)}/entitlement/nameservice`
+    );
 
     if (!response.ok) {
-      throw new Error(`Failed to check entitlement: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to check entitlement: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -239,7 +306,9 @@ export class IndexerClient implements NetworkClient {
     const response = await this.get('/points/how-to-earn');
 
     if (!response.ok) {
-      throw new Error(`Failed to get how-to-earn info: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to get how-to-earn info: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -253,7 +322,9 @@ export class IndexerClient implements NetworkClient {
     const response = await this.get('/points/public-stats');
 
     if (!response.ok) {
-      throw new Error(`Failed to get public stats: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to get public stats: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -263,7 +334,11 @@ export class IndexerClient implements NetworkClient {
    * Get user points summary (requires signature verification)
    * POST /points/summary
    */
-  async getPointsSummary(walletAddress: string, signature: string, message?: string) {
+  async getPointsSummary(
+    walletAddress: string,
+    signature: string,
+    message?: string
+  ) {
     const response = await this.post('/points/summary', {
       walletAddress,
       signature,
@@ -271,7 +346,9 @@ export class IndexerClient implements NetworkClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to get points summary: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to get points summary: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -281,7 +358,13 @@ export class IndexerClient implements NetworkClient {
    * Get user points history (requires signature verification)
    * POST /points/history
    */
-  async getPointsHistory(walletAddress: string, signature: string, message?: string, limit?: number, offset?: number) {
+  async getPointsHistory(
+    walletAddress: string,
+    signature: string,
+    message?: string,
+    limit?: number,
+    offset?: number
+  ) {
     const response = await this.post('/points/history', {
       walletAddress,
       signature,
@@ -291,7 +374,9 @@ export class IndexerClient implements NetworkClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to get points history: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to get points history: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -301,7 +386,12 @@ export class IndexerClient implements NetworkClient {
    * Claim promotional code points (requires signature verification)
    * POST /points/claim-promo
    */
-  async claimPromoCode(walletAddress: string, promoCode: string, signature: string, message?: string) {
+  async claimPromoCode(
+    walletAddress: string,
+    promoCode: string,
+    signature: string,
+    message?: string
+  ) {
     const response = await this.post('/points/claim-promo', {
       walletAddress,
       promoCode,
@@ -310,7 +400,9 @@ export class IndexerClient implements NetworkClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to claim promo code: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to claim promo code: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -320,7 +412,12 @@ export class IndexerClient implements NetworkClient {
    * Validate promotional code without claiming (requires signature verification)
    * POST /points/validate-promo
    */
-  async validatePromoCode(walletAddress: string, promoCode: string, signature: string, message?: string) {
+  async validatePromoCode(
+    walletAddress: string,
+    promoCode: string,
+    signature: string,
+    message?: string
+  ) {
     const response = await this.post('/points/validate-promo', {
       walletAddress,
       promoCode,
@@ -329,7 +426,9 @@ export class IndexerClient implements NetworkClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to validate promo code: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to validate promo code: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -339,7 +438,12 @@ export class IndexerClient implements NetworkClient {
    * Register referral (requires signature verification)
    * POST /points/register-referral
    */
-  async registerReferral(walletAddress: string, referralCode: string, signature: string, message?: string) {
+  async registerReferral(
+    walletAddress: string,
+    referralCode: string,
+    signature: string,
+    message?: string
+  ) {
     const response = await this.post('/points/register-referral', {
       walletAddress,
       referralCode,
@@ -348,7 +452,9 @@ export class IndexerClient implements NetworkClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to register referral: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to register referral: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -358,7 +464,11 @@ export class IndexerClient implements NetworkClient {
    * Report referee login (requires signature verification)
    * POST /points/referee-login
    */
-  async reportRefereeLogin(walletAddress: string, signature: string, message?: string) {
+  async reportRefereeLogin(
+    walletAddress: string,
+    signature: string,
+    message?: string
+  ) {
     const response = await this.post('/points/referee-login', {
       walletAddress,
       signature,
@@ -366,7 +476,9 @@ export class IndexerClient implements NetworkClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to report referee login: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to report referee login: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -380,11 +492,15 @@ export class IndexerClient implements NetworkClient {
     const params = new URLSearchParams();
     if (limit) params.append('limit', limit.toString());
     if (offset) params.append('offset', offset.toString());
-    
-    const response = await this.get(`/leaderboard${params.toString() ? '?' + params.toString() : ''}`);
+
+    const response = await this.get(
+      `/leaderboard${params.toString() ? `?${params.toString()}` : ''}`
+    );
 
     if (!response.ok) {
-      throw new Error(`Failed to get leaderboard: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to get leaderboard: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -398,7 +514,9 @@ export class IndexerClient implements NetworkClient {
     const response = await this.get('/campaigns');
 
     if (!response.ok) {
-      throw new Error(`Failed to get campaigns: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to get campaigns: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -409,10 +527,14 @@ export class IndexerClient implements NetworkClient {
    * GET /campaigns/:campaignId/stats
    */
   async getCampaignStats(campaignId: string) {
-    const response = await this.get(`/campaigns/${encodeURIComponent(campaignId)}/stats`);
+    const response = await this.get(
+      `/campaigns/${encodeURIComponent(campaignId)}/stats`
+    );
 
     if (!response.ok) {
-      throw new Error(`Failed to get campaign stats: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to get campaign stats: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -436,7 +558,9 @@ export class IndexerClient implements NetworkClient {
     const response = await this.post('/webhook/email-sent', data);
 
     if (!response.ok) {
-      throw new Error(`Failed to send email webhook: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to send email webhook: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -453,7 +577,9 @@ export class IndexerClient implements NetworkClient {
     const response = await this.post('/webhook/recipient-login', data);
 
     if (!response.ok) {
-      throw new Error(`Failed to send recipient login webhook: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to send recipient login webhook: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -463,14 +589,13 @@ export class IndexerClient implements NetworkClient {
    * Login webhook (internal)
    * POST /webhook/login
    */
-  async webhookLogin(data: {
-    walletAddress: string;
-    referralCode?: string;
-  }) {
+  async webhookLogin(data: { walletAddress: string; referralCode?: string }) {
     const response = await this.post('/webhook/login', data);
 
     if (!response.ok) {
-      throw new Error(`Failed to send login webhook: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to send login webhook: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -507,7 +632,9 @@ export class IndexerClient implements NetworkClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to create campaign: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to create campaign: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -535,7 +662,9 @@ export class IndexerClient implements NetworkClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to award points: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to award points: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -561,7 +690,9 @@ export class IndexerClient implements NetworkClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to flag user: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to flag user: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -575,7 +706,9 @@ export class IndexerClient implements NetworkClient {
     const response = await this.get('/admin/stats/overview');
 
     if (!response.ok) {
-      throw new Error(`Failed to get admin stats: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to get admin stats: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -589,11 +722,15 @@ export class IndexerClient implements NetworkClient {
     const params = new URLSearchParams();
     if (limit) params.append('limit', limit.toString());
     if (offset) params.append('offset', offset.toString());
-    
-    const response = await this.get(`/admin/users/flagged${params.toString() ? '?' + params.toString() : ''}`);
+
+    const response = await this.get(
+      `/admin/users/flagged${params.toString() ? `?${params.toString()}` : ''}`
+    );
 
     if (!response.ok) {
-      throw new Error(`Failed to get flagged users: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to get flagged users: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -619,7 +756,9 @@ export class IndexerClient implements NetworkClient {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to create bulk codes: ${(response.data as any)?.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to create bulk codes: ${(response.data as any)?.error || 'Unknown error'}`
+      );
     }
 
     return response.data;
@@ -643,14 +782,23 @@ export const createIndexerApiConfig = (config: AppConfig) => ({
     // Mail endpoints
     EMAILS: '/emails',
     DELEGATED: '/delegated',
-    DELEGATED_TO: (walletAddress: string) => `/delegatedTo/${encodeURIComponent(walletAddress)}`,
-    MESSAGE: (chainId: number, walletAddress: string, domain: string, url: string) =>
+    DELEGATED_TO: (walletAddress: string) =>
+      `/delegatedTo/${encodeURIComponent(walletAddress)}`,
+    MESSAGE: (
+      chainId: number,
+      walletAddress: string,
+      domain: string,
+      url: string
+    ) =>
       `/message/${chainId}/${encodeURIComponent(walletAddress)}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`,
-    NONCE_CREATE: (walletAddress: string) => `/nonce/${encodeURIComponent(walletAddress)}/create`,
-    NONCE_GET: (walletAddress: string) => `/nonce/${encodeURIComponent(walletAddress)}`,
+    NONCE_CREATE: (walletAddress: string) =>
+      `/nonce/${encodeURIComponent(walletAddress)}/create`,
+    NONCE_GET: (walletAddress: string) =>
+      `/nonce/${encodeURIComponent(walletAddress)}`,
     VERIFY: '/verify',
-    NAME_SERVICE_ENTITLEMENT: (walletAddress: string) => `/${encodeURIComponent(walletAddress)}/entitlement/nameservice`,
-    
+    NAME_SERVICE_ENTITLEMENT: (walletAddress: string) =>
+      `/${encodeURIComponent(walletAddress)}/entitlement/nameservice`,
+
     // Points endpoints
     POINTS_HOW_TO_EARN: '/points/how-to-earn',
     POINTS_PUBLIC_STATS: '/points/public-stats',
@@ -660,20 +808,22 @@ export const createIndexerApiConfig = (config: AppConfig) => ({
     POINTS_VALIDATE_PROMO: '/points/validate-promo',
     POINTS_REGISTER_REFERRAL: '/points/register-referral',
     POINTS_REFEREE_LOGIN: '/points/referee-login',
-    
+
     // Public endpoints
     LEADERBOARD: '/leaderboard',
     CAMPAIGNS: '/campaigns',
-    CAMPAIGN_STATS: (campaignId: string) => `/campaigns/${encodeURIComponent(campaignId)}/stats`,
-    
+    CAMPAIGN_STATS: (campaignId: string) =>
+      `/campaigns/${encodeURIComponent(campaignId)}/stats`,
+
     // Webhook endpoints
     WEBHOOK_EMAIL_SENT: '/webhook/email-sent',
     WEBHOOK_RECIPIENT_LOGIN: '/webhook/recipient-login',
     WEBHOOK_LOGIN: '/webhook/login',
-    
+
     // Admin endpoints
     ADMIN_CREATE_CAMPAIGN: '/admin/campaigns/create',
-    ADMIN_DEACTIVATE_CAMPAIGN: (campaignId: string) => `/admin/campaigns/${campaignId}/deactivate`,
+    ADMIN_DEACTIVATE_CAMPAIGN: (campaignId: string) =>
+      `/admin/campaigns/${campaignId}/deactivate`,
     ADMIN_AWARD_POINTS: '/admin/points/award',
     ADMIN_FLAG_USER: '/admin/points/flag-user',
     ADMIN_STATS: '/admin/stats/overview',

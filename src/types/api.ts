@@ -627,7 +627,11 @@ export interface IndexerLeaderboardResponse {
 export interface IndexerCampaign {
   id: string;
   campaignName: string;
-  campaignType: 'promotional_code' | 'referral_bonus' | 'achievement_unlock' | 'seasonal_event';
+  campaignType:
+    | 'promotional_code'
+    | 'referral_bonus'
+    | 'achievement_unlock'
+    | 'seasonal_event';
   isActive: boolean;
   description?: string;
   startTime: number;

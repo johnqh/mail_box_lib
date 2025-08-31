@@ -5,6 +5,9 @@
 
 import { AppConfig } from '../../types';
 
+// Platform-specific global
+declare const fetch: typeof globalThis.fetch; // eslint-disable-line @typescript-eslint/no-unused-vars
+
 export interface CreateAddressParams {
   address: string;
   name?: string;
@@ -98,7 +101,8 @@ export class WildDuckAddressHelper {
   /**
    * Update user address information
    */
-  static async updateUserAddress(appConfig: AppConfig, 
+  static async updateUserAddress(
+    appConfig: AppConfig,
     userId: string,
     addressId: string,
     params: UpdateAddressParams
@@ -128,7 +132,8 @@ export class WildDuckAddressHelper {
   /**
    * Delete user address
    */
-  static async deleteUserAddress(appConfig: AppConfig, 
+  static async deleteUserAddress(
+    appConfig: AppConfig,
     userId: string,
     address: string
   ): Promise<{ success: boolean }> {
@@ -156,7 +161,8 @@ export class WildDuckAddressHelper {
   /**
    * Create new forwarded address
    */
-  static async createForwardedAddress(appConfig: AppConfig, 
+  static async createForwardedAddress(
+    appConfig: AppConfig,
     params: CreateForwardedAddressParams
   ): Promise<{ success: boolean; id: string }> {
     const response = await fetch(
@@ -184,7 +190,8 @@ export class WildDuckAddressHelper {
   /**
    * Update forwarded address information
    */
-  static async updateForwardedAddress(appConfig: AppConfig, 
+  static async updateForwardedAddress(
+    appConfig: AppConfig,
     addressId: string,
     params: UpdateForwardedAddressParams
   ): Promise<{ success: boolean }> {
@@ -213,7 +220,8 @@ export class WildDuckAddressHelper {
   /**
    * Delete forwarded address
    */
-  static async deleteForwardedAddress(appConfig: AppConfig, 
+  static async deleteForwardedAddress(
+    appConfig: AppConfig,
     address: string
   ): Promise<{ success: boolean }> {
     const response = await fetch(
@@ -240,7 +248,8 @@ export class WildDuckAddressHelper {
   /**
    * Rename domain in addresses
    */
-  static async renameDomain(appConfig: AppConfig, 
+  static async renameDomain(
+    appConfig: AppConfig,
     oldDomain: string,
     newDomain: string
   ): Promise<{ success: boolean; modified: number }> {

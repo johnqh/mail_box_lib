@@ -318,7 +318,7 @@ export class DefaultAnalyticsOperations implements AnalyticsOperations {
 
     // Validate properties
     if (eventData.properties) {
-      for (const [key, value] of Object.entries(eventData.properties)) {
+      for (const [_key, value] of Object.entries(eventData.properties)) {
         if (
           typeof value === 'string' &&
           value.length > this.MAX_PROPERTY_LENGTH
@@ -452,9 +452,11 @@ export class DefaultAnalyticsOperations implements AnalyticsOperations {
   }
 
   private sanitizeString(str: string): string {
+    // Remove control characters and potential HTML
     return str
       .replace(/[<>]/g, '') // Remove potential HTML
-      .replace(/[\x00-\x1f\x7f]/g, '') // Remove control characters
+      .replace(/[\r\n\t]/g, ' ') // Replace common control characters with spaces
+      .replace(/[^\x20-\x7E]/g, '') // Keep only printable ASCII characters
       .substring(0, this.MAX_PROPERTY_LENGTH);
   }
 }

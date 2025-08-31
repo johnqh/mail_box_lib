@@ -6,6 +6,10 @@
 import { formatSignatureForWildDuck } from './blockchainAuth';
 import { ChainType } from '../../business/core/enums';
 
+// Platform-specific globals
+declare const fetch: typeof globalThis.fetch; // eslint-disable-line @typescript-eslint/no-unused-vars
+declare const sessionStorage: Storage; // eslint-disable-line @typescript-eslint/no-unused-vars
+
 // Type definition for WildDuck API client interface
 export interface WildDuckAPIClient {
   authenticate(

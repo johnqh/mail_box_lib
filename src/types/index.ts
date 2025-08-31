@@ -9,7 +9,6 @@ export * from './environment';
 // Network types
 export * from './network';
 
-
 // Email types (primary email interface)
 export {
   Email,

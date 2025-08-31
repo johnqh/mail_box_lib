@@ -2,6 +2,10 @@ import { AppConfig, NetworkClient, NetworkResponse } from '../../types';
 import { getWildDuckStorageKeys } from '../../utils/auth/wildDuckAuth';
 import { createURLSearchParams } from '../../utils/url-params';
 
+// Platform-specific globals
+declare const fetch: typeof globalThis.fetch; // eslint-disable-line @typescript-eslint/no-unused-vars
+declare const sessionStorage: Storage; // eslint-disable-line @typescript-eslint/no-unused-vars
+
 // Determine API base URL based on Cloudflare worker configuration
 const getApiBaseUrl = (config: AppConfig): string => {
   if (config.useCloudflareWorker && config.cloudflareWorkerUrl) {

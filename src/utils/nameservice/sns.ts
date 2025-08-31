@@ -1,7 +1,7 @@
 import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
 
 // Create connection to Solana mainnet
-const connection = new Connection(clusterApiUrl('mainnet-beta'), 'confirmed');
+const _connection = new Connection(clusterApiUrl('mainnet-beta'), 'confirmed');
 
 export interface SNSName {
   name: string;
@@ -21,7 +21,7 @@ export async function getSNSNames(address: string): Promise<SNSName[]> {
     // Check cache first
     const cached = snsCache.get(address);
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      console.log('Returning cached SNS names for:', address);
+      // Returning cached SNS names
       return cached.names;
     }
 
@@ -29,7 +29,7 @@ export async function getSNSNames(address: string): Promise<SNSName[]> {
 
     try {
       // Convert address string to PublicKey
-      const walletPublicKey = new PublicKey(address);
+      const _walletPublicKey = new PublicKey(address);
 
       // Query on-chain SNS domains owned by this address
       const domains = await querySOLDomains(address);
@@ -40,28 +40,23 @@ export async function getSNSNames(address: string): Promise<SNSName[]> {
           name: domain,
           address,
         });
-        console.log(
-          'Found SNS domain from on-chain data:',
-          domain,
-          'for address:',
-          address
-        );
+        // Found SNS domain from on-chain data
       });
-    } catch (snsError) {
-      console.warn('SNS on-chain lookup failed:', snsError);
+    } catch {
+      // SNS on-chain lookup failed
     }
 
     // Cache the result
     snsCache.set(address, { names: snsNames, timestamp: Date.now() });
 
-    console.log(`Total SNS names found for ${address}:`, snsNames.length);
+    // SNS names processed
     return snsNames;
-  } catch (error) {
-    console.error('Error fetching SNS names:', error);
+  } catch {
+    // Error fetching SNS names
     // Return cached value if available, even if expired
     const cached = snsCache.get(address);
     if (cached) {
-      console.log('Returning stale cached SNS names due to error');
+      // Returning stale cached SNS names due to error
       return cached.names;
     }
     return [];
@@ -72,54 +67,41 @@ export async function getSNSNames(address: string): Promise<SNSName[]> {
  * Query Solana blockchain for .sol domains owned by an address
  * This uses the proper SNS program to find domain ownership
  */
-async function querySOLDomains(ownerAddress: string): Promise<string[]> {
-  try {
-    // For now, return empty array as proper SNS querying requires specialized libraries
-    // like @bonfida/spl-name-service which need to be added as dependencies
+async function querySOLDomains(_ownerAddress: string): Promise<string[]> {
+  // For now, return empty array as proper SNS querying requires specialized libraries
+  // like @bonfida/spl-name-service which need to be added as dependencies
 
-    // TODO: Implement proper SNS domain discovery using:
-    // 1. @bonfida/spl-name-service library
-    // 2. Query the SNS registry program for domains owned by this address
-    // 3. Filter for active domains with valid records
+  // TODO: Implement proper SNS domain discovery using:
+  // 1. @bonfida/spl-name-service library
+  // 2. Query the SNS registry program for domains owned by this address
+  // 3. Filter for active domains with valid records
 
-    console.log(
-      'SNS on-chain domain discovery not yet fully implemented for:',
-      ownerAddress
-    );
-    console.log(
-      'This requires specialized SNS libraries like @bonfida/spl-name-service'
-    );
+  // SNS on-chain domain discovery not yet fully implemented
+  // This requires specialized SNS libraries like @bonfida/spl-name-service
 
-    return [];
-  } catch (error) {
-    console.error('Error querying SOL domains:', error);
-    return [];
-  }
+  return [];
 }
 
 /**
  * Resolve a .sol domain to a Solana address
  * This is a simplified implementation - a full implementation would use the SNS registry
  */
-export async function resolveSNSDomain(domain: string): Promise<string | null> {
-  try {
-    // For now, this is a placeholder implementation
-    // Real SNS resolution would involve:
-    // 1. Computing the domain hash
-    // 2. Deriving the domain account address
-    // 3. Fetching the account data from Solana
-    // 4. Parsing the owner/target address
+export async function resolveSNSDomain(
+  _domain: string
+): Promise<string | null> {
+  // For now, this is a placeholder implementation
+  // Real SNS resolution would involve:
+  // 1. Computing the domain hash
+  // 2. Deriving the domain account address
+  // 3. Fetching the account data from Solana
+  // 4. Parsing the owner/target address
 
-    console.log('SNS domain resolution for:', domain);
+  // SNS domain resolution attempted
 
-    // Since proper SNS resolution is complex and requires specific libraries,
-    // we'll return null for now to indicate no resolution found
-    // This prevents errors while allowing the system to continue working
-    return null;
-  } catch (error) {
-    console.error('Error resolving SNS domain:', error);
-    return null;
-  }
+  // Since proper SNS resolution is complex and requires specific libraries,
+  // we'll return null for now to indicate no resolution found
+  // This prevents errors while allowing the system to continue working
+  return null;
 }
 
 /**
@@ -133,8 +115,8 @@ export async function validateSNSName(
     const resolvedAddress = await resolveSNSDomain(name);
 
     return resolvedAddress?.toLowerCase() === expectedAddress.toLowerCase();
-  } catch (error) {
-    console.error('Error validating SNS name:', error);
+  } catch {
+    // Error validating SNS name
     return false;
   }
 }

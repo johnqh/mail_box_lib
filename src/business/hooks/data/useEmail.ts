@@ -3,7 +3,7 @@ import { Email } from '../../../types/email';
 import { EmailService } from '../../../types/services';
 // Services will be injected through options or dependency injection
 import {
-  WildDuckMessageDetail,
+  WildDuckMessageDetail as _WildDuckMessageDetail,
   WildDuckMessageResponse,
 } from '../../../types/api';
 

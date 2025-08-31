@@ -6,7 +6,7 @@ import { AuthStatus, ChainType } from '../enums';
 import { EmailAddress } from '../../../types/email';
 
 // Extended EmailAddress interface for business logic
-interface ExtendedEmailAddress extends EmailAddress {
+interface _ExtendedEmailAddress extends EmailAddress {
   main?: boolean;
 }
 

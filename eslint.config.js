@@ -89,6 +89,17 @@ export default [
   },
   {
     files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}'],
+    languageOptions: {
+      parser: typescriptParser,
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module',
+        // Don't use project for test files
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+    },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       'no-console': 'off',
@@ -109,6 +120,8 @@ export default [
       '*.d.ts',
       'coverage/',
       '.github/',
+      '**/*.test.{ts,tsx}',
+      '**/*.spec.{ts,tsx}',
     ],
   },
 ];

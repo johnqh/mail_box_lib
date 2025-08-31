@@ -3,7 +3,10 @@
  * These functions are for data modification operations (POST/PUT/DELETE)
  */
 
-import { AppConfig } from "../../types";
+import { AppConfig as _AppConfig } from '../../types';
+
+// Platform-specific global
+declare const fetch: typeof globalThis.fetch; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface UploadMessageParams {
   raw?: string;

@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+// Platform-specific timer type
+type NodeJSTimeout = ReturnType<typeof setTimeout>;
+
 export function useDebounce<T>(value: T, delay: number = 500): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
@@ -20,7 +23,7 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
   callback: T,
   delay: number = 500
 ): T {
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJSTimeout>();
   const callbackRef = useRef(callback);
 
   // Update callback ref when callback changes

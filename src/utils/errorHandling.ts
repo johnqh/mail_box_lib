@@ -1,6 +1,9 @@
 import { ERROR_MESSAGES } from './constants';
 import { env } from '../di/env';
 
+// Platform-specific global
+declare const fetch: typeof globalThis.fetch; // eslint-disable-line @typescript-eslint/no-unused-vars
+
 export class AppError extends Error {
   code: string;
   statusCode?: number;

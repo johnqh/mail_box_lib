@@ -3,13 +3,17 @@
  * @description React hook for managing points leaderboard data (no authentication required)
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useIndexerPoints } from '../indexer/useIndexerPoints';
-import { IndexerLeaderboardEntry, IndexerCampaign } from '../../../types';
+import { IndexerCampaign, IndexerLeaderboardEntry } from '../../../types';
 
 // Service interface for legacy points API (uses DI)
 interface PointsApiService {
-  getLeaderboard(page: number, limit: number, timeframe?: string): Promise<{
+  getLeaderboard(
+    page: number,
+    limit: number,
+    timeframe?: string
+  ): Promise<{
     data: {
       leaderboard: LeaderboardEntry[];
       pagination: {
@@ -54,13 +58,17 @@ export interface Campaign {
 }
 
 // Helper functions to convert between indexer types and existing types
-const convertIndexerLeaderboardEntry = (entry: IndexerLeaderboardEntry): LeaderboardEntry => ({
+const convertIndexerLeaderboardEntry = (
+  entry: IndexerLeaderboardEntry
+): LeaderboardEntry => ({
   rank: entry.rank,
   walletAddress: entry.walletAddress,
   totalPoints: parseInt(entry.totalPoints, 10) || 0,
   currentStreak: entry.currentStreak,
   longestStreak: entry.longestStreak,
-  lastActivityDate: entry.lastActivityDate ? new Date(entry.lastActivityDate) : null,
+  lastActivityDate: entry.lastActivityDate
+    ? new Date(entry.lastActivityDate)
+    : null,
 });
 
 const convertIndexerCampaign = (campaign: IndexerCampaign): Campaign => ({
@@ -94,7 +102,11 @@ export interface UsePointsLeaderboardState {
 }
 
 export interface UsePointsLeaderboardActions {
-  fetchLeaderboard: (page?: number, limit?: number, timeframe?: 'all_time' | 'weekly' | 'monthly') => Promise<void>;
+  fetchLeaderboard: (
+    page?: number,
+    limit?: number,
+    timeframe?: 'all_time' | 'weekly' | 'monthly'
+  ) => Promise<void>;
   fetchCampaigns: () => Promise<void>;
   nextPage: () => Promise<void>;
   prevPage: () => Promise<void>;
@@ -107,7 +119,9 @@ interface PointsLeaderboardHookDependencies {
   pointsApiService?: PointsApiService;
 }
 
-export function usePointsLeaderboard(dependencies?: PointsLeaderboardHookDependencies): UsePointsLeaderboardState & UsePointsLeaderboardActions {
+export function usePointsLeaderboard(
+  dependencies?: PointsLeaderboardHookDependencies
+): UsePointsLeaderboardState & UsePointsLeaderboardActions {
   const [state, setState] = useState<UsePointsLeaderboardState>({
     leaderboard: [],
     campaigns: [],
@@ -125,72 +139,92 @@ export function usePointsLeaderboard(dependencies?: PointsLeaderboardHookDepende
   });
 
   // Use the indexer points hook and legacy API service
-  const { 
-    getLeaderboard: getIndexerLeaderboard, 
-    getActiveCampaigns: getIndexerCampaigns
+  const {
+    getLeaderboard: getIndexerLeaderboard,
+    getActiveCampaigns: getIndexerCampaigns,
   } = useIndexerPoints();
 
   // Legacy points API service (injected via DI or mock for development)
-  const pointsApiService = dependencies?.pointsApiService || createMockPointsApiService();
+  const pointsApiService =
+    dependencies?.pointsApiService || createMockPointsApiService();
 
   const clearError = useCallback(() => {
     setState(prev => ({ ...prev, error: null }));
   }, []);
 
-  const fetchLeaderboard = useCallback(async (
-    page = 1, 
-    limit = 50, 
-    timeframe: 'all_time' | 'weekly' | 'monthly' = 'all_time'
-  ) => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+  const fetchLeaderboard = useCallback(
+    async (
+      page = 1,
+      limit = 50,
+      timeframe: 'all_time' | 'weekly' | 'monthly' = 'all_time'
+    ) => {
+      setState(prev => ({ ...prev, loading: true, error: null }));
 
-    try {
-      // First try to use the indexer hook
-      const indexerResponse = await getIndexerLeaderboard(timeframe, page, limit);
-      
-      setState(prev => ({
-        ...prev,
-        leaderboard: indexerResponse.leaderboard.map(convertIndexerLeaderboardEntry),
-        totalUsers: indexerResponse.pagination.totalUsers,
-        pagination: {
-          page: indexerResponse.pagination.page,
-          limit: indexerResponse.pagination.limit,
-          totalPages: indexerResponse.pagination.totalPages,
-          hasNext: indexerResponse.pagination.hasNext,
-          hasPrevious: indexerResponse.pagination.hasPrevious,
-        },
-        loading: false,
-      }));
-    } catch (error) {
-      console.warn('Indexer API unavailable, falling back to legacy points API:', error);
-      
       try {
-        // Fallback to legacy points API
-        const response = await pointsApiService.getLeaderboard(page, limit, timeframe);
-        
+        // First try to use the indexer hook
+        const indexerResponse = await getIndexerLeaderboard(
+          timeframe,
+          page,
+          limit
+        );
+
         setState(prev => ({
           ...prev,
-          leaderboard: response.data.leaderboard,
-          totalUsers: response.data.pagination.totalUsers,
+          leaderboard: indexerResponse.leaderboard.map(
+            convertIndexerLeaderboardEntry
+          ),
+          totalUsers: indexerResponse.pagination.totalUsers,
           pagination: {
-            page: response.data.pagination.page,
-            limit: response.data.pagination.limit,
-            totalPages: response.data.pagination.totalPages,
-            hasNext: response.data.pagination.hasNext,
-            hasPrevious: response.data.pagination.hasPrevious,
+            page: indexerResponse.pagination.page,
+            limit: indexerResponse.pagination.limit,
+            totalPages: indexerResponse.pagination.totalPages,
+            hasNext: indexerResponse.pagination.hasNext,
+            hasPrevious: indexerResponse.pagination.hasPrevious,
           },
           loading: false,
         }));
-      } catch (fallbackError) {
-        console.error('Both indexer and legacy API failed:', fallbackError);
-        setState(prev => ({
-          ...prev,
-          loading: false,
-          error: fallbackError instanceof Error ? fallbackError.message : 'Failed to fetch leaderboard',
-        }));
+      } catch (error) {
+        console.warn(
+          'Indexer API unavailable, falling back to legacy points API:',
+          error
+        );
+
+        try {
+          // Fallback to legacy points API
+          const response = await pointsApiService.getLeaderboard(
+            page,
+            limit,
+            timeframe
+          );
+
+          setState(prev => ({
+            ...prev,
+            leaderboard: response.data.leaderboard,
+            totalUsers: response.data.pagination.totalUsers,
+            pagination: {
+              page: response.data.pagination.page,
+              limit: response.data.pagination.limit,
+              totalPages: response.data.pagination.totalPages,
+              hasNext: response.data.pagination.hasNext,
+              hasPrevious: response.data.pagination.hasPrevious,
+            },
+            loading: false,
+          }));
+        } catch (fallbackError) {
+          console.error('Both indexer and legacy API failed:', fallbackError);
+          setState(prev => ({
+            ...prev,
+            loading: false,
+            error:
+              fallbackError instanceof Error
+                ? fallbackError.message
+                : 'Failed to fetch leaderboard',
+          }));
+        }
       }
-    }
-  }, [getIndexerLeaderboard]);
+    },
+    [getIndexerLeaderboard]
+  );
 
   const fetchCampaigns = useCallback(async () => {
     setState(prev => ({ ...prev, campaignsLoading: true }));
@@ -204,8 +238,11 @@ export function usePointsLeaderboard(dependencies?: PointsLeaderboardHookDepende
         campaignsLoading: false,
       }));
     } catch (error) {
-      console.warn('Indexer campaigns API unavailable, falling back to legacy API:', error);
-      
+      console.warn(
+        'Indexer campaigns API unavailable, falling back to legacy API:',
+        error
+      );
+
       try {
         // Fallback to legacy points API
         const response = await pointsApiService.getActiveCampaigns();
@@ -215,7 +252,10 @@ export function usePointsLeaderboard(dependencies?: PointsLeaderboardHookDepende
           campaignsLoading: false,
         }));
       } catch (fallbackError) {
-        console.error('Both indexer and legacy campaigns API failed:', fallbackError);
+        console.error(
+          'Both indexer and legacy campaigns API failed:',
+          fallbackError
+        );
         setState(prev => ({
           ...prev,
           campaignsLoading: false,
@@ -237,11 +277,14 @@ export function usePointsLeaderboard(dependencies?: PointsLeaderboardHookDepende
     }
   }, [state.pagination, fetchLeaderboard]);
 
-  const goToPage = useCallback(async (page: number) => {
-    if (page >= 1 && page <= state.pagination.totalPages) {
-      await fetchLeaderboard(page, state.pagination.limit);
-    }
-  }, [state.pagination, fetchLeaderboard]);
+  const goToPage = useCallback(
+    async (page: number) => {
+      if (page >= 1 && page <= state.pagination.totalPages) {
+        await fetchLeaderboard(page, state.pagination.limit);
+      }
+    },
+    [state.pagination, fetchLeaderboard]
+  );
 
   const refresh = useCallback(async () => {
     await Promise.all([
@@ -269,7 +312,10 @@ export function usePointsLeaderboard(dependencies?: PointsLeaderboardHookDepende
 }
 
 // Simple hook for just getting top users (for overview components)
-export function useTopUsers(count: number = 10, dependencies?: PointsLeaderboardHookDependencies) {
+export function useTopUsers(
+  count: number = 10,
+  dependencies?: PointsLeaderboardHookDependencies
+) {
   const [topUsers, setTopUsers] = useState<LeaderboardEntry[]>([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -277,7 +323,8 @@ export function useTopUsers(count: number = 10, dependencies?: PointsLeaderboard
 
   // Use the indexer points hook and legacy API service
   const { getLeaderboard: getIndexerLeaderboard } = useIndexerPoints();
-  const pointsApiService = dependencies?.pointsApiService || createMockPointsApiService();
+  const pointsApiService =
+    dependencies?.pointsApiService || createMockPointsApiService();
 
   const fetchTopUsers = useCallback(async () => {
     setLoading(true);
@@ -286,18 +333,27 @@ export function useTopUsers(count: number = 10, dependencies?: PointsLeaderboard
     try {
       // First try to use the indexer hook
       const indexerResponse = await getIndexerLeaderboard('all_time', 1, count);
-      setTopUsers(indexerResponse.leaderboard.map(convertIndexerLeaderboardEntry));
+      setTopUsers(
+        indexerResponse.leaderboard.map(convertIndexerLeaderboardEntry)
+      );
       setTotalUsers(indexerResponse.pagination.totalUsers);
     } catch (err) {
-      console.warn('Indexer API unavailable for top users, falling back to legacy API:', err);
-      
+      console.warn(
+        'Indexer API unavailable for top users, falling back to legacy API:',
+        err
+      );
+
       try {
         // Fallback to legacy points API
         const response = await pointsApiService.getLeaderboard(1, count);
         setTopUsers(response.data.leaderboard);
         setTotalUsers(response.data.pagination.totalUsers);
       } catch (fallbackErr) {
-        setError(fallbackErr instanceof Error ? fallbackErr.message : 'Failed to fetch top users');
+        setError(
+          fallbackErr instanceof Error
+            ? fallbackErr.message
+            : 'Failed to fetch top users'
+        );
       }
     } finally {
       setLoading(false);
@@ -320,7 +376,7 @@ export function useTopUsers(count: number = 10, dependencies?: PointsLeaderboard
 // Mock implementation for legacy points API service
 function createMockPointsApiService(): PointsApiService {
   return {
-    async getLeaderboard(page: number, limit: number, timeframe?: string) {
+    async getLeaderboard(page: number, limit: number, _timeframe?: string) {
       return {
         data: {
           leaderboard: [],

@@ -183,7 +183,7 @@ export class DefaultNavigationOperations implements NavigationOperations {
 
   shouldShowContent(
     view: MobileView,
-    state: NavigationState
+    _state: NavigationState
   ): {
     showEmailAddresses: boolean;
     showFolders: boolean;

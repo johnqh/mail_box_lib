@@ -43,7 +43,7 @@ class AIEmailServiceImpl implements AIEmailService {
 
   async categorizeEmail(
     email: Email,
-    options?: AIProcessingOptions
+    _options?: AIProcessingOptions
   ): Promise<EmailCategory> {
     try {
       const content = `${email.subject} ${email.body}`.toLowerCase();
@@ -108,8 +108,8 @@ class AIEmailServiceImpl implements AIEmailService {
         reasoning:
           'Default categorization - no strong indicators for other categories',
       };
-    } catch (error) {
-      console.error('Email categorization failed:', error);
+    } catch {
+      // Categorization failed, using default
       return {
         primary: 'personal',
         confidence: 0.3,
@@ -120,7 +120,7 @@ class AIEmailServiceImpl implements AIEmailService {
 
   async summarizeEmail(
     email: Email,
-    options?: AIProcessingOptions
+    _options?: AIProcessingOptions
   ): Promise<EmailSummary> {
     try {
       const content = email.body || email.subject;
@@ -162,8 +162,8 @@ class AIEmailServiceImpl implements AIEmailService {
         actionRequired,
         estimatedReadTime,
       };
-    } catch (error) {
-      console.error('Email summarization failed:', error);
+    } catch {
+      // Summarization failed, return fallback
       return {
         summary: 'Summary generation failed',
         keyPoints: [],
@@ -177,7 +177,7 @@ class AIEmailServiceImpl implements AIEmailService {
 
   async extractEntities(
     email: Email,
-    options?: AIProcessingOptions
+    _options?: AIProcessingOptions
   ): Promise<EmailEntities> {
     try {
       const content = `${email.subject} ${email.body}`;
@@ -190,8 +190,8 @@ class AIEmailServiceImpl implements AIEmailService {
         organizations: this.extractOrganizations(content),
         topics: this.extractTopics(content),
       };
-    } catch (error) {
-      console.error('Entity extraction failed:', error);
+    } catch {
+      // Entity extraction failed, return empty
       return {
         web3Entities: [],
         dates: [],
@@ -378,7 +378,7 @@ class AIEmailServiceImpl implements AIEmailService {
     score = matchedKeywords.length * 0.15;
 
     // Check for currency amounts
-    const currencyRegex = /[\$€£¥]\s*\d+(?:,\d{3})*(?:\.\d{2})?/g;
+    const currencyRegex = /[$€£¥]\s*\d+(?:,\d{3})*(?:\.\d{2})?/g;
     if (currencyRegex.test(content)) {
       score += 0.3;
     }

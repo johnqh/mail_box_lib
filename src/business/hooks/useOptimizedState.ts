@@ -1,5 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 
+// Platform-specific timer type
+type NodeJSTimeout = ReturnType<typeof setTimeout>;
+
 /**
  * Optimized state management hooks to reduce re-renders
  */
@@ -41,7 +44,7 @@ export const useBatchedState = <T extends Record<string, any>>(
 ) => {
   const [state, setState] = useState(initialState);
   const pendingUpdates = useRef<Partial<T>>({});
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJSTimeout>();
 
   const batchedSetState = useCallback((updates: Partial<T>) => {
     pendingUpdates.current = { ...pendingUpdates.current, ...updates };
@@ -71,7 +74,7 @@ export const useBatchedState = <T extends Record<string, any>>(
 export const useDebouncedState = <T>(initialValue: T, delay: number = 300) => {
   const [value, setValue] = useState(initialValue);
   const [debouncedValue, setDebouncedValue] = useState(initialValue);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJSTimeout>();
 
   const setValueWithDebounce = useCallback(
     (newValue: T) => {

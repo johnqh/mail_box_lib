@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Email } from '../../../types/email';
 import { emailToUserId } from '../../../network/clients/wildduck';
-import { WildDuckMessage, WildDuckMessageResponse } from '../../../types/api';
+import {
+  WildDuckMessageResponse as _WildDuckMessageResponse,
+  WildDuckMessage,
+} from '../../../types/api';
 import { EmailListOptions, EmailService } from '../../../types/services';
 // Services will be injected through options or dependency injection
 

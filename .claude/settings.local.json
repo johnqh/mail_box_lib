@@ -16,7 +16,19 @@
       "Read(/Users/qianghuang/mail_box_indexer/src/services/**)",
       "Read(/Users/qianghuang/mail_box_indexer/src/services/**)",
       "Read(/Users/qianghuang/mail_box_indexer/api//**)",
-      "Bash(npm run typecheck:*)"
+      "Bash(npm run typecheck:*)",
+      "Read(/Users/qianghuang/wildduck/.github/workflows/**)",
+      "Read(/Users/qianghuang/wildduck/**)",
+      "Read(/Users/qianghuang/wildduck/.github/workflows/**)",
+      "Read(/Users/qianghuang/wildduck/.github/workflows/**)",
+      "Bash(mkdir:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npm outdated)",
+      "Bash(git push:*)",
+      "Bash(sed:*)",
+      "Bash(npx eslint:*)",
+      "Bash(find:*)",
+      "Read(/dev/**)"
     ],
     "deny": [],
     "ask": []

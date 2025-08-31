@@ -3,7 +3,7 @@
  * Specialized AI features for Web3 and blockchain-related content
  */
 
-import { TransactionAnalysis, Web3Entity } from './ai-types';
+import { TransactionAnalysis } from './ai-types';
 import { ChainType } from '../../utils/blockchain';
 
 export interface AIWeb3Service {
@@ -194,7 +194,6 @@ class AIWeb3ServiceImpl implements AIWeb3Service {
       const analysis = this.generateMockTransactionAnalysis(txHash, chainType);
       return analysis;
     } catch (error) {
-      console.error('Transaction analysis failed:', error);
       throw new Error(
         `Failed to analyze transaction: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -213,7 +212,6 @@ class AIWeb3ServiceImpl implements AIWeb3Service {
       );
       return explanation;
     } catch (error) {
-      console.error('Contract explanation failed:', error);
       throw new Error(
         `Failed to explain contract: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -244,7 +242,6 @@ class AIWeb3ServiceImpl implements AIWeb3Service {
         },
       };
     } catch (error) {
-      console.error('NFT analysis failed:', error);
       throw new Error(
         `Failed to analyze NFT: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -344,8 +341,8 @@ class AIWeb3ServiceImpl implements AIWeb3Service {
   }
 
   async analyzeTokenMetrics(
-    tokenAddress: string,
-    chainType: ChainType
+    _tokenAddress: string,
+    _chainType: ChainType
   ): Promise<TokenAnalysis> {
     // Mock implementation - would integrate with price APIs
     return {

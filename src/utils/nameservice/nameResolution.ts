@@ -63,7 +63,7 @@ export async function resolveENSName(name: string): Promise<string | null> {
       return cached.address;
     }
 
-    console.log('Resolving ENS name:', name);
+    // Resolving ENS name
     const address = await publicClient.getEnsAddress({
       name,
     });
@@ -74,13 +74,13 @@ export async function resolveENSName(name: string): Promise<string | null> {
         address,
         timestamp: Date.now(),
       });
-      console.log('ENS resolution successful:', name, '->', address);
+      // ENS resolution successful
       return address;
     }
 
     return null;
-  } catch (error) {
-    console.error('ENS resolution failed:', error);
+  } catch {
+    // ENS resolution failed
     return null;
   }
 }
@@ -97,12 +97,12 @@ export async function resolveSNSName(name: string): Promise<string | null> {
       return cached.address;
     }
 
-    console.log('SNS resolution not yet implemented for:', name);
+    // SNS resolution not yet implemented
     // TODO: Implement actual SNS resolution when available
 
     return null;
-  } catch (error) {
-    console.error('SNS resolution failed:', error);
+  } catch {
+    // SNS resolution failed
     return null;
   }
 }

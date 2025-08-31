@@ -53,7 +53,10 @@ class SimpleURLSearchParams implements URLSearchParamsLike {
     if (!this.params.has(name)) {
       this.params.set(name, []);
     }
-    this.params.get(name)!.push(value);
+    const existingValues = this.params.get(name);
+    if (existingValues) {
+      existingValues.push(value);
+    }
   }
 
   delete(name: string): void {
