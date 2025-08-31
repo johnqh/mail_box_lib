@@ -1,6 +1,6 @@
 {
-  "name": "@0xmail/lib",
-  "version": "1.0.0",
+  "name": "@johnqh/lib",
+  "version": "1.0.1",
   "description": "React Native-compatible shared utilities and common functions for 0xmail.box projects",
   "type": "module",
   "main": "dist/index.js",
