@@ -48,7 +48,6 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
       const snsEmailAddresses: EmailAddress[] = [];
 
       try {
-        console.log('Fetching SNS names for:', walletAddress);
         const snsNames = await getSNSNames(walletAddress);
 
         snsNames.forEach((snsName, index) => {
@@ -61,7 +60,6 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
           });
         });
 
-        console.log(`Created ${snsEmailAddresses.length} SNS email addresses`);
       } catch (error) {
         console.error('Error fetching SNS names:', error);
         // Don't throw - just return empty array to keep other addresses
@@ -81,14 +79,9 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
       const ensEmailAddresses: EmailAddress[] = [];
 
       try {
-        console.log('🔍 Fetching ENS names for wallet:', walletAddress);
         const ensNames = await getENSNames(walletAddress);
 
-        console.log('🔍 ENS names returned from getENSNames:', ensNames);
 
-        if (ensNames.length === 0) {
-          console.log('⚠️ No ENS names found for wallet:', walletAddress);
-        }
 
         ensNames.forEach((ensName, index) => {
           const emailAddress = {
@@ -100,12 +93,8 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
           };
 
           ensEmailAddresses.push(emailAddress);
-          console.log('✅ Created ENS email address:', emailAddress);
         });
 
-        console.log(
-          `📧 Total ENS email addresses created: ${ensEmailAddresses.length}`
-        );
       } catch (error) {
         console.error('❌ Error fetching ENS names:', error);
         // Don't throw - just return empty array to keep other addresses
@@ -165,12 +154,10 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
         // For unknown chain type, try both ENS and SNS in parallel to auto-detect
         fetchPromises.push(
           createENSEmailAddresses(walletAddress, idCounter).catch(error => {
-            console.warn('ENS lookup failed for unknown chain type:', error);
             return [];
           }),
           createSNSEmailAddresses(walletAddress, idCounter + 100).catch(
             error => {
-              console.warn('SNS lookup failed for unknown chain type:', error);
               return [];
             }
           )
@@ -191,18 +178,10 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
           // Call progress callback with enhanced addresses
           progressCallback?.(allEmailAddresses);
         } catch (error) {
-          console.warn('Error in parallel name service lookup:', error);
         }
       }
 
-      // Log any errors but don't fail the entire process
-      if (errors.length > 0) {
-        console.warn('Some email address services failed:', errors);
-      }
 
-      console.log(
-        `Total email addresses generated: ${allEmailAddresses.length}`
-      );
       return allEmailAddresses;
     },
     [createWalletEmailAddress, createSNSEmailAddresses, createENSEmailAddresses]
@@ -218,9 +197,6 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
       chainType?: ChainType
     ): Promise<EmailAddress[]> => {
       if (!walletAddress) {
-        console.warn(
-          'Cannot refresh email addresses: no wallet address provided'
-        );
         setEmailAddresses([]);
         setError('No wallet address provided');
         return [];
@@ -230,15 +206,11 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
       setError(null);
 
       try {
-        console.log('Starting email address generation for:', walletAddress);
         const detectedChainType = chainType || detectAddressType(walletAddress);
 
         // Progressive enhancement: show wallet address immediately, then add name service addresses
         const progressCallback = (addresses: EmailAddress[]) => {
           setEmailAddresses([...addresses]); // Create new array to trigger React re-render
-          console.log(
-            `Progressive update: ${addresses.length} email addresses available`
-          );
         };
 
         const newEmailAddresses = await generateEmailAddresses(
@@ -251,10 +223,6 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
         setEmailAddresses(newEmailAddresses);
         setError(null);
 
-        console.log(
-          'Email addresses successfully updated:',
-          newEmailAddresses.length
-        );
         return newEmailAddresses;
       } catch (error) {
         const errorMessage =

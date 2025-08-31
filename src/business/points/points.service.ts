@@ -86,7 +86,6 @@ export class PointsService {
     // Update local cache
     this.updateUserPointsCache(walletAddress, pointsAction);
 
-    console.log(`Awarded ${points} points to ${walletAddress} for ${action}`);
   }
 
   // Get points value for different actions
@@ -227,7 +226,6 @@ export class PointsService {
   // Track referral click
   public async trackReferralClick(referralCode: string): Promise<void> {
     // In real implementation, this would be sent to backend
-    console.log(`Referral click tracked for code: ${referralCode}`);
   }
 
   // Process referral conversion (when referred user connects wallet)
@@ -244,9 +242,6 @@ export class PointsService {
       points: 50, // Bonus points for successful referral
     });
 
-    console.log(
-      `Referral conversion processed: ${referralCode} -> ${newUserWallet}`
-    );
   }
 
   // Generate claimable points (admin function - would be done by backend)

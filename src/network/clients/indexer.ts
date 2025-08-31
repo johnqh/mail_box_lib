@@ -6,7 +6,7 @@ import {
 } from '../../types';
 
 // Platform-specific global
-declare const fetch: typeof globalThis.fetch; // eslint-disable-line @typescript-eslint/no-unused-vars
+declare const fetch: typeof globalThis.fetch;
 
 /**
  * Indexer API client for interacting with mail_box_indexer v2.2.0

@@ -184,10 +184,6 @@ export function usePointsLeaderboard(
           loading: false,
         }));
       } catch (error) {
-        console.warn(
-          'Indexer API unavailable, falling back to legacy points API:',
-          error
-        );
 
         try {
           // Fallback to legacy points API
@@ -211,7 +207,6 @@ export function usePointsLeaderboard(
             loading: false,
           }));
         } catch (fallbackError) {
-          console.error('Both indexer and legacy API failed:', fallbackError);
           setState(prev => ({
             ...prev,
             loading: false,
@@ -238,10 +233,6 @@ export function usePointsLeaderboard(
         campaignsLoading: false,
       }));
     } catch (error) {
-      console.warn(
-        'Indexer campaigns API unavailable, falling back to legacy API:',
-        error
-      );
 
       try {
         // Fallback to legacy points API
@@ -252,10 +243,6 @@ export function usePointsLeaderboard(
           campaignsLoading: false,
         }));
       } catch (fallbackError) {
-        console.error(
-          'Both indexer and legacy campaigns API failed:',
-          fallbackError
-        );
         setState(prev => ({
           ...prev,
           campaignsLoading: false,
@@ -338,10 +325,6 @@ export function useTopUsers(
       );
       setTotalUsers(indexerResponse.pagination.totalUsers);
     } catch (err) {
-      console.warn(
-        'Indexer API unavailable for top users, falling back to legacy API:',
-        err
-      );
 
       try {
         // Fallback to legacy points API
