@@ -11,6 +11,116 @@
  */
 
 // =============================================================================
+// INDEXER API TYPES (v2.0.0+)
+// =============================================================================
+
+/**
+ * Standard API response wrapper for indexer endpoints
+ */
+export interface IndexerApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  timestamp: string;
+}
+
+/**
+ * Signature-protected API request base interface
+ * All signature-protected endpoints extend this
+ */
+export interface SignatureProtectedRequest {
+  /** Wallet address (EVM 0x format or Solana Base58) */
+  walletAddress: string;
+  /** Cryptographic signature proving wallet ownership */
+  signature: string;
+  /** Message that was signed for verification */
+  message: string;
+}
+
+/**
+ * Note: ChainType is defined later in this file with 'evm' | 'solana' | 'unknown'
+ */
+
+/**
+ * Email retrieval API request
+ * POST /emails
+ */
+export interface GetEmailsRequest extends SignatureProtectedRequest {}
+
+/**
+ * Email addresses response
+ */
+export interface GetEmailsResponse {
+  walletAddress: string;
+  addressType: ChainType;
+  emailAddresses: string[];
+  detailedAddresses?: {
+    email: string;
+    source: string;
+    verified?: boolean;
+  }[];
+  totalCount: number;
+  hasNameService: boolean;
+  verified: boolean;
+  timestamp: string;
+}
+
+/**
+ * Delegation retrieval API request  
+ * POST /delegated
+ */
+export interface GetDelegatedRequest extends SignatureProtectedRequest {}
+
+/**
+ * Delegation response
+ */
+export interface GetDelegatedResponse {
+  walletAddress: string;
+  addressType: ChainType;
+  delegatedTo: string | null;
+  chainId: number | null;
+  verified: boolean;
+  timestamp: string;
+}
+
+/**
+ * Get addresses delegated TO a wallet - API request
+ * POST /delegatedTo
+ */
+export interface GetDelegatedToRequest extends SignatureProtectedRequest {}
+
+/**
+ * Points summary request
+ * POST /points/summary
+ */
+export interface GetPointsSummaryRequest extends SignatureProtectedRequest {}
+
+/**
+ * Points history request
+ * POST /points/history
+ */
+export interface GetPointsHistoryRequest extends SignatureProtectedRequest {
+  limit?: number;
+  offset?: number;
+}
+
+/**
+ * Promotional code claim request
+ * POST /points/claim-promo
+ */
+export interface ClaimPromoCodeRequest extends SignatureProtectedRequest {
+  promoCode: string;
+}
+
+/**
+ * Referral registration request
+ * POST /points/register-referral
+ */
+export interface RegisterReferralRequest extends SignatureProtectedRequest {
+  referralCode: string;
+}
+
+// =============================================================================
 // WILDDUCK API TYPES
 // =============================================================================
 

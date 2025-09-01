@@ -39,7 +39,11 @@
       "Bash(grep:*)",
       "Bash(npx vitest:*)",
       "Bash(npm uninstall:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Read(/Users/qianghuang/mail_box_indexer/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/types/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)"
     ],
     "deny": [],
     "ask": []

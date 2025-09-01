@@ -4,6 +4,18 @@ import {
   NetworkRequestOptions,
   NetworkResponse,
 } from '../../types';
+import type {
+  SignatureProtectedRequest,
+  GetEmailsRequest,
+  GetEmailsResponse,
+  GetDelegatedRequest,
+  GetDelegatedResponse,
+  GetDelegatedToRequest,
+  GetPointsSummaryRequest,
+  GetPointsHistoryRequest,
+  ClaimPromoCodeRequest,
+  RegisterReferralRequest,
+} from '../../types/api';
 
 // Platform-specific global
 declare const fetch: typeof globalThis.fetch;
@@ -126,7 +138,7 @@ export class IndexerClient implements NetworkClient {
   async getEmailAddresses(
     walletAddress: string,
     signature: string,
-    message?: string
+    message: string
   ) {
     const response = await this.post('/emails', {
       walletAddress,
@@ -150,7 +162,7 @@ export class IndexerClient implements NetworkClient {
   async getDelegated(
     walletAddress: string,
     signature: string,
-    message?: string
+    message: string
   ) {
     const response = await this.post('/delegated', {
       walletAddress,
@@ -168,13 +180,19 @@ export class IndexerClient implements NetworkClient {
   }
 
   /**
-   * Get all addresses that have delegated TO a specific wallet address (public)
-   * GET /delegatedTo/:walletAddress
+   * Get all addresses that have delegated TO a specific wallet address (requires signature verification)
+   * POST /delegatedTo
    */
-  async getDelegatedTo(walletAddress: string) {
-    const response = await this.get(
-      `/delegatedTo/${encodeURIComponent(walletAddress)}`
-    );
+  async getDelegatedTo(
+    walletAddress: string,
+    signature: string,
+    message: string
+  ) {
+    const response = await this.post('/delegatedTo', {
+      walletAddress,
+      signature,
+      message,
+    });
 
     if (!response.ok) {
       throw new Error(
@@ -337,7 +355,7 @@ export class IndexerClient implements NetworkClient {
   async getPointsSummary(
     walletAddress: string,
     signature: string,
-    message?: string
+    message: string
   ) {
     const response = await this.post('/points/summary', {
       walletAddress,
@@ -361,7 +379,7 @@ export class IndexerClient implements NetworkClient {
   async getPointsHistory(
     walletAddress: string,
     signature: string,
-    message?: string,
+    message: string,
     limit?: number,
     offset?: number
   ) {
@@ -390,7 +408,7 @@ export class IndexerClient implements NetworkClient {
     walletAddress: string,
     promoCode: string,
     signature: string,
-    message?: string
+    message: string
   ) {
     const response = await this.post('/points/claim-promo', {
       walletAddress,
@@ -416,7 +434,7 @@ export class IndexerClient implements NetworkClient {
     walletAddress: string,
     promoCode: string,
     signature: string,
-    message?: string
+    message: string
   ) {
     const response = await this.post('/points/validate-promo', {
       walletAddress,
@@ -442,7 +460,7 @@ export class IndexerClient implements NetworkClient {
     walletAddress: string,
     referralCode: string,
     signature: string,
-    message?: string
+    message: string
   ) {
     const response = await this.post('/points/register-referral', {
       walletAddress,
@@ -467,7 +485,7 @@ export class IndexerClient implements NetworkClient {
   async reportRefereeLogin(
     walletAddress: string,
     signature: string,
-    message?: string
+    message: string
   ) {
     const response = await this.post('/points/referee-login', {
       walletAddress,
@@ -782,8 +800,7 @@ export const createIndexerApiConfig = (config: AppConfig) => ({
     // Mail endpoints
     EMAILS: '/emails',
     DELEGATED: '/delegated',
-    DELEGATED_TO: (walletAddress: string) =>
-      `/delegatedTo/${encodeURIComponent(walletAddress)}`,
+    DELEGATED_TO: '/delegatedTo',
     MESSAGE: (
       chainId: number,
       walletAddress: string,

@@ -100,20 +100,22 @@ export interface UseIndexerMailReturn {
   getEmailAddresses: (
     walletAddress: string,
     signature: string,
-    message?: string
+    message: string
   ) => Promise<IndexerEmailResponse>;
   getDelegatedAddress: (
     walletAddress: string,
     signature: string,
-    message?: string
+    message: string
   ) => Promise<IndexerDelegationInfo>;
   getDelegatorsToAddress: (
-    walletAddress: string
+    walletAddress: string,
+    signature: string,
+    message: string
   ) => Promise<IndexerDelegatorInfo>;
   verifySignature: (
     walletAddress: string,
     signature: string,
-    message?: string
+    message: string
   ) => Promise<IndexerSignatureVerification>;
   getSigningMessage: (
     chainId: number,
@@ -154,7 +156,7 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     async (
       walletAddress: string,
       signature: string,
-      message?: string
+      message: string
     ): Promise<IndexerEmailResponse> => {
       setIsLoading(true);
       setError(null);
@@ -182,7 +184,7 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     async (
       walletAddress: string,
       signature: string,
-      message?: string
+      message: string
     ): Promise<IndexerDelegationInfo> => {
       setIsLoading(true);
       setError(null);
@@ -209,12 +211,20 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
   );
 
   const getDelegatorsToAddress = useCallback(
-    async (walletAddress: string): Promise<IndexerDelegatorInfo> => {
+    async (
+      walletAddress: string,
+      signature: string,
+      message: string
+    ): Promise<IndexerDelegatorInfo> => {
       setIsLoading(true);
       setError(null);
 
       try {
-        const result = await indexerClient.getDelegatedTo(walletAddress);
+        const result = await indexerClient.getDelegatedTo(
+          walletAddress,
+          signature,
+          message
+        );
         return result;
       } catch (err) {
         const errorMessage =
@@ -234,7 +244,7 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     async (
       walletAddress: string,
       signature: string,
-      message?: string
+      message: string
     ): Promise<IndexerSignatureVerification> => {
       setIsLoading(true);
       setError(null);
