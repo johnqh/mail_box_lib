@@ -31,7 +31,8 @@
       "Read(/dev/**)",
       "Bash(npm ci:*)",
       "Bash(gh repo view:*)",
-      "Bash(echo \"Exit code: $?\")"
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(npx prettier:*)"
     ],
     "deny": [],
     "ask": []
