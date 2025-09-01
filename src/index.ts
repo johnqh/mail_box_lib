@@ -1,5 +1,5 @@
 /**
- * @0xmail/lib - Shared utilities and common functions for 0xmail.box projects
+ * @johnqh/lib - Shared utilities and common functions for 0xmail.box projects
  */
 
 // Business Logic - Core business operations and enums (Goal 4)

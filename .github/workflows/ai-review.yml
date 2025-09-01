@@ -86,7 +86,7 @@ jobs:
         # Code Review Analysis Request
         
         ## Context
-        This is a pull request for @0xmail/lib, a React Native-compatible shared utilities library for 0xmail.box projects.
+        This is a pull request for @johnqh/lib, a React Native-compatible shared utilities library for 0xmail.box projects.
         
         ## Architecture Principles
         - Platform-agnostic business logic in src/business/

@@ -1,10 +1,10 @@
 # Claude Code Assistant Instructions
 
-This document provides context and instructions for AI assistants working on the @0xmail/lib project.
+This document provides context and instructions for AI assistants working on the @johnqh/lib project.
 
 ## Project Context
 
-### What is @0xmail/lib?
+### What is @johnqh/lib?
 A React Native-compatible shared utilities library for 0xmail.box projects, providing:
 - Platform-agnostic business logic
 - Email management services

@@ -87,7 +87,7 @@ export function createBusinessLogicServicesSync() {
  *   DefaultEmailOperations,
  *   DefaultMailboxOperations,
  *   NavigationStateManager
- * } from '@0xmail/lib';
+ * } from '@johnqh/lib';
  *
  * const emailOps = new DefaultEmailOperations();
  * const mailboxOps = new DefaultMailboxOperations();

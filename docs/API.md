@@ -19,7 +19,7 @@ interface EmailService {
 
 **Usage:**
 ```typescript
-import { getEmailService } from '@0xmail/lib';
+import { getEmailService } from '@johnqh/lib';
 
 const emailService = getEmailService();
 const emails = await emailService.getEmails('user123', 'inbox');
@@ -285,18 +285,18 @@ export class ValidationError extends Error {
 
 ```typescript
 // Web environment
-import { createWebAppConfig } from '@0xmail/lib/di';
+import { createWebAppConfig } from '@johnqh/lib/di';
 const config = createWebAppConfig();
 
 // React Native environment
-import { createReactNativeAppConfig } from '@0xmail/lib/di';
+import { createReactNativeAppConfig } from '@johnqh/lib/di';
 const config = createReactNativeAppConfig();
 ```
 
 ### Service Registration
 
 ```typescript
-import { DependencyContainer } from '@0xmail/lib/business/core/container';
+import { DependencyContainer } from '@johnqh/lib/business/core/container';
 
 const container = new DependencyContainer();
 container.register('emailService', new WebEmailService(config));
@@ -385,7 +385,7 @@ The library automatically detects the platform and uses appropriate implementati
 
 ```typescript
 // This automatically chooses WebEmailService or ReactNativeEmailService
-import { getEmailService } from '@0xmail/lib';
+import { getEmailService } from '@johnqh/lib';
 
 const emailService = getEmailService();
 ```
@@ -395,7 +395,7 @@ const emailService = getEmailService();
 The library provides testing utilities for easier testing:
 
 ```typescript
-import { createMockEmailService, createTestUser } from '@0xmail/lib/testing';
+import { createMockEmailService, createTestUser } from '@johnqh/lib/testing';
 
 const mockService = createMockEmailService();
 const testUser = createTestUser();

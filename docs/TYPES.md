@@ -1,6 +1,6 @@
 # Type Documentation
 
-Complete TypeScript type definitions for @0xmail/lib.
+Complete TypeScript type definitions for @johnqh/lib.
 
 ## Table of Contents
 

@@ -1,11 +1,11 @@
-# @0xmail/lib
+# @johnqh/lib
 
 Shared utilities and common functions for 0xmail.box projects.
 
 ## Installation
 
 ```bash
-npm install @0xmail/lib
+npm install @johnqh/lib
 ```
 
 ## Features
@@ -17,7 +17,7 @@ Platform-agnostic environment variable management that works across web and Reac
 #### Basic Usage
 
 ```typescript
-import { env, getAppConfig } from '@0xmail/lib';
+import { env, getAppConfig } from '@johnqh/lib';
 
 // Check environment
 if (env.isDevelopment()) {
@@ -35,7 +35,7 @@ console.log(config.wildDuckApiToken);
 #### Web Environment (Vite)
 
 ```typescript
-import { WebEnvProvider, createWebAppConfig } from '@0xmail/lib';
+import { WebEnvProvider, createWebAppConfig } from '@johnqh/lib';
 
 const envProvider = new WebEnvProvider();
 const config = createWebAppConfig(envProvider);
@@ -44,7 +44,7 @@ const config = createWebAppConfig(envProvider);
 #### React Native Environment
 
 ```typescript
-import { ReactNativeEnvProvider, createReactNativeAppConfig } from '@0xmail/lib';
+import { ReactNativeEnvProvider, createReactNativeAppConfig } from '@johnqh/lib';
 import Config from 'react-native-config'; // Optional
 
 const envProvider = new ReactNativeEnvProvider(Config);

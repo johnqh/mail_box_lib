@@ -12,7 +12,7 @@ import {
   createIndexerService,
   IndexerClient,
   createIndexerClient 
-} from '@0xmail/lib';
+} from '@johnqh/lib';
 ```
 
 ### 2. Initialize the Service
@@ -106,7 +106,7 @@ import {
   IndexerLeaderboardResponse,
   IndexerCampaignsResponse,
   // ... many more types available
-} from '@0xmail/lib';
+} from '@johnqh/lib';
 ```
 
 ## Caching

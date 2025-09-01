@@ -1,4 +1,4 @@
-// Temporary types until full integration with @0xmail/lib
+// Temporary types until full integration with @johnqh/lib
 interface IndexerEmailResponse {
   success: boolean;
   emails?: any[];
@@ -76,7 +76,7 @@ interface AppConfig {
   };
 }
 
-// Define types that might not be exported from @0xmail/lib yet
+// Define types that might not be exported from @johnqh/lib yet
 interface IndexerClient {
   getEmailAddresses: (
     address: string,

@@ -1,5 +1,5 @@
 /**
- * Centralized type exports for @0xmail/lib
+ * Centralized type exports for @johnqh/lib
  * All interfaces and types are consolidated here
  */
 

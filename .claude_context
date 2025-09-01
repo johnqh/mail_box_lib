@@ -1,4 +1,4 @@
-# @0xmail/lib - AI Development Context
+# @johnqh/lib - AI Development Context
 
 ## Project Overview
 A React Native-compatible shared utilities library for 0xmail.box projects, providing platform-agnostic business logic, authentication, email handling, blockchain integration, and UI utilities.

@@ -297,7 +297,7 @@ npm test
 ```
 
 ### Publishing
-The library is published as `@0xmail/lib` and should work in both web and React Native environments.
+The library is published as `@johnqh/lib` and should work in both web and React Native environments.
 
 ### Version Management
 Follow semantic versioning:
