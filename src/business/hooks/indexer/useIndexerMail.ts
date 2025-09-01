@@ -97,14 +97,43 @@ export interface IndexerEntitlement {
 export interface UseIndexerMailReturn {
   isLoading: boolean;
   error: string | null;
-  getEmailAddresses: (walletAddress: string, signature: string, message?: string) => Promise<IndexerEmailResponse>;
-  getDelegatedAddress: (walletAddress: string, signature: string, message?: string) => Promise<IndexerDelegationInfo>;
-  getDelegatorsToAddress: (walletAddress: string) => Promise<IndexerDelegatorInfo>;
-  verifySignature: (walletAddress: string, signature: string, message?: string) => Promise<IndexerSignatureVerification>;
-  getSigningMessage: (chainId: number, walletAddress: string, domain: string, url: string) => Promise<IndexerSigningMessage>;
-  getNonce: (walletAddress: string, signature: string, message?: string) => Promise<IndexerNonceInfo>;
-  createNonce: (walletAddress: string, signature: string, message?: string) => Promise<IndexerNonceInfo>;
-  getNameServiceEntitlement: (walletAddress: string) => Promise<IndexerEntitlement>;
+  getEmailAddresses: (
+    walletAddress: string,
+    signature: string,
+    message?: string
+  ) => Promise<IndexerEmailResponse>;
+  getDelegatedAddress: (
+    walletAddress: string,
+    signature: string,
+    message?: string
+  ) => Promise<IndexerDelegationInfo>;
+  getDelegatorsToAddress: (
+    walletAddress: string
+  ) => Promise<IndexerDelegatorInfo>;
+  verifySignature: (
+    walletAddress: string,
+    signature: string,
+    message?: string
+  ) => Promise<IndexerSignatureVerification>;
+  getSigningMessage: (
+    chainId: number,
+    walletAddress: string,
+    domain: string,
+    url: string
+  ) => Promise<IndexerSigningMessage>;
+  getNonce: (
+    walletAddress: string,
+    signature: string,
+    message?: string
+  ) => Promise<IndexerNonceInfo>;
+  createNonce: (
+    walletAddress: string,
+    signature: string,
+    message?: string
+  ) => Promise<IndexerNonceInfo>;
+  getNameServiceEntitlement: (
+    walletAddress: string
+  ) => Promise<IndexerEntitlement>;
   clearError: () => void;
 }
 
@@ -121,158 +150,222 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     setError(null);
   }, []);
 
-  const getEmailAddresses = useCallback(async (
-    walletAddress: string, 
-    signature: string, 
-    message?: string
-  ): Promise<IndexerEmailResponse> => {
-    setIsLoading(true);
-    setError(null);
+  const getEmailAddresses = useCallback(
+    async (
+      walletAddress: string,
+      signature: string,
+      message?: string
+    ): Promise<IndexerEmailResponse> => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const result = await indexerClient.getEmailAddresses(walletAddress, signature, message);
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get email addresses';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [indexerClient]);
+      try {
+        const result = await indexerClient.getEmailAddresses(
+          walletAddress,
+          signature,
+          message
+        );
+        return result;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to get email addresses';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [indexerClient]
+  );
 
-  const getDelegatedAddress = useCallback(async (
-    walletAddress: string, 
-    signature: string, 
-    message?: string
-  ): Promise<IndexerDelegationInfo> => {
-    setIsLoading(true);
-    setError(null);
+  const getDelegatedAddress = useCallback(
+    async (
+      walletAddress: string,
+      signature: string,
+      message?: string
+    ): Promise<IndexerDelegationInfo> => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const result = await indexerClient.getDelegated(walletAddress, signature, message);
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get delegated address';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [indexerClient]);
+      try {
+        const result = await indexerClient.getDelegated(
+          walletAddress,
+          signature,
+          message
+        );
+        return result;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : 'Failed to get delegated address';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [indexerClient]
+  );
 
-  const getDelegatorsToAddress = useCallback(async (walletAddress: string): Promise<IndexerDelegatorInfo> => {
-    setIsLoading(true);
-    setError(null);
+  const getDelegatorsToAddress = useCallback(
+    async (walletAddress: string): Promise<IndexerDelegatorInfo> => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const result = await indexerClient.getDelegatedTo(walletAddress);
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get delegators to address';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [indexerClient]);
+      try {
+        const result = await indexerClient.getDelegatedTo(walletAddress);
+        return result;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : 'Failed to get delegators to address';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [indexerClient]
+  );
 
-  const verifySignature = useCallback(async (
-    walletAddress: string, 
-    signature: string, 
-    message?: string
-  ): Promise<IndexerSignatureVerification> => {
-    setIsLoading(true);
-    setError(null);
+  const verifySignature = useCallback(
+    async (
+      walletAddress: string,
+      signature: string,
+      message?: string
+    ): Promise<IndexerSignatureVerification> => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const result = await indexerClient.verifySignature(walletAddress, signature, message || '');
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to verify signature';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [indexerClient]);
+      try {
+        const result = await indexerClient.verifySignature(
+          walletAddress,
+          signature,
+          message || ''
+        );
+        return result;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to verify signature';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [indexerClient]
+  );
 
-  const getSigningMessage = useCallback(async (
-    chainId: number, 
-    walletAddress: string, 
-    domain: string, 
-    url: string
-  ): Promise<IndexerSigningMessage> => {
-    setIsLoading(true);
-    setError(null);
+  const getSigningMessage = useCallback(
+    async (
+      chainId: number,
+      walletAddress: string,
+      domain: string,
+      url: string
+    ): Promise<IndexerSigningMessage> => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const result = await indexerClient.getMessage(chainId, walletAddress, domain, url);
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get signing message';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [indexerClient]);
+      try {
+        const result = await indexerClient.getMessage(
+          chainId,
+          walletAddress,
+          domain,
+          url
+        );
+        return result;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to get signing message';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [indexerClient]
+  );
 
-  const getNonce = useCallback(async (
-    walletAddress: string, 
-    signature: string, 
-    message?: string
-  ): Promise<IndexerNonceInfo> => {
-    setIsLoading(true);
-    setError(null);
+  const getNonce = useCallback(
+    async (
+      walletAddress: string,
+      signature: string,
+      message?: string
+    ): Promise<IndexerNonceInfo> => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const result = await indexerClient.getNonce(walletAddress, signature, message || '');
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get nonce';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [indexerClient]);
+      try {
+        const result = await indexerClient.getNonce(
+          walletAddress,
+          signature,
+          message || ''
+        );
+        return result;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to get nonce';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [indexerClient]
+  );
 
-  const createNonce = useCallback(async (
-    walletAddress: string, 
-    signature: string, 
-    message?: string
-  ): Promise<IndexerNonceInfo> => {
-    setIsLoading(true);
-    setError(null);
+  const createNonce = useCallback(
+    async (
+      walletAddress: string,
+      signature: string,
+      message?: string
+    ): Promise<IndexerNonceInfo> => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const result = await indexerClient.createNonce(walletAddress, signature, message || '');
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create nonce';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [indexerClient]);
+      try {
+        const result = await indexerClient.createNonce(
+          walletAddress,
+          signature,
+          message || ''
+        );
+        return result;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to create nonce';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [indexerClient]
+  );
 
-  const getNameServiceEntitlement = useCallback(async (walletAddress: string): Promise<IndexerEntitlement> => {
-    setIsLoading(true);
-    setError(null);
+  const getNameServiceEntitlement = useCallback(
+    async (walletAddress: string): Promise<IndexerEntitlement> => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const result = await indexerClient.checkNameServiceEntitlement(walletAddress);
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get nameservice entitlement';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [indexerClient]);
+      try {
+        const result =
+          await indexerClient.checkNameServiceEntitlement(walletAddress);
+        return result;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : 'Failed to get nameservice entitlement';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [indexerClient]
+  );
 
   return {
     isLoading,

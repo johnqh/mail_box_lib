@@ -1,6 +1,10 @@
 import { useCallback, useState } from 'react';
 import axios from 'axios';
-import { WildDuckAPI, WildDuckMailbox, WildDuckMailboxResponse } from "../../../network/clients/wildduck";
+import {
+  WildDuckAPI,
+  WildDuckMailbox,
+  WildDuckMailboxResponse,
+} from '../../../network/clients/wildduck';
 
 export interface CreateMailboxParams {
   path: string;
@@ -19,15 +23,28 @@ export interface UseWildduckMailboxesReturn {
   isLoading: boolean;
   error: string | null;
   mailboxes: WildDuckMailbox[];
-  getMailboxes: (userId: string, options?: {
-    specialUse?: boolean;
-    showHidden?: boolean;
-    counters?: boolean;
-    sizes?: boolean;
-  }) => Promise<WildDuckMailbox[]>;
-  createMailbox: (userId: string, params: CreateMailboxParams) => Promise<{ success: boolean; id: string }>;
-  updateMailbox: (userId: string, mailboxId: string, params: UpdateMailboxParams) => Promise<{ success: boolean }>;
-  deleteMailbox: (userId: string, mailboxId: string) => Promise<{ success: boolean }>;
+  getMailboxes: (
+    userId: string,
+    options?: {
+      specialUse?: boolean;
+      showHidden?: boolean;
+      counters?: boolean;
+      sizes?: boolean;
+    }
+  ) => Promise<WildDuckMailbox[]>;
+  createMailbox: (
+    userId: string,
+    params: CreateMailboxParams
+  ) => Promise<{ success: boolean; id: string }>;
+  updateMailbox: (
+    userId: string,
+    mailboxId: string,
+    params: UpdateMailboxParams
+  ) => Promise<{ success: boolean }>;
+  deleteMailbox: (
+    userId: string,
+    mailboxId: string
+  ) => Promise<{ success: boolean }>;
   clearError: () => void;
   refresh: (userId: string) => Promise<void>;
 }
@@ -44,87 +61,124 @@ export const useWildduckMailboxes = (): UseWildduckMailboxesReturn => {
     setError(null);
   }, []);
 
-  const getMailboxes = useCallback(async (userId: string, options = {}): Promise<WildDuckMailbox[]> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const response: WildDuckMailboxResponse = await WildDuckAPI.getMailboxes(userId, options);
-      const mailboxList = response.results || [];
-      setMailboxes(mailboxList);
-      return mailboxList;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get mailboxes';
-      setError(errorMessage);
-      setMailboxes([]);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const getMailboxes = useCallback(
+    async (userId: string, options = {}): Promise<WildDuckMailbox[]> => {
+      setIsLoading(true);
+      setError(null);
 
-  const createMailbox = useCallback(async (userId: string, params: CreateMailboxParams): Promise<{ success: boolean; id: string }> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const response = await WildDuckAPI.createMailbox(userId, params.path, {
-        hidden: params.hidden,
-        retention: params.retention
-      });
-      return response;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create mailbox';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      try {
+        const response: WildDuckMailboxResponse =
+          await WildDuckAPI.getMailboxes(userId, options);
+        const mailboxList = response.results || [];
+        setMailboxes(mailboxList);
+        return mailboxList;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to get mailboxes';
+        setError(errorMessage);
+        setMailboxes([]);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
 
-  const updateMailbox = useCallback(async (userId: string, mailboxId: string, params: UpdateMailboxParams): Promise<{ success: boolean }> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // This would need to be added to the WildDuckAPI class
-      const response = await axios.put(`${WildDuckAPI['baseUrl']}/users/${userId}/mailboxes/${mailboxId}`, params, {
-        headers: WildDuckAPI['headers']
-      });
-      
-      return response.data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update mailbox';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const createMailbox = useCallback(
+    async (
+      userId: string,
+      params: CreateMailboxParams
+    ): Promise<{ success: boolean; id: string }> => {
+      setIsLoading(true);
+      setError(null);
 
-  const deleteMailbox = useCallback(async (userId: string, mailboxId: string): Promise<{ success: boolean }> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // This would need to be added to the WildDuckAPI class
-      const response = await axios.delete(`${WildDuckAPI['baseUrl']}/users/${userId}/mailboxes/${mailboxId}`, {
-        headers: WildDuckAPI['headers']
-      });
-      
-      return response.data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete mailbox';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      try {
+        const response = await WildDuckAPI.createMailbox(userId, params.path, {
+          hidden: params.hidden,
+          retention: params.retention,
+        });
+        return response;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to create mailbox';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
 
-  const refresh = useCallback(async (userId: string): Promise<void> => {
-    await getMailboxes(userId, { counters: true });
-  }, [getMailboxes]);
+  const updateMailbox = useCallback(
+    async (
+      userId: string,
+      mailboxId: string,
+      params: UpdateMailboxParams
+    ): Promise<{ success: boolean }> => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // This would need to be added to the WildDuckAPI class
+        const response = await axios.put(
+          `${WildDuckAPI['baseUrl']}/users/${userId}/mailboxes/${mailboxId}`,
+          params,
+          {
+            headers: WildDuckAPI['headers'],
+          }
+        );
+
+        return response.data;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to update mailbox';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  const deleteMailbox = useCallback(
+    async (
+      userId: string,
+      mailboxId: string
+    ): Promise<{ success: boolean }> => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // This would need to be added to the WildDuckAPI class
+        const response = await axios.delete(
+          `${WildDuckAPI['baseUrl']}/users/${userId}/mailboxes/${mailboxId}`,
+          {
+            headers: WildDuckAPI['headers'],
+          }
+        );
+
+        return response.data;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to delete mailbox';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  const refresh = useCallback(
+    async (userId: string): Promise<void> => {
+      await getMailboxes(userId, { counters: true });
+    },
+    [getMailboxes]
+  );
 
   return {
     isLoading,
@@ -135,6 +189,6 @@ export const useWildduckMailboxes = (): UseWildduckMailboxesReturn => {
     updateMailbox,
     deleteMailbox,
     clearError,
-    refresh
+    refresh,
   };
 };

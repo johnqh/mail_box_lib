@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import axios from 'axios';
-import { WildDuckAPI } from "../../../network/clients/wildduck";
+import { WildDuckAPI } from '../../../network/clients/wildduck';
 
 export interface WildduckFilter {
   id: string;
@@ -76,9 +76,19 @@ export interface UseWildduckFiltersReturn {
   filters: WildduckFilter[];
   getFilters: (userId: string) => Promise<WildduckFilter[]>;
   getFilter: (userId: string, filterId: string) => Promise<WildduckFilter>;
-  createFilter: (userId: string, params: CreateFilterParams) => Promise<{ success: boolean; id: string }>;
-  updateFilter: (userId: string, filterId: string, params: UpdateFilterParams) => Promise<{ success: boolean }>;
-  deleteFilter: (userId: string, filterId: string) => Promise<{ success: boolean }>;
+  createFilter: (
+    userId: string,
+    params: CreateFilterParams
+  ) => Promise<{ success: boolean; id: string }>;
+  updateFilter: (
+    userId: string,
+    filterId: string,
+    params: UpdateFilterParams
+  ) => Promise<{ success: boolean }>;
+  deleteFilter: (
+    userId: string,
+    filterId: string
+  ) => Promise<{ success: boolean }>;
   clearError: () => void;
   refresh: (userId: string) => Promise<void>;
 }
@@ -95,112 +105,159 @@ export const useWildduckFilters = (): UseWildduckFiltersReturn => {
     setError(null);
   }, []);
 
-  const getFilters = useCallback(async (userId: string): Promise<WildduckFilter[]> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // This would need to be added to the WildDuckAPI class
-      const response = await axios.get(`${WildDuckAPI['baseUrl']}/users/${userId}/filters`, {
-        headers: WildDuckAPI['headers']
-      });
-      
-      const filterList = response.data.results || [];
-      setFilters(filterList);
-      return filterList;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get filters';
-      setError(errorMessage);
-      setFilters([]);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const getFilters = useCallback(
+    async (userId: string): Promise<WildduckFilter[]> => {
+      setIsLoading(true);
+      setError(null);
 
-  const getFilter = useCallback(async (userId: string, filterId: string): Promise<WildduckFilter> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // This would need to be added to the WildDuckAPI class
-      const response = await axios.get(`${WildDuckAPI['baseUrl']}/users/${userId}/filters/${filterId}`, {
-        headers: WildDuckAPI['headers']
-      });
-      
-      return response.data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get filter';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      try {
+        // This would need to be added to the WildDuckAPI class
+        const response = await axios.get(
+          `${WildDuckAPI['baseUrl']}/users/${userId}/filters`,
+          {
+            headers: WildDuckAPI['headers'],
+          }
+        );
 
-  const createFilter = useCallback(async (userId: string, params: CreateFilterParams): Promise<{ success: boolean; id: string }> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // This would need to be added to the WildDuckAPI class
-      const response = await axios.post(`${WildDuckAPI['baseUrl']}/users/${userId}/filters`, params, {
-        headers: WildDuckAPI['headers']
-      });
-      
-      return response.data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create filter';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+        const filterList = response.data.results || [];
+        setFilters(filterList);
+        return filterList;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to get filters';
+        setError(errorMessage);
+        setFilters([]);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
 
-  const updateFilter = useCallback(async (userId: string, filterId: string, params: UpdateFilterParams): Promise<{ success: boolean }> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // This would need to be added to the WildDuckAPI class
-      const response = await axios.put(`${WildDuckAPI['baseUrl']}/users/${userId}/filters/${filterId}`, params, {
-        headers: WildDuckAPI['headers']
-      });
-      
-      return response.data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update filter';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const getFilter = useCallback(
+    async (userId: string, filterId: string): Promise<WildduckFilter> => {
+      setIsLoading(true);
+      setError(null);
 
-  const deleteFilter = useCallback(async (userId: string, filterId: string): Promise<{ success: boolean }> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // This would need to be added to the WildDuckAPI class
-      const response = await axios.delete(`${WildDuckAPI['baseUrl']}/users/${userId}/filters/${filterId}`, {
-        headers: WildDuckAPI['headers']
-      });
-      
-      return response.data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete filter';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      try {
+        // This would need to be added to the WildDuckAPI class
+        const response = await axios.get(
+          `${WildDuckAPI['baseUrl']}/users/${userId}/filters/${filterId}`,
+          {
+            headers: WildDuckAPI['headers'],
+          }
+        );
 
-  const refresh = useCallback(async (userId: string): Promise<void> => {
-    await getFilters(userId);
-  }, [getFilters]);
+        return response.data;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to get filter';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  const createFilter = useCallback(
+    async (
+      userId: string,
+      params: CreateFilterParams
+    ): Promise<{ success: boolean; id: string }> => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // This would need to be added to the WildDuckAPI class
+        const response = await axios.post(
+          `${WildDuckAPI['baseUrl']}/users/${userId}/filters`,
+          params,
+          {
+            headers: WildDuckAPI['headers'],
+          }
+        );
+
+        return response.data;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to create filter';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  const updateFilter = useCallback(
+    async (
+      userId: string,
+      filterId: string,
+      params: UpdateFilterParams
+    ): Promise<{ success: boolean }> => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // This would need to be added to the WildDuckAPI class
+        const response = await axios.put(
+          `${WildDuckAPI['baseUrl']}/users/${userId}/filters/${filterId}`,
+          params,
+          {
+            headers: WildDuckAPI['headers'],
+          }
+        );
+
+        return response.data;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to update filter';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  const deleteFilter = useCallback(
+    async (userId: string, filterId: string): Promise<{ success: boolean }> => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // This would need to be added to the WildDuckAPI class
+        const response = await axios.delete(
+          `${WildDuckAPI['baseUrl']}/users/${userId}/filters/${filterId}`,
+          {
+            headers: WildDuckAPI['headers'],
+          }
+        );
+
+        return response.data;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to delete filter';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  const refresh = useCallback(
+    async (userId: string): Promise<void> => {
+      await getFilters(userId);
+    },
+    [getFilters]
+  );
 
   return {
     isLoading,
@@ -212,6 +269,6 @@ export const useWildduckFilters = (): UseWildduckFiltersReturn => {
     updateFilter,
     deleteFilter,
     clearError,
-    refresh
+    refresh,
   };
 };

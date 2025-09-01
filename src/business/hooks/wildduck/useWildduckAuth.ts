@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import axios from 'axios';
-import { WildDuckAPI } from "../../../network/clients/wildduck";
+import { WildDuckAPI } from '../../../network/clients/wildduck';
 import { useStorageService } from '../useServices';
 
 export interface AuthResponse {
@@ -39,10 +39,13 @@ export const useWildduckAuth = (): UseWildduckAuthReturn => {
     setError(null);
   }, []);
 
-  const getAuthStatus = useCallback(async (): Promise<{ authenticated: boolean; user?: any }> => {
+  const getAuthStatus = useCallback(async (): Promise<{
+    authenticated: boolean;
+    user?: any;
+  }> => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       // Check if user has valid token or authentication status
       const token = await storageService.getItem('wildduck_token');
@@ -55,16 +58,17 @@ export const useWildduckAuth = (): UseWildduckAuthReturn => {
         const response = await axios.get(`${WildDuckAPI['baseUrl']}/users/me`, {
           headers: {
             ...WildDuckAPI['headers'],
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
-        
+
         return { authenticated: true, user: response.data };
       } catch {
         return { authenticated: false };
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to check auth status';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to check auth status';
       setError(errorMessage);
       return { authenticated: false };
     } finally {
@@ -76,6 +80,6 @@ export const useWildduckAuth = (): UseWildduckAuthReturn => {
     isLoading,
     error,
     getAuthStatus,
-    clearError
+    clearError,
   };
 };

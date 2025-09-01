@@ -306,7 +306,9 @@ describe('useDebouncedCallback', () => {
     ) => void;
 
     const callback = jest.fn() as jest.MockedFunction<ComplexCallback>;
-    const { result } = renderHook(() => useDebouncedCallback(callback as any, 300));
+    const { result } = renderHook(() =>
+      useDebouncedCallback(callback as any, 300)
+    );
 
     act(() => {
       result.current(

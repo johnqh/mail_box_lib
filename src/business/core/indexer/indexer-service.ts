@@ -78,22 +78,73 @@ interface AppConfig {
 
 // Define types that might not be exported from @0xmail/lib yet
 interface IndexerClient {
-  getEmailAddresses: (address: string, signature: string, message?: string) => Promise<IndexerEmailResponse>;
-  getPointsSummary: (address: string, signature: string, message?: string) => Promise<IndexerPointsSummaryResponse>;
-  getPointsHistory: (address: string, signature: string, message?: string, limit?: number, offset?: number) => Promise<IndexerPointsHistoryResponse>;
-  getLeaderboard: (limit?: number, offset?: number) => Promise<IndexerLeaderboardResponse>;
+  getEmailAddresses: (
+    address: string,
+    signature: string,
+    message?: string
+  ) => Promise<IndexerEmailResponse>;
+  getPointsSummary: (
+    address: string,
+    signature: string,
+    message?: string
+  ) => Promise<IndexerPointsSummaryResponse>;
+  getPointsHistory: (
+    address: string,
+    signature: string,
+    message?: string,
+    limit?: number,
+    offset?: number
+  ) => Promise<IndexerPointsHistoryResponse>;
+  getLeaderboard: (
+    limit?: number,
+    offset?: number
+  ) => Promise<IndexerLeaderboardResponse>;
   getCampaigns: () => Promise<IndexerCampaignsResponse>;
-  verifySignature: (address: string, signature: string, message: string) => Promise<any>;
-  getMessage: (chainId: number, address: string, domain: string, url: string) => Promise<any>;
-  getDelegated: (address: string, signature: string, message?: string) => Promise<any>;
+  verifySignature: (
+    address: string,
+    signature: string,
+    message: string
+  ) => Promise<any>;
+  getMessage: (
+    chainId: number,
+    address: string,
+    domain: string,
+    url: string
+  ) => Promise<any>;
+  getDelegated: (
+    address: string,
+    signature: string,
+    message?: string
+  ) => Promise<any>;
   getDelegatedTo: (address: string) => Promise<any>;
   getHowToEarnPoints: () => Promise<IndexerHowToEarnResponse>;
   getPublicStats: () => Promise<IndexerPublicStatsResponse>;
-  getCampaignStats: (campaignId: string) => Promise<IndexerCampaignStatsResponse>;
-  claimPromoCode: (address: string, code: string, signature: string, message?: string) => Promise<IndexerPromoCodeResponse>;
-  validatePromoCode: (address: string, code: string, signature: string, message?: string) => Promise<IndexerPromoValidationResponse>;
-  registerReferral: (address: string, code: string, signature: string, message?: string) => Promise<IndexerReferralResponse>;
-  reportRefereeLogin: (address: string, signature: string, message?: string) => Promise<IndexerRefereeLoginResponse>;
+  getCampaignStats: (
+    campaignId: string
+  ) => Promise<IndexerCampaignStatsResponse>;
+  claimPromoCode: (
+    address: string,
+    code: string,
+    signature: string,
+    message?: string
+  ) => Promise<IndexerPromoCodeResponse>;
+  validatePromoCode: (
+    address: string,
+    code: string,
+    signature: string,
+    message?: string
+  ) => Promise<IndexerPromoValidationResponse>;
+  registerReferral: (
+    address: string,
+    code: string,
+    signature: string,
+    message?: string
+  ) => Promise<IndexerReferralResponse>;
+  reportRefereeLogin: (
+    address: string,
+    signature: string,
+    message?: string
+  ) => Promise<IndexerRefereeLoginResponse>;
   webhookEmailSent: (data: any) => Promise<any>;
   webhookRecipientLogin: (data: any) => Promise<any>;
   webhookLogin: (data: any) => Promise<any>;
@@ -102,9 +153,15 @@ interface IndexerClient {
 
 // Mock client factory for now
 const createIndexerClient = (_config: AppConfig): IndexerClient => ({
-  getEmailAddresses: async (_address: string) => ({ success: true, emails: [] }),
+  getEmailAddresses: async (_address: string) => ({
+    success: true,
+    emails: [],
+  }),
   getPointsSummary: async (_address: string) => ({ success: true, points: 0 }),
-  getPointsHistory: async (_address: string) => ({ success: true, history: [] }),
+  getPointsHistory: async (_address: string) => ({
+    success: true,
+    history: [],
+  }),
   getLeaderboard: async () => ({ success: true, leaderboard: [] }),
   getCampaigns: async () => ({ success: true, campaigns: [] }),
   verifySignature: async () => ({ success: true }),
@@ -190,7 +247,7 @@ export class IndexerService {
   ): Promise<IndexerEmailResponse> {
     const cacheKey = this.getCacheKey('getEmailAddresses', { walletAddress });
     const cached = this.getFromCache<IndexerEmailResponse>(cacheKey);
-    
+
     if (cached) {
       return cached;
     }
@@ -201,7 +258,7 @@ export class IndexerService {
         signature || '',
         message
       );
-      
+
       this.setCache(cacheKey, response);
       return response;
     } catch (error) {
@@ -239,7 +296,7 @@ export class IndexerService {
   ): Promise<IndexerLeaderboardResponse> {
     const cacheKey = this.getCacheKey('getLeaderboard', { limit, offset });
     const cached = this.getFromCache<IndexerLeaderboardResponse>(cacheKey);
-    
+
     if (cached) {
       return cached;
     }

@@ -4,19 +4,22 @@
  */
 
 import { useCallback, useState } from 'react';
-import { 
-  AppConfig as _AppConfig, 
-  IndexerCampaign, 
+import {
+  AppConfig as _AppConfig,
+  IndexerCampaign,
   IndexerHowToEarnResponse,
   IndexerLeaderboardEntry,
   IndexerPointsHistoryEntry,
   IndexerPointsSummary,
-  IndexerPublicStatsResponse 
+  IndexerPublicStatsResponse,
 } from '../../../types';
 
 // Service interface for indexer operations (uses DI)
 interface IndexerService {
-  getLeaderboard(limit?: number, offset?: number): Promise<{
+  getLeaderboard(
+    limit?: number,
+    offset?: number
+  ): Promise<{
     leaderboard: IndexerLeaderboardEntry[];
     pagination: {
       page: number;
@@ -28,8 +31,18 @@ interface IndexerService {
     };
   }>;
   getCampaigns(): Promise<IndexerCampaign[]>;
-  getPointsSummary(walletAddress: string, signature: string, message?: string): Promise<IndexerPointsSummary>;
-  getPointsHistory(walletAddress: string, signature: string, message?: string, limit?: number, offset?: number): Promise<IndexerPointsHistoryEntry[]>;
+  getPointsSummary(
+    walletAddress: string,
+    signature: string,
+    message?: string
+  ): Promise<IndexerPointsSummary>;
+  getPointsHistory(
+    walletAddress: string,
+    signature: string,
+    message?: string,
+    limit?: number,
+    offset?: number
+  ): Promise<IndexerPointsHistoryEntry[]>;
   getHowToEarnPoints(): Promise<IndexerHowToEarnResponse>;
   getPublicStats(): Promise<IndexerPublicStatsResponse>;
 }
@@ -95,35 +108,40 @@ export interface IndexerPublicStats {
 export function useIndexerPoints(dependencies?: IndexerHookDependencies) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // In a real implementation, this would be injected via a service locator or context
   // For now, we'll use a mock implementation until proper DI is set up
-  const indexerService = dependencies?.indexerService || createMockIndexerService();
+  const indexerService =
+    dependencies?.indexerService || createMockIndexerService();
 
-  const getLeaderboard = useCallback(async (
-    _timeframe: 'all_time' | 'weekly' | 'monthly' = 'all_time',
-    page: number = 1,
-    limit: number = 50
-  ) => {
-    setIsLoading(true);
-    setError(null);
+  const getLeaderboard = useCallback(
+    async (
+      _timeframe: 'all_time' | 'weekly' | 'monthly' = 'all_time',
+      page: number = 1,
+      limit: number = 50
+    ) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const offset = (page - 1) * limit;
-      const result = await indexerService.getLeaderboard(limit, offset);
-      
-      return {
-        leaderboard: result.leaderboard,
-        pagination: result.pagination
-      };
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get leaderboard';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [indexerService]);
+      try {
+        const offset = (page - 1) * limit;
+        const result = await indexerService.getLeaderboard(limit, offset);
+
+        return {
+          leaderboard: result.leaderboard,
+          pagination: result.pagination,
+        };
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to get leaderboard';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [indexerService]
+  );
 
   const getActiveCampaigns = useCallback(async () => {
     setIsLoading(true);
@@ -133,7 +151,8 @@ export function useIndexerPoints(dependencies?: IndexerHookDependencies) {
       const campaigns = await indexerService.getCampaigns();
       return campaigns.filter(campaign => campaign.isActive);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get campaigns';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to get campaigns';
       setError(errorMessage);
       throw err;
     } finally {
@@ -141,45 +160,59 @@ export function useIndexerPoints(dependencies?: IndexerHookDependencies) {
     }
   }, [indexerService]);
 
-  const getPointsSummary = useCallback(async (
-    walletAddress: string, 
-    signature: string, 
-    message?: string
-  ) => {
-    setIsLoading(true);
-    setError(null);
+  const getPointsSummary = useCallback(
+    async (walletAddress: string, signature: string, message?: string) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      return await indexerService.getPointsSummary(walletAddress, signature, message);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get points summary';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [indexerService]);
+      try {
+        return await indexerService.getPointsSummary(
+          walletAddress,
+          signature,
+          message
+        );
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to get points summary';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [indexerService]
+  );
 
-  const getPointsHistory = useCallback(async (
-    walletAddress: string,
-    signature: string,
-    message?: string,
-    limit?: number,
-    offset?: number
-  ) => {
-    setIsLoading(true);
-    setError(null);
+  const getPointsHistory = useCallback(
+    async (
+      walletAddress: string,
+      signature: string,
+      message?: string,
+      limit?: number,
+      offset?: number
+    ) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      return await indexerService.getPointsHistory(walletAddress, signature, message, limit, offset);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get points history';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [indexerService]);
+      try {
+        return await indexerService.getPointsHistory(
+          walletAddress,
+          signature,
+          message,
+          limit,
+          offset
+        );
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to get points history';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [indexerService]
+  );
 
   const getHowToEarnPoints = useCallback(async () => {
     setIsLoading(true);
@@ -188,7 +221,8 @@ export function useIndexerPoints(dependencies?: IndexerHookDependencies) {
     try {
       return await indexerService.getHowToEarnPoints();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get how-to-earn info';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to get how-to-earn info';
       setError(errorMessage);
       throw err;
     } finally {
@@ -203,7 +237,8 @@ export function useIndexerPoints(dependencies?: IndexerHookDependencies) {
     try {
       return await indexerService.getPublicStats();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get public stats';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to get public stats';
       setError(errorMessage);
       throw err;
     } finally {
@@ -219,7 +254,7 @@ export function useIndexerPoints(dependencies?: IndexerHookDependencies) {
     getHowToEarnPoints,
     getPublicStats,
     isLoading,
-    error
+    error,
   };
 }
 
@@ -236,8 +271,8 @@ function createMockIndexerService(): IndexerService {
           totalUsers: 0,
           totalPages: 0,
           hasNext: false,
-          hasPrevious: false
-        }
+          hasPrevious: false,
+        },
       };
     },
 
@@ -245,7 +280,11 @@ function createMockIndexerService(): IndexerService {
       return [];
     },
 
-    async getPointsSummary(walletAddress: string, _signature: string, _message?: string) {
+    async getPointsSummary(
+      walletAddress: string,
+      _signature: string,
+      _message?: string
+    ) {
       return {
         walletAddress,
         totalPoints: '0',
@@ -263,8 +302,8 @@ function createMockIndexerService(): IndexerService {
           totalReferrals: 0,
           successfulReferrals: 0,
           referralPointsEarned: '0',
-          referralCode: ''
-        }
+          referralCode: '',
+        },
       };
     },
 
@@ -281,15 +320,15 @@ function createMockIndexerService(): IndexerService {
           earnMethods: [],
           quickStart: {
             title: 'Quick Start',
-            steps: []
+            steps: [],
           },
           totalMethods: 0,
           estimatedEarningsPerDay: {
             casual: 10,
             regular: 50,
-            power: 200
-          }
-        }
+            power: 200,
+          },
+        },
       };
     },
 
@@ -304,9 +343,9 @@ function createMockIndexerService(): IndexerService {
           totalEmailsSent: 0,
           totalReferrals: 0,
           averagePointsPerUser: 0,
-          lastUpdated: new Date().toISOString()
-        }
+          lastUpdated: new Date().toISOString(),
+        },
       };
-    }
+    },
   };
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
-import { WildDuckAPI } from "../../../network/clients/wildduck";
+import { WildDuckAPI } from '../../../network/clients/wildduck';
 
 export interface WildduckHealthStatus {
   success: boolean;
@@ -50,15 +50,19 @@ export interface UseWildduckHealthReturn {
 export const useWildduckHealth = (): UseWildduckHealthReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [healthStatus, setHealthStatus] = useState<WildduckHealthStatus | null>(null);
+  const [healthStatus, setHealthStatus] = useState<WildduckHealthStatus | null>(
+    null
+  );
   const [isMonitoring, setIsMonitoring] = useState(false);
-  const [monitoringInterval, setMonitoringInterval] = useState<NodeJS.Timeout | null>(null);
+  const [monitoringInterval, setMonitoringInterval] =
+    useState<NodeJS.Timeout | null>(null);
 
   const clearError = useCallback(() => {
     setError(null);
   }, []);
 
-  const isHealthy = healthStatus?.success === true && 
+  const isHealthy =
+    healthStatus?.success === true &&
     healthStatus?.database?.status === 'connected' &&
     (healthStatus?.redis?.status === 'connected' || !healthStatus?.redis) &&
     (healthStatus?.imap?.status === 'running' || !healthStatus?.imap);
@@ -66,19 +70,20 @@ export const useWildduckHealth = (): UseWildduckHealthReturn => {
   const checkHealth = useCallback(async (): Promise<WildduckHealthStatus> => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       // This would need to be added to the WildDuckAPI class
       const response = await axios.get(`${WildDuckAPI['baseUrl']}/health`, {
-        headers: WildDuckAPI['headers']
+        headers: WildDuckAPI['headers'],
       });
-      
+
       setHealthStatus(response.data);
       return response.data;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to check health';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to check health';
       setError(errorMessage);
-      
+
       // Create a basic error health status
       const errorStatus: WildduckHealthStatus = {
         success: false,
@@ -86,9 +91,9 @@ export const useWildduckHealth = (): UseWildduckHealthReturn => {
         redis: { status: 'error' },
         imap: { status: 'error' },
         smtp: { status: 'error' },
-        pop3: { status: 'error' }
+        pop3: { status: 'error' },
       };
-      
+
       setHealthStatus(errorStatus);
       throw err;
     } finally {
@@ -96,23 +101,26 @@ export const useWildduckHealth = (): UseWildduckHealthReturn => {
     }
   }, []);
 
-  const startMonitoring = useCallback((intervalMs: number = 30000) => {
-    if (monitoringInterval) {
-      clearInterval(monitoringInterval);
-    }
-    
-    setIsMonitoring(true);
-    
-    // Initial health check
-    checkHealth().catch(console.error);
-    
-    // Set up periodic health checks
-    const interval = setInterval(() => {
+  const startMonitoring = useCallback(
+    (intervalMs: number = 30000) => {
+      if (monitoringInterval) {
+        clearInterval(monitoringInterval);
+      }
+
+      setIsMonitoring(true);
+
+      // Initial health check
       checkHealth().catch(console.error);
-    }, intervalMs);
-    
-    setMonitoringInterval(interval);
-  }, [checkHealth, monitoringInterval]);
+
+      // Set up periodic health checks
+      const interval = setInterval(() => {
+        checkHealth().catch(console.error);
+      }, intervalMs);
+
+      setMonitoringInterval(interval);
+    },
+    [checkHealth, monitoringInterval]
+  );
 
   const stopMonitoring = useCallback(() => {
     if (monitoringInterval) {
@@ -140,6 +148,6 @@ export const useWildduckHealth = (): UseWildduckHealthReturn => {
     startMonitoring,
     stopMonitoring,
     isMonitoring,
-    clearError
+    clearError,
   };
 };
