@@ -32,7 +32,8 @@
       "Bash(npm ci:*)",
       "Bash(gh repo view:*)",
       "Bash(echo \"Exit code: $?\")",
-      "Bash(npx prettier:*)"
+      "Bash(npx prettier:*)",
+      "Bash(npm run test:run:*)"
     ],
     "deny": [],
     "ask": []

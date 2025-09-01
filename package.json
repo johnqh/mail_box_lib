@@ -1,6 +1,6 @@
 {
   "name": "@johnqh/lib",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "React Native-compatible shared utilities and common functions for 0xmail.box projects",
   "type": "module",
   "main": "dist/index.js",
@@ -13,8 +13,8 @@
     "build:watch": "tsc --watch",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run clean && npm run build",
-    "test": "vitest",
-    "test:run": "vitest run",
+    "test": "node --require ./crypto-polyfill.cjs ./node_modules/.bin/vitest",
+    "test:run": "node --require ./crypto-polyfill.cjs ./node_modules/.bin/vitest run",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "format": "prettier --write src/**/*.{ts,tsx,js,jsx,json,md}",

@@ -1,11 +1,4 @@
 import { vi } from 'vitest'
-import { webcrypto } from 'crypto'
-
-// Polyfill crypto.getRandomValues for Node.js environment
-Object.defineProperty(globalThis, 'crypto', {
-  value: webcrypto,
-  writable: true,
-})
 
 // Mock localStorage
 const localStorageMock = {
