@@ -45,7 +45,7 @@ export interface SignatureProtectedRequest {
  * Email retrieval API request
  * POST /emails
  */
-export interface GetEmailsRequest extends SignatureProtectedRequest {}
+export type GetEmailsRequest = SignatureProtectedRequest;
 
 /**
  * Email addresses response
@@ -66,10 +66,10 @@ export interface GetEmailsResponse {
 }
 
 /**
- * Delegation retrieval API request  
+ * Delegation retrieval API request
  * POST /delegated
  */
-export interface GetDelegatedRequest extends SignatureProtectedRequest {}
+export type GetDelegatedRequest = SignatureProtectedRequest;
 
 /**
  * Delegation response
@@ -87,13 +87,13 @@ export interface GetDelegatedResponse {
  * Get addresses delegated TO a wallet - API request
  * POST /delegatedTo
  */
-export interface GetDelegatedToRequest extends SignatureProtectedRequest {}
+export type GetDelegatedToRequest = SignatureProtectedRequest;
 
 /**
  * Points summary request
  * POST /points/summary
  */
-export interface GetPointsSummaryRequest extends SignatureProtectedRequest {}
+export type GetPointsSummaryRequest = SignatureProtectedRequest;
 
 /**
  * Points history request

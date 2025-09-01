@@ -52,7 +52,7 @@
     "typescript": "^5.5.3"
   },
   "peerDependencies": {
-    "react": "^18.2.0"
+    "react": "^19.1.1"
   },
   "dependencies": {
     "@noble/hashes": "^1.8.0",

@@ -4,18 +4,7 @@ import {
   NetworkRequestOptions,
   NetworkResponse,
 } from '../../types';
-import type {
-  SignatureProtectedRequest,
-  GetEmailsRequest,
-  GetEmailsResponse,
-  GetDelegatedRequest,
-  GetDelegatedResponse,
-  GetDelegatedToRequest,
-  GetPointsSummaryRequest,
-  GetPointsHistoryRequest,
-  ClaimPromoCodeRequest,
-  RegisterReferralRequest,
-} from '../../types/api';
+// Note: TypeScript types are available in ../../types/api but not currently used in implementation
 
 // Platform-specific global
 declare const fetch: typeof globalThis.fetch;
