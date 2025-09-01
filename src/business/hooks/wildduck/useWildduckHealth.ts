@@ -1,0 +1,150 @@
+import { useState, useCallback, useEffect } from 'react';
+import { WildDuckAPI } from "../../../network/clients/wildduck";
+
+export interface WildduckHealthStatus {
+  success: boolean;
+  version?: string;
+  database?: {
+    status: 'connected' | 'disconnected' | 'error';
+    collections?: number;
+  };
+  redis?: {
+    status: 'connected' | 'disconnected' | 'error';
+  };
+  imap?: {
+    status: 'running' | 'stopped' | 'error';
+    connections?: number;
+  };
+  smtp?: {
+    status: 'running' | 'stopped' | 'error';
+    connections?: number;
+  };
+  pop3?: {
+    status: 'running' | 'stopped' | 'error';
+    connections?: number;
+  };
+  uptime?: number;
+  memory?: {
+    used: number;
+    free: number;
+    total: number;
+  };
+}
+
+export interface UseWildduckHealthReturn {
+  isLoading: boolean;
+  error: string | null;
+  healthStatus: WildduckHealthStatus | null;
+  isHealthy: boolean;
+  checkHealth: () => Promise<WildduckHealthStatus>;
+  startMonitoring: (intervalMs?: number) => void;
+  stopMonitoring: () => void;
+  isMonitoring: boolean;
+  clearError: () => void;
+}
+
+/**
+ * Hook for WildDuck health monitoring and status operations
+ */
+export const useWildduckHealth = (): UseWildduckHealthReturn => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [healthStatus, setHealthStatus] = useState<WildduckHealthStatus | null>(null);
+  const [isMonitoring, setIsMonitoring] = useState(false);
+  const [monitoringInterval, setMonitoringInterval] = useState<NodeJS.Timeout | null>(null);
+
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  const isHealthy = healthStatus?.success === true && 
+    healthStatus?.database?.status === 'connected' &&
+    (healthStatus?.redis?.status === 'connected' || !healthStatus?.redis) &&
+    (healthStatus?.imap?.status === 'running' || !healthStatus?.imap);
+
+  const checkHealth = useCallback(async (): Promise<WildduckHealthStatus> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // This would need to be added to the WildDuckAPI class
+      const response = await fetch(`${WildDuckAPI['baseUrl']}/health`, {
+        method: 'GET',
+        headers: WildDuckAPI['headers']
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      setHealthStatus(result);
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to check health';
+      setError(errorMessage);
+      
+      // Create a basic error health status
+      const errorStatus: WildduckHealthStatus = {
+        success: false,
+        database: { status: 'error' },
+        redis: { status: 'error' },
+        imap: { status: 'error' },
+        smtp: { status: 'error' },
+        pop3: { status: 'error' }
+      };
+      
+      setHealthStatus(errorStatus);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const startMonitoring = useCallback((intervalMs: number = 30000) => {
+    if (monitoringInterval) {
+      clearInterval(monitoringInterval);
+    }
+    
+    setIsMonitoring(true);
+    
+    // Initial health check
+    checkHealth().catch(console.error);
+    
+    // Set up periodic health checks
+    const interval = setInterval(() => {
+      checkHealth().catch(console.error);
+    }, intervalMs);
+    
+    setMonitoringInterval(interval);
+  }, [checkHealth, monitoringInterval]);
+
+  const stopMonitoring = useCallback(() => {
+    if (monitoringInterval) {
+      clearInterval(monitoringInterval);
+      setMonitoringInterval(null);
+    }
+    setIsMonitoring(false);
+  }, [monitoringInterval]);
+
+  // Clean up interval on unmount
+  useEffect(() => {
+    return () => {
+      if (monitoringInterval) {
+        clearInterval(monitoringInterval);
+      }
+    };
+  }, [monitoringInterval]);
+
+  return {
+    isLoading,
+    error,
+    healthStatus,
+    isHealthy,
+    checkHealth,
+    startMonitoring,
+    stopMonitoring,
+    isMonitoring,
+    clearError
+  };
+};

@@ -27,13 +27,9 @@ export interface UploadMessageParams {
   date?: string;
 }
 
-export interface UpdateMessageParams {
-  moveTo?: string;
-  seen?: boolean;
-  flagged?: boolean;
-  answered?: boolean;
-  draft?: boolean;
-}
+// Import from business hooks to avoid conflicts
+import type { UpdateMessageParams } from '../../business/hooks/wildduck/useWildduckMessages';
+export type { UpdateMessageParams } from '../../business/hooks/wildduck/useWildduckMessages';
 
 export interface ForwardMessageParams {
   to: string[];

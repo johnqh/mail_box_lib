@@ -8,21 +8,9 @@ import { AppConfig } from '../../types';
 // Platform-specific global
 declare const fetch: typeof globalThis.fetch;
 
-export interface CreateAddressParams {
-  address: string;
-  name?: string;
-  main?: boolean;
-  metaData?: any;
-  tags?: string[];
-}
-
-export interface UpdateAddressParams {
-  address?: string;
-  name?: string;
-  main?: boolean;
-  metaData?: any;
-  tags?: string[];
-}
+// Import from business hooks to avoid conflicts
+import type { CreateAddressParams, UpdateAddressParams } from '../../business/hooks/wildduck/useWildduckAddresses';
+export type { CreateAddressParams, UpdateAddressParams } from '../../business/hooks/wildduck/useWildduckAddresses';
 
 export interface CreateForwardedAddressParams {
   address: string;
