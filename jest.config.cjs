@@ -17,4 +17,6 @@ module.exports = {
     '!src/**/*.d.ts',
     '!src/**/index.ts'
   ],
+  // Fix for Node.js versions that don't have os.availableParallelism()
+  maxWorkers: process.env.CI ? 2 : '50%',
 };
