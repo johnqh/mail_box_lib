@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useLocalStorage } from '../useLocalStorage';
 
@@ -6,7 +5,7 @@ import { useLocalStorage } from '../useLocalStorage';
 const localStorageMock = window.localStorage as any;
 const addEventListener = window.addEventListener as any;
 const removeEventListener = window.removeEventListener as any;
-const dispatchEvent = vi.fn();
+const dispatchEvent = jest.fn();
 Object.defineProperty(window, 'dispatchEvent', { value: dispatchEvent });
 Object.defineProperty(window, 'CustomEvent', {
   value: class CustomEvent {
@@ -19,12 +18,12 @@ Object.defineProperty(window, 'CustomEvent', {
 
 describe('useLocalStorage', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     localStorageMock.getItem.mockReturnValue(null);
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('initialization', () => {
@@ -48,7 +47,7 @@ describe('useLocalStorage', () => {
     });
 
     it('should handle JSON parsing errors gracefully', () => {
-      const consoleSpy = vi
+      const consoleSpy = jest
         .spyOn(console, 'error')
         .mockImplementation(() => {});
       localStorageMock.getItem.mockReturnValue('invalid-json');
@@ -113,7 +112,7 @@ describe('useLocalStorage', () => {
     });
 
     it('should handle localStorage errors gracefully', () => {
-      const consoleSpy = vi
+      const consoleSpy = jest
         .spyOn(console, 'error')
         .mockImplementation(() => {});
       localStorageMock.setItem.mockImplementation(() => {
@@ -167,7 +166,7 @@ describe('useLocalStorage', () => {
     });
 
     it('should handle removeItem errors gracefully', () => {
-      const consoleSpy = vi
+      const consoleSpy = jest
         .spyOn(console, 'error')
         .mockImplementation(() => {});
       localStorageMock.removeItem.mockImplementation(() => {
@@ -193,8 +192,8 @@ describe('useLocalStorage', () => {
 
   describe('custom serialization', () => {
     it('should use custom serialize and deserialize functions', () => {
-      const customSerialize = vi.fn((value: number) => `custom:${value}`);
-      const customDeserialize = vi.fn((value: string) =>
+      const customSerialize = jest.fn((value: number) => `custom:${value}`);
+      const customDeserialize = jest.fn((value: string) =>
         parseInt(value.replace('custom:', ''), 10)
       );
 
@@ -263,7 +262,7 @@ describe('useLocalStorage', () => {
 
       // Simulate storage event from another tab
       const storageHandler = addEventListener.mock.calls.find(
-        call => call[0] === 'storage'
+        (call: any) => call[0] === 'storage'
       )?.[1];
 
       if (storageHandler) {
@@ -285,7 +284,7 @@ describe('useLocalStorage', () => {
 
       // Simulate custom event
       const customHandler = addEventListener.mock.calls.find(
-        call => call[0] === 'local-storage'
+        (call: any) => call[0] === 'local-storage'
       )?.[1];
 
       if (customHandler) {
@@ -316,7 +315,7 @@ describe('useLocalStorage', () => {
         throw new Error('localStorage not available');
       });
 
-      const consoleSpy = vi
+      const consoleSpy = jest
         .spyOn(console, 'error')
         .mockImplementation(() => {});
 

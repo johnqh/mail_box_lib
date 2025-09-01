@@ -1,17 +1,16 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useDebounce, useDebouncedCallback } from '../useDebounce';
 
 // Mock timers
-vi.useFakeTimers();
+jest.useFakeTimers();
 
 describe('useDebounce', () => {
   beforeEach(() => {
-    vi.clearAllTimers();
+    jest.clearAllTimers();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should return initial value immediately', () => {
@@ -36,14 +35,14 @@ describe('useDebounce', () => {
 
     // Fast forward time by less than delay
     act(() => {
-      vi.advanceTimersByTime(300);
+      jest.advanceTimersByTime(300);
     });
 
     expect(result.current).toBe('initial');
 
     // Fast forward remaining time
     act(() => {
-      vi.advanceTimersByTime(200);
+      jest.advanceTimersByTime(200);
     });
 
     expect(result.current).toBe('updated');
@@ -57,10 +56,10 @@ describe('useDebounce', () => {
 
     // Rapid updates
     rerender({ value: 'update1' });
-    act(() => vi.advanceTimersByTime(200));
+    act(() => jest.advanceTimersByTime(200));
 
     rerender({ value: 'update2' });
-    act(() => vi.advanceTimersByTime(200));
+    act(() => jest.advanceTimersByTime(200));
 
     rerender({ value: 'final' });
 
@@ -69,7 +68,7 @@ describe('useDebounce', () => {
 
     // Complete the debounce
     act(() => {
-      vi.advanceTimersByTime(500);
+      jest.advanceTimersByTime(500);
     });
 
     expect(result.current).toBe('final');
@@ -86,7 +85,7 @@ describe('useDebounce', () => {
     rerender({ value: { count: 2 } });
 
     act(() => {
-      vi.advanceTimersByTime(100);
+      jest.advanceTimersByTime(100);
     });
 
     expect(result.current).toEqual({ count: 2 });
@@ -101,12 +100,12 @@ describe('useDebounce', () => {
 
     // Default delay is 500ms
     act(() => {
-      vi.advanceTimersByTime(499);
+      jest.advanceTimersByTime(499);
     });
     expect(result.current).toBe('initial');
 
     act(() => {
-      vi.advanceTimersByTime(1);
+      jest.advanceTimersByTime(1);
     });
     expect(result.current).toBe('updated');
   });
@@ -120,26 +119,26 @@ describe('useDebounce', () => {
     rerender({ value: 'updated', delay: 1000 });
 
     // Change delay mid-debounce
-    act(() => vi.advanceTimersByTime(500));
+    act(() => jest.advanceTimersByTime(500));
     rerender({ value: 'updated', delay: 200 });
 
     // Should respect the new delay
-    act(() => vi.advanceTimersByTime(200));
+    act(() => jest.advanceTimersByTime(200));
     expect(result.current).toBe('updated');
   });
 });
 
 describe('useDebouncedCallback', () => {
   beforeEach(() => {
-    vi.clearAllTimers();
+    jest.clearAllTimers();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should debounce callback execution', () => {
-    const callback = vi.fn();
+    const callback = jest.fn();
     const { result } = renderHook(() => useDebouncedCallback(callback, 500));
 
     // Call multiple times rapidly
@@ -154,7 +153,7 @@ describe('useDebouncedCallback', () => {
 
     // Fast forward time
     act(() => {
-      vi.advanceTimersByTime(500);
+      jest.advanceTimersByTime(500);
     });
 
     // Only the last call should execute
@@ -163,7 +162,7 @@ describe('useDebouncedCallback', () => {
   });
 
   it('should cancel previous timeout on new calls', () => {
-    const callback = vi.fn();
+    const callback = jest.fn();
     const { result } = renderHook(() => useDebouncedCallback(callback, 500));
 
     // First call
@@ -173,7 +172,7 @@ describe('useDebouncedCallback', () => {
 
     // Advance time partially
     act(() => {
-      vi.advanceTimersByTime(300);
+      jest.advanceTimersByTime(300);
     });
 
     // Second call should cancel the first
@@ -183,7 +182,7 @@ describe('useDebouncedCallback', () => {
 
     // Complete the new timeout
     act(() => {
-      vi.advanceTimersByTime(500);
+      jest.advanceTimersByTime(500);
     });
 
     expect(callback).toHaveBeenCalledTimes(1);
@@ -191,8 +190,8 @@ describe('useDebouncedCallback', () => {
   });
 
   it('should update callback reference', () => {
-    const callback1 = vi.fn();
-    const callback2 = vi.fn();
+    const callback1 = jest.fn();
+    const callback2 = jest.fn();
 
     const { result, rerender } = renderHook(
       ({ callback }) => useDebouncedCallback(callback, 500),
@@ -209,7 +208,7 @@ describe('useDebouncedCallback', () => {
 
     // Complete timeout
     act(() => {
-      vi.advanceTimersByTime(500);
+      jest.advanceTimersByTime(500);
     });
 
     // Should call the updated callback
@@ -218,7 +217,7 @@ describe('useDebouncedCallback', () => {
   });
 
   it('should preserve callback arguments', () => {
-    const callback = vi.fn();
+    const callback = jest.fn();
     const { result } = renderHook(() => useDebouncedCallback(callback, 200));
 
     act(() => {
@@ -226,14 +225,14 @@ describe('useDebouncedCallback', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(200);
+      jest.advanceTimersByTime(200);
     });
 
     expect(callback).toHaveBeenCalledWith('arg1', 'arg2', { prop: 'value' });
   });
 
   it('should use default delay when not provided', () => {
-    const callback = vi.fn();
+    const callback = jest.fn();
     const { result } = renderHook(() => useDebouncedCallback(callback));
 
     act(() => {
@@ -242,18 +241,18 @@ describe('useDebouncedCallback', () => {
 
     // Default delay is 500ms
     act(() => {
-      vi.advanceTimersByTime(499);
+      jest.advanceTimersByTime(499);
     });
     expect(callback).not.toHaveBeenCalled();
 
     act(() => {
-      vi.advanceTimersByTime(1);
+      jest.advanceTimersByTime(1);
     });
     expect(callback).toHaveBeenCalledWith('test');
   });
 
   it('should clean up timeout on unmount', () => {
-    const callback = vi.fn();
+    const callback = jest.fn();
     const { result, unmount } = renderHook(() =>
       useDebouncedCallback(callback, 500)
     );
@@ -266,7 +265,7 @@ describe('useDebouncedCallback', () => {
     unmount();
 
     act(() => {
-      vi.advanceTimersByTime(500);
+      jest.advanceTimersByTime(500);
     });
 
     // Callback should not have been called
@@ -274,7 +273,7 @@ describe('useDebouncedCallback', () => {
   });
 
   it('should handle delay changes', () => {
-    const callback = vi.fn();
+    const callback = jest.fn();
     const { result, rerender } = renderHook(
       ({ delay }) => useDebouncedCallback(callback, delay),
       { initialProps: { delay: 1000 } }
@@ -293,7 +292,7 @@ describe('useDebouncedCallback', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(200);
+      jest.advanceTimersByTime(200);
     });
 
     expect(callback).toHaveBeenCalledWith('test2');
@@ -306,8 +305,8 @@ describe('useDebouncedCallback', () => {
       options?: { immediate?: boolean }
     ) => void;
 
-    const callback = vi.fn() as ComplexCallback;
-    const { result } = renderHook(() => useDebouncedCallback(callback, 300));
+    const callback = jest.fn() as jest.MockedFunction<ComplexCallback>;
+    const { result } = renderHook(() => useDebouncedCallback(callback as any, 300));
 
     act(() => {
       result.current(
@@ -318,7 +317,7 @@ describe('useDebouncedCallback', () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(300);
+      jest.advanceTimersByTime(300);
     });
 
     expect(callback).toHaveBeenCalledWith(
