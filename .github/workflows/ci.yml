@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+permissions:
+  contents: write
+  packages: write
+  actions: read
+  checks: write
+
 env:
   NODE_VERSION: '18'
 
@@ -218,12 +224,10 @@ jobs:
         
     - name: Create GitHub Release
       if: steps.version-check.outputs.version-changed == 'true'
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v1
       with:
         tag_name: v${{ steps.version-check.outputs.current-version }}
-        release_name: Release v${{ steps.version-check.outputs.current-version }}
+        name: Release v${{ steps.version-check.outputs.current-version }}
         draft: false
         prerelease: false
         body: |
@@ -236,6 +240,7 @@ jobs:
           ```bash
           npm install @johnqh/lib@${{ steps.version-check.outputs.current-version }}
           ```
+        generate_release_notes: true
 
   notification:
     name: Notify on Failure
