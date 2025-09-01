@@ -1,10 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import {
+  IndexerDelegation,
   IndexerMail,
   IndexerPreparedMail,
-  IndexerDelegation,
-  GraphQLWhereInput as WhereInput,
   GraphQLPaginationInput as PaginationInput,
+  GraphQLWhereInput as WhereInput,
 } from '../../../types';
 
 // Import types that might not exist yet
@@ -29,22 +29,22 @@ interface IndexerEventLog {
 
 // Helper class - this should be implemented properly
 class IndexerGraphQLHelper {
-  static async getMails(where?: WhereInput, pagination?: PaginationInput) {
+  static async getMails(_where?: WhereInput, _pagination?: PaginationInput) {
     // TODO: Implement proper GraphQL query
     return { mails: { items: [] as IndexerMail[] } };
   }
 
-  static async getPreparedMails(where?: WhereInput, pagination?: PaginationInput) {
+  static async getPreparedMails(_where?: WhereInput, _pagination?: PaginationInput) {
     // TODO: Implement proper GraphQL query
     return { preparedMails: { items: [] as IndexerPreparedMail[] } };
   }
 
-  static async getDelegations(where?: WhereInput, pagination?: PaginationInput) {
+  static async getDelegations(_where?: WhereInput, _pagination?: PaginationInput) {
     // TODO: Implement proper GraphQL query
     return { delegations: { items: [] as IndexerDelegation[] } };
   }
 
-  static async getUserStatistics(address: string, chainId?: number) {
+  static async getUserStatistics(_address: string, _chainId?: number) {
     // TODO: Implement proper GraphQL query
     return { userStatistics: { items: [] as IndexerUserStatistics[] } };
   }
@@ -54,32 +54,32 @@ class IndexerGraphQLHelper {
     return { chainStatistics: {} as IndexerChainStatistics };
   }
 
-  static async getEventLogs(where?: WhereInput, pagination?: PaginationInput) {
+  static async getEventLogs(_where?: WhereInput, _pagination?: PaginationInput) {
     // TODO: Implement proper GraphQL query
     return { eventLogs: { items: [] as IndexerEventLog[] } };
   }
 
-  static async getMailsFromAddress(fromAddress: string, chainId?: number, pagination?: PaginationInput): Promise<IndexerMail[]> {
+  static async getMailsFromAddress(_fromAddress: string, _chainId?: number, _pagination?: PaginationInput): Promise<IndexerMail[]> {
     // TODO: Implement proper GraphQL query
     return [];
   }
 
-  static async getMailsToAddress(toAddress: string, chainId?: number, pagination?: PaginationInput): Promise<IndexerMail[]> {
+  static async getMailsToAddress(_toAddress: string, _chainId?: number, _pagination?: PaginationInput): Promise<IndexerMail[]> {
     // TODO: Implement proper GraphQL query
     return [];
   }
 
-  static async getActiveDelegationsFromAddress(delegatorAddress: string, chainId?: number): Promise<IndexerDelegation[]> {
+  static async getActiveDelegationsFromAddress(_delegatorAddress: string, _chainId?: number): Promise<IndexerDelegation[]> {
     // TODO: Implement proper GraphQL query
     return [];
   }
 
-  static async getActiveDelegationsToAddress(delegateAddress: string, chainId?: number): Promise<IndexerDelegation[]> {
+  static async getActiveDelegationsToAddress(_delegateAddress: string, _chainId?: number): Promise<IndexerDelegation[]> {
     // TODO: Implement proper GraphQL query
     return [];
   }
 
-  static async query<T = unknown>(query: string, variables?: Record<string, unknown>): Promise<T> {
+  static async query<T = unknown>(_query: string, _variables?: Record<string, unknown>): Promise<T> {
     // TODO: Implement proper GraphQL query
     throw new Error('GraphQL queries not implemented yet');
   }

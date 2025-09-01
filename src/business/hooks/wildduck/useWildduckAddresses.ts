@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import axios from 'axios';
 import { WildDuckAPI } from "../../../network/clients/wildduck";
 
 export interface WildduckAddress {
@@ -84,18 +85,11 @@ export const useWildduckAddresses = (): UseWildduckAddressesReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/users/${userId}/addresses`, {
-        method: 'POST',
-        headers: WildDuckAPI['headers'],
-        body: JSON.stringify(params)
+      const response = await axios.post(`${WildDuckAPI['baseUrl']}/users/${userId}/addresses`, params, {
+        headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create address';
       setError(errorMessage);
@@ -111,18 +105,11 @@ export const useWildduckAddresses = (): UseWildduckAddressesReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/users/${userId}/addresses/${addressId}`, {
-        method: 'PUT',
-        headers: WildDuckAPI['headers'],
-        body: JSON.stringify(params)
+      const response = await axios.put(`${WildDuckAPI['baseUrl']}/users/${userId}/addresses/${addressId}`, params, {
+        headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update address';
       setError(errorMessage);
@@ -138,17 +125,11 @@ export const useWildduckAddresses = (): UseWildduckAddressesReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/users/${userId}/addresses/${addressId}`, {
-        method: 'DELETE',
+      const response = await axios.delete(`${WildDuckAPI['baseUrl']}/users/${userId}/addresses/${addressId}`, {
         headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete address';
       setError(errorMessage);
@@ -164,17 +145,11 @@ export const useWildduckAddresses = (): UseWildduckAddressesReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/addresses/forwarded`, {
-        method: 'GET',
+      const response = await axios.get(`${WildDuckAPI['baseUrl']}/addresses/forwarded`, {
         headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result.results || [];
+      return response.data.results || [];
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get forwarded addresses';
       setError(errorMessage);
@@ -190,18 +165,11 @@ export const useWildduckAddresses = (): UseWildduckAddressesReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/addresses/forwarded`, {
-        method: 'POST',
-        headers: WildDuckAPI['headers'],
-        body: JSON.stringify({ address, target })
+      const response = await axios.post(`${WildDuckAPI['baseUrl']}/addresses/forwarded`, { address, target }, {
+        headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create forwarded address';
       setError(errorMessage);
@@ -217,17 +185,11 @@ export const useWildduckAddresses = (): UseWildduckAddressesReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/addresses/forwarded/${addressId}`, {
-        method: 'DELETE',
+      const response = await axios.delete(`${WildDuckAPI['baseUrl']}/addresses/forwarded/${addressId}`, {
         headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete forwarded address';
       setError(errorMessage);
@@ -243,17 +205,11 @@ export const useWildduckAddresses = (): UseWildduckAddressesReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/addresses/resolve/${encodeURIComponent(address)}`, {
-        method: 'GET',
+      const response = await axios.get(`${WildDuckAPI['baseUrl']}/addresses/resolve/${encodeURIComponent(address)}`, {
         headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to resolve address';
       setError(errorMessage);

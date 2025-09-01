@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import axios from 'axios';
 import { WildDuckAPI } from "../../../network/clients/wildduck";
 
 export interface WildduckUser {
@@ -62,17 +63,11 @@ export const useWildduckUsers = (): UseWildduckUsersReturn => {
       if (query) params.set('query', query);
       params.set('limit', limit.toString());
       
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/users?${params}`, {
-        method: 'GET',
+      const response = await axios.get(`${WildDuckAPI['baseUrl']}/users?${params}`, {
         headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return { users: result.results || [], total: result.total || 0 };
+      return { users: response.data.results || [], total: response.data.total || 0 };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get users';
       setError(errorMessage);

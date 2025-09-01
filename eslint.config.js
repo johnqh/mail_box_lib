@@ -35,6 +35,7 @@ export default [
         clearTimeout: 'readonly',
         setInterval: 'readonly',
         clearInterval: 'readonly',
+        NodeJS: 'readonly',
       },
     },
     plugins: {
@@ -49,7 +50,7 @@ export default [
       'prettier/prettier': 'error',
       
       // Code quality
-      'no-console': 'warn',
+      'no-console': 'off',
       'no-debugger': 'error',
       'no-unused-vars': 'off', // Use TypeScript version instead
       '@typescript-eslint/no-unused-vars': [
@@ -65,7 +66,7 @@ export default [
       // TypeScript specific
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-non-null-assertion': 'warn',
       // Disable type-aware rules for now to avoid config complexity
       // '@typescript-eslint/prefer-nullish-coalescing': 'error',

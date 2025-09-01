@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import axios from 'axios';
 import { WildDuckAPI, WildDuckMailbox, WildDuckMailboxResponse } from "../../../network/clients/wildduck";
 
 export interface CreateMailboxParams {
@@ -87,18 +88,11 @@ export const useWildduckMailboxes = (): UseWildduckMailboxesReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/users/${userId}/mailboxes/${mailboxId}`, {
-        method: 'PUT',
-        headers: WildDuckAPI['headers'],
-        body: JSON.stringify(params)
+      const response = await axios.put(`${WildDuckAPI['baseUrl']}/users/${userId}/mailboxes/${mailboxId}`, params, {
+        headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update mailbox';
       setError(errorMessage);
@@ -114,17 +108,11 @@ export const useWildduckMailboxes = (): UseWildduckMailboxesReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/users/${userId}/mailboxes/${mailboxId}`, {
-        method: 'DELETE',
+      const response = await axios.delete(`${WildDuckAPI['baseUrl']}/users/${userId}/mailboxes/${mailboxId}`, {
         headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete mailbox';
       setError(errorMessage);

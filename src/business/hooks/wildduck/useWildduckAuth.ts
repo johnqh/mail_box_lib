@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import axios from 'axios';
 import { WildDuckAPI } from "../../../network/clients/wildduck";
 import { useStorageService } from '../useServices';
 
@@ -50,17 +51,16 @@ export const useWildduckAuth = (): UseWildduckAuthReturn => {
       }
 
       // Validate token by making a test request
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/users/me`, {
-        headers: {
-          ...WildDuckAPI['headers'],
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const user = await response.json();
-        return { authenticated: true, user };
-      } else {
+      try {
+        const response = await axios.get(`${WildDuckAPI['baseUrl']}/users/me`, {
+          headers: {
+            ...WildDuckAPI['headers'],
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        return { authenticated: true, user: response.data };
+      } catch {
         return { authenticated: false };
       }
     } catch (err) {

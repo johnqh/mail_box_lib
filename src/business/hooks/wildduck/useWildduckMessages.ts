@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
-import { WildDuckAPI, WildDuckMessage, WildDuckMessagesResponse, WildDuckMessageResponse } from "../../../network/clients/wildduck";
+import { useCallback, useState } from 'react';
+import axios from 'axios';
+import { WildDuckAPI, WildDuckMessage, WildDuckMessageResponse, WildDuckMessagesResponse } from "../../../network/clients/wildduck";
 
 export interface GetMessagesOptions {
   limit?: number;
@@ -110,18 +111,11 @@ export const useWildduckMessages = (): UseWildduckMessagesReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/users/${userId}/submit`, {
-        method: 'POST',
-        headers: WildDuckAPI['headers'],
-        body: JSON.stringify(params)
+      const response = await axios.post(`${WildDuckAPI['baseUrl']}/users/${userId}/submit`, params, {
+        headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to send message';
       setError(errorMessage);
@@ -137,18 +131,11 @@ export const useWildduckMessages = (): UseWildduckMessagesReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/users/${userId}/messages/${messageId}`, {
-        method: 'PUT',
-        headers: WildDuckAPI['headers'],
-        body: JSON.stringify(params)
+      const response = await axios.put(`${WildDuckAPI['baseUrl']}/users/${userId}/messages/${messageId}`, params, {
+        headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update message';
       setError(errorMessage);
@@ -164,17 +151,11 @@ export const useWildduckMessages = (): UseWildduckMessagesReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/users/${userId}/messages/${messageId}`, {
-        method: 'DELETE',
+      const response = await axios.delete(`${WildDuckAPI['baseUrl']}/users/${userId}/messages/${messageId}`, {
         headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete message';
       setError(errorMessage);
@@ -190,18 +171,11 @@ export const useWildduckMessages = (): UseWildduckMessagesReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/users/${userId}/messages/${messageId}/move`, {
-        method: 'PUT',
-        headers: WildDuckAPI['headers'],
-        body: JSON.stringify({ mailbox: targetMailbox })
+      const response = await axios.put(`${WildDuckAPI['baseUrl']}/users/${userId}/messages/${messageId}/move`, { mailbox: targetMailbox }, {
+        headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to move message';
       setError(errorMessage);
@@ -217,20 +191,14 @@ export const useWildduckMessages = (): UseWildduckMessagesReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class - search across all mailboxes
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/users/${userId}/search?q=${encodeURIComponent(query)}&limit=${options.limit || 50}&page=${options.page || 1}`, {
-        method: 'GET',
+      const response = await axios.get(`${WildDuckAPI['baseUrl']}/users/${userId}/search?q=${encodeURIComponent(query)}&limit=${options.limit || 50}&page=${options.page || 1}`, {
         headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      const messageList = result.results || [];
+      const messageList = response.data.results || [];
       setMessages(messageList);
-      setTotalMessages(result.total || 0);
-      setCurrentPage(result.page || 1);
+      setTotalMessages(response.data.total || 0);
+      setCurrentPage(response.data.page || 1);
       return messageList;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to search messages';

@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import axios from 'axios';
 import { WildDuckAPI } from "../../../network/clients/wildduck";
 
 export interface WildduckSettings {
@@ -34,17 +35,11 @@ export const useWildduckSettings = (): UseWildduckSettingsReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/settings`, {
-        method: 'GET',
+      const response = await axios.get(`${WildDuckAPI['baseUrl']}/settings`, {
         headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      const settingsData = result.results || result;
+      const settingsData = response.data.results || response.data;
       setSettings(settingsData);
       return settingsData;
     } catch (err) {
@@ -63,22 +58,14 @@ export const useWildduckSettings = (): UseWildduckSettingsReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/settings/${key}`, {
-        method: 'PUT',
-        headers: WildDuckAPI['headers'],
-        body: JSON.stringify({ value })
+      const response = await axios.put(`${WildDuckAPI['baseUrl']}/settings/${key}`, { value }, {
+        headers: WildDuckAPI['headers']
       });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
       
       // Update local settings
       setSettings(prev => ({ ...prev, [key]: value }));
       
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update setting';
       setError(errorMessage);
@@ -94,24 +81,17 @@ export const useWildduckSettings = (): UseWildduckSettingsReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/settings/${key}`, {
-        method: 'DELETE',
+      const response = await axios.delete(`${WildDuckAPI['baseUrl']}/settings/${key}`, {
         headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      
       // Remove from local settings
       setSettings(prev => {
-        const { [key]: removed, ...rest } = prev;
+        const { [key]: _removed, ...rest } = prev;
         return rest;
       });
       
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete setting';
       setError(errorMessage);

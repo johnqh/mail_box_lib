@@ -3,7 +3,7 @@
  * Uses the platform storage abstraction instead of direct localStorage
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { PlatformStorage } from '../core/container/dependency-container';
 import { useStorageService } from './useServices';
 
@@ -47,17 +47,21 @@ export function useStorage<T>(
   }, [getStoredValue]);
 
   // Update storage when value changes
-  const setValue = useCallback(async (value: SetValue<T>) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      
-      setStoredValue(valueToStore);
-      
-      await storage.setItem(key, serialize(valueToStore));
-    } catch (error) {
-      console.error(`Error setting storage key "${key}":`, error);
-    }
-  }, [key, serialize, storedValue, storage]);
+  const setValue = useCallback(
+    async (value: SetValue<T>) => {
+      try {
+        const valueToStore =
+          value instanceof Function ? value(storedValue) : value;
+
+        setStoredValue(valueToStore);
+
+        await storage.setItem(key, serialize(valueToStore));
+      } catch (error) {
+        console.error(`Error setting storage key "${key}":`, error);
+      }
+    },
+    [key, serialize, storedValue, storage]
+  );
 
   // Remove value from storage
   const removeValue = useCallback(async () => {

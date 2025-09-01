@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useAppConfig } from '../useServices';
+import { IndexerClient } from '../../../network/clients/indexer';
 
 export interface IndexerEmailAddress {
   email: string;
@@ -114,6 +115,7 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const appConfig = useAppConfig();
+  const indexerClient = new IndexerClient(appConfig);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -128,24 +130,7 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     setError(null);
 
     try {
-      const response = await fetch(`${appConfig.indexerBackendUrl}/emails`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          walletAddress,
-          signature,
-          message,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await indexerClient.getEmailAddresses(walletAddress, signature, message);
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get email addresses';
@@ -154,7 +139,7 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [appConfig]);
+  }, [indexerClient]);
 
   const getDelegatedAddress = useCallback(async (
     walletAddress: string, 
@@ -165,24 +150,7 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     setError(null);
 
     try {
-      const response = await fetch(`${appConfig.indexerBackendUrl}/delegated`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          walletAddress,
-          signature,
-          message,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await indexerClient.getDelegated(walletAddress, signature, message);
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get delegated address';
@@ -191,26 +159,14 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [appConfig]);
+  }, [indexerClient]);
 
   const getDelegatorsToAddress = useCallback(async (walletAddress: string): Promise<IndexerDelegatorInfo> => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`${appConfig.indexerBackendUrl}/delegatedTo/${encodeURIComponent(walletAddress)}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await indexerClient.getDelegatedTo(walletAddress);
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get delegators to address';
@@ -219,7 +175,7 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [appConfig]);
+  }, [indexerClient]);
 
   const verifySignature = useCallback(async (
     walletAddress: string, 
@@ -230,24 +186,7 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     setError(null);
 
     try {
-      const response = await fetch(`${appConfig.indexerBackendUrl}/verify`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          walletAddress,
-          signature,
-          message,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await indexerClient.verifySignature(walletAddress, signature, message || '');
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to verify signature';
@@ -256,7 +195,7 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [appConfig]);
+  }, [indexerClient]);
 
   const getSigningMessage = useCallback(async (
     chainId: number, 
@@ -268,19 +207,7 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     setError(null);
 
     try {
-      const response = await fetch(`${appConfig.indexerBackendUrl}/message/${chainId}/${encodeURIComponent(walletAddress)}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await indexerClient.getMessage(chainId, walletAddress, domain, url);
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get signing message';
@@ -289,7 +216,7 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [appConfig]);
+  }, [indexerClient]);
 
   const getNonce = useCallback(async (
     walletAddress: string, 
@@ -300,23 +227,7 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     setError(null);
 
     try {
-      const response = await fetch(`${appConfig.indexerBackendUrl}/nonce/${encodeURIComponent(walletAddress)}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          signature,
-          message,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await indexerClient.getNonce(walletAddress, signature, message || '');
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get nonce';
@@ -325,7 +236,7 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [appConfig]);
+  }, [indexerClient]);
 
   const createNonce = useCallback(async (
     walletAddress: string, 
@@ -336,23 +247,7 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     setError(null);
 
     try {
-      const response = await fetch(`${appConfig.indexerBackendUrl}/nonce/${encodeURIComponent(walletAddress)}/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          signature,
-          message,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await indexerClient.createNonce(walletAddress, signature, message || '');
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create nonce';
@@ -361,26 +256,14 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [appConfig]);
+  }, [indexerClient]);
 
   const getNameServiceEntitlement = useCallback(async (walletAddress: string): Promise<IndexerEntitlement> => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`${appConfig.indexerBackendUrl}/${encodeURIComponent(walletAddress)}/entitlement/nameservice`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await indexerClient.checkNameServiceEntitlement(walletAddress);
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get nameservice entitlement';
@@ -389,7 +272,7 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [appConfig]);
+  }, [indexerClient]);
 
   return {
     isLoading,

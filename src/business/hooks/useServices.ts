@@ -12,20 +12,22 @@ import { ServiceKeys } from '../core/container/dependency-container';
 // Temporarily import PersistenceService type from types
 // import { PersistenceService } from '../../types';
 import { DefaultFolderOperations } from '../core/folder/folder-operations';
-import type { 
-  PlatformTheme, 
-  PlatformNotifications, 
+import type {
+  PlatformAnalytics,
   PlatformNetwork,
+  PlatformNotifications,
   PlatformStorage,
-  PlatformAnalytics
+  PlatformTheme,
 } from '../core/container/dependency-container';
 
 /**
  * Get a service from the dependency injection container
  */
-export function useService<T>(serviceKey: string): T {
+export function useService<T>(_serviceKey: string): T {
   // TODO: Implement proper service container context
-  throw new Error('Service container not implemented yet - needs context setup');
+  throw new Error(
+    'Service container not implemented yet - needs context setup'
+  );
 }
 
 /**
@@ -41,7 +43,9 @@ export function useStorageService(): PlatformStorage {
  */
 export function useAnalyticsService(): PlatformAnalytics {
   // TODO: Replace with proper DI implementation
-  throw new Error('Analytics service not implemented yet - needs context setup');
+  throw new Error(
+    'Analytics service not implemented yet - needs context setup'
+  );
 }
 
 /**
@@ -70,7 +74,9 @@ export function useNetworkService(): PlatformNetwork {
  */
 export function usePersistenceService(): any {
   // TODO: Replace with proper DI implementation
-  throw new Error('Persistence service not implemented yet - needs context setup');
+  throw new Error(
+    'Persistence service not implemented yet - needs context setup'
+  );
 }
 
 /**
@@ -116,14 +122,14 @@ export function useFolderOperations() {
 export function useAppConfig() {
   // Import the config here to maintain DI pattern while accessing environment config
   // This is acceptable since config is essentially a singleton constant
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
+
   if (typeof window !== 'undefined') {
     // Web environment
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { webAppConfig } = require('../../di/env');
     return webAppConfig;
   } else {
-    // React Native environment  
+    // React Native environment
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { reactNativeAppConfig } = require('../../di/env');
     return reactNativeAppConfig;

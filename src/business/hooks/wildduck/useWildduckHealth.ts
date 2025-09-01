@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import axios from 'axios';
 import { WildDuckAPI } from "../../../network/clients/wildduck";
 
 export interface WildduckHealthStatus {
@@ -68,18 +69,12 @@ export const useWildduckHealth = (): UseWildduckHealthReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/health`, {
-        method: 'GET',
+      const response = await axios.get(`${WildDuckAPI['baseUrl']}/health`, {
         headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      setHealthStatus(result);
-      return result;
+      setHealthStatus(response.data);
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to check health';
       setError(errorMessage);

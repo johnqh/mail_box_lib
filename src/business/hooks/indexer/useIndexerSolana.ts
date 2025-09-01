@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useAppConfig } from '../useServices';
+import { IndexerClient } from '../../../network/clients/indexer';
 
 export interface IndexerSolanaIndexer {
   chainId: number;
@@ -46,6 +47,7 @@ export const useIndexerSolana = (): UseIndexerSolanaReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const appConfig = useAppConfig();
+  const indexerClient = new IndexerClient(appConfig);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -56,20 +58,8 @@ export const useIndexerSolana = (): UseIndexerSolanaReturn => {
     setError(null);
 
     try {
-      const response = await fetch(`${appConfig.indexerBackendUrl}/api/solana/status`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      return result;
+      const response = await indexerClient.get<IndexerSolanaStatus>('/api/solana/status');
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get Solana status';
       setError(errorMessage);
@@ -77,28 +67,15 @@ export const useIndexerSolana = (): UseIndexerSolanaReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [appConfig]);
+  }, [indexerClient]);
 
   const setupWebhooks = useCallback(async (): Promise<IndexerSolanaSetupResponse> => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`${appConfig.indexerBackendUrl}/api/solana/setup-webhooks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({}),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      return result;
+      const response = await indexerClient.post<IndexerSolanaSetupResponse>('/api/solana/setup-webhooks', {});
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to setup webhooks';
       setError(errorMessage);
@@ -106,7 +83,7 @@ export const useIndexerSolana = (): UseIndexerSolanaReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [appConfig]);
+  }, [indexerClient]);
 
   const processTestTransaction = useCallback(async (
     chainId: number, 
@@ -116,24 +93,11 @@ export const useIndexerSolana = (): UseIndexerSolanaReturn => {
     setError(null);
 
     try {
-      const response = await fetch(`${appConfig.indexerBackendUrl}/api/solana/test-transaction`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          chainId,
-          transaction,
-        }),
+      const response = await indexerClient.post<{ success: boolean; message: string }>('/api/solana/test-transaction', {
+        chainId,
+        transaction,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to process test transaction';
       setError(errorMessage);
@@ -141,7 +105,7 @@ export const useIndexerSolana = (): UseIndexerSolanaReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [appConfig]);
+  }, [indexerClient]);
 
   return {
     isLoading,

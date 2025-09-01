@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import axios from 'axios';
 import { WildDuckAPI } from "../../../network/clients/wildduck";
 
 export interface WildduckFilter {
@@ -100,17 +101,11 @@ export const useWildduckFilters = (): UseWildduckFiltersReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/users/${userId}/filters`, {
-        method: 'GET',
+      const response = await axios.get(`${WildDuckAPI['baseUrl']}/users/${userId}/filters`, {
         headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      const filterList = result.results || [];
+      const filterList = response.data.results || [];
       setFilters(filterList);
       return filterList;
     } catch (err) {
@@ -129,17 +124,11 @@ export const useWildduckFilters = (): UseWildduckFiltersReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/users/${userId}/filters/${filterId}`, {
-        method: 'GET',
+      const response = await axios.get(`${WildDuckAPI['baseUrl']}/users/${userId}/filters/${filterId}`, {
         headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get filter';
       setError(errorMessage);
@@ -155,18 +144,11 @@ export const useWildduckFilters = (): UseWildduckFiltersReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/users/${userId}/filters`, {
-        method: 'POST',
-        headers: WildDuckAPI['headers'],
-        body: JSON.stringify(params)
+      const response = await axios.post(`${WildDuckAPI['baseUrl']}/users/${userId}/filters`, params, {
+        headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create filter';
       setError(errorMessage);
@@ -182,18 +164,11 @@ export const useWildduckFilters = (): UseWildduckFiltersReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/users/${userId}/filters/${filterId}`, {
-        method: 'PUT',
-        headers: WildDuckAPI['headers'],
-        body: JSON.stringify(params)
+      const response = await axios.put(`${WildDuckAPI['baseUrl']}/users/${userId}/filters/${filterId}`, params, {
+        headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update filter';
       setError(errorMessage);
@@ -209,17 +184,11 @@ export const useWildduckFilters = (): UseWildduckFiltersReturn => {
     
     try {
       // This would need to be added to the WildDuckAPI class
-      const response = await fetch(`${WildDuckAPI['baseUrl']}/users/${userId}/filters/${filterId}`, {
-        method: 'DELETE',
+      const response = await axios.delete(`${WildDuckAPI['baseUrl']}/users/${userId}/filters/${filterId}`, {
         headers: WildDuckAPI['headers']
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result;
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete filter';
       setError(errorMessage);
