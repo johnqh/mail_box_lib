@@ -1,15 +1,9 @@
 import { defineConfig } from 'vitest/config'
-import { webcrypto } from 'crypto'
-
-// Polyfill crypto for Node.js environment (needed for CI)
-if (!globalThis.crypto) {
-  Object.defineProperty(globalThis, 'crypto', {
-    value: webcrypto,
-    writable: true,
-  })
-}
 
 export default defineConfig({
+  define: {
+    global: 'globalThis',
+  },
   test: {
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
