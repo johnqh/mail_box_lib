@@ -90,13 +90,11 @@ export const ROUTES = {
   MAIL: '/mail',
   COMPOSE: '/mail/compose',
   PREFERENCES: '/preferences',
-  DELEGATE: '/admin/delegate',
   TERMS: '/terms',
   PRIVACY: '/privacy',
   DOCUMENTATION: '/document',
   WEB3_USERS: '/web3-users',
   WEB3_PROJECTS: '/web3-projects',
-  NAME_SERVICE: '/admin/subscriptions/ns',
 } as const;
 
 // External Links
