@@ -215,13 +215,6 @@ export const navigationHelper = {
   },
 
   /**
-   * Navigate to delegate page
-   */
-  goToDelegate: () => {
-    navigationHelper.navigate('/admin/delegate');
-  },
-
-  /**
    * Navigate to home page
    */
   goToHome: () => {

@@ -22,8 +22,23 @@ export * from './data/useMailBoxes';
 // WildDuck API hooks
 export * from './wildduck';
 
-// Indexer hooks
-export * from './indexer';
+// Indexer hooks (excluding conflicting exports)
+export {
+  useIndexerPoints,
+  useIndexerGraphQL,
+  useIndexerMail,
+  useIndexerSolana,
+  // TanStack Query hooks
+  useSigningMessage,
+  useHowToEarnPoints,
+  usePublicStats,
+  useLeaderboard,
+  useCampaigns,
+  useCampaignStats,
+  usePointsLeaderboard as usePointsLeaderboardQuery,
+  useSiteStats,
+  useSolanaStatus,
+} from './indexer';
 
-// Points hooks
-export * from './points/usePointsLeaderboard';
+// Points hooks (new TanStack Query based)
+export * from './points';

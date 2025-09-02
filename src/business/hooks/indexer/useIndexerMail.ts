@@ -134,7 +134,9 @@ export interface UseIndexerMailReturn {
     message?: string
   ) => Promise<IndexerNonceInfo>;
   getNameServiceEntitlement: (
-    walletAddress: string
+    walletAddress: string,
+    signature: string,
+    message: string
   ) => Promise<IndexerEntitlement>;
   clearError: () => void;
 }
@@ -355,13 +357,20 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
   );
 
   const getNameServiceEntitlement = useCallback(
-    async (walletAddress: string): Promise<IndexerEntitlement> => {
+    async (
+      walletAddress: string,
+      signature: string,
+      message: string
+    ): Promise<IndexerEntitlement> => {
       setIsLoading(true);
       setError(null);
 
       try {
-        const result =
-          await indexerClient.checkNameServiceEntitlement(walletAddress);
+        const result = await indexerClient.checkNameServiceEntitlement(
+          walletAddress,
+          signature,
+          message
+        );
         return result;
       } catch (err) {
         const errorMessage =

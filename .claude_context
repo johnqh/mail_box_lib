@@ -3,6 +3,20 @@
 ## Project Overview
 A React Native-compatible shared utilities library for 0xmail.box projects, providing platform-agnostic business logic, authentication, email handling, blockchain integration, and UI utilities.
 
+### Key Features
+- **Platform Abstraction**: Works on both web and React Native
+- **Business Logic Layer**: Pure domain logic separate from platform concerns
+- **Interface-First Design**: TypeScript interfaces drive implementation
+- **Blockchain Integration**: Supports Solana and EVM chains
+- **Email Services**: Full email client functionality with AI assistance
+- **Points System**: Gamified user engagement and rewards
+- **Dependency Injection**: Clean architecture with configurable services
+
+### Current Version: 2.1.0
+- Recently updated indexer API client to match new signature-protected endpoints
+- Removed admin functionality (no longer supported by backend)
+- Added new Solana and simplified points API support
+
 ## Architecture
 ```
 src/
@@ -71,24 +85,32 @@ src/
 ## AI Development Tips
 
 ### When adding new features:
-1. Start with interface definition in `types/`
-2. Implement business logic in `business/core/`
-3. Create platform-specific implementations
-4. Add React hooks if needed
-5. Write comprehensive tests
+1. **Define Interface First**: Start with interface definition in `types/services/`
+2. **Business Logic**: Implement pure logic in `business/core/[domain]/`
+3. **Platform Implementations**: Create `.web.ts` and `.reactnative.ts` files
+4. **React Integration**: Add hooks in `business/hooks/[domain]/`
+5. **Comprehensive Testing**: Write tests in `__tests__` directories
+6. **Export Management**: Update relevant `index.ts` files
 
-### When debugging:
-- Check platform detection logic first
-- Verify interface implementations
-- Look at dependency injection setup
-- Check environment configuration
+### When debugging issues:
+- **Platform Detection**: Check if correct platform implementation is loaded
+- **Interface Compliance**: Verify implementations match their interfaces
+- **Dependency Injection**: Review service registration in DI container
+- **Environment Config**: Validate configuration in `src/di/environment/`
+- **API Signatures**: Ensure API client methods match backend endpoints
 
-### Common patterns to follow:
-- Use dependency injection for external services
-- Implement error handling consistently
-- Add proper TypeScript types
-- Follow existing naming conventions
-- Write tests for all business logic
+### Critical Patterns to Follow:
+- **Signature Protection**: All indexer API calls now require `walletAddress`, `signature`, `message`
+- **Error Handling**: Use consistent error patterns with typed exceptions
+- **Type Safety**: Export interfaces alongside implementations
+- **Platform Isolation**: Keep platform-specific code in `utils/` directory
+- **Business Purity**: Keep business logic free of platform dependencies
+
+### Recent Changes to Consider:
+- **No Admin Endpoints**: Admin functionality has been removed from indexer API
+- **New API Structure**: Points API now uses `/api/points/*` endpoints
+- **Solana Support**: New `/api/solana/*` endpoints for Solana blockchain integration
+- **Signature Verification**: All protected endpoints now use unified signature verification
 
 ## External Integrations
 - WildDuck email server (via symbolic link)

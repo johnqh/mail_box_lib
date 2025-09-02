@@ -43,7 +43,14 @@
       "Read(/Users/qianghuang/mail_box_indexer/**)",
       "Read(/Users/qianghuang/mail_box_indexer/types/**)",
       "Read(/Users/qianghuang/mail_box_indexer/api/**)",
-      "Read(/Users/qianghuang/mail_box_indexer/api/**)"
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)",
+      "Bash(chmod:*)",
+      "Bash(npm run check-all:*)",
+      "Bash(npx jest:*)"
     ],
     "deny": [],
     "ask": []

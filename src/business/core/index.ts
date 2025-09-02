@@ -33,6 +33,9 @@ export * from './auth/auth-business-logic';
 // Dependency injection container
 export * from './container';
 
+// TanStack Query system
+export * from './query';
+
 // Direct imports for sync function
 import { DefaultEmailOperations } from './email/email-operations';
 import { DefaultMailboxOperations } from './mailbox/mailbox-operations';

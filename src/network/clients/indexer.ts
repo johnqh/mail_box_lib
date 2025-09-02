@@ -217,16 +217,14 @@ export class IndexerClient implements NetworkClient {
 
   /**
    * Create/update nonce for wallet address
-   * POST /nonce/:walletAddress/create
+   * POST /nonce/create
    */
   async createNonce(walletAddress: string, signature: string, message: string) {
-    const response = await this.post(
-      `/nonce/${encodeURIComponent(walletAddress)}/create`,
-      {
-        signature,
-        message,
-      }
-    );
+    const response = await this.post('/nonce/create', {
+      walletAddress,
+      signature,
+      message,
+    });
 
     if (!response.ok) {
       throw new Error(
@@ -239,16 +237,14 @@ export class IndexerClient implements NetworkClient {
 
   /**
    * Retrieve nonce for wallet address
-   * POST /nonce/:walletAddress
+   * POST /nonce
    */
   async getNonce(walletAddress: string, signature: string, message: string) {
-    const response = await this.post(
-      `/nonce/${encodeURIComponent(walletAddress)}`,
-      {
-        signature,
-        message,
-      }
-    );
+    const response = await this.post('/nonce', {
+      walletAddress,
+      signature,
+      message,
+    });
 
     if (!response.ok) {
       throw new Error(
@@ -284,13 +280,19 @@ export class IndexerClient implements NetworkClient {
   }
 
   /**
-   * Check nameservice entitlement for a wallet address (public)
-   * GET /:walletAddress/entitlement/nameservice
+   * Check nameservice entitlement for a wallet address (requires signature verification)
+   * POST /entitlement/nameservice
    */
-  async checkNameServiceEntitlement(walletAddress: string) {
-    const response = await this.get(
-      `/${encodeURIComponent(walletAddress)}/entitlement/nameservice`
-    );
+  async checkNameServiceEntitlement(
+    walletAddress: string,
+    signature: string,
+    message: string
+  ) {
+    const response = await this.post('/entitlement/nameservice', {
+      walletAddress,
+      signature,
+      message,
+    });
 
     if (!response.ok) {
       throw new Error(
@@ -548,6 +550,86 @@ export class IndexerClient implements NetworkClient {
   }
 
   // =============================================================================
+  // SIMPLIFIED POINTS API ENDPOINTS
+  // =============================================================================
+
+  /**
+   * Get user points balance (requires signature verification)
+   * POST /api/points
+   */
+  async getPointsBalance(
+    walletAddress: string,
+    signature: string,
+    message: string
+  ) {
+    const response = await this.post('/api/points', {
+      walletAddress,
+      signature,
+      message,
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get points balance: ${(response.data as any)?.error || 'Unknown error'}`
+      );
+    }
+
+    return response.data;
+  }
+
+  /**
+   * Get points leaderboard (public)
+   * GET /api/points/leaderboard/:count
+   */
+  async getPointsLeaderboard(count: number = 10) {
+    const response = await this.get(`/api/points/leaderboard/${count}`);
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get points leaderboard: ${(response.data as any)?.error || 'Unknown error'}`
+      );
+    }
+
+    return response.data;
+  }
+
+  /**
+   * Get site-wide statistics (public)
+   * GET /api/points/site-stats
+   */
+  async getPointsSiteStats() {
+    const response = await this.get('/api/points/site-stats');
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get site stats: ${(response.data as any)?.error || 'Unknown error'}`
+      );
+    }
+
+    return response.data;
+  }
+
+  // =============================================================================
+  // SOLANA API ENDPOINTS
+  // =============================================================================
+
+  /**
+   * Get Solana indexer status (public)
+   * GET /api/solana/status
+   */
+  async getSolanaStatus() {
+    const response = await this.get('/api/solana/status');
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get Solana status: ${(response.data as any)?.error || 'Unknown error'}`
+      );
+    }
+
+    return response.data;
+  }
+
+  // =============================================================================
   // WEBHOOK ENDPOINTS (for internal use by email backend)
   // =============================================================================
 
@@ -607,169 +689,6 @@ export class IndexerClient implements NetworkClient {
 
     return response.data;
   }
-
-  // =============================================================================
-  // ADMIN API ENDPOINTS (require admin privileges)
-  // =============================================================================
-
-  /**
-   * Create campaign (admin)
-   * POST /admin/campaigns/create
-   */
-  async adminCreateCampaign(
-    campaignData: {
-      campaignName: string;
-      campaignType: string;
-      pointsPerClaim: number;
-      maxClaimsPerUser: number;
-      totalClaimsLimit?: number;
-      startTime: number;
-      endTime: number;
-      description?: string;
-    },
-    adminWallet: string,
-    adminSignature: string,
-    adminMessage: string
-  ) {
-    const response = await this.post('/admin/campaigns/create', {
-      ...campaignData,
-      adminWallet,
-      adminSignature,
-      adminMessage,
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to create campaign: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Award points manually (admin)
-   * POST /admin/points/award
-   */
-  async adminAwardPoints(
-    targetWallet: string,
-    points: number,
-    reason: string,
-    adminWallet: string,
-    adminSignature: string,
-    adminMessage: string
-  ) {
-    const response = await this.post('/admin/points/award', {
-      targetWallet,
-      points,
-      reason,
-      adminWallet,
-      adminSignature,
-      adminMessage,
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to award points: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Flag user (admin)
-   * POST /admin/points/flag-user
-   */
-  async adminFlagUser(
-    targetWallet: string,
-    reason: string,
-    adminWallet: string,
-    adminSignature: string,
-    adminMessage: string
-  ) {
-    const response = await this.post('/admin/points/flag-user', {
-      targetWallet,
-      reason,
-      adminWallet,
-      adminSignature,
-      adminMessage,
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to flag user: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Get admin stats overview (admin)
-   * GET /admin/stats/overview
-   */
-  async adminGetStatsOverview() {
-    const response = await this.get('/admin/stats/overview');
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to get admin stats: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Get flagged users (admin)
-   * GET /admin/users/flagged
-   */
-  async adminGetFlaggedUsers(limit?: number, offset?: number) {
-    const params = new URLSearchParams();
-    if (limit) params.append('limit', limit.toString());
-    if (offset) params.append('offset', offset.toString());
-
-    const response = await this.get(
-      `/admin/users/flagged${params.toString() ? `?${params.toString()}` : ''}`
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to get flagged users: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Create bulk promotional codes (admin)
-   * POST /admin/campaigns/bulk-codes
-   */
-  async adminCreateBulkCodes(
-    campaignId: string,
-    quantity: number,
-    adminWallet: string,
-    adminSignature: string,
-    adminMessage: string
-  ) {
-    const response = await this.post('/admin/campaigns/bulk-codes', {
-      campaignId,
-      quantity,
-      adminWallet,
-      adminSignature,
-      adminMessage,
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to create bulk codes: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
 }
 
 /**
@@ -797,13 +716,10 @@ export const createIndexerApiConfig = (config: AppConfig) => ({
       url: string
     ) =>
       `/message/${chainId}/${encodeURIComponent(walletAddress)}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`,
-    NONCE_CREATE: (walletAddress: string) =>
-      `/nonce/${encodeURIComponent(walletAddress)}/create`,
-    NONCE_GET: (walletAddress: string) =>
-      `/nonce/${encodeURIComponent(walletAddress)}`,
+    NONCE_CREATE: '/nonce/create',
+    NONCE_GET: '/nonce',
     VERIFY: '/verify',
-    NAME_SERVICE_ENTITLEMENT: (walletAddress: string) =>
-      `/${encodeURIComponent(walletAddress)}/entitlement/nameservice`,
+    NAME_SERVICE_ENTITLEMENT: '/entitlement/nameservice',
 
     // Points endpoints
     POINTS_HOW_TO_EARN: '/points/how-to-earn',
@@ -826,14 +742,14 @@ export const createIndexerApiConfig = (config: AppConfig) => ({
     WEBHOOK_RECIPIENT_LOGIN: '/webhook/recipient-login',
     WEBHOOK_LOGIN: '/webhook/login',
 
-    // Admin endpoints
-    ADMIN_CREATE_CAMPAIGN: '/admin/campaigns/create',
-    ADMIN_DEACTIVATE_CAMPAIGN: (campaignId: string) =>
-      `/admin/campaigns/${campaignId}/deactivate`,
-    ADMIN_AWARD_POINTS: '/admin/points/award',
-    ADMIN_FLAG_USER: '/admin/points/flag-user',
-    ADMIN_STATS: '/admin/stats/overview',
-    ADMIN_FLAGGED_USERS: '/admin/users/flagged',
-    ADMIN_BULK_CODES: '/admin/campaigns/bulk-codes',
+    // Simplified Points API endpoints
+    POINTS_BALANCE: '/api/points',
+    POINTS_LEADERBOARD: (count: number) => `/api/points/leaderboard/${count}`,
+    POINTS_SITE_STATS: '/api/points/site-stats',
+
+    // Solana API endpoints
+    SOLANA_STATUS: '/api/solana/status',
+    SOLANA_WEBHOOK: '/api/solana/webhook',
+    SOLANA_SETUP_WEBHOOKS: '/api/solana/setup-webhooks',
   },
 });
