@@ -24,6 +24,7 @@ export const STALE_TIMES = {
   CAMPAIGN_STATS: 1 * 60 * 1000, // 1 minute
 
   // User-specific or contextual data
+  ADDRESS_VALIDATION: 10 * 60 * 1000, // 10 minutes (address format is deterministic)
   SIGNING_MESSAGE: 5 * 60 * 1000, // 5 minutes (deterministic)
 } as const;
 

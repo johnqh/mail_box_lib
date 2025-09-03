@@ -11,33 +11,37 @@ export interface IndexerEmailAddress {
 export interface IndexerEmailResponse {
   walletAddress: string;
   addressType: string;
-  emailAddresses: string[];
-  detailedAddresses: IndexerEmailAddress[];
-  totalCount: number;
-  hasNameService: boolean;
+  addresses: Array<{
+    email: string;
+    source: 'base' | 'nameservice' | 'delegated';
+    walletAddress: string;
+    hasEntitlement?: boolean;
+  }>;
   verified: boolean;
   timestamp: string;
 }
 
 export interface IndexerDelegationInfo {
+  walletAddress: string;
+  addressType: string;
+  hasDelegation: boolean;
   delegatedTo: string | null;
+  chainId: number | null;
   isActive: boolean;
-  chainId?: number;
-  blockNumber?: string;
-  transactionHash?: string;
-  timestamp?: string;
   verified: boolean;
+  timestamp: string;
 }
 
 export interface IndexerDelegatorInfo {
-  delegatedFrom: Array<{
-    address: string;
+  walletAddress: string;
+  addressType: string;
+  delegators: Array<{
+    delegatorAddress: string;
+    isActive: boolean;
     chainId: number;
-    blockNumber: string;
-    transactionHash: string;
-    timestamp: string;
   }>;
   totalDelegators: number;
+  verified: boolean;
   timestamp: string;
 }
 
@@ -94,9 +98,24 @@ export interface IndexerEntitlement {
   timestamp: string;
 }
 
+export interface ValidateAddressResponse {
+  isValid: boolean;
+  addressType: string;
+  normalizedAddress: string;
+  formats?: {
+    standard: string;
+    checksummed?: string;
+    compressed?: string;
+  };
+  message?: string;
+  error?: string;
+  timestamp: string;
+}
+
 export interface UseIndexerMailReturn {
   isLoading: boolean;
   error: string | null;
+  validateAddress: (address: string) => Promise<ValidateAddressResponse>;
   getEmailAddresses: (
     walletAddress: string,
     signature: string,
@@ -153,6 +172,26 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
   const clearError = useCallback(() => {
     setError(null);
   }, []);
+
+  const validateAddress = useCallback(
+    async (address: string): Promise<ValidateAddressResponse> => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const result = await indexerClient.validateAddress(address);
+        return result;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to validate address';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [indexerClient]
+  );
 
   const getEmailAddresses = useCallback(
     async (
@@ -389,6 +428,7 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
   return {
     isLoading,
     error,
+    validateAddress,
     getEmailAddresses,
     getDelegatedAddress,
     getDelegatorsToAddress,

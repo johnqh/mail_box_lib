@@ -121,15 +121,33 @@ export class IndexerClient implements NetworkClient {
   // =============================================================================
 
   /**
+   * Validate address format (public endpoint)
+   * GET /api/addresses/validate/:address
+   */
+  async validateAddress(address: string) {
+    const response = await this.get(
+      `/api/addresses/validate/${encodeURIComponent(address)}`
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to validate address: ${(response.data as any)?.error || 'Unknown error'}`
+      );
+    }
+
+    return response.data;
+  }
+
+  /**
    * Get email addresses for a wallet address (requires signature verification)
-   * POST /emails
+   * POST /api/addresses
    */
   async getEmailAddresses(
     walletAddress: string,
     signature: string,
     message: string
   ) {
-    const response = await this.post('/emails', {
+    const response = await this.post('/api/addresses', {
       walletAddress,
       signature,
       message,
@@ -146,14 +164,14 @@ export class IndexerClient implements NetworkClient {
 
   /**
    * Get delegation information for a wallet (requires signature verification)
-   * POST /delegated
+   * POST /api/addresses/delegated
    */
   async getDelegated(
     walletAddress: string,
     signature: string,
     message: string
   ) {
-    const response = await this.post('/delegated', {
+    const response = await this.post('/api/addresses/delegated', {
       walletAddress,
       signature,
       message,
@@ -170,14 +188,14 @@ export class IndexerClient implements NetworkClient {
 
   /**
    * Get all addresses that have delegated TO a specific wallet address (requires signature verification)
-   * POST /delegatedTo
+   * POST /api/addresses/delegated/to
    */
   async getDelegatedTo(
     walletAddress: string,
     signature: string,
     message: string
   ) {
-    const response = await this.post('/delegatedTo', {
+    const response = await this.post('/api/addresses/delegated/to', {
       walletAddress,
       signature,
       message,
@@ -194,7 +212,7 @@ export class IndexerClient implements NetworkClient {
 
   /**
    * Get deterministic message for signing
-   * GET /message/:chainId/:walletAddress/:domain/:url
+   * GET /api/message/:chainId/:walletAddress/:domain/:url
    */
   async getMessage(
     chainId: number,
@@ -203,7 +221,7 @@ export class IndexerClient implements NetworkClient {
     url: string
   ) {
     const response = await this.get(
-      `/message/${chainId}/${encodeURIComponent(walletAddress)}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`
+      `/api/message/${chainId}/${encodeURIComponent(walletAddress)}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`
     );
 
     if (!response.ok) {
@@ -217,10 +235,10 @@ export class IndexerClient implements NetworkClient {
 
   /**
    * Create/update nonce for wallet address
-   * POST /nonce/create
+   * POST /api/nonce/create
    */
   async createNonce(walletAddress: string, signature: string, message: string) {
-    const response = await this.post('/nonce/create', {
+    const response = await this.post('/api/nonce/create', {
       walletAddress,
       signature,
       message,
@@ -237,10 +255,10 @@ export class IndexerClient implements NetworkClient {
 
   /**
    * Retrieve nonce for wallet address
-   * POST /nonce
+   * POST /api/nonce
    */
   async getNonce(walletAddress: string, signature: string, message: string) {
-    const response = await this.post('/nonce', {
+    const response = await this.post('/api/nonce', {
       walletAddress,
       signature,
       message,
@@ -257,14 +275,14 @@ export class IndexerClient implements NetworkClient {
 
   /**
    * Verify wallet signature
-   * POST /verify
+   * POST /api/signature/verify
    */
   async verifySignature(
     walletAddress: string,
     signature: string,
     message: string
   ) {
-    const response = await this.post('/verify', {
+    const response = await this.post('/api/signature/verify', {
       walletAddress,
       signature,
       message,
@@ -281,14 +299,14 @@ export class IndexerClient implements NetworkClient {
 
   /**
    * Check nameservice entitlement for a wallet address (requires signature verification)
-   * POST /entitlement/nameservice
+   * POST /api/entitlements/nameservice
    */
   async checkNameServiceEntitlement(
     walletAddress: string,
     signature: string,
     message: string
   ) {
-    const response = await this.post('/entitlement/nameservice', {
+    const response = await this.post('/api/entitlements/nameservice', {
       walletAddress,
       signature,
       message,
@@ -706,20 +724,21 @@ export const createIndexerApiConfig = (config: AppConfig) => ({
   VERSION: '2.2.0',
   ENDPOINTS: {
     // Mail endpoints
-    EMAILS: '/emails',
-    DELEGATED: '/delegated',
-    DELEGATED_TO: '/delegatedTo',
+    ADDRESSES_VALIDATE: '/api/addresses/validate',
+    ADDRESSES: '/api/addresses',
+    ADDRESSES_DELEGATED: '/api/addresses/delegated',
+    ADDRESSES_DELEGATED_TO: '/api/addresses/delegated/to',
     MESSAGE: (
       chainId: number,
       walletAddress: string,
       domain: string,
       url: string
     ) =>
-      `/message/${chainId}/${encodeURIComponent(walletAddress)}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`,
-    NONCE_CREATE: '/nonce/create',
-    NONCE_GET: '/nonce',
-    VERIFY: '/verify',
-    NAME_SERVICE_ENTITLEMENT: '/entitlement/nameservice',
+      `/api/message/${chainId}/${encodeURIComponent(walletAddress)}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`,
+    NONCE_CREATE: '/api/nonce/create',
+    NONCE_GET: '/api/nonce',
+    SIGNATURE_VERIFY: '/api/signature/verify',
+    ENTITLEMENTS_NAMESERVICE: '/api/entitlements/nameservice',
 
     // Points endpoints
     POINTS_HOW_TO_EARN: '/points/how-to-earn',

@@ -85,9 +85,43 @@ export interface GetDelegatedResponse {
 
 /**
  * Get addresses delegated TO a wallet - API request
- * POST /delegatedTo
+ * POST /api/addresses/delegated/to
  */
 export type GetDelegatedToRequest = SignatureProtectedRequest;
+
+/**
+ * Response for addresses that have delegated to a wallet
+ */
+export interface GetDelegatedToResponse {
+  walletAddress: string;
+  addressType: ChainType;
+  delegators: Array<{
+    delegatorAddress: string;
+    isActive: boolean;
+    chainId: number;
+  }>;
+  totalDelegators: number;
+  verified: boolean;
+  timestamp: string;
+}
+
+/**
+ * Validate address format endpoint
+ * GET /api/addresses/validate/:address
+ */
+export interface ValidateAddressResponse {
+  isValid: boolean;
+  addressType: ChainType;
+  normalizedAddress: string;
+  formats?: {
+    standard: string;
+    checksummed?: string;
+    compressed?: string;
+  };
+  message?: string;
+  error?: string;
+  timestamp: string;
+}
 
 /**
  * Points summary request

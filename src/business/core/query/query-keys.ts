@@ -19,6 +19,11 @@ export const queryKeys = {
   indexer: {
     all: indexerBase,
 
+    // Address validation
+    addresses: () => [...indexerBase(), 'addresses'] as const,
+    validateAddress: (address: string) =>
+      [...indexerBase(), 'addresses', 'validate', address] as const,
+
     // Message signing
     messages: () => [...indexerBase(), 'messages'] as const,
     message: (

@@ -11,6 +11,19 @@ import { IndexerClient } from '../../../network/clients/indexer';
 import { queryKeys, STALE_TIMES } from '../../core/query';
 
 // Types for API responses
+export interface AddressValidationResponse {
+  isValid: boolean;
+  addressType: string;
+  normalizedAddress: string;
+  formats?: {
+    standard: string;
+    checksummed?: string;
+    compressed?: string;
+  };
+  message?: string;
+  error?: string;
+  timestamp: string;
+}
 export interface SigningMessageResponse {
   walletAddress: string;
   addressType: string;
@@ -102,6 +115,27 @@ export interface SolanaStatusResponse {
   totalIndexers: number;
   configured: boolean;
 }
+
+/**
+ * Hook to validate address format (public endpoint)
+ */
+export const useAddressValidation = (
+  address: string,
+  options?: UseQueryOptions<AddressValidationResponse>
+): UseQueryResult<AddressValidationResponse> => {
+  const appConfig = useAppConfig();
+  
+  return useQuery({
+    queryKey: queryKeys.indexer.validateAddress(address),
+    queryFn: async (): Promise<AddressValidationResponse> => {
+      const client = new IndexerClient(appConfig);
+      return client.validateAddress(address);
+    },
+    staleTime: STALE_TIMES.ADDRESS_VALIDATION,
+    enabled: !!address,
+    ...options,
+  });
+};
 
 /**
  * Hook to get signing message for wallet verification
