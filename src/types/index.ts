@@ -22,6 +22,8 @@ export {
 
 // API types (with aliased exports to avoid conflicts)
 export {
+  WalletSignature,
+  WalletAuth,
   WildDuckAuthRequest,
   WildDuckAuthResponse,
   WildDuckPreAuthRequest,

@@ -5,6 +5,29 @@
 import { AuthStatus, ChainType } from '../enums';
 import { EmailAddress } from '../../../types/email';
 
+/**
+ * Address type enumeration
+ */
+export enum AddressType {
+  EVMAddress = 'EVMAddress',
+  SolanaAddress = 'SolanaAddress',
+  ENSName = 'ENSName',
+  SNSName = 'SNSName',
+  Unknown = 'Unknown',
+}
+
+/**
+ * Parsed email address structure
+ */
+export type ParsedEmailAddress = {
+  /** The address part (before @) */
+  address: string;
+  /** The domain part (after @) */
+  domain: string;
+  /** The detected type of the address */
+  type: AddressType;
+};
+
 // Extended EmailAddress interface for business logic
 interface _ExtendedEmailAddress extends EmailAddress {
   main?: boolean;
@@ -330,5 +353,199 @@ export class DefaultEmailAddressBusinessLogic
       default:
         return 5;
     }
+  }
+}
+
+/**
+ * Address Helper class for address type detection and validation
+ */
+export class AddressHelper {
+  /**
+   * Determine the address type from an email address prefix (part before @)
+   * Case insensitive as email addresses are case insensitive
+   */
+  static getAddressType(address: string): AddressType {
+    if (!address || typeof address !== 'string') {
+      return AddressType.Unknown;
+    }
+
+    // Convert to lowercase for case-insensitive comparison
+    const lowerAddress = address.trim().toLowerCase();
+
+    // Check for ENS names (.eth or .box domains)
+    if (this.isENSName(lowerAddress)) {
+      return AddressType.ENSName;
+    }
+
+    // Check for SNS names (.sol domain)
+    if (this.isSNSName(lowerAddress)) {
+      return AddressType.SNSName;
+    }
+
+    // Check for EVM address (0x followed by 40 hex characters)
+    if (this.isEVMAddress(lowerAddress)) {
+      return AddressType.EVMAddress;
+    }
+
+    // Check for Solana address (base58 encoded, 32-44 characters)
+    if (this.isSolanaAddress(lowerAddress)) {
+      return AddressType.SolanaAddress;
+    }
+
+    return AddressType.Unknown;
+  }
+
+  /**
+   * Check if address is an EVM address
+   */
+  private static isEVMAddress(address: string): boolean {
+    // EVM addresses are 0x followed by exactly 40 hexadecimal characters
+    return /^0x[a-f0-9]{40}$/.test(address);
+  }
+
+  /**
+   * Check if address is a Solana address
+   */
+  private static isSolanaAddress(address: string): boolean {
+    try {
+      // Solana addresses are base58 encoded and typically 32-44 characters
+      if (address.length < 32 || address.length > 44) {
+        return false;
+      }
+
+      // Base58 alphabet: 123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz
+      const base58Regex = /^[1-9a-hjkmnp-z]+$/;
+      if (!base58Regex.test(address)) {
+        return false;
+      }
+
+      // Additional validation: try to decode with bs58 if available
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const bs58 = require('bs58');
+        const decoded = bs58.decode(address);
+        return decoded.length === 32; // Solana addresses decode to 32 bytes
+      } catch {
+        // If bs58 is not available, rely on regex validation
+        return true;
+      }
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Check if address is an ENS name (.eth or .box)
+   */
+  private static isENSName(address: string): boolean {
+    // ENS names end with .eth or .box
+    if (!address.endsWith('.eth') && !address.endsWith('.box')) {
+      return false;
+    }
+
+    // Extract the name part (without .eth or .box)
+    const nameWithoutTLD = address.endsWith('.eth')
+      ? address.slice(0, -4)
+      : address.slice(0, -4);
+
+    if (nameWithoutTLD.length === 0) {
+      return false;
+    }
+
+    // ENS names can have multiple labels separated by dots
+    const labels = nameWithoutTLD.split('.');
+
+    // Each label must be valid
+    const validLabelRegex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+    for (const label of labels) {
+      if (label.length === 0 || !validLabelRegex.test(label)) {
+        return false;
+      }
+      // No consecutive hyphens allowed
+      if (label.includes('--')) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Check if address is an SNS name (.sol)
+   */
+  private static isSNSName(address: string): boolean {
+    // SNS names end with .sol
+    if (!address.endsWith('.sol')) {
+      return false;
+    }
+
+    // Extract the name part (without .sol)
+    const nameWithoutTLD = address.slice(0, -4);
+
+    if (nameWithoutTLD.length === 0) {
+      return false;
+    }
+
+    // SNS names can have multiple labels separated by dots
+    const labels = nameWithoutTLD.split('.');
+
+    // Each label must be valid
+    const validLabelRegex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+    for (const label of labels) {
+      if (label.length === 0 || !validLabelRegex.test(label)) {
+        return false;
+      }
+      // No consecutive hyphens allowed
+      if (label.includes('--')) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+}
+
+/**
+ * Email Address Helper class for parsing and analyzing email addresses
+ */
+export class EmailAddressHelper {
+  /**
+   * Parse an email address into its components
+   * Returns undefined if the email address is invalid (doesn't contain exactly one @)
+   */
+  static parse(emailAddress: string): ParsedEmailAddress | undefined {
+    if (!emailAddress || typeof emailAddress !== 'string') {
+      return undefined;
+    }
+
+    // Trim whitespace and validate input
+    const trimmedEmail = emailAddress.trim();
+    if (trimmedEmail.length === 0) {
+      return undefined;
+    }
+
+    // Split by @ symbol
+    const parts = trimmedEmail.split('@');
+
+    // Must have exactly one @ symbol (resulting in exactly 2 parts)
+    if (parts.length !== 2) {
+      return undefined;
+    }
+
+    const [address, domain] = parts;
+
+    // Both address and domain parts must be non-empty
+    if (address.length === 0 || domain.length === 0) {
+      return undefined;
+    }
+
+    // Determine the address type using AddressHelper
+    const type = AddressHelper.getAddressType(address);
+
+    return {
+      address,
+      domain,
+      type,
+    };
   }
 }

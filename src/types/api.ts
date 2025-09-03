@@ -25,6 +25,28 @@ export interface IndexerApiResponse<T = any> {
 }
 
 /**
+ * Wallet signature data structure
+ */
+export interface WalletSignature {
+  /** The wallet address that signed the message */
+  signerAddress: string;
+  /** The message that was signed */
+  message: string;
+  /** The cryptographic signature */
+  signature: string;
+}
+
+/**
+ * Wallet authentication data structure
+ */
+export interface WalletAuth {
+  /** The wallet address (optional) */
+  walletAddress?: string;
+  /** The wallet signature (optional) */
+  signature?: WalletSignature;
+}
+
+/**
  * Signature-protected API request base interface
  * All signature-protected endpoints extend this
  */
