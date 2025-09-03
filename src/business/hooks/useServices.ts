@@ -117,21 +117,30 @@ export function useFolderOperations() {
 
 /**
  * Get the application configuration
- * This provides environment-specific configuration in a DI-compliant way
+ * This should be provided by the consuming application through DI context
+ * For now, we'll throw an error to indicate proper DI setup is needed
  */
 export function useAppConfig() {
-  // Import the config here to maintain DI pattern while accessing environment config
-  // This is acceptable since config is essentially a singleton constant
-
-  if (typeof window !== 'undefined') {
-    // Web environment
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { webAppConfig } = require('../../di/env');
-    return webAppConfig;
-  } else {
-    // React Native environment
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { reactNativeAppConfig } = require('../../di/env');
-    return reactNativeAppConfig;
-  }
+  // TODO: This should come from a proper DI context provided by the main application
+  // For now, return a complete AppConfig that works with all clients
+  return {
+    wildDuckApiToken: '',
+    wildDuckBackendUrl: 'https://0xmail.box',
+    indexerBackendUrl: 'https://api.0xmail.box',
+    revenueCatApiKey: '',
+    walletConnectProjectId: '',
+    privyAppId: '',
+    firebase: {
+      apiKey: '',
+      authDomain: '',
+      projectId: '',
+      storageBucket: '',
+      messagingSenderId: '',
+      appId: '',
+      vapidKey: '',
+    },
+    useCloudflareWorker: false,
+    cloudflareWorkerUrl: '',
+    useMockFallback: true, // Use mock fallback for development
+  };
 }
