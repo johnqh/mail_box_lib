@@ -8,6 +8,7 @@ import {
   TransactionReceipt,
 } from 'viem';
 import { mainnet } from 'viem/chains';
+import { logger } from '../logger';
 
 // MailService contract configuration for delegation (separate from Mailer)
 // TODO: Replace with actual contract address when deployed
@@ -80,7 +81,7 @@ export class MailServiceContract {
         throw new Error('Cannot delegate to yourself');
       }
 
-      console.log('Delegating email handling:', {
+      logger.info('Delegating email handling', 'MailService', {
         from: account,
         to: delegateAddress,
         contract: MAIL_SERVICE_CONTRACT_ADDRESS,
@@ -106,7 +107,7 @@ export class MailServiceContract {
 
       // Execute transaction
       const hash = await this.walletClient.writeContract(request);
-      console.log('Delegation transaction sent:', hash);
+      logger.info('Delegation transaction sent', 'MailService', { hash });
 
       // Wait for confirmation
       const receipt = await this.publicClient.waitForTransactionReceipt({
@@ -114,7 +115,9 @@ export class MailServiceContract {
         confirmations: 1,
       });
 
-      console.log('Delegation transaction confirmed:', receipt);
+      logger.info('Delegation transaction confirmed', 'MailService', {
+        receipt,
+      });
 
       return {
         success: true,
@@ -122,7 +125,7 @@ export class MailServiceContract {
         receipt,
       };
     } catch (error: any) {
-      console.error('Delegation failed:', error);
+      logger.error('Delegation failed', 'MailService', error);
 
       let errorMessage = 'Failed to delegate email handling';
 
@@ -161,7 +164,7 @@ export class MailServiceContract {
         throw new Error('Wallet client not initialized');
       }
 
-      console.log('Revoking delegation:', {
+      logger.info('Revoking delegation', 'MailService', {
         from: account,
         delegate: delegateAddress,
         contract: MAIL_SERVICE_CONTRACT_ADDRESS,
@@ -184,7 +187,7 @@ export class MailServiceContract {
 
       // Execute transaction
       const hash = await this.walletClient.writeContract(request);
-      console.log('Revocation transaction sent:', hash);
+      logger.info('Revocation transaction sent', 'MailService', { hash });
 
       // Wait for confirmation
       const receipt = await this.publicClient.waitForTransactionReceipt({
@@ -192,7 +195,9 @@ export class MailServiceContract {
         confirmations: 1,
       });
 
-      console.log('Revocation transaction confirmed:', receipt);
+      logger.info('Revocation transaction confirmed', 'MailService', {
+        receipt,
+      });
 
       return {
         success: true,
@@ -200,7 +205,7 @@ export class MailServiceContract {
         receipt,
       };
     } catch (error: any) {
-      console.error('Revocation failed:', error);
+      logger.error('Revocation failed', 'MailService', error);
 
       let errorMessage = 'Failed to revoke delegation';
 
@@ -238,7 +243,7 @@ export class MailServiceContract {
 
       return result as boolean;
     } catch (error) {
-      console.error('Error checking delegation status:', error);
+      logger.error('Error checking delegation status', 'MailService', error);
       return false;
     }
   }
@@ -259,7 +264,7 @@ export class MailServiceContract {
 
       return result as Address[];
     } catch (error) {
-      console.error('Error fetching delegates:', error);
+      logger.error('Error fetching delegates', 'MailService', error);
       return [];
     }
   }

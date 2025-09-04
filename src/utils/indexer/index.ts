@@ -1,7 +1,8 @@
 /**
  * Indexer utilities - Platform-agnostic indexer helpers
- * These will be implemented with proper DI when moved from main project
+ * Re-exports from the business logic layer for convenience
  */
 
-// Placeholder exports to make the build pass
-// TODO: Implement actual indexer utilities with proper DI
+export { IndexerClient } from '../../network/clients/indexer';
+export * from '../../business/hooks/indexer';
+export * from '../../business/core/indexer';

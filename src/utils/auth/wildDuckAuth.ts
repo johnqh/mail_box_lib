@@ -5,6 +5,7 @@
 
 import { formatSignatureForWildDuck } from './blockchainAuth';
 import { ChainType } from '../../business/core/enums';
+import { authLogger } from '../logger';
 
 // Platform-specific globals
 declare const _fetch: typeof globalThis.fetch;
@@ -80,7 +81,7 @@ const storeAuthData = (
       userId
     );
   } catch (error) {
-    console.error('Failed to store auth data:', error);
+    authLogger.error('Failed to store auth data', error);
   }
 };
 

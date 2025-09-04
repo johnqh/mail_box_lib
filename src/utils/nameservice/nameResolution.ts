@@ -6,6 +6,10 @@
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
 import { isAddress } from 'viem';
+import {
+  AddressHelper,
+  AddressType,
+} from '../../business/core/auth/auth-business-logic';
 
 // Create public client for ENS resolution
 const publicClient = createPublicClient({
@@ -31,14 +35,14 @@ export interface NameResolutionResult {
  * Check if input looks like an ENS name
  */
 export function isENSName(input: string): boolean {
-  return /^[a-zA-Z0-9-]+\.eth$|^[a-zA-Z0-9-]+\.box$/.test(input.toLowerCase());
+  return AddressHelper.getAddressType(input) === AddressType.ENSName;
 }
 
 /**
  * Check if input looks like an SNS name
  */
 export function isSNSName(input: string): boolean {
-  return /^[a-zA-Z0-9-]+\.sol$/.test(input.toLowerCase());
+  return AddressHelper.getAddressType(input) === AddressType.SNSName;
 }
 
 /**
@@ -46,7 +50,17 @@ export function isSNSName(input: string): boolean {
  */
 export function isValidAddress(input: string): boolean {
   try {
-    return isAddress(input);
+    // First check with viem (for EVM addresses)
+    if (isAddress(input)) {
+      return true;
+    }
+
+    // Then check with AddressHelper for Solana addresses
+    const addressType = AddressHelper.getAddressType(input);
+    return (
+      addressType === AddressType.EVMAddress ||
+      addressType === AddressType.SolanaAddress
+    );
   } catch {
     return false;
   }

@@ -1,5 +1,6 @@
 import { ERROR_MESSAGES } from './constants';
 import { env } from '../di/env';
+import { logger } from './logger';
 
 // Platform-specific global
 declare const fetch: typeof globalThis.fetch; // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -81,13 +82,8 @@ export const handleApiError = (error: unknown): AppError => {
 };
 
 export const logError = (error: unknown, context?: string): void => {
-  const timestamp = new Date().toISOString();
   const errorMessage = getErrorMessage(error);
-
-  console.error(
-    `[${timestamp}]${context ? ` [${context}]` : ''}: ${errorMessage}`,
-    error
-  );
+  logger.error(errorMessage, context, error);
 
   // In production, you might want to send this to an error tracking service
   if (env.isProduction()) {

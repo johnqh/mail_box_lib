@@ -4,6 +4,10 @@
  */
 
 import { ChainType } from '../blockchain/addressDetection';
+import {
+  AddressHelper,
+  AddressType,
+} from '../../business/core/auth/auth-business-logic';
 
 // Re-export for convenience
 export { detectAddressType } from '../blockchain/addressDetection';
@@ -194,47 +198,23 @@ export const isValidBlockchainUsername = (username: string): boolean => {
 
   const cleanUsername = username.trim().toLowerCase();
 
-  // EVM address
-  if (isEVMAddress(cleanUsername)) {
+  // Use AddressHelper for standardized address detection
+  const addressType = AddressHelper.getAddressType(cleanUsername);
+
+  // Valid if it's any known address type (not Unknown)
+  if (addressType !== AddressType.Unknown) {
     return true;
   }
 
-  // Base64 encoded EVM address
+  // Check for Base64 encoded EVM address (legacy support)
   if (isBase64EVMAddress(cleanUsername)) {
-    return true;
-  }
-
-  // Solana address
-  if (isSolanaAddress(cleanUsername)) {
-    return true;
-  }
-
-  // ENS name
-  if (isENSName(cleanUsername)) {
-    return true;
-  }
-
-  // SNS name
-  if (isSNSName(cleanUsername)) {
     return true;
   }
 
   return false;
 };
 
-// Helper functions (matching WildDuck's validation logic)
-const isEVMAddress = (address: string): boolean => {
-  try {
-    // Basic hex address validation
-    if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
-      return false;
-    }
-    return true;
-  } catch {
-    return false;
-  }
-};
-
+// Helper function for Base64 EVM address validation (legacy support)
 const isBase64EVMAddress = (encoded: string): boolean => {
   try {
     const base64Regex = /^[A-Za-z0-9+/]+=*$/;
@@ -246,78 +226,8 @@ const isBase64EVMAddress = (encoded: string): boolean => {
       return false;
     }
     const address = `0x${decoded}`;
-    return isEVMAddress(address);
+    return AddressHelper.getAddressType(address) === AddressType.EVMAddress;
   } catch {
     return false;
   }
-};
-
-const isSolanaAddress = (address: string): boolean => {
-  try {
-    if (
-      !address ||
-      typeof address !== 'string' ||
-      address.length < 32 ||
-      address.length > 44
-    ) {
-      return false;
-    }
-    const base58Regex = /^[1-9A-HJ-NP-Za-km-z]+$/;
-    if (!base58Regex.test(address)) {
-      return false;
-    }
-    // Basic length validation for base58 decoded - dynamic import for crypto library
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const bs58 = require('bs58');
-    const decoded = bs58.decode(address);
-    return decoded.length === 32;
-  } catch {
-    return false;
-  }
-};
-
-const isENSName = (name: string): boolean => {
-  const lowerName = name.toLowerCase();
-  if (!lowerName.endsWith('.eth') && !lowerName.endsWith('.box')) {
-    return false;
-  }
-  const withoutTLD = lowerName.endsWith('.eth')
-    ? lowerName.slice(0, -4)
-    : lowerName.slice(0, -4);
-  if (withoutTLD.length === 0) {
-    return false;
-  }
-  const labels = withoutTLD.split('.');
-  const validLabelRegex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
-  for (const label of labels) {
-    if (label.length === 0 || !validLabelRegex.test(label)) {
-      return false;
-    }
-    if (label.includes('--')) {
-      return false;
-    }
-  }
-  return true;
-};
-
-const isSNSName = (name: string): boolean => {
-  const lowerName = name.toLowerCase();
-  if (!lowerName.endsWith('.sol')) {
-    return false;
-  }
-  const withoutTLD = lowerName.slice(0, -4);
-  if (withoutTLD.length === 0) {
-    return false;
-  }
-  const labels = withoutTLD.split('.');
-  const validLabelRegex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
-  for (const label of labels) {
-    if (label.length === 0 || !validLabelRegex.test(label)) {
-      return false;
-    }
-    if (label.includes('--')) {
-      return false;
-    }
-  }
-  return true;
 };

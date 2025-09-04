@@ -105,18 +105,25 @@ export class DefaultAuthBusinessLogic implements AuthBusinessLogic {
       return false;
     }
 
+    // Use AddressHelper for consistent validation
+    const addressType = AddressHelper.getAddressType(address);
+
     switch (chainType) {
       case ChainType.EVM:
-        // EVM address validation (0x followed by 40 hex characters)
-        return /^0x[a-fA-F0-9]{40}$/.test(address);
+        return (
+          addressType === AddressType.EVMAddress ||
+          addressType === AddressType.ENSName
+        );
 
       case ChainType.SOLANA:
-        // Solana address validation (base58 encoded, 32-44 characters)
-        return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
+        return (
+          addressType === AddressType.SolanaAddress ||
+          addressType === AddressType.SNSName
+        );
 
       default:
-        // Unknown chain type, basic validation
-        return address.length > 10 && address.length < 100;
+        // Unknown chain type, accept any known address format
+        return addressType !== AddressType.Unknown;
     }
   }
 
@@ -125,12 +132,18 @@ export class DefaultAuthBusinessLogic implements AuthBusinessLogic {
     hasActiveSubscription: boolean
   ): boolean {
     // ENS and SNS domains require subscription
-    const isENS =
-      emailAddress.id.startsWith('ens_') ||
-      emailAddress.email.endsWith('.eth@0xmail.box');
-    const isSNS =
-      emailAddress.id.startsWith('sns_') ||
-      emailAddress.email.endsWith('.sol@0xmail.box');
+    let isENS = emailAddress.id.startsWith('ens_');
+    let isSNS = emailAddress.id.startsWith('sns_');
+
+    // Also check the email address part using AddressHelper
+    if (!isENS && !isSNS) {
+      const emailParts = emailAddress.email.split('@');
+      if (emailParts.length === 2) {
+        const addressType = AddressHelper.getAddressType(emailParts[0]);
+        isENS = addressType === AddressType.ENSName;
+        isSNS = addressType === AddressType.SNSName;
+      }
+    }
 
     return (isENS || isSNS) && !hasActiveSubscription;
   }
@@ -471,16 +484,30 @@ export class AddressHelper {
   }
 
   /**
-   * Check if address is an SNS name (.sol)
+   * Check if address is an SNS name (Solana name service)
+   * Supports: .sol, .abc, .bonk, .poor, .gm, .dao, .defi, .web3
    */
   private static isSNSName(address: string): boolean {
-    // SNS names end with .sol
-    if (!address.endsWith('.sol')) {
+    // List of supported Solana name extensions
+    const snsExtensions = [
+      '.sol',
+      '.abc',
+      '.bonk',
+      '.poor',
+      '.gm',
+      '.dao',
+      '.defi',
+      '.web3',
+    ];
+
+    // Check if address ends with any supported extension
+    const matchingExtension = snsExtensions.find(ext => address.endsWith(ext));
+    if (!matchingExtension) {
       return false;
     }
 
-    // Extract the name part (without .sol)
-    const nameWithoutTLD = address.slice(0, -4);
+    // Extract the name part (without the extension)
+    const nameWithoutTLD = address.slice(0, -matchingExtension.length);
 
     if (nameWithoutTLD.length === 0) {
       return false;
@@ -502,6 +529,278 @@ export class AddressHelper {
     }
 
     return true;
+  }
+
+  /**
+   * Get all ENS names (both .eth and .box domains) for a given address
+   * Uses comprehensive discovery to find all names, not just primary
+   */
+  static async getENSNames(address: string): Promise<string[]> {
+    if (!this.isEVMAddress(address.toLowerCase())) {
+      return [];
+    }
+
+    try {
+      const { createPublicClient, http } = await import('viem');
+      const { mainnet } = await import('viem/chains');
+
+      const client = createPublicClient({
+        chain: mainnet,
+        transport: http(),
+      });
+
+      const ensNames: string[] = [];
+
+      try {
+        // Method 1: Get primary ENS name
+        const primaryName = await client.getEnsName({
+          address: address as `0x${string}`,
+        });
+
+        if (primaryName) {
+          ensNames.push(primaryName);
+        }
+      } catch {
+        // No primary name found, continue
+      }
+
+      // Method 2: Query ENS subgraph for all names pointing to this address
+      // This covers both .eth and .box domains
+      try {
+        const subgraphQuery = `
+          query GetAllNames($address: String!) {
+            domains(where: { resolvedAddress: $address }) {
+              name
+            }
+          }
+        `;
+
+        const subgraphUrl =
+          'https://api.thegraph.com/subgraphs/name/ensdomains/ens';
+        const response = await (globalThis as any).fetch(subgraphUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: subgraphQuery,
+            variables: { address: address.toLowerCase() },
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+
+          if (data.data?.domains) {
+            const supportedTlds = ['.eth', '.box'];
+
+            for (const domain of data.data.domains) {
+              const domainName = domain.name;
+
+              // Check if it's a supported TLD
+              const hasSupportedTld = supportedTlds.some(tld =>
+                domainName.endsWith(tld)
+              );
+
+              if (hasSupportedTld && !ensNames.includes(domainName)) {
+                ensNames.push(domainName);
+              }
+            }
+          }
+        }
+      } catch {
+        // Continue with primary name only if subgraph fails
+      }
+
+      return ensNames;
+    } catch (error) {
+      console.error('Error fetching ENS names:', error);
+
+      if (
+        error instanceof Error &&
+        error.message?.includes('Cannot resolve module')
+      ) {
+        console.warn(
+          'ENS dependencies not available. Install viem for ENS resolution.'
+        );
+      }
+
+      return [];
+    }
+  }
+
+  /**
+   * Get all SNS names for a given Solana address
+   * Supports all Solana name extensions: .sol, .abc, .bonk, .poor, .gm, .dao, .defi, .web3
+   * Uses comprehensive discovery to find all names, not just primary
+   */
+  static async getSNSNames(address: string): Promise<string[]> {
+    if (!this.isSolanaAddress(address.toLowerCase())) {
+      return [];
+    }
+
+    try {
+      // Dynamic imports to avoid issues in environments without these dependencies
+      const { Connection, PublicKey } = await import('@solana/web3.js');
+      const bonfida = await import('@bonfida/spl-name-service');
+
+      // Create connection to Solana mainnet
+      const connection = new Connection(
+        process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
+      );
+      const ownerKey = new PublicKey(address);
+
+      const snsNames: string[] = [];
+
+      // Supported SNS TLDs
+      const supportedTlds = [
+        '.sol',
+        '.abc',
+        '.bonk',
+        '.poor',
+        '.gm',
+        '.dao',
+        '.defi',
+        '.web3',
+      ];
+
+      try {
+        // Method 1: Try reverse lookup for primary domain
+        if (bonfida.reverseLookup) {
+          const primaryDomain = await bonfida.reverseLookup(
+            connection,
+            ownerKey
+          );
+          if (primaryDomain && typeof primaryDomain === 'string') {
+            const hasSupportedTld = supportedTlds.some(tld =>
+              primaryDomain.endsWith(tld)
+            );
+            if (hasSupportedTld) {
+              snsNames.push(primaryDomain);
+            }
+          }
+        }
+      } catch {
+        // No primary domain found, continue with comprehensive search
+      }
+
+      try {
+        // Method 2: Get all domains owned by this address
+        // Try different approaches depending on Bonfida v3.x API
+        if (bonfida.getAllDomains) {
+          const allDomains = await bonfida.getAllDomains(connection, ownerKey);
+
+          // Handle different return types from getAllDomains
+          if (Array.isArray(allDomains)) {
+            for (const domainInfo of allDomains) {
+              let domainName: string | null = null;
+
+              // Handle different possible return formats
+              if (typeof domainInfo === 'string') {
+                domainName = domainInfo;
+              } else if (domainInfo && typeof domainInfo === 'object') {
+                // Try common property names for domain info
+                domainName =
+                  (domainInfo as any).name ||
+                  (domainInfo as any).domain ||
+                  null;
+              }
+
+              if (domainName && typeof domainName === 'string') {
+                const hasSupportedTld = supportedTlds.some(tld =>
+                  domainName.endsWith(tld)
+                );
+
+                if (hasSupportedTld && !snsNames.includes(domainName)) {
+                  snsNames.push(domainName);
+                }
+              }
+            }
+          }
+        }
+      } catch (allDomainsError) {
+        // If getAllDomains fails, continue with just primary domain
+        console.debug(
+          'getAllDomains failed, using primary domain only:',
+          allDomainsError
+        );
+      }
+
+      try {
+        // Method 3: Try alternative domain discovery methods
+        // Some versions of Bonfida SDK might have different function names
+        const bonfidaAny = bonfida as any;
+        const alternativeFunctions = [
+          'getDomains',
+          'getOwnedDomains',
+          'getUserDomains',
+        ];
+
+        for (const funcName of alternativeFunctions) {
+          if (
+            bonfidaAny[funcName] &&
+            typeof bonfidaAny[funcName] === 'function'
+          ) {
+            try {
+              const domains = await bonfidaAny[funcName](connection, ownerKey);
+              if (Array.isArray(domains)) {
+                for (const domain of domains) {
+                  const domainStr =
+                    typeof domain === 'string'
+                      ? domain
+                      : domain?.name || domain?.domain;
+
+                  if (domainStr && typeof domainStr === 'string') {
+                    const hasSupportedTld = supportedTlds.some(tld =>
+                      domainStr.endsWith(tld)
+                    );
+
+                    if (hasSupportedTld && !snsNames.includes(domainStr)) {
+                      snsNames.push(domainStr);
+                    }
+                  }
+                }
+                break; // Stop after first successful alternative method
+              }
+            } catch {
+              // Continue to next alternative method
+            }
+          }
+        }
+      } catch {
+        // All alternative methods failed, continue with what we have
+      }
+
+      return snsNames;
+    } catch (error) {
+      console.error('Error fetching SNS names:', error);
+
+      // If dependencies are not available, return empty array to avoid breaking the flow
+      if (
+        error instanceof Error &&
+        error.message?.includes('Cannot resolve module')
+      ) {
+        console.warn(
+          'SNS dependencies not available. Install @solana/web3.js and @bonfida/spl-name-service for SNS resolution.'
+        );
+      }
+
+      return [];
+    }
+  }
+
+  /**
+   * Get the list of supported SNS extensions
+   */
+  static getSupportedSNSExtensions(): string[] {
+    return ['.sol', '.abc', '.bonk', '.poor', '.gm', '.dao', '.defi', '.web3'];
+  }
+
+  /**
+   * Get the list of supported ENS extensions
+   */
+  static getSupportedENSExtensions(): string[] {
+    return ['.eth', '.box'];
   }
 }
 
