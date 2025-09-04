@@ -31,11 +31,6 @@ export {
   useIndexerSolana,
   // TanStack Query hooks
   useSigningMessage,
-  useHowToEarnPoints,
-  usePublicStats,
-  useLeaderboard,
-  useCampaigns,
-  useCampaignStats,
   usePointsLeaderboard as usePointsLeaderboardQuery,
   useSiteStats,
   useSolanaStatus,

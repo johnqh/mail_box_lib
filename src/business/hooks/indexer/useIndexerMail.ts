@@ -14,10 +14,8 @@ export interface IndexerEmailResponse {
   walletAddress: string;
   addressType: string;
   addresses: Array<{
-    email: string;
-    source: 'base' | 'nameservice' | 'delegated';
     walletAddress: string;
-    hasEntitlement?: boolean;
+    names: string[];
   }>;
   verified: boolean;
   timestamp: string;

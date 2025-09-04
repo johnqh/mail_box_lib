@@ -63,9 +63,8 @@ export const useIndexerSolana = (): UseIndexerSolanaReturn => {
       setError(null);
 
       try {
-        const response =
-          await indexerClient.get<IndexerSolanaStatus>('/api/solana/status');
-        return response.data;
+        const response = await indexerClient.getSolanaStatus();
+        return response;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to get Solana status';
@@ -82,11 +81,8 @@ export const useIndexerSolana = (): UseIndexerSolanaReturn => {
       setError(null);
 
       try {
-        const response = await indexerClient.post<IndexerSolanaSetupResponse>(
-          '/api/solana/setup-webhooks',
-          {}
-        );
-        return response.data;
+        const response = await indexerClient.setupSolanaWebhooks();
+        return response;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to setup webhooks';
@@ -106,14 +102,11 @@ export const useIndexerSolana = (): UseIndexerSolanaReturn => {
       setError(null);
 
       try {
-        const response = await indexerClient.post<{
-          success: boolean;
-          message: string;
-        }>('/api/solana/test-transaction', {
+        const response = await indexerClient.processSolanaTestTransaction(
           chainId,
-          transaction,
-        });
-        return response.data;
+          transaction
+        );
+        return response;
       } catch (err) {
         const errorMessage =
           err instanceof Error

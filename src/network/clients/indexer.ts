@@ -322,253 +322,7 @@ export class IndexerClient implements NetworkClient {
   }
 
   // =============================================================================
-  // POINTS API ENDPOINTS
-  // =============================================================================
-
-  /**
-   * Get "How to Earn Points" information (public)
-   * GET /points/how-to-earn
-   */
-  async getHowToEarnPoints() {
-    const response = await this.get('/points/how-to-earn');
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to get how-to-earn info: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Get public stats (public)
-   * GET /points/public-stats
-   */
-  async getPublicStats() {
-    const response = await this.get('/points/public-stats');
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to get public stats: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Get user points summary (requires signature verification)
-   * POST /points/summary
-   */
-  async getPointsSummary(
-    walletAddress: string,
-    signature: string,
-    message: string
-  ) {
-    const response = await this.post('/points/summary', {
-      walletAddress,
-      signature,
-      message,
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to get points summary: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Get user points history (requires signature verification)
-   * POST /points/history
-   */
-  async getPointsHistory(
-    walletAddress: string,
-    signature: string,
-    message: string,
-    limit?: number,
-    offset?: number
-  ) {
-    const response = await this.post('/points/history', {
-      walletAddress,
-      signature,
-      message,
-      limit,
-      offset,
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to get points history: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Claim promotional code points (requires signature verification)
-   * POST /points/claim-promo
-   */
-  async claimPromoCode(
-    walletAddress: string,
-    promoCode: string,
-    signature: string,
-    message: string
-  ) {
-    const response = await this.post('/points/claim-promo', {
-      walletAddress,
-      promoCode,
-      signature,
-      message,
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to claim promo code: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Validate promotional code without claiming (requires signature verification)
-   * POST /points/validate-promo
-   */
-  async validatePromoCode(
-    walletAddress: string,
-    promoCode: string,
-    signature: string,
-    message: string
-  ) {
-    const response = await this.post('/points/validate-promo', {
-      walletAddress,
-      promoCode,
-      signature,
-      message,
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to validate promo code: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Register referral (requires signature verification)
-   * POST /points/register-referral
-   */
-  async registerReferral(
-    walletAddress: string,
-    referralCode: string,
-    signature: string,
-    message: string
-  ) {
-    const response = await this.post('/points/register-referral', {
-      walletAddress,
-      referralCode,
-      signature,
-      message,
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to register referral: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Report referee login (requires signature verification)
-   * POST /points/referee-login
-   */
-  async reportRefereeLogin(
-    walletAddress: string,
-    signature: string,
-    message: string
-  ) {
-    const response = await this.post('/points/referee-login', {
-      walletAddress,
-      signature,
-      message,
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to report referee login: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Get leaderboard (public)
-   * GET /leaderboard
-   */
-  async getLeaderboard(limit?: number, offset?: number) {
-    const params = new URLSearchParams();
-    if (limit) params.append('limit', limit.toString());
-    if (offset) params.append('offset', offset.toString());
-
-    const response = await this.get(
-      `/leaderboard${params.toString() ? `?${params.toString()}` : ''}`
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to get leaderboard: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Get campaigns (public)
-   * GET /campaigns
-   */
-  async getCampaigns() {
-    const response = await this.get('/campaigns');
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to get campaigns: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Get campaign stats (public)
-   * GET /campaigns/:campaignId/stats
-   */
-  async getCampaignStats(campaignId: string) {
-    const response = await this.get(
-      `/campaigns/${encodeURIComponent(campaignId)}/stats`
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to get campaign stats: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
-
-  // =============================================================================
-  // SIMPLIFIED POINTS API ENDPOINTS
+  // POINTS API ENDPOINTS (Actual available endpoints)
   // =============================================================================
 
   /**
@@ -647,26 +401,16 @@ export class IndexerClient implements NetworkClient {
     return response.data;
   }
 
-  // =============================================================================
-  // WEBHOOK ENDPOINTS (for internal use by email backend)
-  // =============================================================================
-
   /**
-   * Email sent webhook (internal)
-   * POST /webhook/email-sent
+   * Setup Solana webhooks (internal)
+   * POST /api/solana/setup-webhooks
    */
-  async webhookEmailSent(data: {
-    senderWallet: string;
-    recipientEmails: string[];
-    transactionHash?: string;
-    chainId?: number;
-    blockNumber?: string;
-  }) {
-    const response = await this.post('/webhook/email-sent', data);
+  async setupSolanaWebhooks() {
+    const response = await this.post('/api/solana/setup-webhooks', {});
 
     if (!response.ok) {
       throw new Error(
-        `Failed to send email webhook: ${(response.data as any)?.error || 'Unknown error'}`
+        `Failed to setup Solana webhooks: ${(response.data as any)?.error || 'Unknown error'}`
       );
     }
 
@@ -674,34 +418,18 @@ export class IndexerClient implements NetworkClient {
   }
 
   /**
-   * Recipient login webhook (internal)
-   * POST /webhook/recipient-login
+   * Process test Solana transaction (development only)
+   * POST /api/solana/test-transaction
    */
-  async webhookRecipientLogin(data: {
-    recipientWallet: string;
-    senderWallets: string[];
-  }) {
-    const response = await this.post('/webhook/recipient-login', data);
+  async processSolanaTestTransaction(chainId: number, transaction: any) {
+    const response = await this.post('/api/solana/test-transaction', {
+      chainId,
+      transaction,
+    });
 
     if (!response.ok) {
       throw new Error(
-        `Failed to send recipient login webhook: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Login webhook (internal)
-   * POST /webhook/login
-   */
-  async webhookLogin(data: { walletAddress: string; referralCode?: string }) {
-    const response = await this.post('/webhook/login', data);
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to send login webhook: ${(response.data as any)?.error || 'Unknown error'}`
+        `Failed to process test transaction: ${(response.data as any)?.error || 'Unknown error'}`
       );
     }
 
@@ -740,28 +468,7 @@ export const createIndexerApiConfig = (config: AppConfig) => ({
     SIGNATURE_VERIFY: '/api/signature/verify',
     ENTITLEMENTS_NAMESERVICE: '/api/entitlements/nameservice',
 
-    // Points endpoints
-    POINTS_HOW_TO_EARN: '/points/how-to-earn',
-    POINTS_PUBLIC_STATS: '/points/public-stats',
-    POINTS_SUMMARY: '/points/summary',
-    POINTS_HISTORY: '/points/history',
-    POINTS_CLAIM_PROMO: '/points/claim-promo',
-    POINTS_VALIDATE_PROMO: '/points/validate-promo',
-    POINTS_REGISTER_REFERRAL: '/points/register-referral',
-    POINTS_REFEREE_LOGIN: '/points/referee-login',
-
-    // Public endpoints
-    LEADERBOARD: '/leaderboard',
-    CAMPAIGNS: '/campaigns',
-    CAMPAIGN_STATS: (campaignId: string) =>
-      `/campaigns/${encodeURIComponent(campaignId)}/stats`,
-
-    // Webhook endpoints
-    WEBHOOK_EMAIL_SENT: '/webhook/email-sent',
-    WEBHOOK_RECIPIENT_LOGIN: '/webhook/recipient-login',
-    WEBHOOK_LOGIN: '/webhook/login',
-
-    // Simplified Points API endpoints
+    // Points endpoints (actual available endpoints)
     POINTS_BALANCE: '/api/points',
     POINTS_LEADERBOARD: (count: number) => `/api/points/leaderboard/${count}`,
     POINTS_SITE_STATS: '/api/points/site-stats',
@@ -770,5 +477,6 @@ export const createIndexerApiConfig = (config: AppConfig) => ({
     SOLANA_STATUS: '/api/solana/status',
     SOLANA_WEBHOOK: '/api/solana/webhook',
     SOLANA_SETUP_WEBHOOKS: '/api/solana/setup-webhooks',
+    SOLANA_TEST_TRANSACTION: '/api/solana/test-transaction',
   },
 });

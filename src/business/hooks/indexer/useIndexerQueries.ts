@@ -60,30 +60,6 @@ export interface SigningMessageResponse {
   timestamp: string;
 }
 
-export interface HowToEarnResponse {
-  // Define based on actual API response structure
-  [key: string]: unknown;
-}
-
-export interface PublicStatsResponse {
-  // Define based on actual API response structure
-  [key: string]: unknown;
-}
-
-export interface LeaderboardResponse {
-  // Define based on actual API response structure
-  [key: string]: unknown;
-}
-
-export interface CampaignsResponse {
-  // Define based on actual API response structure
-  [key: string]: unknown;
-}
-
-export interface CampaignStatsResponse {
-  // Define based on actual API response structure
-  [key: string]: unknown;
-}
 
 export interface PointsLeaderboardResponse {
   success: boolean;
@@ -162,104 +138,7 @@ export const useSigningMessage = (
   });
 };
 
-/**
- * Hook to get "How to Earn Points" information
- */
-export const useHowToEarnPoints = (
-  options?: UseQueryOptions<HowToEarnResponse>
-): UseQueryResult<HowToEarnResponse> => {
-  const config = useAppConfig();
-  
-  return useQuery({
-    queryKey: queryKeys.indexer.howToEarn(),
-    queryFn: async (): Promise<HowToEarnResponse> => {
-      const client = new IndexerClient(convertToAppConfig(config));
-      return client.getHowToEarnPoints();
-    },
-    staleTime: STALE_TIMES.HOW_TO_EARN,
-    ...options,
-  });
-};
 
-/**
- * Hook to get public statistics
- */
-export const usePublicStats = (
-  options?: UseQueryOptions<PublicStatsResponse>
-): UseQueryResult<PublicStatsResponse> => {
-  const config = useAppConfig();
-  
-  return useQuery({
-    queryKey: queryKeys.indexer.publicStats(),
-    queryFn: async (): Promise<PublicStatsResponse> => {
-      const client = new IndexerClient(convertToAppConfig(config));
-      return client.getPublicStats();
-    },
-    staleTime: STALE_TIMES.PUBLIC_STATS,
-    ...options,
-  });
-};
-
-/**
- * Hook to get leaderboard data
- */
-export const useLeaderboard = (
-  limit?: number,
-  offset?: number,
-  options?: UseQueryOptions<LeaderboardResponse>
-): UseQueryResult<LeaderboardResponse> => {
-  const config = useAppConfig();
-  
-  return useQuery({
-    queryKey: queryKeys.indexer.leaderboard(limit, offset),
-    queryFn: async (): Promise<LeaderboardResponse> => {
-      const client = new IndexerClient(convertToAppConfig(config));
-      return client.getLeaderboard(limit, offset);
-    },
-    staleTime: STALE_TIMES.LEADERBOARD,
-    ...options,
-  });
-};
-
-/**
- * Hook to get campaigns list
- */
-export const useCampaigns = (
-  options?: UseQueryOptions<CampaignsResponse>
-): UseQueryResult<CampaignsResponse> => {
-  const config = useAppConfig();
-  
-  return useQuery({
-    queryKey: queryKeys.indexer.campaignsList(),
-    queryFn: async (): Promise<CampaignsResponse> => {
-      const client = new IndexerClient(convertToAppConfig(config));
-      return client.getCampaigns();
-    },
-    staleTime: STALE_TIMES.CAMPAIGNS,
-    ...options,
-  });
-};
-
-/**
- * Hook to get campaign statistics
- */
-export const useCampaignStats = (
-  campaignId: string,
-  options?: UseQueryOptions<CampaignStatsResponse>
-): UseQueryResult<CampaignStatsResponse> => {
-  const config = useAppConfig();
-  
-  return useQuery({
-    queryKey: queryKeys.indexer.campaignStats(campaignId),
-    queryFn: async (): Promise<CampaignStatsResponse> => {
-      const client = new IndexerClient(convertToAppConfig(config));
-      return client.getCampaignStats(campaignId);
-    },
-    staleTime: STALE_TIMES.CAMPAIGN_STATS,
-    enabled: !!campaignId,
-    ...options,
-  });
-};
 
 /**
  * Hook to get points leaderboard (new API)

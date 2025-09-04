@@ -177,15 +177,15 @@ export class IndexerService {
     message: string
   ): Promise<IndexerPointsSummaryResponse> {
     try {
-      const response = await this.indexerClient.getPointsSummary(
+      const response = await this.indexerClient.getPointsBalance(
         walletAddress,
         signature,
         message
       );
       
       return {
-        success: true,
-        points: response.points || 0,
+        success: response.success || true,
+        points: parseInt(response.data?.pointsEarned || '0'),
       };
     } catch (error) {
       console.error('Failed to get points summary:', error);
@@ -208,11 +208,11 @@ export class IndexerService {
     }
 
     try {
-      const response = await this.indexerClient.getLeaderboard(limit, offset);
+      const response = await this.indexerClient.getPointsLeaderboard(limit || 10);
       
       const result = {
-        success: true,
-        leaderboard: response.leaderboard || [],
+        success: response.success || true,
+        leaderboard: response.data?.leaderboard || [],
       };
       
       this.setCache(cacheKey, result);
@@ -235,11 +235,10 @@ export class IndexerService {
     }
 
     try {
-      const response = await this.indexerClient.getHowToEarnPoints();
-      
+      // This endpoint no longer exists in the indexer, return placeholder data
       const result = {
         success: true,
-        methods: response.methods || [],
+        methods: [],
       };
       
       this.setCache(cacheKey, result);
@@ -262,11 +261,11 @@ export class IndexerService {
     }
 
     try {
-      const response = await this.indexerClient.getPublicStats();
+      const response = await this.indexerClient.getPointsSiteStats();
       
       const result = {
-        success: true,
-        stats: response,
+        success: response.success || true,
+        stats: response.data,
       };
       
       this.setCache(cacheKey, result);

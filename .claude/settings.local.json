@@ -59,7 +59,19 @@
       "Read(/Users/qianghuang/mail_box_indexer/api/**)",
       "Read(/Users/qianghuang/mail_box_indexer/api/**)",
       "Read(/Users/qianghuang/mail_box_indexer/**)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/types/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/lib/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/lib/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/lib/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)",
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)"
     ],
     "deny": [],
     "ask": []

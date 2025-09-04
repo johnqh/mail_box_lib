@@ -132,13 +132,13 @@ class IndexerGraphQLHelper {
 
   async getChainStatistics() {
     try {
-      const publicStats = await this.client.getPublicStats();
+      const siteStats = await this.client.getPointsSiteStats();
       
       const chainStats: IndexerChainStatistics = {
         chainId: 1,
         networkName: 'Ethereum',
         totalEmails: 0,
-        totalUsers: publicStats?.data?.totalUsers || 0,
+        totalUsers: siteStats?.data?.totalUsers || 0,
         totalDelegations: 0,
         isActive: true,
         lastUpdated: new Date().toISOString()
