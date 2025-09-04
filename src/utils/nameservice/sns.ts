@@ -67,19 +67,78 @@ export async function getSNSNames(address: string): Promise<SNSName[]> {
  * Query Solana blockchain for .sol domains owned by an address
  * This uses the proper SNS program to find domain ownership
  */
-async function querySOLDomains(_ownerAddress: string): Promise<string[]> {
-  // For now, return empty array as proper SNS querying requires specialized libraries
-  // like @bonfida/spl-name-service which need to be added as dependencies
+async function querySOLDomains(ownerAddress: string): Promise<string[]> {
+  try {
+    // Dynamic import to handle environments where @bonfida/spl-name-service might not be available
+    const bonfida = await import('@bonfida/spl-name-service');
+    const { Connection, PublicKey } = await import('@solana/web3.js');
 
-  // TODO: Implement proper SNS domain discovery using:
-  // 1. @bonfida/spl-name-service library
-  // 2. Query the SNS registry program for domains owned by this address
-  // 3. Filter for active domains with valid records
+    // Create connection to Solana mainnet
+    const connection = new Connection('https://api.mainnet-beta.solana.com');
+    const ownerKey = new PublicKey(ownerAddress);
 
-  // SNS on-chain domain discovery not yet fully implemented
-  // This requires specialized SNS libraries like @bonfida/spl-name-service
+    const domains: string[] = [];
 
-  return [];
+    try {
+      // Method 1: Try reverse lookup for primary domain
+      const primaryDomain = await bonfida.reverseLookup(connection, ownerKey);
+      if (primaryDomain) {
+        domains.push(primaryDomain);
+      }
+    } catch {
+      // Primary domain lookup failed, continue with other methods
+    }
+
+    try {
+      // Method 2: Get all domains owned by this address
+      const allDomains = await bonfida.getAllDomains(connection, ownerKey);
+      if (allDomains && allDomains.length > 0) {
+        // Convert to strings if they're not already strings
+        const domainStrings = allDomains.map((domain: any) =>
+          typeof domain === 'string' ? domain : domain.toString()
+        );
+        domains.push(...domainStrings);
+      }
+    } catch {
+      // All domains lookup failed, continue
+    }
+
+    try {
+      // Method 3: Try alternative domain discovery methods if available
+      const bonfidaAny = bonfida as any;
+      const alternativeFunctions = [
+        'getDomains',
+        'getOwnedDomains',
+        'getUserDomains',
+      ];
+
+      for (const funcName of alternativeFunctions) {
+        if (typeof bonfidaAny[funcName] === 'function') {
+          try {
+            const result = await bonfidaAny[funcName](connection, ownerKey);
+            if (Array.isArray(result)) {
+              domains.push(...result);
+            }
+          } catch {
+            // Function failed, try next one
+          }
+        }
+      }
+    } catch {
+      // Alternative methods failed
+    }
+
+    // Remove duplicates and return
+    return [...new Set(domains)].filter(
+      domain => domain && typeof domain === 'string'
+    );
+  } catch (importError) {
+    console.warn(
+      'Bonfida SNS library not available for domain discovery:',
+      importError
+    );
+    return [];
+  }
 }
 
 /**

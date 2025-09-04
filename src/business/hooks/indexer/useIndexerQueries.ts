@@ -8,6 +8,7 @@
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useAppConfig } from '../useServices';
 import { IndexerClient } from '../../../network/clients/indexer';
+import { convertToAppConfig } from './utils';
 import { queryKeys, STALE_TIMES } from '../../core/query';
 
 // Types for API responses
@@ -123,12 +124,12 @@ export const useAddressValidation = (
   address: string,
   options?: UseQueryOptions<AddressValidationResponse>
 ): UseQueryResult<AddressValidationResponse> => {
-  const appConfig = useAppConfig();
+  const config = useAppConfig();
   
   return useQuery({
     queryKey: queryKeys.indexer.validateAddress(address),
     queryFn: async (): Promise<AddressValidationResponse> => {
-      const client = new IndexerClient(appConfig);
+      const client = new IndexerClient(convertToAppConfig(config));
       return client.validateAddress(address);
     },
     staleTime: STALE_TIMES.ADDRESS_VALIDATION,
@@ -147,12 +148,12 @@ export const useSigningMessage = (
   url: string,
   options?: UseQueryOptions<SigningMessageResponse>
 ): UseQueryResult<SigningMessageResponse> => {
-  const appConfig = useAppConfig();
+  const config = useAppConfig();
   
   return useQuery({
     queryKey: queryKeys.indexer.message(chainId, walletAddress, domain, url),
     queryFn: async (): Promise<SigningMessageResponse> => {
-      const client = new IndexerClient(appConfig);
+      const client = new IndexerClient(convertToAppConfig(config));
       return client.getMessage(chainId, walletAddress, domain, url);
     },
     staleTime: STALE_TIMES.SIGNING_MESSAGE,
@@ -167,12 +168,12 @@ export const useSigningMessage = (
 export const useHowToEarnPoints = (
   options?: UseQueryOptions<HowToEarnResponse>
 ): UseQueryResult<HowToEarnResponse> => {
-  const appConfig = useAppConfig();
+  const config = useAppConfig();
   
   return useQuery({
     queryKey: queryKeys.indexer.howToEarn(),
     queryFn: async (): Promise<HowToEarnResponse> => {
-      const client = new IndexerClient(appConfig);
+      const client = new IndexerClient(convertToAppConfig(config));
       return client.getHowToEarnPoints();
     },
     staleTime: STALE_TIMES.HOW_TO_EARN,
@@ -186,12 +187,12 @@ export const useHowToEarnPoints = (
 export const usePublicStats = (
   options?: UseQueryOptions<PublicStatsResponse>
 ): UseQueryResult<PublicStatsResponse> => {
-  const appConfig = useAppConfig();
+  const config = useAppConfig();
   
   return useQuery({
     queryKey: queryKeys.indexer.publicStats(),
     queryFn: async (): Promise<PublicStatsResponse> => {
-      const client = new IndexerClient(appConfig);
+      const client = new IndexerClient(convertToAppConfig(config));
       return client.getPublicStats();
     },
     staleTime: STALE_TIMES.PUBLIC_STATS,
@@ -207,12 +208,12 @@ export const useLeaderboard = (
   offset?: number,
   options?: UseQueryOptions<LeaderboardResponse>
 ): UseQueryResult<LeaderboardResponse> => {
-  const appConfig = useAppConfig();
+  const config = useAppConfig();
   
   return useQuery({
     queryKey: queryKeys.indexer.leaderboard(limit, offset),
     queryFn: async (): Promise<LeaderboardResponse> => {
-      const client = new IndexerClient(appConfig);
+      const client = new IndexerClient(convertToAppConfig(config));
       return client.getLeaderboard(limit, offset);
     },
     staleTime: STALE_TIMES.LEADERBOARD,
@@ -226,12 +227,12 @@ export const useLeaderboard = (
 export const useCampaigns = (
   options?: UseQueryOptions<CampaignsResponse>
 ): UseQueryResult<CampaignsResponse> => {
-  const appConfig = useAppConfig();
+  const config = useAppConfig();
   
   return useQuery({
     queryKey: queryKeys.indexer.campaignsList(),
     queryFn: async (): Promise<CampaignsResponse> => {
-      const client = new IndexerClient(appConfig);
+      const client = new IndexerClient(convertToAppConfig(config));
       return client.getCampaigns();
     },
     staleTime: STALE_TIMES.CAMPAIGNS,
@@ -246,12 +247,12 @@ export const useCampaignStats = (
   campaignId: string,
   options?: UseQueryOptions<CampaignStatsResponse>
 ): UseQueryResult<CampaignStatsResponse> => {
-  const appConfig = useAppConfig();
+  const config = useAppConfig();
   
   return useQuery({
     queryKey: queryKeys.indexer.campaignStats(campaignId),
     queryFn: async (): Promise<CampaignStatsResponse> => {
-      const client = new IndexerClient(appConfig);
+      const client = new IndexerClient(convertToAppConfig(config));
       return client.getCampaignStats(campaignId);
     },
     staleTime: STALE_TIMES.CAMPAIGN_STATS,
@@ -267,12 +268,12 @@ export const usePointsLeaderboard = (
   count: number = 10,
   options?: UseQueryOptions<PointsLeaderboardResponse>
 ): UseQueryResult<PointsLeaderboardResponse> => {
-  const appConfig = useAppConfig();
+  const config = useAppConfig();
   
   return useQuery({
     queryKey: queryKeys.indexer.pointsLeaderboard(count),
     queryFn: async (): Promise<PointsLeaderboardResponse> => {
-      const client = new IndexerClient(appConfig);
+      const client = new IndexerClient(convertToAppConfig(config));
       return client.getPointsLeaderboard(count);
     },
     staleTime: STALE_TIMES.LEADERBOARD,
@@ -286,12 +287,12 @@ export const usePointsLeaderboard = (
 export const useSiteStats = (
   options?: UseQueryOptions<SiteStatsResponse>
 ): UseQueryResult<SiteStatsResponse> => {
-  const appConfig = useAppConfig();
+  const config = useAppConfig();
   
   return useQuery({
     queryKey: queryKeys.indexer.siteStats(),
     queryFn: async (): Promise<SiteStatsResponse> => {
-      const client = new IndexerClient(appConfig);
+      const client = new IndexerClient(convertToAppConfig(config));
       return client.getPointsSiteStats();
     },
     staleTime: STALE_TIMES.SITE_STATS,
@@ -305,12 +306,12 @@ export const useSiteStats = (
 export const useSolanaStatus = (
   options?: UseQueryOptions<SolanaStatusResponse>
 ): UseQueryResult<SolanaStatusResponse> => {
-  const appConfig = useAppConfig();
+  const config = useAppConfig();
   
   return useQuery({
     queryKey: queryKeys.indexer.solanaStatus(),
     queryFn: async (): Promise<SolanaStatusResponse> => {
-      const client = new IndexerClient(appConfig);
+      const client = new IndexerClient(convertToAppConfig(config));
       return client.getSolanaStatus();
     },
     staleTime: STALE_TIMES.SOLANA_STATUS,

@@ -1,4 +1,12 @@
-// Temporary types until full integration with @johnqh/lib
+/**
+ * Business service for indexer operations
+ * Provides high-level methods for interacting with the mail_box_indexer API
+ */
+
+import { IndexerClient } from '../../../network/clients/indexer';
+import type { AppConfig } from '../../../types/environment';
+
+// Response types for indexer operations
 interface IndexerEmailResponse {
   success: boolean;
   emails?: any[];
@@ -11,7 +19,8 @@ interface IndexerLeaderboardResponse {
   message?: string;
 }
 
-interface IndexerCampaignsResponse {
+// Currently unused interfaces - kept for future API expansion
+interface _IndexerCampaignsResponse {
   success: boolean;
   campaigns?: any[];
   message?: string;
@@ -23,7 +32,7 @@ interface IndexerPointsSummaryResponse {
   message?: string;
 }
 
-interface IndexerPointsHistoryResponse {
+interface _IndexerPointsHistoryResponse {
   success: boolean;
   history?: any[];
   message?: string;
@@ -41,145 +50,32 @@ interface IndexerPublicStatsResponse {
   message?: string;
 }
 
-interface IndexerCampaignStatsResponse {
+interface _IndexerCampaignStatsResponse {
   success: boolean;
   stats?: any;
   message?: string;
 }
 
-interface IndexerPromoCodeResponse {
+interface _IndexerPromoCodeResponse {
   success: boolean;
   message?: string;
 }
 
-interface IndexerPromoValidationResponse {
+interface _IndexerPromoValidationResponse {
   success: boolean;
   valid?: boolean;
   message?: string;
 }
 
-interface IndexerReferralResponse {
+interface _IndexerReferralResponse {
   success: boolean;
   message?: string;
 }
 
-interface IndexerRefereeLoginResponse {
+interface _IndexerRefereeLoginResponse {
   success: boolean;
   message?: string;
 }
-
-// Basic config interface for now
-interface AppConfig {
-  indexer?: {
-    baseUrl?: string;
-    apiKey?: string;
-  };
-}
-
-// Define types that might not be exported from @johnqh/lib yet
-interface IndexerClient {
-  getEmailAddresses: (
-    address: string,
-    signature: string,
-    message?: string
-  ) => Promise<IndexerEmailResponse>;
-  getPointsSummary: (
-    address: string,
-    signature: string,
-    message?: string
-  ) => Promise<IndexerPointsSummaryResponse>;
-  getPointsHistory: (
-    address: string,
-    signature: string,
-    message?: string,
-    limit?: number,
-    offset?: number
-  ) => Promise<IndexerPointsHistoryResponse>;
-  getLeaderboard: (
-    limit?: number,
-    offset?: number
-  ) => Promise<IndexerLeaderboardResponse>;
-  getCampaigns: () => Promise<IndexerCampaignsResponse>;
-  verifySignature: (
-    address: string,
-    signature: string,
-    message: string
-  ) => Promise<any>;
-  getMessage: (
-    chainId: number,
-    address: string,
-    domain: string,
-    url: string
-  ) => Promise<any>;
-  getDelegated: (
-    address: string,
-    signature: string,
-    message?: string
-  ) => Promise<any>;
-  getDelegatedTo: (address: string) => Promise<any>;
-  getHowToEarnPoints: () => Promise<IndexerHowToEarnResponse>;
-  getPublicStats: () => Promise<IndexerPublicStatsResponse>;
-  getCampaignStats: (
-    campaignId: string
-  ) => Promise<IndexerCampaignStatsResponse>;
-  claimPromoCode: (
-    address: string,
-    code: string,
-    signature: string,
-    message?: string
-  ) => Promise<IndexerPromoCodeResponse>;
-  validatePromoCode: (
-    address: string,
-    code: string,
-    signature: string,
-    message?: string
-  ) => Promise<IndexerPromoValidationResponse>;
-  registerReferral: (
-    address: string,
-    code: string,
-    signature: string,
-    message?: string
-  ) => Promise<IndexerReferralResponse>;
-  reportRefereeLogin: (
-    address: string,
-    signature: string,
-    message?: string
-  ) => Promise<IndexerRefereeLoginResponse>;
-  webhookEmailSent: (data: any) => Promise<any>;
-  webhookRecipientLogin: (data: any) => Promise<any>;
-  webhookLogin: (data: any) => Promise<any>;
-  checkNameServiceEntitlement: (address: string) => Promise<any>;
-}
-
-// Mock client factory for now
-const createIndexerClient = (_config: AppConfig): IndexerClient => ({
-  getEmailAddresses: async (_address: string) => ({
-    success: true,
-    emails: [],
-  }),
-  getPointsSummary: async (_address: string) => ({ success: true, points: 0 }),
-  getPointsHistory: async (_address: string) => ({
-    success: true,
-    history: [],
-  }),
-  getLeaderboard: async () => ({ success: true, leaderboard: [] }),
-  getCampaigns: async () => ({ success: true, campaigns: [] }),
-  verifySignature: async () => ({ success: true }),
-  getMessage: async () => ({ messages: { simple: 'Test message' } }),
-  getDelegated: async () => ({ success: true }),
-  getDelegatedTo: async () => ({ success: true }),
-  getHowToEarnPoints: async () => ({ success: true, methods: [] }),
-  getPublicStats: async () => ({ success: true, stats: {} }),
-  getCampaignStats: async () => ({ success: true, stats: {} }),
-  claimPromoCode: async () => ({ success: true }),
-  validatePromoCode: async () => ({ success: true, valid: false }),
-  registerReferral: async () => ({ success: true }),
-  reportRefereeLogin: async () => ({ success: true }),
-  webhookEmailSent: async () => ({ success: true }),
-  webhookRecipientLogin: async () => ({ success: true }),
-  webhookLogin: async () => ({ success: true }),
-  checkNameServiceEntitlement: async () => ({ success: true }),
-});
 
 /**
  * Business service for indexer operations
@@ -192,7 +88,7 @@ export class IndexerService {
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
   constructor(config: AppConfig) {
-    this.indexerClient = createIndexerClient(config);
+    this.indexerClient = new IndexerClient(config);
   }
 
   public static getInstance(config: AppConfig): IndexerService {
@@ -242,8 +138,8 @@ export class IndexerService {
    */
   public async getEmailAddresses(
     walletAddress: string,
-    signature?: string,
-    message?: string
+    limit?: string,
+    offset?: string
   ): Promise<IndexerEmailResponse> {
     const cacheKey = this.getCacheKey('getEmailAddresses', { walletAddress });
     const cached = this.getFromCache<IndexerEmailResponse>(cacheKey);
@@ -255,12 +151,17 @@ export class IndexerService {
     try {
       const response = await this.indexerClient.getEmailAddresses(
         walletAddress,
-        signature || '',
-        message
+        limit || '10',
+        offset || '0'
       );
 
-      this.setCache(cacheKey, response);
-      return response;
+      const result = {
+        success: true,
+        emails: response.emails || [],
+      };
+
+      this.setCache(cacheKey, result);
+      return result;
     } catch (error) {
       console.error('Failed to get email addresses:', error);
       return { success: false, message: 'Failed to get email addresses' };
@@ -272,15 +173,20 @@ export class IndexerService {
    */
   public async getPointsSummary(
     walletAddress: string,
-    signature?: string,
-    message?: string
+    signature: string,
+    message: string
   ): Promise<IndexerPointsSummaryResponse> {
     try {
-      return await this.indexerClient.getPointsSummary(
+      const response = await this.indexerClient.getPointsSummary(
         walletAddress,
-        signature || '',
+        signature,
         message
       );
+      
+      return {
+        success: true,
+        points: response.points || 0,
+      };
     } catch (error) {
       console.error('Failed to get points summary:', error);
       return { success: false, message: 'Failed to get points summary' };
@@ -303,11 +209,71 @@ export class IndexerService {
 
     try {
       const response = await this.indexerClient.getLeaderboard(limit, offset);
-      this.setCache(cacheKey, response);
-      return response;
+      
+      const result = {
+        success: true,
+        leaderboard: response.leaderboard || [],
+      };
+      
+      this.setCache(cacheKey, result);
+      return result;
     } catch (error) {
       console.error('Failed to get leaderboard:', error);
       return { success: false, message: 'Failed to get leaderboard' };
+    }
+  }
+
+  /**
+   * Get how to earn points information
+   */
+  public async getHowToEarnPoints(): Promise<IndexerHowToEarnResponse> {
+    const cacheKey = this.getCacheKey('getHowToEarnPoints', {});
+    const cached = this.getFromCache<IndexerHowToEarnResponse>(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
+
+    try {
+      const response = await this.indexerClient.getHowToEarnPoints();
+      
+      const result = {
+        success: true,
+        methods: response.methods || [],
+      };
+      
+      this.setCache(cacheKey, result);
+      return result;
+    } catch (error) {
+      console.error('Failed to get how to earn points:', error);
+      return { success: false, message: 'Failed to get how to earn points' };
+    }
+  }
+
+  /**
+   * Get public statistics
+   */
+  public async getPublicStats(): Promise<IndexerPublicStatsResponse> {
+    const cacheKey = this.getCacheKey('getPublicStats', {});
+    const cached = this.getFromCache<IndexerPublicStatsResponse>(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
+
+    try {
+      const response = await this.indexerClient.getPublicStats();
+      
+      const result = {
+        success: true,
+        stats: response,
+      };
+      
+      this.setCache(cacheKey, result);
+      return result;
+    } catch (error) {
+      console.error('Failed to get public stats:', error);
+      return { success: false, message: 'Failed to get public stats' };
     }
   }
 
@@ -316,6 +282,13 @@ export class IndexerService {
    */
   public clearCache(): void {
     this.cache.clear();
+  }
+
+  /**
+   * Clear cache for specific user
+   */
+  public clearUserCache(walletAddress: string): void {
+    this.clearCacheForUser(walletAddress);
   }
 
   /**

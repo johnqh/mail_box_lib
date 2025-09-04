@@ -12,6 +12,7 @@ export * from './useStorage';
 
 // Service layer hooks
 export * from './useServices';
+export * from './ServiceProvider';
 
 // Data layer hooks
 export * from './data/useEmail';

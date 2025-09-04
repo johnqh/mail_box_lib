@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useAppConfig } from '../useServices';
+import { convertToAppConfig } from './utils';
 import { IndexerClient } from '../../../network/clients/indexer';
 import { useApiCall } from '../useApiCall';
 
@@ -165,7 +166,8 @@ export interface UseIndexerMailReturn {
  * React hook for Indexer Mail API operations
  */
 export const useIndexerMail = (): UseIndexerMailReturn => {
-  const appConfig = useAppConfig();
+  const config = useAppConfig();
+  const appConfig = convertToAppConfig(config);
   const indexerClient = new IndexerClient(appConfig);
   const { isLoading, error, clearError, execute } = useApiCall({
     context: 'IndexerMail',

@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useAppConfig } from '../useServices';
+import { convertToAppConfig } from './utils';
 import { IndexerClient } from '../../../network/clients/indexer';
 
 export interface IndexerSolanaIndexer {
@@ -49,8 +50,8 @@ export interface UseIndexerSolanaReturn {
 export const useIndexerSolana = (): UseIndexerSolanaReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const appConfig = useAppConfig();
-  const indexerClient = new IndexerClient(appConfig);
+  const config = useAppConfig();
+  const indexerClient = new IndexerClient(convertToAppConfig(config));
 
   const clearError = useCallback(() => {
     setError(null);

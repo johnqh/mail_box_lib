@@ -111,8 +111,35 @@ export async function resolveSNSName(name: string): Promise<string | null> {
       return cached.address;
     }
 
-    // SNS resolution not yet implemented
-    // TODO: Implement actual SNS resolution when available
+    // Implement SNS resolution using Bonfida
+    try {
+      // Dynamic import to handle environments where @bonfida/spl-name-service might not be available
+      const bonfida = await import('@bonfida/spl-name-service');
+      const { Connection } = await import('@solana/web3.js');
+
+      // Create a connection to Solana mainnet
+      const connection = new Connection('https://api.mainnet-beta.solana.com');
+
+      // Resolve the SNS name to an address
+      const address = await bonfida.resolve(connection, name);
+
+      if (address) {
+        const addressString = address.toBase58();
+
+        // Cache the result
+        resolverCache.set(name.toLowerCase(), {
+          address: addressString,
+          timestamp: Date.now(),
+        });
+
+        return addressString;
+      }
+    } catch (importError) {
+      console.warn(
+        'Bonfida SNS library not available, falling back to null:',
+        importError
+      );
+    }
 
     return null;
   } catch {

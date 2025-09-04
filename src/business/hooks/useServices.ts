@@ -2,16 +2,8 @@
  * Custom hooks for accessing services from the dependency injection container
  */
 
-// Temporarily removed useServiceContainer import - needs proper context implementation
-// import { useServiceContainer } from '../context/ServiceContainerContext';
 import { ServiceKeys } from '../core/container/dependency-container';
-// Temporarily import StorageService type from types
-// import { StorageService } from '../../types';
-// Temporarily import AnalyticsService type from DI
-// import { AnalyticsService } from '../../di';
-// Temporarily import PersistenceService type from types
-// import { PersistenceService } from '../../types';
-import { DefaultFolderOperations } from '../core/folder/folder-operations';
+import { useServiceContainer, useServiceResolver } from './ServiceProvider';
 import type {
   PlatformAnalytics,
   PlatformNetwork,
@@ -23,29 +15,25 @@ import type {
 /**
  * Get a service from the dependency injection container
  */
-export function useService<T>(_serviceKey: string): T {
-  // TODO: Implement proper service container context
-  throw new Error(
-    'Service container not implemented yet - needs context setup'
-  );
+export function useService<T>(serviceKey: string): T {
+  const container = useServiceContainer();
+  return container.get<T>(serviceKey);
 }
 
 /**
  * Get the storage service
  */
 export function useStorageService(): PlatformStorage {
-  // TODO: Replace with proper DI implementation
-  throw new Error('Storage service not implemented yet - needs context setup');
+  const resolver = useServiceResolver();
+  return resolver.getStorage();
 }
 
 /**
  * Get the analytics service
  */
 export function useAnalyticsService(): PlatformAnalytics {
-  // TODO: Replace with proper DI implementation
-  throw new Error(
-    'Analytics service not implemented yet - needs context setup'
-  );
+  const resolver = useServiceResolver();
+  return resolver.getAnalytics();
 }
 
 /**
@@ -73,10 +61,7 @@ export function useNetworkService(): PlatformNetwork {
  * Get the persistence service
  */
 export function usePersistenceService(): any {
-  // TODO: Replace with proper DI implementation
-  throw new Error(
-    'Persistence service not implemented yet - needs context setup'
-  );
+  return useService(ServiceKeys.PERSISTENCE);
 }
 
 /**
@@ -111,8 +96,7 @@ export function useEmailAddressService(): any {
  * Get the folder operations service
  */
 export function useFolderOperations() {
-  // TODO: Replace with proper DI implementation - temporary direct instantiation
-  return new DefaultFolderOperations();
+  return useService(ServiceKeys.FOLDER_OPERATIONS);
 }
 
 /**
@@ -121,26 +105,6 @@ export function useFolderOperations() {
  * For now, we'll throw an error to indicate proper DI setup is needed
  */
 export function useAppConfig() {
-  // TODO: This should come from a proper DI context provided by the main application
-  // For now, return a complete AppConfig that works with all clients
-  return {
-    wildDuckApiToken: '',
-    wildDuckBackendUrl: 'https://0xmail.box',
-    indexerBackendUrl: 'https://api.0xmail.box',
-    revenueCatApiKey: '',
-    walletConnectProjectId: '',
-    privyAppId: '',
-    firebase: {
-      apiKey: '',
-      authDomain: '',
-      projectId: '',
-      storageBucket: '',
-      messagingSenderId: '',
-      appId: '',
-      vapidKey: '',
-    },
-    useCloudflareWorker: false,
-    cloudflareWorkerUrl: '',
-    useMockFallback: true, // Use mock fallback for development
-  };
+  const resolver = useServiceResolver();
+  return resolver.getConfig();
 }
