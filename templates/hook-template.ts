@@ -1,9 +1,18 @@
 /**
  * Template for creating React hooks
- * Follow this pattern for consistent data fetching hooks
+ * 
+ * INSTRUCTIONS:
+ * 1. Replace {{HookName}} with your actual hook name (PascalCase)
+ * 2. Replace {{hookName}} with camelCase version
+ * 3. Update all type definitions to match your data
+ * 4. Implement actual service calls
+ * 5. Add proper error handling
+ * 6. Write tests for the hook
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { create{{ServiceName}}Service } from '../../../utils/{{service-name}}';
+import { {{ServiceName}}Operations } from '../../core/{{service-name}}/{{service-name}}-operations';
 
 // Define hook return type
 interface Use{{HookName}}Return {

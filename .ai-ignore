@@ -1,0 +1,122 @@
+# AI Assistant Ignore File
+# Files and patterns that AI assistants should generally avoid reading or modifying
+
+# Dependencies and Build Artifacts
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+coverage/
+*.tgz
+*.tar.gz
+
+# OS and Editor Files  
+.DS_Store
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary Files
+*.tmp
+*.temp
+.cache/
+.temp/
+
+# Log Files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime Data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Symbolic Links (External Projects)
+wildduck/
+indexer/
+
+# Generated Documentation
+docs/generated/
+api-docs/
+typedoc/
+
+# Test Coverage Reports
+coverage/
+.nyc_output/
+lcov.info
+
+# Environment Files (may contain secrets)
+.env
+.env.local
+.env.development.local
+.env.test.local  
+.env.production.local
+
+# Package Lock Files (too large and auto-generated)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Binary Files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.pdf
+*.zip
+*.tar
+*.gz
+
+# Very Large Generated Files
+*.min.js
+*.min.css
+bundle.js
+chunk.*.js
+
+# Database Files
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache Directories  
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# CI/CD Artifacts
+.github/workflows/artifacts/
+.circleci/artifacts/
+
+# Backup Files
+*.backup
+*.bak
+*.orig
+
+# IDE Workspace Files
+*.sublime-workspace
+*.sublime-project
+.vscode/launch.json
+.vscode/tasks.json
+
+# OS Generated Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# AI Assistant Notes:
+# When working with this project:
+# 1. Focus on source files in src/
+# 2. Read configuration files as needed  
+# 3. Check templates/ for code patterns
+# 4. Avoid modifying package-lock.json directly
+# 5. Be cautious with .env files - never read/modify them
+# 6. Generated files in dist/ are read-only

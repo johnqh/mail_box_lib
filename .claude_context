@@ -17,6 +17,29 @@ A React Native-compatible shared utilities library for 0xmail.box projects, prov
 - Removed admin functionality (no longer supported by backend)
 - Added new Solana and simplified points API support
 
+## Quick Start for AI Assistants
+
+### Most Common Tasks
+1. **Add a new service**: Start with interface in `src/types/services/`, then operations in `src/business/core/`, then platform implementations
+2. **Fix a bug**: Search with Grep, write failing test first, then fix
+3. **Add a hook**: Create in `src/business/hooks/`, use existing patterns
+4. **Update API client**: Modify `src/network/clients/`, ensure signature auth
+
+### Essential Commands
+```bash
+npm run typecheck     # Check TypeScript types
+npm test             # Run all tests
+npm run lint:fix     # Fix lint issues
+npm run build        # Build the library
+```
+
+### File Patterns to Remember
+- `*.interface.ts` - TypeScript interfaces
+- `*.web.ts` - Web-specific implementations
+- `*.reactnative.ts` - React Native implementations
+- `*-operations.ts` - Business logic operations
+- `index.ts` - Barrel exports (always update!)
+
 ## Architecture
 ```
 src/
@@ -111,6 +134,66 @@ src/
 - **New API Structure**: Points API now uses `/api/points/*` endpoints
 - **Solana Support**: New `/api/solana/*` endpoints for Solana blockchain integration
 - **Signature Verification**: All protected endpoints now use unified signature verification
+
+## Code Quality Checklist
+
+Before committing any changes:
+- [ ] Run `npm run typecheck` - No TypeScript errors
+- [ ] Run `npm test` - All tests pass
+- [ ] Run `npm run lint:fix` - Code is properly formatted
+- [ ] Check imports - No platform-specific imports in business logic
+- [ ] Update exports - All new code exported from index.ts files
+- [ ] Add tests - New features have test coverage
+
+## Common Code Patterns
+
+### Service Factory Pattern
+```typescript
+// src/utils/my-service/index.ts
+export const createMyService = (): MyService => {
+  if (Platform.OS === 'web') {
+    const { WebMyService } = require('./my-service.web');
+    return new WebMyService();
+  } else {
+    const { ReactNativeMyService } = require('./my-service.reactnative');
+    return new ReactNativeMyService();
+  }
+};
+```
+
+### Hook Pattern with Error Handling
+```typescript
+export const useMyData = () => {
+  const [data, setData] = useState<DataType | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  
+  const fetch = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await service.getData();
+      setData(result);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  
+  return { data, loading, error, fetch };
+};
+```
+
+### Error Class Pattern
+```typescript
+export class ServiceError extends Error {
+  constructor(message: string, public code?: string) {
+    super(message);
+    this.name = 'ServiceError';
+  }
+}
+```
 
 ## External Integrations
 - WildDuck email server (via symbolic link)

@@ -34,53 +34,106 @@ Environment and service configuration:
 
 ## Development Workflow
 
-### Adding New Features
+### Quick Start for AI Assistants
 
-1. **Define the Interface**
-   ```typescript
-   // src/types/services/my-service.interface.ts
-   export interface MyService {
-     doSomething(input: string): Promise<Result>;
-   }
-   ```
+**Essential Commands:**
+```bash
+npm run typecheck    # Check TypeScript types (run this first!)
+npm test            # Run all tests
+npm run lint:fix    # Fix code formatting
+npm run build       # Build the library
+```
 
-2. **Implement Business Logic**
-   ```typescript
-   // src/business/core/my-feature/my-operations.ts
-   export class MyOperations {
-     constructor(private myService: MyService) {}
-     
-     async performOperation(input: string): Promise<Result> {
-       // Pure business logic here
-     }
-   }
-   ```
+**File Search Patterns:**
+- Interfaces: `**/*.interface.ts`
+- Platform implementations: `**/*.web.ts`, `**/*.reactnative.ts`
+- Business operations: `**/business/core/**/*-operations.ts`
+- React hooks: `**/business/hooks/**/*.ts`
+- Tests: `**/__tests__/**/*.test.ts`
 
-3. **Create Platform Implementations**
-   ```typescript
-   // src/utils/my-service/my-service.web.ts
-   export class WebMyService implements MyService {
-     async doSomething(input: string): Promise<Result> {
-       // Web-specific implementation
-     }
-   }
-   ```
+### Adding New Features (AI-Optimized)
 
-4. **Add React Hook (if needed)**
-   ```typescript
-   // src/business/hooks/data/useMyFeature.ts
-   export const useMyFeature = () => {
-     // React hook implementation
-   }
-   ```
+**Step 1: Use the Service Template**
+Copy `templates/service-template.ts` and replace all placeholders:
+- `{{ServiceName}}` → Your service name (PascalCase)
+- `{{serviceName}}` → camelCase version
+- `{{service-name}}` → kebab-case version
 
-5. **Write Tests**
-   ```typescript
-   // src/business/core/my-feature/__tests__/my-operations.test.ts
-   describe('MyOperations', () => {
-     // Test business logic
-   });
-   ```
+**Step 2: Define the Interface**
+```typescript
+// src/types/services/my-service.interface.ts
+export interface MyService {
+  doSomething(input: string): Promise<Result>;
+}
+```
+
+**Step 3: Implement Business Logic**
+```typescript
+// src/business/core/my-feature/my-operations.ts
+export class MyOperations {
+  constructor(private myService: MyService) {}
+  
+  async performOperation(input: string): Promise<Result> {
+    // Pure business logic - NO platform imports!
+  }
+}
+```
+
+**Step 4: Create Platform Implementations**
+```typescript
+// src/utils/my-service/my-service.web.ts
+export class WebMyService implements MyService {
+  async doSomething(input: string): Promise<Result> {
+    // Web-specific implementation using fetch, localStorage, etc.
+  }
+}
+
+// src/utils/my-service/my-service.reactnative.ts  
+export class ReactNativeMyService implements MyService {
+  async doSomething(input: string): Promise<Result> {
+    // React Native implementation using AsyncStorage, etc.
+  }
+}
+
+// src/utils/my-service/index.ts
+export const createMyService = (): MyService => {
+  if (Platform.OS === 'web') {
+    const { WebMyService } = require('./my-service.web');
+    return new WebMyService();
+  } else {
+    const { ReactNativeMyService } = require('./my-service.reactnative');
+    return new ReactNativeMyService();
+  }
+};
+```
+
+**Step 5: Add React Hook (Optional)**
+```typescript
+// src/business/hooks/data/useMyFeature.ts
+export const useMyFeature = () => {
+  // Use the hook template pattern
+}
+```
+
+**Step 6: Write Tests**
+```typescript
+// src/business/core/my-feature/__tests__/my-operations.test.ts
+describe('MyOperations', () => {
+  // Test business logic with mocks
+});
+```
+
+**Step 7: Update Exports (CRITICAL!)**
+```typescript
+// Add to src/types/services/index.ts:
+export * from './my-service.interface';
+
+// Add to src/business/core/index.ts:  
+export * from './my-feature/my-operations';
+
+// Add to src/business/hooks/data/index.ts:
+export { useMyFeature } from './useMyFeature';
+```
 
 ### Code Style Guidelines
 
@@ -256,19 +309,70 @@ export const useEmailList = (mailboxId: string) => {
 };
 ```
 
+## AI Assistant Workflows
+
+### Bug Fixing Workflow
+1. **Search for the issue**: Use Grep to find relevant code
+2. **Understand the context**: Read surrounding files and imports
+3. **Write failing test**: Reproduce the bug in a test
+4. **Fix the implementation**: Make minimal changes
+5. **Verify the fix**: Ensure test passes and no regressions
+6. **Run quality checks**: `npm run typecheck && npm test && npm run lint:fix`
+
+### Code Review Checklist
+- [ ] No platform-specific imports in business logic
+- [ ] All interfaces properly implemented
+- [ ] Tests cover both success and error cases
+- [ ] Exports added to relevant index.ts files
+- [ ] TypeScript types are strict (no `any`)
+- [ ] Error handling follows patterns
+- [ ] Documentation is updated
+
+### Migration Patterns
+When updating existing services:
+1. Use `templates/migration-template.ts` for guidance
+2. Create adapter classes for backward compatibility
+3. Add deprecation warnings for old methods
+4. Use feature flags for gradual rollout
+5. Document migration path clearly
+
 ## Debugging Tips
 
-### Common Issues
-1. **Platform detection not working**: Check environment setup
-2. **Import errors**: Verify index.ts exports are correct
-3. **Type errors**: Check interface implementations match
-4. **Tests failing**: Ensure mocks are properly configured
+### Common Issues & Solutions
+
+**Platform detection not working:**
+```typescript
+// ✅ Correct import
+import { Platform } from '../../types/environment';
+// ❌ Wrong - don't import from react-native!
+```
+
+**Import errors:**
+```bash
+# Check exports in index.ts files
+npm run typecheck  # Will show missing exports
+```
+
+**Interface compliance errors:**
+```typescript
+// Make sure implementations match interfaces exactly
+class MyService implements MyServiceInterface {
+  // Must implement ALL interface methods
+}
+```
+
+**Test mocking issues:**
+```typescript
+// Use vi.mocked() for better type safety
+const mockService = vi.mocked(createMockService());
+```
 
 ### Debugging Tools
-- Use `console.log` with clear prefixes
-- Leverage TypeScript compiler for type checking
-- Use debugger statements in development
+- Use `npm run typecheck` first - catches most issues
+- Leverage TypeScript compiler errors for guidance
+- Use `console.log` with service names for clarity
 - Check network requests in browser dev tools
+- Use `npm test -- --watch` for rapid iteration
 
 ## Performance Considerations
 
