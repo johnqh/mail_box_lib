@@ -71,7 +71,8 @@
       "Read(/Users/qianghuang/mail_box_indexer/api/**)",
       "Read(/Users/qianghuang/mail_box_indexer/api/**)",
       "Read(/Users/qianghuang/mail_box_indexer/api/**)",
-      "Read(/Users/qianghuang/mail_box_indexer/api/**)"
+      "Read(/Users/qianghuang/mail_box_indexer/api/**)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

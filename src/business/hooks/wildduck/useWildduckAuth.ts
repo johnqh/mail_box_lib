@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import axios from 'axios';
 import { WildDuckAPI } from '../../../network/clients/wildduck';
-import { useStorageService } from '../useServices';
+import { useStorageService } from '../core/useServices';
 
 export interface AuthResponse {
   success: boolean;

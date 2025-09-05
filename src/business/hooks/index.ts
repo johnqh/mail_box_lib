@@ -2,17 +2,8 @@
  * Platform-agnostic React hooks that work in both React and React Native
  */
 
-// State management hooks
-export * from './useDebounce';
-export * from './useAsync';
-export * from './useAsyncOperation';
-export * from './useOptimizedState';
-export * from './useLocalStorage';
-export * from './useStorage';
-
-// Service layer hooks
-export * from './useServices';
-export * from './ServiceProvider';
+// Core utility hooks
+export * from './core';
 
 // Data layer hooks
 export * from './data/useEmail';

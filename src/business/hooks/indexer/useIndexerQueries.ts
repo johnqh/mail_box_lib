@@ -6,7 +6,7 @@
  */
 
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { useAppConfig } from '../useServices';
+import { useAppConfig } from '../core/useServices';
 import { IndexerClient } from '../../../network/clients/indexer';
 import { convertToAppConfig } from './utils';
 import { queryKeys, STALE_TIMES } from '../../core/query';

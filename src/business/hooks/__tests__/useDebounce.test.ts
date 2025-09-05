@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useDebounce, useDebouncedCallback } from '../useDebounce';
+import { useDebounce, useDebouncedCallback } from '../core/useDebounce';
 
 // Mock timers
 jest.useFakeTimers();

@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useLocalStorage } from '../useLocalStorage';
+import { useLocalStorage } from '../core/useLocalStorage';
 
 // Get mocked functions from global setup
 const localStorageMock = window.localStorage as any;

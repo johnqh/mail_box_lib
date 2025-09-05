@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useAppConfig } from '../useServices';
+import { useAppConfig } from '../core/useServices';
 import { convertToAppConfig } from './utils';
 import { IndexerClient } from '../../../network/clients/indexer';
 import { useApiCall } from '../useApiCall';

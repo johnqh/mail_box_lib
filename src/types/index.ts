@@ -6,8 +6,8 @@
 // Environment types
 export * from './environment';
 
-// Network types
-export * from './network';
+// Infrastructure types
+export * from './infrastructure/network';
 
 // Email types (primary email interface)
 export {
@@ -103,5 +103,5 @@ export {
 // Service types
 export * from './services';
 
-// UI types
-export * from './ui';
+// Business domain types
+export * from './business/ui';

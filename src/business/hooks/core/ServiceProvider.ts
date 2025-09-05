@@ -7,7 +7,7 @@ import { createContext, useContext } from 'react';
 import {
   ServiceContainer,
   ServiceResolver,
-} from '../core/container/dependency-container';
+} from '../../core/container/dependency-container';
 
 // Service container context
 const ServiceContainerContext = createContext<ServiceContainer | null>(null);

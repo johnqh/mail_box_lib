@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { PlatformStorage } from '../core/container/dependency-container';
+import { PlatformStorage } from '../../core/container/dependency-container';
 import { useStorageService } from './useServices';
 
 type SetValue<T> = T | ((prevValue: T) => T);

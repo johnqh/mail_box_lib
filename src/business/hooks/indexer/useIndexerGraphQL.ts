@@ -7,7 +7,7 @@ import {
   GraphQLWhereInput as WhereInput,
 } from '../../../types';
 import { IndexerClient } from '../../../network/clients/indexer';
-import { useAppConfig } from '../useServices';
+import { useAppConfig } from '../core/useServices';
 import { convertToAppConfig } from './utils';
 
 // Define interfaces for GraphQL responses

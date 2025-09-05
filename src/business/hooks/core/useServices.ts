@@ -2,7 +2,7 @@
  * Custom hooks for accessing services from the dependency injection container
  */
 
-import { ServiceKeys } from '../core/container/dependency-container';
+import { ServiceKeys } from '../../core/container/dependency-container';
 import { useServiceContainer, useServiceResolver } from './ServiceProvider';
 import type {
   PlatformAnalytics,
@@ -10,7 +10,7 @@ import type {
   PlatformNotifications,
   PlatformStorage,
   PlatformTheme,
-} from '../core/container/dependency-container';
+} from '../../core/container/dependency-container';
 
 /**
  * Get a service from the dependency injection container

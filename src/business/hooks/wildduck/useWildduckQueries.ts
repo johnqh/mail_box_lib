@@ -5,7 +5,7 @@
  */
 
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { useAppConfig } from '../useServices';
+import { useAppConfig } from '../core/useServices';
 import { queryKeys } from '../../core/query';
 
 // TODO: Import actual WildduckClient when it's implemented

@@ -44,7 +44,7 @@ export const useBatchedState = <T extends Record<string, any>>(
 ) => {
   const [state, setState] = useState(initialState);
   const pendingUpdates = useRef<Partial<T>>({});
-  const timeoutRef = useRef<NodeJSTimeout>();
+  const timeoutRef = useRef<NodeJSTimeout | null>(null);
 
   const batchedSetState = useCallback((updates: Partial<T>) => {
     pendingUpdates.current = { ...pendingUpdates.current, ...updates };
@@ -74,7 +74,7 @@ export const useBatchedState = <T extends Record<string, any>>(
 export const useDebouncedState = <T>(initialValue: T, delay: number = 300) => {
   const [value, setValue] = useState(initialValue);
   const [debouncedValue, setDebouncedValue] = useState(initialValue);
-  const timeoutRef = useRef<NodeJSTimeout>();
+  const timeoutRef = useRef<NodeJSTimeout | null>(null);
 
   const setValueWithDebounce = useCallback(
     (newValue: T) => {
@@ -160,8 +160,8 @@ export const useMapState = <K, V>(initialMap?: Map<K, V>) => {
 
 // Previous value hook for debugging re-renders
 export const usePrevious = <T>(value: T): T | undefined => {
-  const ref = useRef<T>();
-  const previousRef = useRef<T>();
+  const ref = useRef<T | undefined>(undefined);
+  const previousRef = useRef<T | undefined>(undefined);
 
   if (ref.current !== value) {
     previousRef.current = ref.current;
