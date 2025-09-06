@@ -235,6 +235,10 @@ const isBase64EVMAddress = (encoded: string): boolean => {
 export {
   type SigninMessage,
   createSIWEMessage,
+  createSolanaSignMessage,
+  generateNonce,
+  _createWildDuckAuthMessage as createWildDuckAuthMessage,
+  _createAuthMessage as createAuthMessage,
   formatSignatureForWildDuck,
   isValidBlockchainUsername,
 };

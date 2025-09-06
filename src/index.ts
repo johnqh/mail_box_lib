@@ -21,6 +21,9 @@ export type {
   AnalyticsService,
   AnalyticsConfig,
   AnalyticsEventProperties,
+  AnalyticsClient,
+  AnalyticsContextProvider,
+  AnalyticsEventData,
   // Navigation types
   NavigationService,
   NavigationOptions,

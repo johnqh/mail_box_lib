@@ -63,3 +63,9 @@ interface _AnalyticsContextProvider {
    */
   getCurrentContext(): Record<string, any>;
 }
+
+export {
+  type AnalyticsEventData,
+  type _AnalyticsClient as AnalyticsClient,
+  type _AnalyticsContextProvider as AnalyticsContextProvider,
+};
