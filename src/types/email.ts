@@ -1,4 +1,4 @@
-export interface Email {
+interface Email {
   id: string;
   from: string;
   to: string;
@@ -13,13 +13,13 @@ export interface Email {
   attachments?: string[];
 }
 
-export interface Folder {
+interface Folder {
   name: string;
   count: number;
   unreadCount: number;
 }
 
-export interface EmailAddress {
+interface EmailAddress {
   id: string;
   email: string;
   name: string;
@@ -27,7 +27,7 @@ export interface EmailAddress {
   isActive: boolean;
 }
 
-export interface User {
+interface User {
   id: string;
   name: string;
   email: string;
@@ -48,3 +48,5 @@ export type { WalletUserData };
 
 // Re-export types from enums for backward compatibility
 export { Theme, FontSize };
+
+export { type Email, type Folder, type EmailAddress, type User };

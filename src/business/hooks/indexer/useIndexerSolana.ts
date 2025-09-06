@@ -3,36 +3,36 @@ import { useAppConfig } from '../core/useServices';
 import { convertToAppConfig } from './utils';
 import { IndexerClient } from '../../../network/clients/indexer';
 
-export interface IndexerSolanaIndexer {
+interface IndexerSolanaIndexer {
   chainId: number;
   initialized: boolean;
   networkName: string;
 }
 
-export interface IndexerSolanaStatus {
+interface IndexerSolanaStatus {
   solanaIndexers: IndexerSolanaIndexer[];
   totalIndexers: number;
   configured: boolean;
 }
 
-export interface IndexerSolanaWebhookResponse {
+interface IndexerSolanaWebhookResponse {
   success: boolean;
   processed: number;
   total: number;
 }
 
-export interface IndexerSolanaSetupResult {
+interface IndexerSolanaSetupResult {
   chainId: string;
   status: 'success' | 'error';
   error?: string;
 }
 
-export interface IndexerSolanaSetupResponse {
+interface IndexerSolanaSetupResponse {
   success: boolean;
   results: IndexerSolanaSetupResult[];
 }
 
-export interface UseIndexerSolanaReturn {
+interface UseIndexerSolanaReturn {
   isLoading: boolean;
   error: string | null;
   getSolanaStatus: () => Promise<IndexerSolanaStatus>;
@@ -47,7 +47,7 @@ export interface UseIndexerSolanaReturn {
 /**
  * React hook for Indexer Solana API operations
  */
-export const useIndexerSolana = (): UseIndexerSolanaReturn => {
+const useIndexerSolana = (): UseIndexerSolanaReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const config = useAppConfig();
@@ -129,4 +129,14 @@ export const useIndexerSolana = (): UseIndexerSolanaReturn => {
     processTestTransaction,
     clearError,
   };
+};
+
+export {
+  useIndexerSolana,
+  type IndexerSolanaIndexer,
+  type IndexerSolanaStatus,
+  type IndexerSolanaWebhookResponse,
+  type IndexerSolanaSetupResult,
+  type IndexerSolanaSetupResponse,
+  type UseIndexerSolanaReturn
 };

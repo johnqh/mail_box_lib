@@ -5,7 +5,7 @@ import { logger } from './logger';
 // Platform-specific global
 declare const fetch: typeof globalThis.fetch; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export class AppError extends Error {
+class AppError extends Error {
   code: string;
   statusCode?: number;
   details?: any;
@@ -24,11 +24,11 @@ export class AppError extends Error {
   }
 }
 
-export const isAppError = (error: unknown): error is AppError => {
+const isAppError = (error: unknown): error is AppError => {
   return error instanceof AppError;
 };
 
-export const getErrorMessage = (error: unknown): string => {
+const getErrorMessage = (error: unknown): string => {
   if (isAppError(error)) {
     return error.message;
   }
@@ -48,7 +48,7 @@ export const getErrorMessage = (error: unknown): string => {
   return ERROR_MESSAGES.NETWORK_ERROR;
 };
 
-export const handleApiError = (error: unknown): AppError => {
+const handleApiError = (error: unknown): AppError => {
   if (isAppError(error)) {
     return error;
   }
@@ -81,7 +81,7 @@ export const handleApiError = (error: unknown): AppError => {
   return new AppError(getErrorMessage(error), 'UNKNOWN_ERROR');
 };
 
-export const logError = (error: unknown, context?: string): void => {
+const logError = (error: unknown, context?: string): void => {
   const errorMessage = getErrorMessage(error);
   logger.error(errorMessage, context, error);
 
@@ -92,7 +92,7 @@ export const logError = (error: unknown, context?: string): void => {
   }
 };
 
-export const retryWithBackoff = async <T>(
+const retryWithBackoff = async <T>(
   fn: () => Promise<T>,
   maxRetries: number = 3,
   initialDelay: number = 1000
@@ -115,7 +115,7 @@ export const retryWithBackoff = async <T>(
   throw lastError;
 };
 
-export const withErrorBoundary = async <T>(
+const withErrorBoundary = async <T>(
   fn: () => Promise<T>,
   fallback?: T,
   context?: string
@@ -126,4 +126,14 @@ export const withErrorBoundary = async <T>(
     logError(error, context);
     return fallback;
   }
+};
+
+export {
+  isAppError,
+  getErrorMessage,
+  handleApiError,
+  logError,
+  retryWithBackoff,
+  withErrorBoundary,
+  AppError,
 };

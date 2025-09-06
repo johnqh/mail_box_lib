@@ -2,7 +2,7 @@
  * Formatting utilities for common data transformations
  */
 
-export const formatWalletAddress = (
+const formatWalletAddress = (
   address: string,
   startChars: number = 6,
   endChars: number = 4
@@ -12,7 +12,7 @@ export const formatWalletAddress = (
   return `${address.slice(0, startChars)}...${address.slice(-endChars)}`;
 };
 
-export const formatFileSize = (bytes: number): string => {
+const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -20,7 +20,7 @@ export const formatFileSize = (bytes: number): string => {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 };
 
-export const formatEmailDate = (
+const formatEmailDate = (
   date: Date,
   format: 'relative' | 'full' | 'short' = 'relative'
 ): string => {
@@ -48,7 +48,7 @@ export const formatEmailDate = (
   return date.toLocaleString();
 };
 
-export const formatCurrency = (
+const formatCurrency = (
   amount: number,
   currency: string = 'USD',
   locale: string = 'en-US'
@@ -59,16 +59,22 @@ export const formatCurrency = (
   }).format(amount);
 };
 
-export const formatNumber = (
+const formatNumber = (
   value: number,
   options?: Intl.NumberFormatOptions
 ): string => {
   return new Intl.NumberFormat('en-US', options).format(value);
 };
 
-export const formatPercentage = (
-  value: number,
-  decimals: number = 2
-): string => {
+const formatPercentage = (value: number, decimals: number = 2): string => {
   return `${(value * 100).toFixed(decimals)}%`;
+};
+
+export {
+  formatWalletAddress,
+  formatFileSize,
+  formatEmailDate,
+  formatCurrency,
+  formatNumber,
+  formatPercentage,
 };

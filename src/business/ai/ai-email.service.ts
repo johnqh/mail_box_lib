@@ -12,7 +12,7 @@ import {
 } from './ai-types';
 import { Email } from '../../types/email';
 
-export interface AIEmailService {
+interface AIEmailService {
   categorizeEmail(
     email: Email,
     options?: AIProcessingOptions
@@ -722,4 +722,6 @@ class AIEmailServiceImpl implements AIEmailService {
   }
 }
 
-export const aiEmailService = new AIEmailServiceImpl();
+const aiEmailService = new AIEmailServiceImpl();
+
+export { aiEmailService, type AIEmailService };

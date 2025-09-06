@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 // Platform-specific timer type
 type NodeJSTimeout = ReturnType<typeof setTimeout>;
 
-export function useDebounce<T>(value: T, delay: number = 500): T {
+function useDebounce<T>(value: T, delay: number = 500): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export function useDebounce<T>(value: T, delay: number = 500): T {
   return debouncedValue;
 }
 
-export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
+function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number = 500
 ): T {
@@ -55,3 +55,5 @@ export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
 
   return debouncedCallback;
 }
+
+export { useDebounce, useDebouncedCallback };

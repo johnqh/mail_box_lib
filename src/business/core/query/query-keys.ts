@@ -14,7 +14,7 @@
 const indexerBase = () => ['indexer'] as const;
 const wildduckBase = () => ['wildduck'] as const;
 
-export const queryKeys = {
+const queryKeys = {
   // Indexer API keys
   indexer: {
     all: indexerBase,
@@ -96,13 +96,13 @@ export const queryKeys = {
 /**
  * Utility type to extract query key from the factory
  */
-export type QueryKey = readonly unknown[];
+type QueryKey = readonly unknown[];
 
 /**
  * Helper function to create a query key for custom endpoints
  * Use this when you need a one-off query key that doesn't fit the factory pattern
  */
-export const createQueryKey = (
+const createQueryKey = (
   service: string,
   ...parts: (string | number | object)[]
 ): readonly unknown[] => {
@@ -112,6 +112,8 @@ export const createQueryKey = (
 /**
  * Helper to get all keys for a service (useful for invalidation)
  */
-export const getServiceKeys = (service: 'indexer' | 'wildduck') => {
+const getServiceKeys = (service: 'indexer' | 'wildduck') => {
   return queryKeys[service].all();
 };
+
+export { queryKeys, createQueryKey, getServiceKeys, type QueryKey };

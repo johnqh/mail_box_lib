@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 type SetValue<T> = T | ((prevValue: T) => T);
 
-export function useLocalStorage<T>(
+function useLocalStorage<T>(
   key: string,
   initialValue: T,
   options?: {
@@ -129,3 +129,5 @@ export function useLocalStorage<T>(
 
   return [storedValue, setValue, removeValue];
 }
+
+export { useLocalStorage };

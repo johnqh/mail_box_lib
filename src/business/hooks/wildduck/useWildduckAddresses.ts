@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import axios from 'axios';
 import { WildDuckAPI } from '../../../network/clients/wildduck';
 
-export interface WildduckAddress {
+interface WildduckAddress {
   id: string;
   address: string;
   name?: string;
@@ -11,20 +11,20 @@ export interface WildduckAddress {
   tags?: string[];
 }
 
-export interface CreateAddressParams {
+interface CreateAddressParams {
   address: string;
   name?: string;
   main?: boolean;
   tags?: string[];
 }
 
-export interface UpdateAddressParams {
+interface UpdateAddressParams {
   name?: string;
   main?: boolean;
   tags?: string[];
 }
 
-export interface ForwardedAddress {
+interface ForwardedAddress {
   id: string;
   address: string;
   forwarded: boolean;
@@ -32,7 +32,7 @@ export interface ForwardedAddress {
   user?: string;
 }
 
-export interface UseWildduckAddressesReturn {
+interface UseWildduckAddressesReturn {
   isLoading: boolean;
   error: string | null;
   addresses: WildduckAddress[];
@@ -66,7 +66,7 @@ export interface UseWildduckAddressesReturn {
 /**
  * Hook for WildDuck address management operations
  */
-export const useWildduckAddresses = (): UseWildduckAddressesReturn => {
+const useWildduckAddresses = (): UseWildduckAddressesReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [addresses, setAddresses] = useState<WildduckAddress[]>([]);
@@ -330,4 +330,13 @@ export const useWildduckAddresses = (): UseWildduckAddressesReturn => {
     clearError,
     refresh,
   };
+};
+
+export {
+  useWildduckAddresses,
+  type WildduckAddress,
+  type CreateAddressParams,
+  type UpdateAddressParams,
+  type ForwardedAddress,
+  type UseWildduckAddressesReturn
 };

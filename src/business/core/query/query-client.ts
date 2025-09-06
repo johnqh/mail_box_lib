@@ -9,7 +9,7 @@ import { QueryClient } from '@tanstack/react-query';
 /**
  * Default stale times for different types of queries
  */
-export const STALE_TIMES = {
+const STALE_TIMES = {
   // Very stable data - rarely changes
   CAMPAIGNS: 5 * 60 * 1000, // 5 minutes
   HOW_TO_EARN: 10 * 60 * 1000, // 10 minutes
@@ -31,7 +31,7 @@ export const STALE_TIMES = {
 /**
  * Create a configured QueryClient instance
  */
-export const createQueryClient = (): QueryClient => {
+const createQueryClient = (): QueryClient => {
   return new QueryClient({
     defaultOptions: {
       queries: {
@@ -85,13 +85,13 @@ export const createQueryClient = (): QueryClient => {
  * Global query client instance
  * Use this for accessing the query client outside of React components
  */
-export let queryClient: QueryClient;
+let queryClient: QueryClient;
 
 /**
  * Initialize the global query client
  * Call this once in your app setup
  */
-export const initializeQueryClient = (): QueryClient => {
+const initializeQueryClient = (): QueryClient => {
   queryClient = createQueryClient();
   return queryClient;
 };
@@ -100,11 +100,19 @@ export const initializeQueryClient = (): QueryClient => {
  * Get the global query client instance
  * Throws an error if not initialized
  */
-export const getQueryClient = (): QueryClient => {
+const getQueryClient = (): QueryClient => {
   if (!queryClient) {
     throw new Error(
       'QueryClient not initialized. Call initializeQueryClient() first.'
     );
   }
   return queryClient;
+};
+
+export {
+  STALE_TIMES,
+  createQueryClient,
+  queryClient,
+  initializeQueryClient,
+  getQueryClient,
 };

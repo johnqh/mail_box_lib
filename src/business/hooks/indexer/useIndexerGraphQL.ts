@@ -232,7 +232,7 @@ class IndexerGraphQLHelper {
   }
 }
 
-export interface UseIndexerGraphQLReturn {
+interface UseIndexerGraphQLReturn {
   isLoading: boolean;
   error: string | null;
   getMails: (
@@ -284,7 +284,7 @@ export interface UseIndexerGraphQLReturn {
 /**
  * React hook for Indexer GraphQL API operations
  */
-export const useIndexerGraphQL = (): UseIndexerGraphQLReturn => {
+const useIndexerGraphQL = (): UseIndexerGraphQLReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const config = useAppConfig();
@@ -584,4 +584,9 @@ export const useIndexerGraphQL = (): UseIndexerGraphQLReturn => {
     executeCustomQuery,
     clearError,
   };
+};
+
+export {
+  useIndexerGraphQL,
+  type UseIndexerGraphQLReturn
 };

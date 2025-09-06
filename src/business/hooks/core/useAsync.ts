@@ -15,7 +15,7 @@ interface UseAsyncOptions<T = unknown> {
   onError?: (error: string) => void;
 }
 
-export function useAsync<T = unknown>(
+function useAsync<T = unknown>(
   asyncFunction: () => Promise<T>,
   options: UseAsyncOptions<T> = {}
 ) {
@@ -103,3 +103,5 @@ export function useAsync<T = unknown>(
     reset,
   };
 }
+
+export { useAsync };

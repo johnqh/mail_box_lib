@@ -7,7 +7,7 @@ import {
   WildDuckMessagesResponse,
 } from '../../../network/clients/wildduck';
 
-export interface GetMessagesOptions {
+interface GetMessagesOptions {
   limit?: number;
   page?: number;
   order?: 'asc' | 'desc';
@@ -15,7 +15,7 @@ export interface GetMessagesOptions {
   thread?: string;
 }
 
-export interface SendMessageParams {
+interface SendMessageParams {
   from?: string;
   to: Array<{ name?: string; address: string }>;
   cc?: Array<{ name?: string; address: string }>;
@@ -32,14 +32,14 @@ export interface SendMessageParams {
   references?: string[];
 }
 
-export interface UpdateMessageParams {
+interface UpdateMessageParams {
   seen?: boolean;
   flagged?: boolean;
   deleted?: boolean;
   mailbox?: string;
 }
 
-export interface UseWildduckMessagesReturn {
+interface UseWildduckMessagesReturn {
   isLoading: boolean;
   error: string | null;
   messages: WildDuckMessage[];
@@ -84,7 +84,7 @@ export interface UseWildduckMessagesReturn {
 /**
  * Hook for WildDuck message operations
  */
-export const useWildduckMessages = (): UseWildduckMessagesReturn => {
+const useWildduckMessages = (): UseWildduckMessagesReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [messages, setMessages] = useState<WildDuckMessage[]>([]);
@@ -343,4 +343,12 @@ export const useWildduckMessages = (): UseWildduckMessagesReturn => {
     clearError,
     refresh,
   };
+};
+
+export {
+  useWildduckMessages,
+  type GetMessagesOptions,
+  type SendMessageParams,
+  type UpdateMessageParams,
+  type UseWildduckMessagesReturn
 };

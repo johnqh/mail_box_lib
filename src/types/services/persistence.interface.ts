@@ -5,14 +5,14 @@
 
 import { RequestStatus, StorageType } from '../../business/core/enums';
 
-export interface PersistenceOptions {
+interface PersistenceOptions {
   ttl?: number; // Time to live in milliseconds
   encrypted?: boolean;
   compressed?: boolean;
   serializer?: 'json' | 'msgpack' | 'custom';
 }
 
-export interface PersistenceResult<T> {
+interface PersistenceResult<T> {
   data: T | null;
   status: RequestStatus;
   error?: string;
@@ -20,7 +20,7 @@ export interface PersistenceResult<T> {
   expiresAt?: Date;
 }
 
-export interface PersistenceService {
+interface PersistenceService {
   /**
    * Store data with key
    */
@@ -57,7 +57,7 @@ export interface PersistenceService {
   getStorageInfo(): Promise<StorageInfo>;
 }
 
-export interface StorageInfo {
+interface StorageInfo {
   type: StorageType;
   totalSize: number;
   usedSize: number;
@@ -68,7 +68,7 @@ export interface StorageInfo {
 /**
  * Cache-specific persistence service
  */
-export interface CacheService extends PersistenceService {
+interface CacheService extends PersistenceService {
   /**
    * Store with automatic expiration
    */
@@ -95,7 +95,7 @@ export interface CacheService extends PersistenceService {
   getStats(): Promise<CacheStats>;
 }
 
-export interface CacheStats {
+interface CacheStats {
   hits: number;
   misses: number;
   hitRate: number;
@@ -107,7 +107,7 @@ export interface CacheStats {
 /**
  * Database-like persistence service for complex queries
  */
-export interface DatabaseService {
+interface DatabaseService {
   /**
    * Store record with index support
    */
@@ -154,7 +154,7 @@ export interface DatabaseService {
   transaction<T>(operations: DatabaseOperation[]): Promise<T>;
 }
 
-export interface DatabaseOperation {
+interface DatabaseOperation {
   type: 'put' | 'get' | 'update' | 'delete';
   table: string;
   key: string;
@@ -164,7 +164,7 @@ export interface DatabaseOperation {
 /**
  * User-specific persistence service
  */
-export interface UserPersistenceService {
+interface UserPersistenceService {
   /**
    * Store user data
    */
@@ -209,7 +209,7 @@ export interface UserPersistenceService {
 /**
  * Settings persistence service
  */
-export interface SettingsPersistenceService {
+interface SettingsPersistenceService {
   /**
    * Get setting value
    */
@@ -244,7 +244,7 @@ export interface SettingsPersistenceService {
 /**
  * Factory for creating persistence services
  */
-export interface PersistenceServiceFactory {
+interface PersistenceServiceFactory {
   /**
    * Create basic persistence service
    */
@@ -274,3 +274,17 @@ export interface PersistenceServiceFactory {
     storageType: StorageType
   ): SettingsPersistenceService;
 }
+
+export {
+  type PersistenceOptions,
+  type PersistenceResult,
+  type PersistenceService,
+  type StorageInfo,
+  type CacheService,
+  type CacheStats,
+  type DatabaseService,
+  type DatabaseOperation,
+  type UserPersistenceService,
+  type SettingsPersistenceService,
+  type PersistenceServiceFactory,
+};

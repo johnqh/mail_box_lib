@@ -8,12 +8,12 @@ import { AppConfig } from '../../types';
 // Platform-specific global
 declare const fetch: typeof globalThis.fetch;
 
-export interface PreAuthParams {
+interface PreAuthParams {
   username: string;
   scope?: string;
 }
 
-export interface AuthenticateParams {
+interface AuthenticateParams {
   username: string;
   signature: string;
   nonce?: string;
@@ -32,7 +32,7 @@ const getWildDuckBaseUrl = (appConfig: AppConfig): string => {
  * WildDuck Authentication Helper Class
  * Contains methods for authentication operations that modify data
  */
-export class WildDuckAuthHelper {
+class WildDuckAuthHelper {
   /**
    * Pre-authentication check
    */
@@ -139,3 +139,5 @@ export class WildDuckAuthHelper {
     return result;
   }
 }
+
+export { WildDuckAuthHelper, type PreAuthParams, type AuthenticateParams };

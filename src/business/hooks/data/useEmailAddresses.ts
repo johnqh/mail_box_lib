@@ -5,7 +5,7 @@ import { getSNSNames } from '../../../utils/nameservice/sns';
 import { detectAddressType } from '../../../utils/blockchain/addressDetection';
 import { ChainType } from '../../../business/core/enums';
 
-export interface UseEmailAddressesReturn {
+interface UseEmailAddressesReturn {
   emailAddresses: EmailAddress[];
   isLoading: boolean;
   error: string | null;
@@ -19,7 +19,7 @@ export interface UseEmailAddressesReturn {
  * Custom hook to manage email address generation from wallet and ENS/SNS data
  * Handles the orchestration of fetching and creating email addresses
  */
-export const useEmailAddresses = (): UseEmailAddressesReturn => {
+const useEmailAddresses = (): UseEmailAddressesReturn => {
   const [emailAddresses, setEmailAddresses] = useState<EmailAddress[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -247,3 +247,5 @@ export const useEmailAddresses = (): UseEmailAddressesReturn => {
     refreshEmailAddresses,
   };
 };
+
+export { useEmailAddresses, type UseEmailAddressesReturn };

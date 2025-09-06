@@ -59,14 +59,14 @@ class PlaceholderWildduckClient implements WildduckClient {
 }
 
 // Define response types based on WildDuck API
-export interface WildduckHealthResponse {
+interface WildduckHealthResponse {
   status: string;
   version: string;
   uptime: number;
   // Add other health response fields as needed
 }
 
-export interface WildduckUser {
+interface WildduckUser {
   id: string;
   username: string;
   name: string;
@@ -83,7 +83,7 @@ export interface WildduckUser {
   // Add other user fields as needed
 }
 
-export interface WildduckUsersListResponse {
+interface WildduckUsersListResponse {
   success: boolean;
   results: WildduckUser[];
   query: string;
@@ -92,7 +92,7 @@ export interface WildduckUsersListResponse {
   pages: number;
 }
 
-export interface WildduckAddress {
+interface WildduckAddress {
   id: string;
   address: string;
   name: string;
@@ -102,7 +102,7 @@ export interface WildduckAddress {
   // Add other address fields
 }
 
-export interface WildduckMessage {
+interface WildduckMessage {
   id: string;
   mailbox: string;
   thread: string;
@@ -121,7 +121,7 @@ export interface WildduckMessage {
   // Add other message fields
 }
 
-export interface WildduckMessagesResponse {
+interface WildduckMessagesResponse {
   success: boolean;
   results: WildduckMessage[];
   total: number;
@@ -129,12 +129,12 @@ export interface WildduckMessagesResponse {
   pages: number;
 }
 
-export interface WildduckUserSettings {
+interface WildduckUserSettings {
   // Define based on actual API response
   [key: string]: unknown;
 }
 
-export interface WildduckFilter {
+interface WildduckFilter {
   id: string;
   name: string;
   query: object;
@@ -147,7 +147,7 @@ export interface WildduckFilter {
 /**
  * Hook to get WildDuck server health status
  */
-export const useWildduckHealth = (
+const useWildduckHealth = (
   options?: UseQueryOptions<WildduckHealthResponse>
 ): UseQueryResult<WildduckHealthResponse> => {
   const appConfig = useAppConfig();
@@ -167,7 +167,7 @@ export const useWildduckHealth = (
 /**
  * Hook to get users list with optional filters
  */
-export const useWildduckUsersList = (
+const useWildduckUsersList = (
   filters?: Record<string, unknown>,
   options?: UseQueryOptions<WildduckUsersListResponse>
 ): UseQueryResult<WildduckUsersListResponse> => {
@@ -188,7 +188,7 @@ export const useWildduckUsersList = (
 /**
  * Hook to get a specific user by ID
  */
-export const useWildduckUser = (
+const useWildduckUser = (
   userId: string,
   options?: UseQueryOptions<WildduckUser>
 ): UseQueryResult<WildduckUser> => {
@@ -210,7 +210,7 @@ export const useWildduckUser = (
 /**
  * Hook to get user addresses
  */
-export const useWildduckUserAddresses = (
+const useWildduckUserAddresses = (
   userId: string,
   options?: UseQueryOptions<WildduckAddress[]>
 ): UseQueryResult<WildduckAddress[]> => {
@@ -232,7 +232,7 @@ export const useWildduckUserAddresses = (
 /**
  * Hook to get user messages with optional filters
  */
-export const useWildduckUserMessages = (
+const useWildduckUserMessages = (
   userId: string,
   filters?: Record<string, unknown>,
   options?: UseQueryOptions<WildduckMessagesResponse>
@@ -255,7 +255,7 @@ export const useWildduckUserMessages = (
 /**
  * Hook to get a specific message
  */
-export const useWildduckMessage = (
+const useWildduckMessage = (
   userId: string,
   messageId: string,
   options?: UseQueryOptions<WildduckMessage>
@@ -278,7 +278,7 @@ export const useWildduckMessage = (
 /**
  * Hook to get user filters
  */
-export const useWildduckUserFilters = (
+const useWildduckUserFilters = (
   userId: string,
   options?: UseQueryOptions<WildduckFilter[]>
 ): UseQueryResult<WildduckFilter[]> => {
@@ -300,7 +300,7 @@ export const useWildduckUserFilters = (
 /**
  * Hook to get user settings
  */
-export const useWildduckUserSettings = (
+const useWildduckUserSettings = (
   userId: string,
   options?: UseQueryOptions<WildduckUserSettings>
 ): UseQueryResult<WildduckUserSettings> => {
@@ -317,4 +317,23 @@ export const useWildduckUserSettings = (
     enabled: !!userId,
     ...options,
   });
+};
+
+export {
+  useWildduckHealth,
+  useWildduckUsersList,
+  useWildduckUser,
+  useWildduckUserAddresses,
+  useWildduckUserMessages,
+  useWildduckMessage,
+  useWildduckUserFilters,
+  useWildduckUserSettings,
+  type WildduckHealthResponse,
+  type WildduckUser,
+  type WildduckUsersListResponse,
+  type WildduckAddress,
+  type WildduckMessage,
+  type WildduckMessagesResponse,
+  type WildduckUserSettings,
+  type WildduckFilter
 };

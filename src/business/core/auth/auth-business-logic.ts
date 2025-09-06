@@ -8,7 +8,7 @@ import { EmailAddress } from '../../../types/email';
 /**
  * Address type enumeration
  */
-export enum AddressType {
+enum AddressType {
   EVMAddress = 'EVMAddress',
   SolanaAddress = 'SolanaAddress',
   ENSName = 'ENSName',
@@ -19,7 +19,7 @@ export enum AddressType {
 /**
  * Parsed email address structure
  */
-export type ParsedEmailAddress = {
+type ParsedEmailAddress = {
   /** The address part (before @) */
   address: string;
   /** The domain part (after @) */
@@ -33,7 +33,7 @@ interface _ExtendedEmailAddress extends EmailAddress {
   main?: boolean;
 }
 
-export interface AuthBusinessLogic {
+interface AuthBusinessLogic {
   /**
    * Generate authentication message
    */
@@ -91,7 +91,7 @@ export interface AuthBusinessLogic {
   formatWalletAddressForDisplay(address: string): string;
 }
 
-export class DefaultAuthBusinessLogic implements AuthBusinessLogic {
+class DefaultAuthBusinessLogic implements AuthBusinessLogic {
   private readonly AUTH_EXPIRATION_HOURS = 24; // 24 hours default
 
   generateAuthMessage(nonce?: string): string {
@@ -237,7 +237,7 @@ export class DefaultAuthBusinessLogic implements AuthBusinessLogic {
 /**
  * Email address business logic
  */
-export interface EmailAddressBusinessLogic {
+interface EmailAddressBusinessLogic {
   /**
    * Generate email addresses for a wallet
    */
@@ -269,9 +269,7 @@ export interface EmailAddressBusinessLogic {
   getEmailAddressDisplayName(emailAddress: EmailAddress): string;
 }
 
-export class DefaultEmailAddressBusinessLogic
-  implements EmailAddressBusinessLogic
-{
+class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLogic {
   generateEmailAddressesForWallet(
     walletAddress: string,
     chainType: ChainType
@@ -372,7 +370,7 @@ export class DefaultEmailAddressBusinessLogic
 /**
  * Address Helper class for address type detection and validation
  */
-export class AddressHelper {
+class AddressHelper {
   /**
    * Determine the address type from an email address prefix (part before @)
    * Case insensitive as email addresses are case insensitive
@@ -807,7 +805,7 @@ export class AddressHelper {
 /**
  * Email Address Helper class for parsing and analyzing email addresses
  */
-export class EmailAddressHelper {
+class EmailAddressHelper {
   /**
    * Parse an email address into its components
    * Returns undefined if the email address is invalid (doesn't contain exactly one @)
@@ -848,3 +846,14 @@ export class EmailAddressHelper {
     };
   }
 }
+
+export {
+  DefaultAuthBusinessLogic,
+  DefaultEmailAddressBusinessLogic,
+  AddressHelper,
+  EmailAddressHelper,
+  AddressType,
+  type AuthBusinessLogic,
+  type EmailAddressBusinessLogic,
+  type ParsedEmailAddress,
+};

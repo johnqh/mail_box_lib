@@ -18,7 +18,7 @@ export type {
   UpdateAddressParams,
 } from '../../business/hooks/wildduck/useWildduckAddresses';
 
-export interface CreateForwardedAddressParams {
+interface CreateForwardedAddressParams {
   address: string;
   name?: string;
   targets: string[];
@@ -36,7 +36,7 @@ export interface CreateForwardedAddressParams {
   tags?: string[];
 }
 
-export interface UpdateForwardedAddressParams {
+interface UpdateForwardedAddressParams {
   name?: string;
   targets?: string[];
   forwards?: number;
@@ -61,7 +61,7 @@ const getWildDuckBaseUrl = (appConfig: AppConfig): string => {
  * WildDuck Address Helper Class
  * Contains methods for address operations that modify data
  */
-export class WildDuckAddressHelper {
+class WildDuckAddressHelper {
   /**
    * Create new address for user
    */
@@ -269,3 +269,9 @@ export class WildDuckAddressHelper {
     return result;
   }
 }
+
+export {
+  WildDuckAddressHelper,
+  type CreateForwardedAddressParams,
+  type UpdateForwardedAddressParams,
+};

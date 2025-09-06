@@ -8,7 +8,7 @@ import { AppConfig as _AppConfig } from '../../types';
 // Platform-specific global
 declare const fetch: typeof globalThis.fetch;
 
-export interface CreateUserParams {
+interface CreateUserParams {
   username: string;
   password?: string;
   address?: string;
@@ -19,7 +19,7 @@ export interface CreateUserParams {
   tags?: string[];
 }
 
-export interface UpdateUserParams {
+interface UpdateUserParams {
   name?: string;
   quota?: number;
   language?: string;
@@ -37,7 +37,7 @@ const getWildDuckBaseUrl = (): string => {
  * WildDuck User Helper Class
  * Contains methods for user management operations that modify data
  */
-export class WildDuckUserHelper {
+class WildDuckUserHelper {
   /**
    * Create a new user
    */
@@ -196,3 +196,5 @@ export class WildDuckUserHelper {
     return result;
   }
 }
+
+export { WildDuckUserHelper, type CreateUserParams, type UpdateUserParams };

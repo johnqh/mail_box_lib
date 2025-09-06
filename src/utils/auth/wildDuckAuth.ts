@@ -12,7 +12,7 @@ declare const _fetch: typeof globalThis.fetch;
 declare const sessionStorage: Storage;
 
 // Type definition for WildDuck API client interface
-export interface WildDuckAPIClient {
+interface WildDuckAPIClient {
   authenticate(
     username: string,
     signature: string,
@@ -27,7 +27,7 @@ export interface WildDuckAPIClient {
 }
 
 // Storage key utility functions
-export const getWildDuckStorageKeys = (username: string) => {
+const getWildDuckStorageKeys = (username: string) => {
   const normalizedUsername = username.toLowerCase();
   return {
     userId: `wildduck_user_id_${normalizedUsername}`,
@@ -38,7 +38,7 @@ export const getWildDuckStorageKeys = (username: string) => {
   };
 };
 
-export interface WildDuckAuthResult {
+interface WildDuckAuthResult {
   success: boolean;
   userId?: string;
   token?: string;
@@ -130,7 +130,7 @@ const getCachedAuthData = (username: string): WildDuckAuthResult | null => {
  * Get WildDuck user ID for a given username/email
  * First checks cache, then attempts authentication if needed
  */
-export const getWildDuckUserId = async (
+const getWildDuckUserId = async (
   username: string,
   wildDuckAPI: WildDuckAPIClient,
   options?: {
@@ -234,7 +234,7 @@ export const getWildDuckUserId = async (
 /**
  * Authenticate a user with WildDuck using password (for testing)
  */
-export const authenticateWithPassword = async (
+const authenticateWithPassword = async (
   username: string,
   password: string,
   wildDuckAPI: WildDuckAPIClient
@@ -274,7 +274,7 @@ export const authenticateWithPassword = async (
 /**
  * Clear all WildDuck authentication data for a user
  */
-export const clearWildDuckAuth = (username: string): void => {
+const clearWildDuckAuth = (username: string): void => {
   const keys = getWildDuckStorageKeys(username);
 
   try {
@@ -293,7 +293,7 @@ export const clearWildDuckAuth = (username: string): void => {
 /**
  * Get all authenticated WildDuck users from session storage
  */
-export const getAuthenticatedUsers = (): string[] => {
+const getAuthenticatedUsers = (): string[] => {
   const users: string[] = [];
 
   try {
@@ -309,4 +309,14 @@ export const getAuthenticatedUsers = (): string[] => {
   }
 
   return users;
+};
+
+export {
+  getWildDuckStorageKeys,
+  getWildDuckUserId,
+  authenticateWithPassword,
+  clearWildDuckAuth,
+  getAuthenticatedUsers,
+  type WildDuckAPIClient,
+  type WildDuckAuthResult,
 };

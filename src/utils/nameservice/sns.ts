@@ -3,7 +3,7 @@ import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
 // Create connection to Solana mainnet
 const _connection = new Connection(clusterApiUrl('mainnet-beta'), 'confirmed');
 
-export interface SNSName {
+interface SNSName {
   name: string;
   address: string;
 }
@@ -179,3 +179,5 @@ export async function validateSNSName(
     return false;
   }
 }
+
+export { type SNSName };

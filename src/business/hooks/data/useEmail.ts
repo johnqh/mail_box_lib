@@ -44,7 +44,7 @@ const convertFullWildDuckMessage = (
   };
 };
 
-export const useEmail = (
+const useEmail = (
   emailId: string | null,
   userId?: string,
   options: UseEmailOptions = {}
@@ -146,3 +146,5 @@ export const useEmail = (
     refreshEmail,
   };
 };
+
+export { useEmail };

@@ -7,7 +7,7 @@ import {
 } from '../../../types/services';
 // Services will be injected through options or dependency injection
 
-export interface MailBox {
+interface MailBox {
   id: string;
   name: string;
   icon: string;
@@ -80,7 +80,7 @@ const convertServiceMailbox = (
   hidden: serviceMailbox.hidden,
 });
 
-export const useMailBoxes = (
+const useMailBoxes = (
   emailAddressId: string,
   emailAddresses: Array<{ id: string; email: string }> = [],
   userId?: string, // Direct WildDuck user ID from authentication
@@ -242,3 +242,5 @@ export const useMailBoxes = (
     refreshMailBoxes,
   };
 };
+
+export { useMailBoxes, type MailBox };

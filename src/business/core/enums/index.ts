@@ -4,35 +4,35 @@
  */
 
 // Authentication states
-export enum AuthStatus {
+enum AuthStatus {
   DISCONNECTED = 'disconnected',
   CONNECTED = 'connected',
   VERIFIED = 'verified',
 }
 
 // Chain types
-export enum ChainType {
+enum ChainType {
   EVM = 'evm',
   SOLANA = 'solana',
   UNKNOWN = 'unknown',
 }
 
 // Theme states
-export enum Theme {
+enum Theme {
   LIGHT = 'light',
   DARK = 'dark',
   SYSTEM = 'system',
 }
 
 // Font sizes
-export enum FontSize {
+enum FontSize {
   SMALL = 'small',
   MEDIUM = 'medium',
   LARGE = 'large',
 }
 
 // Standard email folder types (users can also create custom folders)
-export enum StandardEmailFolder {
+enum StandardEmailFolder {
   INBOX = 'inbox',
   SENT = 'sent',
   DRAFTS = 'drafts',
@@ -44,10 +44,10 @@ export enum StandardEmailFolder {
 }
 
 // Helper type that allows both standard folders and custom folder names
-export type EmailFolder = StandardEmailFolder | string;
+type EmailFolder = StandardEmailFolder | string;
 
 // Utility functions for working with email folders
-export const EmailFolderUtils = {
+const EmailFolderUtils = {
   /**
    * Check if a folder name is one of the standard folders
    */
@@ -80,7 +80,7 @@ export const EmailFolderUtils = {
 };
 
 // Email compose types
-export enum EmailComposeType {
+enum EmailComposeType {
   NEW = 'new',
   REPLY = 'reply',
   REPLY_ALL = 'replyAll',
@@ -88,7 +88,7 @@ export enum EmailComposeType {
 }
 
 // Mobile navigation views
-export enum MobileView {
+enum MobileView {
   EMAIL_ADDRESSES = 'emailAddresses',
   FOLDERS = 'folders',
   EMAILS = 'emails',
@@ -96,13 +96,13 @@ export enum MobileView {
 }
 
 // Medium screen navigation
-export enum MediumView {
+enum MediumView {
   LEFT = 'left',
   RIGHT = 'right',
 }
 
 // Analytics events
-export enum AnalyticsEvent {
+enum AnalyticsEvent {
   USER_LOGIN = 'user_login',
   USER_LOGOUT = 'user_logout',
   EMAIL_OPEN = 'email_open',
@@ -124,7 +124,7 @@ export enum AnalyticsEvent {
 }
 
 // Email actions
-export enum EmailAction {
+enum EmailAction {
   OPEN = 'open',
   REPLY = 'reply',
   FORWARD = 'forward',
@@ -136,7 +136,7 @@ export enum EmailAction {
 }
 
 // Subscription actions
-export enum SubscriptionAction {
+enum SubscriptionAction {
   VIEW = 'view',
   PURCHASE = 'purchase',
   CANCEL = 'cancel',
@@ -144,7 +144,7 @@ export enum SubscriptionAction {
 }
 
 // Network request states
-export enum RequestStatus {
+enum RequestStatus {
   IDLE = 'idle',
   LOADING = 'loading',
   SUCCESS = 'success',
@@ -152,14 +152,14 @@ export enum RequestStatus {
 }
 
 // Storage types
-export enum StorageType {
+enum StorageType {
   LOCAL = 'local',
   SESSION = 'session',
   MEMORY = 'memory',
 }
 
 // Notification types
-export enum NotificationType {
+enum NotificationType {
   INFO = 'info',
   SUCCESS = 'success',
   WARNING = 'warning',
@@ -167,7 +167,7 @@ export enum NotificationType {
 }
 
 // Email address types
-export enum EmailAddressType {
+enum EmailAddressType {
   DIRECT = 'direct',
   ENS = 'ens',
   SNS = 'sns',
@@ -175,13 +175,13 @@ export enum EmailAddressType {
 }
 
 // Mailbox sort orders
-export enum SortOrder {
+enum SortOrder {
   ASC = 'asc',
   DESC = 'desc',
 }
 
 // Email sort criteria
-export enum EmailSortCriteria {
+enum EmailSortCriteria {
   DATE = 'date',
   SUBJECT = 'subject',
   FROM = 'from',
@@ -189,7 +189,7 @@ export enum EmailSortCriteria {
 }
 
 // Mailbox types
-export enum MailboxType {
+enum MailboxType {
   INBOX = 'inbox',
   SENT = 'sent',
   DRAFTS = 'drafts',
@@ -200,14 +200,14 @@ export enum MailboxType {
 }
 
 // Login methods
-export enum LoginMethod {
+enum LoginMethod {
   WALLET = 'wallet',
   EMAIL = 'email',
   SOCIAL = 'social',
 }
 
 // Wallet types for analytics
-export enum WalletType {
+enum WalletType {
   ETHEREUM = 'ethereum',
   SOLANA = 'solana',
   METAMASK = 'metamask',
@@ -217,7 +217,7 @@ export enum WalletType {
 }
 
 // Network status
-export enum NetworkStatus {
+enum NetworkStatus {
   UNKNOWN = 'unknown',
   CONNECTED = 'connected',
   DISCONNECTED = 'disconnected',
@@ -225,7 +225,7 @@ export enum NetworkStatus {
 }
 
 // Connection types
-export enum ConnectionType {
+enum ConnectionType {
   UNKNOWN = 'unknown',
   NONE = 'none',
   WIFI = 'wifi',
@@ -237,7 +237,7 @@ export enum ConnectionType {
 }
 
 // Connection states
-export enum ConnectionState {
+enum ConnectionState {
   DISCONNECTED = 'disconnected',
   CONNECTING = 'connecting',
   CONNECTED = 'connected',
@@ -246,14 +246,14 @@ export enum ConnectionState {
 }
 
 // Platform types
-export enum PlatformType {
+enum PlatformType {
   WEB = 'web',
   REACT_NATIVE = 'react_native',
   DESKTOP = 'desktop',
 }
 
 // Email validation states
-export enum EmailValidationState {
+enum EmailValidationState {
   VALID = 'valid',
   INVALID = 'invalid',
   PENDING = 'pending',
@@ -261,7 +261,7 @@ export enum EmailValidationState {
 }
 
 // Feature flags
-export enum FeatureFlag {
+enum FeatureFlag {
   AI_SEARCH = 'ai_search',
   SMART_COMPOSE = 'smart_compose',
   ADVANCED_FILTERS = 'advanced_filters',
@@ -271,7 +271,7 @@ export enum FeatureFlag {
 }
 
 // Error types
-export enum ErrorType {
+enum ErrorType {
   NETWORK = 'network',
   AUTH = 'auth',
   VALIDATION = 'validation',
@@ -280,10 +280,43 @@ export enum ErrorType {
 }
 
 // Currency types for subscriptions
-export enum Currency {
+enum Currency {
   USD = 'USD',
   EUR = 'EUR',
   GBP = 'GBP',
   CAD = 'CAD',
   AUD = 'AUD',
 }
+
+export {
+  EmailFolderUtils,
+  AuthStatus,
+  ChainType,
+  Theme,
+  FontSize,
+  StandardEmailFolder,
+  EmailComposeType,
+  MobileView,
+  MediumView,
+  AnalyticsEvent,
+  EmailAction,
+  SubscriptionAction,
+  RequestStatus,
+  StorageType,
+  NotificationType,
+  EmailAddressType,
+  SortOrder,
+  EmailSortCriteria,
+  MailboxType,
+  LoginMethod,
+  WalletType,
+  NetworkStatus,
+  ConnectionType,
+  ConnectionState,
+  PlatformType,
+  EmailValidationState,
+  FeatureFlag,
+  ErrorType,
+  Currency,
+  type EmailFolder,
+};

@@ -9,11 +9,11 @@ import {
   WalletType,
 } from '../../business/core/enums';
 
-export interface AnalyticsEventProperties {
+interface AnalyticsEventProperties {
   [key: string]: string | number | boolean | undefined;
 }
 
-export interface AnalyticsService {
+interface AnalyticsService {
   /**
    * Initialize analytics service
    */
@@ -78,7 +78,7 @@ export interface AnalyticsService {
   resetUser(): void;
 }
 
-export interface AnalyticsConfig {
+interface AnalyticsConfig {
   apiKey?: string;
   appId?: string;
   measurementId?: string;
@@ -90,7 +90,7 @@ export interface AnalyticsConfig {
 /**
  * Email-specific analytics events interface
  */
-export interface EmailAnalyticsService extends AnalyticsService {
+interface EmailAnalyticsService extends AnalyticsService {
   /**
    * Track user authentication
    */
@@ -150,7 +150,7 @@ export interface EmailAnalyticsService extends AnalyticsService {
 /**
  * Analytics event builders for common events
  */
-export class AnalyticsEventBuilder {
+class AnalyticsEventBuilder {
   static userLogin(
     method: LoginMethod,
     walletType?: WalletType
@@ -214,3 +214,11 @@ export class AnalyticsEventBuilder {
     };
   }
 }
+
+export {
+  AnalyticsEventBuilder,
+  type AnalyticsEventProperties,
+  type AnalyticsService,
+  type AnalyticsConfig,
+  type EmailAnalyticsService,
+};

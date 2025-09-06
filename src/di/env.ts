@@ -36,7 +36,7 @@ function createEnvProvider(): EnvProvider {
 /**
  * Get the default environment provider instance (singleton pattern)
  */
-export function getEnvProvider(): EnvProvider {
+function getEnvProvider(): EnvProvider {
   if (!envProvider) {
     envProvider = createEnvProvider();
   }
@@ -46,7 +46,7 @@ export function getEnvProvider(): EnvProvider {
 /**
  * Get the app configuration
  */
-export function getAppConfig(): AppConfig {
+function getAppConfig(): AppConfig {
   if (!appConfig) {
     getEnvProvider(); // This will create the config
   }
@@ -56,7 +56,7 @@ export function getAppConfig(): AppConfig {
 /**
  * Convenience functions for common environment checks
  */
-export const env = {
+const env = {
   isDevelopment: () => getEnvProvider().isDevelopment(),
   isProduction: () => getEnvProvider().isProduction(),
   get: (key: string, defaultValue?: string) =>
@@ -65,3 +65,5 @@ export const env = {
 
 // Re-export types for convenience
 export type { EnvProvider, AppConfig, EnvironmentVariables } from '../types';
+
+export { env, getEnvProvider, getAppConfig };

@@ -3,7 +3,7 @@
  * This interface can be implemented for web (fetch) or React Native (different networking libraries)
  */
 
-export interface NetworkResponse<T = any> {
+interface NetworkResponse<T = any> {
   ok: boolean;
   status: number;
   statusText: string;
@@ -11,7 +11,7 @@ export interface NetworkResponse<T = any> {
   headers: Record<string, string>;
 }
 
-export interface NetworkRequestOptions {
+interface NetworkRequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
   body?: string | FormData | Blob;
@@ -23,7 +23,7 @@ export interface NetworkRequestOptions {
  * Platform-agnostic network client interface
  * Abstracts HTTP requests to work across web and React Native
  */
-export interface NetworkClient {
+interface NetworkClient {
   /**
    * Make an HTTP request
    * @param url Request URL
@@ -87,7 +87,7 @@ export interface NetworkClient {
 /**
  * Network error class for consistent error handling
  */
-export class NetworkError extends Error {
+class NetworkError extends Error {
   public readonly status: number;
   public readonly statusText: string;
   public readonly url: string;
@@ -108,3 +108,10 @@ export class NetworkError extends Error {
     this.data = data;
   }
 }
+
+export {
+  NetworkError,
+  type NetworkResponse,
+  type NetworkRequestOptions,
+  type NetworkClient,
+};

@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import axios from 'axios';
 import { WildDuckAPI } from '../../../network/clients/wildduck';
 
-export interface WildduckFilter {
+interface WildduckFilter {
   id: string;
   name?: string;
   query: {
@@ -26,7 +26,7 @@ export interface WildduckFilter {
   created: string;
 }
 
-export interface CreateFilterParams {
+interface CreateFilterParams {
   name?: string;
   query: {
     from?: string;
@@ -48,7 +48,7 @@ export interface CreateFilterParams {
   disabled?: boolean;
 }
 
-export interface UpdateFilterParams {
+interface UpdateFilterParams {
   name?: string;
   query?: {
     from?: string;
@@ -70,7 +70,7 @@ export interface UpdateFilterParams {
   disabled?: boolean;
 }
 
-export interface UseWildduckFiltersReturn {
+interface UseWildduckFiltersReturn {
   isLoading: boolean;
   error: string | null;
   filters: WildduckFilter[];
@@ -96,7 +96,7 @@ export interface UseWildduckFiltersReturn {
 /**
  * Hook for WildDuck filter management operations
  */
-export const useWildduckFilters = (): UseWildduckFiltersReturn => {
+const useWildduckFilters = (): UseWildduckFiltersReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<WildduckFilter[]>([]);
@@ -271,4 +271,12 @@ export const useWildduckFilters = (): UseWildduckFiltersReturn => {
     clearError,
     refresh,
   };
+};
+
+export {
+  useWildduckFilters,
+  type WildduckFilter,
+  type CreateFilterParams,
+  type UpdateFilterParams,
+  type UseWildduckFiltersReturn
 };

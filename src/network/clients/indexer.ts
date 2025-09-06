@@ -13,7 +13,7 @@ declare const fetch: typeof globalThis.fetch;
  * Indexer API client for interacting with mail_box_indexer v2.2.0
  * Supports all the latest endpoints including email generation, points system, and admin functions.
  */
-export class IndexerClient implements NetworkClient {
+class IndexerClient implements NetworkClient {
   private readonly baseUrl: string;
   private readonly timeout: number;
 
@@ -440,14 +440,14 @@ export class IndexerClient implements NetworkClient {
 /**
  * Factory function to create an IndexerClient instance
  */
-export const createIndexerClient = (config: AppConfig): IndexerClient => {
+const createIndexerClient = (config: AppConfig): IndexerClient => {
   return new IndexerClient(config);
 };
 
 /**
  * Default indexer client configuration
  */
-export const createIndexerApiConfig = (config: AppConfig) => ({
+const createIndexerApiConfig = (config: AppConfig) => ({
   BASE_URL: config.indexerBackendUrl || 'https://indexer.0xmail.box',
   VERSION: '2.2.0',
   ENDPOINTS: {
@@ -480,3 +480,5 @@ export const createIndexerApiConfig = (config: AppConfig) => ({
     SOLANA_TEST_TRANSACTION: '/api/solana/test-transaction',
   },
 });
+
+export { createIndexerClient, createIndexerApiConfig, IndexerClient };

@@ -5,7 +5,7 @@
 
 import { logger } from './logger';
 
-export type AsyncResult<T> = {
+type AsyncResult<T> = {
   data?: T;
   error?: Error;
   success: boolean;
@@ -15,7 +15,7 @@ export type AsyncResult<T> = {
  * Safely execute an async operation with error handling
  * Returns a result object instead of throwing
  */
-export const safeAsync = async <T>(
+const safeAsync = async <T>(
   operation: () => Promise<T>,
   context?: string
 ): Promise<AsyncResult<T>> => {
@@ -32,7 +32,7 @@ export const safeAsync = async <T>(
 /**
  * Execute async operation with loading state tracking
  */
-export const withLoadingState = async <T>(
+const withLoadingState = async <T>(
   operation: () => Promise<T>,
   setLoading: (loading: boolean) => void,
   setError: (error: string | null) => void,
@@ -57,7 +57,7 @@ export const withLoadingState = async <T>(
 /**
  * Execute multiple async operations in parallel with error handling
  */
-export const safeParallel = async <T extends readonly unknown[]>(
+const safeParallel = async <T extends readonly unknown[]>(
   operations: readonly [...{ [K in keyof T]: () => Promise<T[K]> }],
   context?: string
 ): Promise<AsyncResult<T>> => {
@@ -78,7 +78,7 @@ export const safeParallel = async <T extends readonly unknown[]>(
 /**
  * Execute async operation with timeout
  */
-export const withTimeout = async <T>(
+const withTimeout = async <T>(
   operation: () => Promise<T>,
   timeoutMs: number,
   context?: string
@@ -103,7 +103,7 @@ export const withTimeout = async <T>(
  */
 const cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
 
-export const withCache = async <T>(
+const withCache = async <T>(
   key: string,
   operation: () => Promise<T>,
   ttlMs: number = 5 * 60 * 1000 // 5 minutes default
@@ -123,7 +123,7 @@ export const withCache = async <T>(
 /**
  * Clear expired cache entries
  */
-export const clearExpiredCache = (): void => {
+const clearExpiredCache = (): void => {
   const now = Date.now();
   for (const [key, entry] of cache.entries()) {
     if (now - entry.timestamp >= entry.ttl) {
@@ -137,7 +137,7 @@ export const clearExpiredCache = (): void => {
  */
 const debounceMap = new Map<string, NodeJS.Timeout>();
 
-export const debounceAsync = <T extends any[], R>(
+const debounceAsync = <T extends any[], R>(
   fn: (...args: T) => Promise<R>,
   delay: number,
   key: string
@@ -163,4 +163,15 @@ export const debounceAsync = <T extends any[], R>(
       debounceMap.set(key, timeout);
     });
   };
+};
+
+export {
+  safeAsync,
+  withLoadingState,
+  safeParallel,
+  withTimeout,
+  withCache,
+  clearExpiredCache,
+  debounceAsync,
+  type AsyncResult,
 };

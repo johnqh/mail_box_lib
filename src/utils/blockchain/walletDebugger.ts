@@ -4,7 +4,7 @@
 
 import { ChainType } from './addressDetection';
 
-export interface WalletDebugInfo {
+interface WalletDebugInfo {
   chainType: ChainType;
   address: string | null;
   isConnected: boolean;
@@ -16,7 +16,7 @@ export interface WalletDebugInfo {
 /**
  * Generate diagnostic information for wallet issues
  */
-export const generateWalletDiagnostics = (
+const generateWalletDiagnostics = (
   chainType: ChainType,
   address: string | null,
   isConnected: boolean,
@@ -154,7 +154,7 @@ export const generateWalletDiagnostics = (
 /**
  * Log detailed wallet diagnostics to console
  */
-export const logWalletDiagnostics = (
+const logWalletDiagnostics = (
   chainType: ChainType,
   address: string | null,
   isConnected: boolean,
@@ -188,4 +188,10 @@ export const logWalletDiagnostics = (
   }
 
   console.groupEnd();
+};
+
+export {
+  generateWalletDiagnostics,
+  logWalletDiagnostics,
+  type WalletDebugInfo,
 };

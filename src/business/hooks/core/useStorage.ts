@@ -15,7 +15,7 @@ interface UseStorageOptions<T> {
   deserialize?: (value: string) => T;
 }
 
-export function useStorage<T>(
+function useStorage<T>(
   key: string,
   initialValue: T,
   options?: UseStorageOptions<T>
@@ -79,3 +79,5 @@ export function useStorage<T>(
 // Note: useLocalStorage is web-specific and conflicts with existing useLocalStorage.ts
 // This web-specific implementation has been removed to avoid conflicts.
 // For web-specific localStorage functionality, import from './useLocalStorage' instead.
+
+export { useStorage };

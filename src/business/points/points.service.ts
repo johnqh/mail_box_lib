@@ -2,7 +2,7 @@
 declare const crypto: { randomUUID(): string };
 declare const localStorage: Storage;
 
-export interface PointsAction {
+interface PointsAction {
   id: string;
   walletAddress: string;
   action:
@@ -26,14 +26,14 @@ export interface PointsAction {
   };
 }
 
-export interface UserPoints {
+interface UserPoints {
   walletAddress: string;
   totalPoints: number;
   actions: PointsAction[];
   lastUpdated: Date;
 }
 
-export interface ReferralLink {
+interface ReferralLink {
   walletAddress: string;
   referralCode: string;
   url: string;
@@ -43,7 +43,7 @@ export interface ReferralLink {
   createdAt: Date;
 }
 
-export interface ClaimablePoints {
+interface ClaimablePoints {
   id: string;
   walletAddress: string;
   points: number;
@@ -52,7 +52,7 @@ export interface ClaimablePoints {
   claimCode: string;
 }
 
-export class PointsService {
+class PointsService {
   private static instance: PointsService;
   private userPointsCache = new Map<string, UserPoints>();
 
@@ -348,4 +348,13 @@ export class PointsService {
 }
 
 // Create singleton instance
-export const pointsService = PointsService.getInstance();
+const pointsService = PointsService.getInstance();
+
+export {
+  pointsService,
+  PointsService,
+  type PointsAction,
+  type UserPoints,
+  type ReferralLink,
+  type ClaimablePoints,
+};

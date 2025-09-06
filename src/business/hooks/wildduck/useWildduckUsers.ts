@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import axios from 'axios';
 import { WildDuckAPI } from '../../../network/clients/wildduck';
 
-export interface WildduckUser {
+interface WildduckUser {
   success: boolean;
   id: string;
   username: string;
@@ -19,7 +19,7 @@ export interface WildduckUser {
   suspended?: boolean;
 }
 
-export interface UseWildduckUsersReturn {
+interface UseWildduckUsersReturn {
   isLoading: boolean;
   error: string | null;
   getUser: (userId: string) => Promise<WildduckUser>;
@@ -33,7 +33,7 @@ export interface UseWildduckUsersReturn {
 /**
  * Hook for WildDuck user management operations
  */
-export const useWildduckUsers = (): UseWildduckUsersReturn => {
+const useWildduckUsers = (): UseWildduckUsersReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -101,4 +101,10 @@ export const useWildduckUsers = (): UseWildduckUsersReturn => {
     getUsers,
     clearError,
   };
+};
+
+export {
+  useWildduckUsers,
+  type WildduckUser,
+  type UseWildduckUsersReturn
 };

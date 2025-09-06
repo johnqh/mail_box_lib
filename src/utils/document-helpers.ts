@@ -10,7 +10,7 @@
  * @param options Event listener options
  * @returns Cleanup function
  */
-export function addDocumentEventListener(
+function addDocumentEventListener(
   type: string,
   listener: EventListener,
   options?: boolean | AddEventListenerOptions
@@ -36,7 +36,7 @@ export function addDocumentEventListener(
  * @param id Element ID
  * @returns Element or null
  */
-export function getDocumentElementById(id: string): Element | null {
+function getDocumentElementById(id: string): Element | null {
   if (typeof document !== 'undefined' && document.getElementById) {
     try {
       return document.getElementById(id);
@@ -52,7 +52,7 @@ export function getDocumentElementById(id: string): Element | null {
  * @param tagName Tag name
  * @returns Element or null
  */
-export function createDocumentElement(tagName: string): HTMLElement | null {
+function createDocumentElement(tagName: string): HTMLElement | null {
   if (typeof document !== 'undefined' && document.createElement) {
     try {
       return document.createElement(tagName);
@@ -67,7 +67,7 @@ export function createDocumentElement(tagName: string): HTMLElement | null {
  * Safely get document head
  * @returns Head element or null
  */
-export function getDocumentHead(): HTMLHeadElement | null {
+function getDocumentHead(): HTMLHeadElement | null {
   if (typeof document !== 'undefined' && document.head) {
     return document.head;
   }
@@ -79,7 +79,7 @@ export function getDocumentHead(): HTMLHeadElement | null {
  * @param element Element to append
  * @returns Success boolean
  */
-export function appendToDocumentHead(element: Node): boolean {
+function appendToDocumentHead(element: Node): boolean {
   const head = getDocumentHead();
   if (head && element) {
     try {
@@ -96,7 +96,7 @@ export function appendToDocumentHead(element: Node): boolean {
  * Safely get document element (html element)
  * @returns Document element or null
  */
-export function getDocumentElement(): HTMLElement | null {
+function getDocumentElement(): HTMLElement | null {
   if (typeof document !== 'undefined' && document.documentElement) {
     return document.documentElement;
   }
@@ -108,7 +108,7 @@ export function getDocumentElement(): HTMLElement | null {
  * @param fallback Fallback title
  * @returns Document title
  */
-export function getDocumentTitle(fallback: string = ''): string {
+function getDocumentTitle(fallback: string = ''): string {
   if (typeof document !== 'undefined' && document.title) {
     return document.title;
   }
@@ -119,7 +119,7 @@ export function getDocumentTitle(fallback: string = ''): string {
  * Safely set document title
  * @param title New title
  */
-export function setDocumentTitle(title: string): void {
+function setDocumentTitle(title: string): void {
   if (typeof document !== 'undefined') {
     try {
       document.title = title;
@@ -132,17 +132,30 @@ export function setDocumentTitle(title: string): void {
 /**
  * Check if we're in a web environment with document support
  */
-export function isWebEnvironment(): boolean {
+function isWebEnvironment(): boolean {
   return typeof document !== 'undefined';
 }
 
 /**
  * Check if DOM manipulation is supported
  */
-export function isDOMSupported(): boolean {
+function isDOMSupported(): boolean {
   return (
     typeof document !== 'undefined' &&
     typeof document.createElement === 'function' &&
     typeof document.getElementById === 'function'
   );
 }
+
+export {
+  addDocumentEventListener,
+  getDocumentElementById,
+  createDocumentElement,
+  getDocumentHead,
+  appendToDocumentHead,
+  getDocumentElement,
+  getDocumentTitle,
+  setDocumentTitle,
+  isWebEnvironment,
+  isDOMSupported,
+};

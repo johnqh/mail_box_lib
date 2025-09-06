@@ -22,7 +22,7 @@ const getApiBaseUrl = (config: AppConfig): string => {
 };
 
 // WildDuck API configuration factory
-export const createApiConfig = (config: AppConfig) => ({
+const createApiConfig = (config: AppConfig) => ({
   BASE_URL: getApiBaseUrl(config),
   BACKEND_URL: config.wildDuckBackendUrl, // Direct backend URL for non-API calls
   API_TOKEN: config.wildDuckApiToken, // Platform-agnostic environment variable access
@@ -61,7 +61,7 @@ export const createApiConfig = (config: AppConfig) => ({
 });
 
 // Legacy export for backward compatibility
-export const API_CONFIG = createApiConfig({
+const API_CONFIG = createApiConfig({
   wildDuckBackendUrl: 'https://0xmail.box',
   wildDuckApiToken: '',
   useCloudflareWorker: false,
@@ -410,7 +410,7 @@ class WildDuckAPI {
 }
 
 // WildDuck API response types based on the source code analysis
-export interface WildDuckMailbox {
+interface WildDuckMailbox {
   id: string;
   name: string;
   path: string;
@@ -423,12 +423,12 @@ export interface WildDuckMailbox {
   size?: number;
 }
 
-export interface WildDuckMailboxResponse {
+interface WildDuckMailboxResponse {
   success: boolean;
   results: WildDuckMailbox[];
 }
 
-export interface WildDuckMessage {
+interface WildDuckMessage {
   id: string;
   mailbox: string;
   thread: string;
@@ -451,7 +451,7 @@ export interface WildDuckMessage {
   ha: boolean; // has attachments
 }
 
-export interface WildDuckMessagesResponse {
+interface WildDuckMessagesResponse {
   success: boolean;
   total: number;
   page: number;
@@ -460,7 +460,7 @@ export interface WildDuckMessagesResponse {
   results: WildDuckMessage[];
 }
 
-export interface WildDuckMessageResponse {
+interface WildDuckMessageResponse {
   success: boolean;
   id: string;
   mailbox: string;
@@ -489,7 +489,7 @@ export interface WildDuckMessageResponse {
 }
 
 // Factory function to create WildDuck API client with dependencies
-export const createWildDuckAPI = (
+const createWildDuckAPI = (
   networkClient: NetworkClient,
   config: AppConfig
 ): WildDuckAPI => {
@@ -662,13 +662,13 @@ class StaticWildDuckAPI {
 export { StaticWildDuckAPI as WildDuckAPI };
 
 // Helper function to validate MongoDB ObjectId format
-export const isValidObjectId = (id: string): boolean => {
+const isValidObjectId = (id: string): boolean => {
   return /^[a-f0-9]{24}$/i.test(id);
 };
 
 // Helper function to get WildDuck user ID for an email address
 // This retrieves the actual MongoDB ObjectId from session storage after authentication
-export const emailToUserId = (emailAddress: string): string => {
+const emailToUserId = (emailAddress: string): string => {
   // Extract the wallet address part from email if it's in email format
   let username = emailAddress.toLowerCase();
   if (username.includes('@')) {
@@ -732,7 +732,7 @@ export const emailToUserId = (emailAddress: string): string => {
 };
 
 // Helper function to ensure a string is a valid user ID for WildDuck API calls
-export const validateUserId = (userId: string): string => {
+const validateUserId = (userId: string): string => {
   if (!userId) {
     throw new Error('User ID is required');
   }
@@ -744,4 +744,16 @@ export const validateUserId = (userId: string): string => {
   }
 
   return userId;
+};
+
+export {
+  type WildDuckMailbox,
+  type WildDuckMailboxResponse,
+  type WildDuckMessage,
+  type WildDuckMessageResponse,
+  type WildDuckMessagesResponse,
+  createWildDuckAPI,
+  emailToUserId,
+  validateUserId,
+  isValidObjectId,
 };

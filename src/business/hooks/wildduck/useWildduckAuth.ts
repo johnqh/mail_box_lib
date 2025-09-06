@@ -3,7 +3,7 @@ import axios from 'axios';
 import { WildDuckAPI } from '../../../network/clients/wildduck';
 import { useStorageService } from '../core/useServices';
 
-export interface AuthResponse {
+interface AuthResponse {
   success: boolean;
   token?: string;
   id?: string;
@@ -12,7 +12,7 @@ export interface AuthResponse {
   scope?: string;
 }
 
-export interface PreAuthResponse {
+interface PreAuthResponse {
   success: boolean;
   id?: string;
   username?: string;
@@ -20,7 +20,7 @@ export interface PreAuthResponse {
   scope?: string;
 }
 
-export interface UseWildduckAuthReturn {
+interface UseWildduckAuthReturn {
   isLoading: boolean;
   error: string | null;
   getAuthStatus: () => Promise<{ authenticated: boolean; user?: any }>;
@@ -30,7 +30,7 @@ export interface UseWildduckAuthReturn {
 /**
  * Hook for WildDuck authentication operations
  */
-export const useWildduckAuth = (): UseWildduckAuthReturn => {
+const useWildduckAuth = (): UseWildduckAuthReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const storageService = useStorageService();
@@ -82,4 +82,11 @@ export const useWildduckAuth = (): UseWildduckAuthReturn => {
     getAuthStatus,
     clearError,
   };
+};
+
+export {
+  useWildduckAuth,
+  type AuthResponse,
+  type PreAuthResponse,
+  type UseWildduckAuthReturn
 };

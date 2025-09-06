@@ -19,7 +19,7 @@ const ServiceResolverContext = createContext<ServiceResolver | null>(null);
  * Hook to get the service container
  * @throws Error if used outside ServiceProvider
  */
-export const useServiceContainer = (): ServiceContainer => {
+const useServiceContainer = (): ServiceContainer => {
   const container = useContext(ServiceContainerContext);
   if (!container) {
     throw new Error(
@@ -34,7 +34,7 @@ export const useServiceContainer = (): ServiceContainer => {
  * Hook to get the service resolver (convenience layer)
  * @throws Error if used outside ServiceProvider
  */
-export const useServiceResolver = (): ServiceResolver => {
+const useServiceResolver = (): ServiceResolver => {
   const resolver = useContext(ServiceResolverContext);
   if (!resolver) {
     throw new Error(
@@ -46,4 +46,9 @@ export const useServiceResolver = (): ServiceResolver => {
 };
 
 // Export contexts for use in consuming applications
-export { ServiceContainerContext, ServiceResolverContext };
+export {
+  ServiceContainerContext,
+  ServiceResolverContext,
+  useServiceContainer,
+  useServiceResolver,
+};

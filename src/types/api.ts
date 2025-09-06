@@ -17,7 +17,7 @@
 /**
  * Standard API response wrapper for indexer endpoints
  */
-export interface IndexerApiResponse<T = any> {
+interface IndexerApiResponse<T = any> {
   success: boolean;
   data?: T;
   error?: string;
@@ -27,7 +27,7 @@ export interface IndexerApiResponse<T = any> {
 /**
  * Wallet signature data structure
  */
-export interface WalletSignature {
+interface WalletSignature {
   /** The wallet address that signed the message */
   signerAddress: string;
   /** The message that was signed */
@@ -39,7 +39,7 @@ export interface WalletSignature {
 /**
  * Wallet authentication data structure
  */
-export interface WalletAuth {
+interface WalletAuth {
   /** The wallet address (optional) */
   walletAddress?: string;
   /** The wallet signature (optional) */
@@ -50,7 +50,7 @@ export interface WalletAuth {
  * Signature-protected API request base interface
  * All signature-protected endpoints extend this
  */
-export interface SignatureProtectedRequest {
+interface SignatureProtectedRequest {
   /** Wallet address (EVM 0x format or Solana Base58) */
   walletAddress: string;
   /** Cryptographic signature proving wallet ownership */
@@ -67,12 +67,12 @@ export interface SignatureProtectedRequest {
  * Email retrieval API request
  * POST /emails
  */
-export type GetEmailsRequest = SignatureProtectedRequest;
+type GetEmailsRequest = SignatureProtectedRequest;
 
 /**
  * Email addresses response
  */
-export interface GetEmailsResponse {
+interface GetEmailsResponse {
   walletAddress: string;
   addressType: ChainType;
   emailAddresses: string[];
@@ -91,12 +91,12 @@ export interface GetEmailsResponse {
  * Delegation retrieval API request
  * POST /delegated
  */
-export type GetDelegatedRequest = SignatureProtectedRequest;
+type GetDelegatedRequest = SignatureProtectedRequest;
 
 /**
  * Delegation response
  */
-export interface GetDelegatedResponse {
+interface GetDelegatedResponse {
   walletAddress: string;
   addressType: ChainType;
   delegatedTo: string | null;
@@ -109,12 +109,12 @@ export interface GetDelegatedResponse {
  * Get addresses delegated TO a wallet - API request
  * POST /api/addresses/delegated/to
  */
-export type GetDelegatedToRequest = SignatureProtectedRequest;
+type GetDelegatedToRequest = SignatureProtectedRequest;
 
 /**
  * Response for addresses that have delegated to a wallet
  */
-export interface GetDelegatedToResponse {
+interface GetDelegatedToResponse {
   walletAddress: string;
   addressType: ChainType;
   delegators: Array<{
@@ -131,7 +131,7 @@ export interface GetDelegatedToResponse {
  * Validate address format endpoint
  * GET /api/addresses/validate/:address
  */
-export interface ValidateAddressResponse {
+interface ValidateAddressResponse {
   isValid: boolean;
   addressType: ChainType;
   normalizedAddress: string;
@@ -149,13 +149,13 @@ export interface ValidateAddressResponse {
  * Points summary request
  * POST /points/summary
  */
-export type GetPointsSummaryRequest = SignatureProtectedRequest;
+type GetPointsSummaryRequest = SignatureProtectedRequest;
 
 /**
  * Points history request
  * POST /points/history
  */
-export interface GetPointsHistoryRequest extends SignatureProtectedRequest {
+interface GetPointsHistoryRequest extends SignatureProtectedRequest {
   limit?: number;
   offset?: number;
 }
@@ -164,7 +164,7 @@ export interface GetPointsHistoryRequest extends SignatureProtectedRequest {
  * Promotional code claim request
  * POST /points/claim-promo
  */
-export interface ClaimPromoCodeRequest extends SignatureProtectedRequest {
+interface ClaimPromoCodeRequest extends SignatureProtectedRequest {
   promoCode: string;
 }
 
@@ -172,7 +172,7 @@ export interface ClaimPromoCodeRequest extends SignatureProtectedRequest {
  * Referral registration request
  * POST /points/register-referral
  */
-export interface RegisterReferralRequest extends SignatureProtectedRequest {
+interface RegisterReferralRequest extends SignatureProtectedRequest {
   referralCode: string;
 }
 
@@ -184,7 +184,7 @@ export interface RegisterReferralRequest extends SignatureProtectedRequest {
  * WildDuck Authentication Types
  * Used for blockchain-based authentication with wallet signatures
  */
-export interface WildDuckAuthRequest {
+interface WildDuckAuthRequest {
   username: string;
   signature: string;
   nonce: string;
@@ -195,7 +195,7 @@ export interface WildDuckAuthRequest {
   ip?: string;
 }
 
-export interface WildDuckAuthResponse {
+interface WildDuckAuthResponse {
   success: boolean;
   id?: string;
   username?: string;
@@ -208,14 +208,14 @@ export interface WildDuckAuthResponse {
   error?: string;
 }
 
-export interface WildDuckPreAuthRequest {
+interface WildDuckPreAuthRequest {
   username: string;
   scope?: string;
   sess?: string;
   ip?: string;
 }
 
-export interface WildDuckPreAuthResponse {
+interface WildDuckPreAuthResponse {
   success: boolean;
   id?: string;
   username?: string;
@@ -231,7 +231,7 @@ export interface WildDuckPreAuthResponse {
  * WildDuck User Management Types
  * For user account creation, updates, and management
  */
-export interface WildDuckUser {
+interface WildDuckUser {
   id: string;
   username: string;
   name?: string;
@@ -250,7 +250,7 @@ export interface WildDuckUser {
   created?: string;
 }
 
-export interface WildDuckCreateUserRequest {
+interface WildDuckCreateUserRequest {
   username: string;
   password?: string;
   address?: string;
@@ -261,7 +261,7 @@ export interface WildDuckCreateUserRequest {
   tags?: string[];
 }
 
-export interface WildDuckUpdateUserRequest {
+interface WildDuckUpdateUserRequest {
   name?: string;
   quota?: number;
   language?: string;
@@ -271,7 +271,7 @@ export interface WildDuckUpdateUserRequest {
   tags?: string[];
 }
 
-export interface WildDuckUserResponse {
+interface WildDuckUserResponse {
   success: boolean;
   id?: string;
   error?: string;
@@ -281,7 +281,7 @@ export interface WildDuckUserResponse {
  * WildDuck Mailbox Types
  * For email folder/mailbox management
  */
-export interface WildDuckMailbox {
+interface WildDuckMailbox {
   id: string;
   name: string;
   path: string;
@@ -294,13 +294,13 @@ export interface WildDuckMailbox {
   size?: number;
 }
 
-export interface WildDuckMailboxResponse {
+interface WildDuckMailboxResponse {
   success: boolean;
   results: WildDuckMailbox[];
   error?: string;
 }
 
-export interface WildDuckCreateMailboxRequest {
+interface WildDuckCreateMailboxRequest {
   path: string;
   hidden?: boolean;
   retention?: number;
@@ -310,12 +310,12 @@ export interface WildDuckCreateMailboxRequest {
  * WildDuck Message Types
  * For email message handling and operations
  */
-export interface WildDuckMessageAddress {
+interface WildDuckMessageAddress {
   name?: string;
   address: string;
 }
 
-export interface WildDuckMessageAttachment {
+interface WildDuckMessageAttachment {
   id: string;
   filename: string;
   contentType: string;
@@ -323,7 +323,7 @@ export interface WildDuckMessageAttachment {
   hash?: string;
 }
 
-export interface WildDuckMessageBase {
+interface WildDuckMessageBase {
   id: string;
   mailbox: string;
   thread: string;
@@ -343,11 +343,11 @@ export interface WildDuckMessageBase {
   ha: boolean; // has attachments
 }
 
-export interface WildDuckMessage extends WildDuckMessageBase {
+interface WildDuckMessage extends WildDuckMessageBase {
   attachments: boolean;
 }
 
-export interface WildDuckMessageDetail extends WildDuckMessageBase {
+interface WildDuckMessageDetail extends WildDuckMessageBase {
   user: string;
   html?: string;
   text?: string;
@@ -357,7 +357,7 @@ export interface WildDuckMessageDetail extends WildDuckMessageBase {
   inReplyTo?: string;
 }
 
-export interface WildDuckMessagesResponse {
+interface WildDuckMessagesResponse {
   success: boolean;
   total: number;
   page: number;
@@ -367,13 +367,13 @@ export interface WildDuckMessagesResponse {
   error?: string;
 }
 
-export interface WildDuckMessageResponse {
+interface WildDuckMessageResponse {
   success: boolean;
   data?: WildDuckMessageDetail;
   error?: string;
 }
 
-export interface WildDuckSendMessageRequest {
+interface WildDuckSendMessageRequest {
   from?: string;
   to: WildDuckMessageAddress[];
   cc?: WildDuckMessageAddress[];
@@ -394,7 +394,7 @@ export interface WildDuckSendMessageRequest {
  * WildDuck Address Types
  * For email address management
  */
-export interface WildDuckAddress {
+interface WildDuckAddress {
   id: string;
   address: string;
   name?: string;
@@ -404,7 +404,7 @@ export interface WildDuckAddress {
   tags?: string[];
 }
 
-export interface WildDuckAddressResponse {
+interface WildDuckAddressResponse {
   success: boolean;
   results?: WildDuckAddress[];
   error?: string;
@@ -417,14 +417,14 @@ export interface WildDuckAddressResponse {
 /**
  * Indexer Mail API Types
  */
-export interface IndexerEmailAddress {
+interface IndexerEmailAddress {
   email: string;
   type: 'primary' | 'domain' | 'delegated' | 'nameservice';
   source?: string;
   isVerified?: boolean;
 }
 
-export interface IndexerEmailResponse {
+interface IndexerEmailResponse {
   walletAddress: string;
   addressType: string;
   emailAddresses: string[];
@@ -435,13 +435,13 @@ export interface IndexerEmailResponse {
   timestamp: string;
 }
 
-export interface IndexerSignatureRequest {
+interface IndexerSignatureRequest {
   walletAddress: string;
   signature: string;
   message?: string;
 }
 
-export interface IndexerSignatureVerification {
+interface IndexerSignatureVerification {
   walletAddress: string;
   addressType: string;
   isValid: boolean;
@@ -449,7 +449,7 @@ export interface IndexerSignatureVerification {
   timestamp: string;
 }
 
-export interface IndexerDelegationResponse {
+interface IndexerDelegationResponse {
   walletAddress: string;
   addressType: string;
   hasDelegation: boolean;
@@ -460,7 +460,7 @@ export interface IndexerDelegationResponse {
   timestamp: string;
 }
 
-export interface IndexerDelegatedToResponse {
+interface IndexerDelegatedToResponse {
   walletAddress: string;
   addressType: string;
   delegators: Array<{
@@ -473,7 +473,7 @@ export interface IndexerDelegatedToResponse {
   timestamp: string;
 }
 
-export interface IndexerMessageResponse {
+interface IndexerMessageResponse {
   walletAddress: string;
   addressType: string;
   chainId: number;
@@ -498,7 +498,7 @@ export interface IndexerMessageResponse {
   timestamp: string;
 }
 
-export interface IndexerNonceResponse {
+interface IndexerNonceResponse {
   walletAddress: string;
   addressType: string;
   nonce: string;
@@ -508,7 +508,7 @@ export interface IndexerNonceResponse {
   timestamp: string;
 }
 
-export interface IndexerEntitlementResponse {
+interface IndexerEntitlementResponse {
   walletAddress: string;
   addressType: string;
   entitlement: {
@@ -528,7 +528,7 @@ export interface IndexerEntitlementResponse {
  * Indexer Blockchain Data Types
  * For GraphQL queries and blockchain data
  */
-export interface IndexerMail {
+interface IndexerMail {
   id: string;
   chainId: number;
   contractAddress: string;
@@ -544,7 +544,7 @@ export interface IndexerMail {
   gasPrice?: string;
 }
 
-export interface IndexerPreparedMail {
+interface IndexerPreparedMail {
   id: string;
   chainId: number;
   contractAddress: string;
@@ -559,7 +559,7 @@ export interface IndexerPreparedMail {
   gasPrice?: string;
 }
 
-export interface IndexerDelegation {
+interface IndexerDelegation {
   id: string;
   chainId: number;
   contractAddress: string;
@@ -577,7 +577,7 @@ export interface IndexerDelegation {
  */
 
 // How to Earn Points Response
-export interface IndexerEarnMethod {
+interface IndexerEarnMethod {
   id: string;
   title: string;
   description: string;
@@ -591,7 +591,7 @@ export interface IndexerEarnMethod {
   tips: string;
 }
 
-export interface IndexerHowToEarnResponse {
+interface IndexerHowToEarnResponse {
   success: boolean;
   data: {
     title: string;
@@ -616,7 +616,7 @@ export interface IndexerHowToEarnResponse {
 }
 
 // Public Stats Response
-export interface IndexerPublicStatsResponse {
+interface IndexerPublicStatsResponse {
   success: boolean;
   data: {
     totalUsers: number;
@@ -631,7 +631,7 @@ export interface IndexerPublicStatsResponse {
 }
 
 // Points Summary Response
-export interface IndexerPointsSummary {
+interface IndexerPointsSummary {
   walletAddress: string;
   totalPoints: string;
   availablePoints: string;
@@ -664,7 +664,7 @@ export interface IndexerPointsSummary {
   };
 }
 
-export interface IndexerPointsSummaryResponse {
+interface IndexerPointsSummaryResponse {
   success: boolean;
   data: {
     pointsSummary: IndexerPointsSummary;
@@ -672,7 +672,7 @@ export interface IndexerPointsSummaryResponse {
 }
 
 // Points History Response
-export interface IndexerPointsHistoryEntry {
+interface IndexerPointsHistoryEntry {
   id: string;
   walletAddress: string;
   transactionType: 'AWARD' | 'DEDUCT' | 'ADJUST' | 'CLAIM';
@@ -687,7 +687,7 @@ export interface IndexerPointsHistoryEntry {
   blockNumber?: string;
 }
 
-export interface IndexerPointsHistoryResponse {
+interface IndexerPointsHistoryResponse {
   success: boolean;
   data: {
     transactions: IndexerPointsHistoryEntry[];
@@ -706,7 +706,7 @@ export interface IndexerPointsHistoryResponse {
 }
 
 // Promotional Code Types
-export interface IndexerPromoCodeResponse {
+interface IndexerPromoCodeResponse {
   success: boolean;
   data?: {
     promoCode: string;
@@ -720,7 +720,7 @@ export interface IndexerPromoCodeResponse {
   message?: string;
 }
 
-export interface IndexerPromoValidationResponse {
+interface IndexerPromoValidationResponse {
   success: boolean;
   data?: {
     isValid: boolean;
@@ -739,7 +739,7 @@ export interface IndexerPromoValidationResponse {
 }
 
 // Referral Types
-export interface IndexerReferralResponse {
+interface IndexerReferralResponse {
   success: boolean;
   data?: {
     referralCode: string;
@@ -749,7 +749,7 @@ export interface IndexerReferralResponse {
   error?: string;
 }
 
-export interface IndexerRefereeLoginResponse {
+interface IndexerRefereeLoginResponse {
   success: boolean;
   data?: {
     pointsAwarded: string;
@@ -764,7 +764,7 @@ export interface IndexerRefereeLoginResponse {
 }
 
 // Leaderboard Types
-export interface IndexerLeaderboardEntry {
+interface IndexerLeaderboardEntry {
   rank: number;
   walletAddress: string;
   totalPoints: string;
@@ -774,7 +774,7 @@ export interface IndexerLeaderboardEntry {
   tier: string;
 }
 
-export interface IndexerLeaderboardResponse {
+interface IndexerLeaderboardResponse {
   success: boolean;
   data: {
     leaderboard: IndexerLeaderboardEntry[];
@@ -790,7 +790,7 @@ export interface IndexerLeaderboardResponse {
 }
 
 // Campaign Types
-export interface IndexerCampaign {
+interface IndexerCampaign {
   id: string;
   campaignName: string;
   campaignType:
@@ -810,7 +810,7 @@ export interface IndexerCampaign {
   createdAt: number;
 }
 
-export interface IndexerCampaignsResponse {
+interface IndexerCampaignsResponse {
   success: boolean;
   data: {
     campaigns: IndexerCampaign[];
@@ -818,7 +818,7 @@ export interface IndexerCampaignsResponse {
   };
 }
 
-export interface IndexerCampaignStatsResponse {
+interface IndexerCampaignStatsResponse {
   success: boolean;
   data: {
     campaign: IndexerCampaign;
@@ -841,7 +841,7 @@ export interface IndexerCampaignStatsResponse {
 }
 
 // Webhook Types
-export interface IndexerWebhookEmailSentRequest {
+interface IndexerWebhookEmailSentRequest {
   senderWallet: string;
   recipientEmails: string[];
   transactionHash?: string;
@@ -849,12 +849,12 @@ export interface IndexerWebhookEmailSentRequest {
   blockNumber?: string;
 }
 
-export interface IndexerWebhookRecipientLoginRequest {
+interface IndexerWebhookRecipientLoginRequest {
   recipientWallet: string;
   senderWallets: string[];
 }
 
-export interface IndexerWebhookLoginRequest {
+interface IndexerWebhookLoginRequest {
   walletAddress: string;
   referralCode?: string;
 }
@@ -862,7 +862,7 @@ export interface IndexerWebhookLoginRequest {
 /**
  * Indexer GraphQL Types
  */
-export interface GraphQLResponse<T = any> {
+interface GraphQLResponse<T = any> {
   data?: T;
   errors?: Array<{
     message: string;
@@ -871,14 +871,14 @@ export interface GraphQLResponse<T = any> {
   }>;
 }
 
-export interface GraphQLPaginationInput {
+interface GraphQLPaginationInput {
   first?: number;
   skip?: number;
   orderBy?: string;
   orderDirection?: 'asc' | 'desc';
 }
 
-export interface GraphQLWhereInput {
+interface GraphQLWhereInput {
   id?: string;
   id_in?: string[];
   chainId?: number;
@@ -901,7 +901,7 @@ export interface GraphQLWhereInput {
 /**
  * Common API Response Pattern
  */
-export interface ApiResponse<T = any> {
+interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
   error?: string;
@@ -912,13 +912,13 @@ export interface ApiResponse<T = any> {
 /**
  * Pagination Types
  */
-export interface PaginationParams {
+interface PaginationParams {
   page?: number;
   limit?: number;
   offset?: number;
 }
 
-export interface PaginationResponse {
+interface PaginationResponse {
   page: number;
   limit: number;
   total: number;
@@ -930,9 +930,9 @@ export interface PaginationResponse {
 /**
  * Chain and Address Types
  */
-export type ChainType = 'evm' | 'solana' | 'unknown';
+type ChainType = 'evm' | 'solana' | 'unknown';
 
-export interface ChainInfo {
+interface ChainInfo {
   chainId: number;
   name: string;
   type: ChainType;
@@ -944,7 +944,7 @@ export interface ChainInfo {
  * Email Types (Frontend)
  * These match the frontend Email interface
  */
-export interface Email {
+interface Email {
   id: string;
   from: string;
   to: string;
@@ -960,7 +960,7 @@ export interface Email {
 /**
  * Email Address Types (Frontend)
  */
-export interface EmailAddress {
+interface EmailAddress {
   id: string;
   email: string;
   name: string;
@@ -971,7 +971,7 @@ export interface EmailAddress {
 /**
  * Mailbox Types (Frontend)
  */
-export interface Mailbox {
+interface Mailbox {
   id: string;
   name: string;
   count: number;
@@ -986,19 +986,15 @@ export interface Mailbox {
 /**
  * Type guards for runtime type checking
  */
-export const isWildDuckAuthResponse = (
-  obj: any
-): obj is WildDuckAuthResponse => {
+const isWildDuckAuthResponse = (obj: any): obj is WildDuckAuthResponse => {
   return obj && typeof obj.success === 'boolean';
 };
 
-export const isWildDuckMessage = (obj: any): obj is WildDuckMessage => {
+const isWildDuckMessage = (obj: any): obj is WildDuckMessage => {
   return obj && typeof obj.id === 'string' && typeof obj.subject === 'string';
 };
 
-export const isIndexerEmailResponse = (
-  obj: any
-): obj is IndexerEmailResponse => {
+const isIndexerEmailResponse = (obj: any): obj is IndexerEmailResponse => {
   return (
     obj &&
     typeof obj.walletAddress === 'string' &&
@@ -1006,26 +1002,23 @@ export const isIndexerEmailResponse = (
   );
 };
 
-export const isGraphQLResponse = (obj: any): obj is GraphQLResponse => {
+const isGraphQLResponse = (obj: any): obj is GraphQLResponse => {
   return obj && (obj.data !== undefined || obj.errors !== undefined);
 };
 
 /**
  * Validation helpers
  */
-export const validateObjectId = (id: string): boolean => {
+const validateObjectId = (id: string): boolean => {
   return /^[a-f0-9]{24}$/i.test(id);
 };
 
-export const validateEmailAddress = (email: string): boolean => {
+const validateEmailAddress = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
-export const validateWalletAddress = (
-  address: string,
-  type: ChainType
-): boolean => {
+const validateWalletAddress = (address: string, type: ChainType): boolean => {
   switch (type) {
     case 'evm':
       return /^0x[a-fA-F0-9]{40}$/.test(address);
@@ -1039,7 +1032,7 @@ export const validateWalletAddress = (
 /**
  * Error types for API operations
  */
-export class ApiError extends Error {
+class ApiError extends Error {
   constructor(
     message: string,
     public statusCode?: number,
@@ -1050,14 +1043,14 @@ export class ApiError extends Error {
   }
 }
 
-export class AuthenticationError extends ApiError {
+class AuthenticationError extends ApiError {
   constructor(message: string = 'Authentication failed') {
     super(message, 401);
     this.name = 'AuthenticationError';
   }
 }
 
-export class ValidationError extends ApiError {
+class ValidationError extends ApiError {
   constructor(
     message: string = 'Validation failed',
     public field?: string
@@ -1070,12 +1063,105 @@ export class ValidationError extends ApiError {
 /**
  * Request/Response interceptor types
  */
-export type ApiInterceptor<T = any> = (data: T) => T | Promise<T>;
+type ApiInterceptor<T = any> = (data: T) => T | Promise<T>;
 
-export interface ApiClientConfig {
+interface ApiClientConfig {
   baseUrl: string;
   timeout?: number;
   headers?: Record<string, string>;
   requestInterceptors?: ApiInterceptor[];
   responseInterceptors?: ApiInterceptor[];
 }
+
+export {
+  isWildDuckAuthResponse,
+  isWildDuckMessage,
+  isIndexerEmailResponse,
+  isGraphQLResponse,
+  validateObjectId,
+  validateEmailAddress,
+  validateWalletAddress,
+  ApiError,
+  AuthenticationError,
+  ValidationError,
+  type IndexerApiResponse,
+  type WalletSignature,
+  type WalletAuth,
+  type SignatureProtectedRequest,
+  type GetEmailsResponse,
+  type GetDelegatedResponse,
+  type GetDelegatedToResponse,
+  type ValidateAddressResponse,
+  type GetPointsHistoryRequest,
+  type ClaimPromoCodeRequest,
+  type RegisterReferralRequest,
+  type WildDuckAuthRequest,
+  type WildDuckAuthResponse,
+  type WildDuckPreAuthRequest,
+  type WildDuckPreAuthResponse,
+  type WildDuckUser,
+  type WildDuckCreateUserRequest,
+  type WildDuckUpdateUserRequest,
+  type WildDuckUserResponse,
+  type WildDuckMailbox,
+  type WildDuckMailboxResponse,
+  type WildDuckCreateMailboxRequest,
+  type WildDuckMessageAddress,
+  type WildDuckMessageAttachment,
+  type WildDuckMessageBase,
+  type WildDuckMessage,
+  type WildDuckMessageDetail,
+  type WildDuckMessagesResponse,
+  type WildDuckMessageResponse,
+  type WildDuckSendMessageRequest,
+  type WildDuckAddress,
+  type WildDuckAddressResponse,
+  type IndexerEmailAddress,
+  type IndexerEmailResponse,
+  type IndexerSignatureRequest,
+  type IndexerSignatureVerification,
+  type IndexerDelegationResponse,
+  type IndexerDelegatedToResponse,
+  type IndexerMessageResponse,
+  type IndexerNonceResponse,
+  type IndexerEntitlementResponse,
+  type IndexerMail,
+  type IndexerPreparedMail,
+  type IndexerDelegation,
+  type IndexerEarnMethod,
+  type IndexerHowToEarnResponse,
+  type IndexerPublicStatsResponse,
+  type IndexerPointsSummary,
+  type IndexerPointsSummaryResponse,
+  type IndexerPointsHistoryEntry,
+  type IndexerPointsHistoryResponse,
+  type IndexerPromoCodeResponse,
+  type IndexerPromoValidationResponse,
+  type IndexerReferralResponse,
+  type IndexerRefereeLoginResponse,
+  type IndexerLeaderboardEntry,
+  type IndexerLeaderboardResponse,
+  type IndexerCampaign,
+  type IndexerCampaignsResponse,
+  type IndexerCampaignStatsResponse,
+  type IndexerWebhookEmailSentRequest,
+  type IndexerWebhookRecipientLoginRequest,
+  type IndexerWebhookLoginRequest,
+  type GraphQLResponse,
+  type GraphQLPaginationInput,
+  type GraphQLWhereInput,
+  type ApiResponse,
+  type PaginationParams,
+  type PaginationResponse,
+  type ChainInfo,
+  type Email,
+  type EmailAddress,
+  type Mailbox,
+  type ApiClientConfig,
+  type GetEmailsRequest,
+  type GetDelegatedRequest,
+  type GetDelegatedToRequest,
+  type GetPointsSummaryRequest,
+  type ChainType,
+  type ApiInterceptor,
+};

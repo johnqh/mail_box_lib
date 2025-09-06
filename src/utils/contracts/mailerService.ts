@@ -11,15 +11,15 @@ import { mainnet } from 'viem/chains';
 
 // Mailer contract configuration
 // TODO: Replace with actual contract address when deployed
-export const MAILER_CONTRACT_ADDRESS =
+const MAILER_CONTRACT_ADDRESS =
   '0x0000000000000000000000000000000000000000' as Address;
 
 // USDC contract address on mainnet
-export const USDC_CONTRACT_ADDRESS =
+const USDC_CONTRACT_ADDRESS =
   '0xA0b86a33E6441E7B8b52C9bbc4BC55e3D0b56a3C' as Address;
 
 // Mailer contract ABI based on the new contract structure
-export const MAILER_ABI = parseAbi([
+const MAILER_ABI = parseAbi([
   // Core functions
   'function sendPriority(address to, string calldata subject, string calldata body) external',
   'function sendPriorityPrepared(address to, string calldata mailId) external',
@@ -53,27 +53,27 @@ export const MAILER_ABI = parseAbi([
 ]);
 
 // USDC contract ABI for approvals
-export const USDC_ABI = parseAbi([
+const USDC_ABI = parseAbi([
   'function approve(address spender, uint256 amount) external returns (bool)',
   'function allowance(address owner, address spender) external view returns (uint256)',
   'function balanceOf(address account) external view returns (uint256)',
   'function decimals() external view returns (uint8)',
 ]);
 
-export interface MailResult {
+interface MailResult {
   success: boolean;
   transactionHash?: Hash;
   receipt?: TransactionReceipt;
   error?: string;
 }
 
-export interface ClaimableInfo {
+interface ClaimableInfo {
   amount: bigint;
   expiresAt: bigint;
   isExpired: boolean;
 }
 
-export class MailerContract {
+class MailerContract {
   private publicClient;
   private walletClient;
 
@@ -436,7 +436,7 @@ export class MailerContract {
 // Export a singleton instance
 let mailerInstance: MailerContract | null = null;
 
-export const getMailerContract = (provider?: any): MailerContract => {
+const getMailerContract = (provider?: any): MailerContract => {
   if (!mailerInstance || provider) {
     mailerInstance = new MailerContract(provider);
   }
@@ -444,6 +444,18 @@ export const getMailerContract = (provider?: any): MailerContract => {
 };
 
 // Helper function to create contract instance with wallet provider
-export const createMailerContract = (provider: any): MailerContract => {
+const createMailerContract = (provider: any): MailerContract => {
   return new MailerContract(provider);
+};
+
+export {
+  MAILER_CONTRACT_ADDRESS,
+  USDC_CONTRACT_ADDRESS,
+  MAILER_ABI,
+  USDC_ABI,
+  getMailerContract,
+  createMailerContract,
+  MailerContract,
+  type MailResult,
+  type ClaimableInfo,
 };

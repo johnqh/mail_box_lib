@@ -19,9 +19,6 @@ export type {
   WalletUserData,
   // Analytics types
   AnalyticsService,
-  AnalyticsClient,
-  AnalyticsContextProvider,
-  AnalyticsEventData,
   AnalyticsConfig,
   AnalyticsEventProperties,
   // Navigation types

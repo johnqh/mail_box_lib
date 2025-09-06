@@ -13,13 +13,13 @@ import {
   WalletType,
 } from '../enums';
 
-export interface AnalyticsEventData {
+interface AnalyticsEventData {
   name: AnalyticsEvent | string;
   properties: Record<string, any>;
   timestamp: number;
 }
 
-export interface UserProperties {
+interface UserProperties {
   userId?: string;
   walletAddress?: string;
   chainType?: ChainType;
@@ -28,7 +28,7 @@ export interface UserProperties {
   [key: string]: any;
 }
 
-export interface AnalyticsOperations {
+interface AnalyticsOperations {
   /**
    * Create authentication event
    */
@@ -141,7 +141,7 @@ export interface AnalyticsOperations {
   ): any;
 }
 
-export class DefaultAnalyticsOperations implements AnalyticsOperations {
+class DefaultAnalyticsOperations implements AnalyticsOperations {
   private readonly MAX_PROPERTY_LENGTH = 1000;
   private readonly MAX_EVENT_NAME_LENGTH = 40;
 
@@ -460,3 +460,10 @@ export class DefaultAnalyticsOperations implements AnalyticsOperations {
       .substring(0, this.MAX_PROPERTY_LENGTH);
   }
 }
+
+export {
+  DefaultAnalyticsOperations,
+  type AnalyticsEventData,
+  type UserProperties,
+  type AnalyticsOperations,
+};

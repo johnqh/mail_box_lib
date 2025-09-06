@@ -15,7 +15,7 @@ import type {
 /**
  * Get a service from the dependency injection container
  */
-export function useService<T>(serviceKey: string): T {
+function useService<T>(serviceKey: string): T {
   const container = useServiceContainer();
   return container.get<T>(serviceKey);
 }
@@ -23,7 +23,7 @@ export function useService<T>(serviceKey: string): T {
 /**
  * Get the storage service
  */
-export function useStorageService(): PlatformStorage {
+function useStorageService(): PlatformStorage {
   const resolver = useServiceResolver();
   return resolver.getStorage();
 }
@@ -31,7 +31,7 @@ export function useStorageService(): PlatformStorage {
 /**
  * Get the analytics service
  */
-export function useAnalyticsService(): PlatformAnalytics {
+function useAnalyticsService(): PlatformAnalytics {
   const resolver = useServiceResolver();
   return resolver.getAnalytics();
 }
@@ -39,63 +39,63 @@ export function useAnalyticsService(): PlatformAnalytics {
 /**
  * Get the theme service
  */
-export function useThemeService(): PlatformTheme {
+function useThemeService(): PlatformTheme {
   return useService(ServiceKeys.THEME);
 }
 
 /**
  * Get the notifications service
  */
-export function useNotificationsService(): PlatformNotifications {
+function useNotificationsService(): PlatformNotifications {
   return useService(ServiceKeys.NOTIFICATIONS);
 }
 
 /**
  * Get the network service
  */
-export function useNetworkService(): PlatformNetwork {
+function useNetworkService(): PlatformNetwork {
   return useService(ServiceKeys.NETWORK);
 }
 
 /**
  * Get the persistence service
  */
-export function usePersistenceService(): any {
+function usePersistenceService(): any {
   return useService(ServiceKeys.PERSISTENCE);
 }
 
 /**
  * Get the email service
  */
-export function useEmailService(): any {
+function useEmailService(): any {
   return useService(ServiceKeys.EMAIL_SERVICE);
 }
 
 /**
  * Get the auth service
  */
-export function useAuthService(): any {
+function useAuthService(): any {
   return useService(ServiceKeys.AUTH_SERVICE);
 }
 
 /**
  * Get the mailbox service
  */
-export function useMailboxService(): any {
+function useMailboxService(): any {
   return useService(ServiceKeys.MAILBOX_SERVICE);
 }
 
 /**
  * Get the email address service
  */
-export function useEmailAddressService(): any {
+function useEmailAddressService(): any {
   return useService(ServiceKeys.EMAIL_ADDRESS_SERVICE);
 }
 
 /**
  * Get the folder operations service
  */
-export function useFolderOperations() {
+function useFolderOperations() {
   return useService(ServiceKeys.FOLDER_OPERATIONS);
 }
 
@@ -104,7 +104,23 @@ export function useFolderOperations() {
  * This should be provided by the consuming application through DI context
  * For now, we'll throw an error to indicate proper DI setup is needed
  */
-export function useAppConfig() {
+function useAppConfig() {
   const resolver = useServiceResolver();
   return resolver.getConfig();
 }
+
+export {
+  useService,
+  useStorageService,
+  useAnalyticsService,
+  useThemeService,
+  useNotificationsService,
+  useNetworkService,
+  usePersistenceService,
+  useEmailService,
+  useAuthService,
+  useMailboxService,
+  useEmailAddressService,
+  useFolderOperations,
+  useAppConfig,
+};

@@ -44,7 +44,7 @@ const convertWildDuckMessage = (
   };
 };
 
-export const useEmails = (
+const useEmails = (
   emailAddressId: string,
   mailBoxId: string,
   emailAddresses: Array<{ id: string; email: string }> = [],
@@ -196,3 +196,5 @@ export const useEmails = (
     updateEmail,
   };
 };
+
+export { useEmails };

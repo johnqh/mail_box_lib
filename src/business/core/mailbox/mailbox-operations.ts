@@ -4,7 +4,7 @@
 
 import { MailBox } from '../../hooks/data/useMailBoxes';
 
-export interface MailboxOperations {
+interface MailboxOperations {
   /**
    * Get default folder configuration
    */
@@ -49,7 +49,7 @@ export interface MailboxOperations {
   ): 'inbox' | 'sent' | 'drafts' | 'trash' | 'spam' | 'archive' | 'custom';
 }
 
-export interface DefaultFolder {
+interface DefaultFolder {
   id: string;
   name: string;
   iconId: string;
@@ -58,7 +58,7 @@ export interface DefaultFolder {
   order: number;
 }
 
-export class DefaultMailboxOperations implements MailboxOperations {
+class DefaultMailboxOperations implements MailboxOperations {
   private readonly SYSTEM_FOLDERS = new Set([
     'inbox',
     'sent',
@@ -254,3 +254,5 @@ export class DefaultMailboxOperations implements MailboxOperations {
     return 'custom';
   }
 }
+
+export { DefaultMailboxOperations, type MailboxOperations, type DefaultFolder };

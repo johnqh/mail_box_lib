@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { WildDuckAPI } from '../../../network/clients/wildduck';
 
-export interface WildduckHealthStatus {
+interface WildduckHealthStatus {
   success: boolean;
   version?: string;
   database?: {
@@ -32,7 +32,7 @@ export interface WildduckHealthStatus {
   };
 }
 
-export interface UseWildduckHealthReturn {
+interface UseWildduckHealthReturn {
   isLoading: boolean;
   error: string | null;
   healthStatus: WildduckHealthStatus | null;
@@ -47,7 +47,7 @@ export interface UseWildduckHealthReturn {
 /**
  * Hook for WildDuck health monitoring and status operations
  */
-export const useWildduckHealth = (): UseWildduckHealthReturn => {
+const useWildduckHealth = (): UseWildduckHealthReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [healthStatus, setHealthStatus] = useState<WildduckHealthStatus | null>(
@@ -150,4 +150,10 @@ export const useWildduckHealth = (): UseWildduckHealthReturn => {
     isMonitoring,
     clearError,
   };
+};
+
+export {
+  useWildduckHealth,
+  type WildduckHealthStatus,
+  type UseWildduckHealthReturn
 };

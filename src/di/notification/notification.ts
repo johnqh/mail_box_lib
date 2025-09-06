@@ -3,7 +3,7 @@
  * Abstracts notification operations to work across web and React Native
  */
 
-export interface NotificationOptions {
+interface NotificationOptions {
   body?: string;
   icon?: string;
   badge?: string;
@@ -15,19 +15,19 @@ export interface NotificationOptions {
   timestamp?: number;
 }
 
-export interface NotificationAction {
+interface NotificationAction {
   action: string;
   title: string;
   icon?: string;
 }
 
-export interface NotificationResult {
+interface NotificationResult {
   success: boolean;
   error?: string;
   notificationId?: string;
 }
 
-export interface NotificationPermissionResult {
+interface NotificationPermissionResult {
   granted: boolean;
   permission: 'granted' | 'denied' | 'default';
   error?: string;
@@ -36,7 +36,7 @@ export interface NotificationPermissionResult {
 /**
  * Platform-agnostic notification service
  */
-export interface NotificationService {
+interface NotificationService {
   /**
    * Check if notifications are supported on this platform
    */
@@ -92,7 +92,7 @@ export interface NotificationService {
   getCapabilities(): NotificationCapabilities;
 }
 
-export interface NotificationCapabilities {
+interface NotificationCapabilities {
   supportsActions: boolean;
   supportsIcon: boolean;
   supportsBadge: boolean;
@@ -105,7 +105,7 @@ export interface NotificationCapabilities {
 /**
  * Notification service configuration
  */
-export interface NotificationConfig {
+interface NotificationConfig {
   enableAutoClose: boolean;
   autoCloseDelay: number; // milliseconds
   defaultIcon: string;
@@ -116,7 +116,7 @@ export interface NotificationConfig {
 /**
  * Notification client wrapper for easier usage
  */
-export interface NotificationClient {
+interface NotificationClient {
   service: NotificationService;
   config: NotificationConfig;
   show(
@@ -129,9 +129,21 @@ export interface NotificationClient {
 /**
  * Notification context provider interface
  */
-export interface NotificationContextProvider {
+interface NotificationContextProvider {
   client: NotificationClient;
   isSupported: boolean;
   hasPermission: boolean;
   requestPermission(): Promise<void>;
 }
+
+export {
+  type NotificationOptions,
+  type NotificationAction,
+  type NotificationResult,
+  type NotificationPermissionResult,
+  type NotificationService,
+  type NotificationCapabilities,
+  type NotificationConfig,
+  type NotificationClient,
+  type NotificationContextProvider,
+};

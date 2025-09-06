@@ -12,13 +12,13 @@ import { logger } from '../logger';
 
 // MailService contract configuration for delegation (separate from Mailer)
 // TODO: Replace with actual contract address when deployed
-export const MAIL_SERVICE_CONTRACT_ADDRESS =
+const MAIL_SERVICE_CONTRACT_ADDRESS =
   '0x0000000000000000000000000000000000000000' as Address;
 
 // MailService contract ABI
 // This is a placeholder ABI based on common delegation patterns
 // TODO: Replace with actual ABI from the deployed contract
-export const MAIL_SERVICE_ABI = parseAbi([
+const MAIL_SERVICE_ABI = parseAbi([
   'function delegateTo(address delegate) external returns (bool)',
   'function revokeDelegation(address delegate) external returns (bool)',
   'function getDelegates(address owner) external view returns (address[])',
@@ -27,14 +27,14 @@ export const MAIL_SERVICE_ABI = parseAbi([
   'event DelegationRevoked(address indexed owner, address indexed delegate, uint256 timestamp)',
 ]);
 
-export interface DelegationResult {
+interface DelegationResult {
   success: boolean;
   transactionHash?: Hash;
   receipt?: TransactionReceipt;
   error?: string;
 }
 
-export class MailServiceContract {
+class MailServiceContract {
   private publicClient;
   private walletClient;
 
@@ -273,7 +273,7 @@ export class MailServiceContract {
 // Export a singleton instance
 let mailServiceInstance: MailServiceContract | null = null;
 
-export const getMailServiceContract = (provider?: any): MailServiceContract => {
+const getMailServiceContract = (provider?: any): MailServiceContract => {
   if (!mailServiceInstance || provider) {
     mailServiceInstance = new MailServiceContract(provider);
   }
@@ -281,9 +281,7 @@ export const getMailServiceContract = (provider?: any): MailServiceContract => {
 };
 
 // Helper function to create contract instance with wallet provider
-export const createMailServiceContract = (
-  provider: any
-): MailServiceContract => {
+const createMailServiceContract = (provider: any): MailServiceContract => {
   return new MailServiceContract(provider);
 };
 
@@ -299,3 +297,12 @@ export {
   USDC_CONTRACT_ADDRESS,
   USDC_ABI,
 } from './mailerService';
+
+export {
+  MAIL_SERVICE_CONTRACT_ADDRESS,
+  MAIL_SERVICE_ABI,
+  getMailServiceContract,
+  createMailServiceContract,
+  MailServiceContract,
+  type DelegationResult,
+};

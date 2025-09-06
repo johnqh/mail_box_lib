@@ -14,7 +14,7 @@ import type {
 } from '../indexer/useIndexerQueries';
 
 // Re-export types for backward compatibility
-export interface LeaderboardEntry {
+interface LeaderboardEntry {
   rank: number;
   walletAddress: string;
   totalPoints: number;
@@ -57,7 +57,7 @@ const transformLeaderboardData = (
  * - Immediate return of cached data
  * - Error handling with retry logic
  */
-export function useTopUsers(
+function useTopUsers(
   count: number = 10,
   options?: Partial<UseQueryOptions<PointsLeaderboardResponse>>
 ) {
@@ -97,7 +97,7 @@ export function useTopUsers(
 /**
  * Hook for site-wide statistics with TanStack Query
  */
-export function usePointsSiteStats(
+function usePointsSiteStats(
   options?: Partial<UseQueryOptions<SiteStatsResponse>>
 ) {
   const query = useSiteStats({
@@ -130,7 +130,7 @@ export function usePointsSiteStats(
  * Comprehensive leaderboard hook with pagination support
  * This replaces the complex usePointsLeaderboard hook
  */
-export function usePointsLeaderboard(
+function usePointsLeaderboard(
   initialCount: number = 50,
   options?: Partial<UseQueryOptions<PointsLeaderboardResponse>>
 ) {
@@ -172,7 +172,7 @@ export function usePointsLeaderboard(
  * Legacy compatibility wrapper
  * Provides the same interface as the old useTopUsers for backward compatibility
  */
-export function useTopUsersLegacy(count: number = 10) {
+function useTopUsersLegacy(count: number = 10) {
   const result = useTopUsers(count);
 
   // Add methods expected by legacy code
@@ -188,3 +188,11 @@ export function useTopUsersLegacy(count: number = 10) {
     },
   };
 }
+
+export {
+  useTopUsers,
+  usePointsSiteStats,
+  usePointsLeaderboard,
+  useTopUsersLegacy,
+  type LeaderboardEntry,
+};

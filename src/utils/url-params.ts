@@ -6,7 +6,7 @@
 /**
  * URLSearchParams interface for cross-platform compatibility
  */
-export interface URLSearchParamsLike {
+interface URLSearchParamsLike {
   append(name: string, value: string): void;
   delete(name: string): void;
   get(name: string): string | null;
@@ -102,7 +102,7 @@ class SimpleURLSearchParams implements URLSearchParamsLike {
 /**
  * Create a URLSearchParams instance with cross-platform compatibility
  */
-export function createURLSearchParams(
+function createURLSearchParams(
   init?: string | Record<string, string> | string[][]
 ): URLSearchParamsLike {
   // Check if native URLSearchParams is available
@@ -117,7 +117,7 @@ export function createURLSearchParams(
 /**
  * Convenience function to create URL search params from an object
  */
-export function createSearchParams(
+function createSearchParams(
   params: Record<string, string | number | boolean>
 ): URLSearchParamsLike {
   const searchParams = createURLSearchParams();
@@ -134,14 +134,14 @@ export function createSearchParams(
 /**
  * Convert search params to a query string
  */
-export function searchParamsToString(params: URLSearchParamsLike): string {
+function searchParamsToString(params: URLSearchParamsLike): string {
   return params.toString();
 }
 
 /**
  * Parse a query string into an object
  */
-export function parseSearchParams(queryString: string): Record<string, string> {
+function parseSearchParams(queryString: string): Record<string, string> {
   const params = createURLSearchParams(queryString);
   const result: Record<string, string> = {};
 
@@ -151,3 +151,11 @@ export function parseSearchParams(queryString: string): Record<string, string> {
 
   return result;
 }
+
+export {
+  createURLSearchParams,
+  createSearchParams,
+  searchParamsToString,
+  parseSearchParams,
+  type URLSearchParamsLike,
+};

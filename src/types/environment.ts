@@ -3,7 +3,7 @@
  * This interface abstracts environment variable access to work across web and React Native
  */
 
-export interface EnvironmentVariables {
+interface EnvironmentVariables {
   VITE_WILDDUCK_API_TOKEN?: string;
   VITE_WILDDUCK_BACKEND_URL?: string;
   VITE_INDEXER_BACKEND_URL?: string;
@@ -26,7 +26,7 @@ export interface EnvironmentVariables {
 /**
  * Platform-agnostic environment variable provider
  */
-export interface EnvProvider {
+interface EnvProvider {
   /**
    * Get environment variable value
    * @param key Environment variable key
@@ -53,7 +53,7 @@ export interface EnvProvider {
 /**
  * Environment configuration for the application
  */
-export interface AppConfig {
+interface AppConfig {
   wildDuckApiToken: string;
   wildDuckBackendUrl: string;
   indexerBackendUrl: string;
@@ -74,3 +74,5 @@ export interface AppConfig {
   cloudflareWorkerUrl: string;
   useMockFallback: boolean;
 }
+
+export { type EnvironmentVariables, type EnvProvider, type AppConfig };

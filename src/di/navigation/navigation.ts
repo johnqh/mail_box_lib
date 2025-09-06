@@ -3,13 +3,13 @@
  * Abstracts navigation operations to work across web and React Native
  */
 
-export interface NavigationOptions {
+interface NavigationOptions {
   replace?: boolean;
   state?: any;
   preventScrollReset?: boolean;
 }
 
-export interface NavigationState {
+interface NavigationState {
   currentPath: string;
   previousPath?: string;
   params: Record<string, string>;
@@ -19,7 +19,7 @@ export interface NavigationState {
 /**
  * Platform-agnostic navigation service
  */
-export interface NavigationService {
+interface NavigationService {
   /**
    * Navigate to a specific path
    * @param path Target path
@@ -91,7 +91,7 @@ export interface NavigationService {
 /**
  * Navigation hook interface
  */
-export interface NavigationHook {
+interface NavigationHook {
   navigate: (path: string, options?: NavigationOptions) => void;
   goBack: (fallbackPath?: string) => void;
   replace: (path: string, options?: NavigationOptions) => void;
@@ -105,7 +105,7 @@ export interface NavigationHook {
 /**
  * Location hook interface
  */
-export interface LocationHook {
+interface LocationHook {
   pathname: string;
   search: string;
   searchParams: Record<string, string>;
@@ -117,10 +117,19 @@ export interface LocationHook {
 /**
  * Navigation configuration
  */
-export interface NavigationConfig {
+interface NavigationConfig {
   enableBackGesture?: boolean; // React Native specific
   enableSwipeGesture?: boolean; // React Native specific
   animationType?: 'slide' | 'fade' | 'none'; // React Native specific
   enableAnalytics?: boolean; // Track navigation events
   fallbackPath?: string; // Default fallback path
 }
+
+export {
+  type NavigationOptions,
+  type NavigationState,
+  type NavigationService,
+  type NavigationHook,
+  type LocationHook,
+  type NavigationConfig,
+};

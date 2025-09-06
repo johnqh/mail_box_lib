@@ -10,7 +10,7 @@ export { AnalyticsEvent };
 /**
  * Analytics event data interface for passing event with parameters
  */
-export interface AnalyticsEventData {
+interface AnalyticsEventData {
   event: AnalyticsEvent;
   parameters?: Record<string, any>;
 }
@@ -19,7 +19,7 @@ export interface AnalyticsEventData {
  * Platform-agnostic analytics client interface
  * Abstracts analytics tracking to work across web and React Native
  */
-export interface AnalyticsClient {
+interface _AnalyticsClient {
   /**
    * Track an analytics event
    * @param event Event enum value or event data with parameters
@@ -56,7 +56,7 @@ export interface AnalyticsClient {
  * Context provider interface for getting current analytics context
  * This allows the analytics to automatically include context like user info, page, etc.
  */
-export interface AnalyticsContextProvider {
+interface _AnalyticsContextProvider {
   /**
    * Get current context data that should be included with all events
    * @returns Context data to merge with event parameters

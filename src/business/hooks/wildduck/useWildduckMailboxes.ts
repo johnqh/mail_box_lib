@@ -6,20 +6,20 @@ import {
   WildDuckMailboxResponse,
 } from '../../../network/clients/wildduck';
 
-export interface CreateMailboxParams {
+interface CreateMailboxParams {
   path: string;
   hidden?: boolean;
   retention?: number;
 }
 
-export interface UpdateMailboxParams {
+interface UpdateMailboxParams {
   path?: string;
   retention?: number;
   subscribed?: boolean;
   hidden?: boolean;
 }
 
-export interface UseWildduckMailboxesReturn {
+interface UseWildduckMailboxesReturn {
   isLoading: boolean;
   error: string | null;
   mailboxes: WildDuckMailbox[];
@@ -52,7 +52,7 @@ export interface UseWildduckMailboxesReturn {
 /**
  * Hook for WildDuck mailbox operations
  */
-export const useWildduckMailboxes = (): UseWildduckMailboxesReturn => {
+const useWildduckMailboxes = (): UseWildduckMailboxesReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mailboxes, setMailboxes] = useState<WildDuckMailbox[]>([]);
@@ -191,4 +191,11 @@ export const useWildduckMailboxes = (): UseWildduckMailboxesReturn => {
     clearError,
     refresh,
   };
+};
+
+export {
+  useWildduckMailboxes,
+  type CreateMailboxParams,
+  type UpdateMailboxParams,
+  type UseWildduckMailboxesReturn
 };

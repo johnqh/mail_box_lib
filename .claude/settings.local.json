@@ -72,7 +72,9 @@
       "Read(/Users/qianghuang/mail_box_indexer/api/**)",
       "Read(/Users/qianghuang/mail_box_indexer/api/**)",
       "Read(/Users/qianghuang/mail_box_indexer/api/**)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(npm search:*)",
+      "Read(//Users/qianghuang/mail_box_contracts/**)"
     ],
     "deny": [],
     "ask": []

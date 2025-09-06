@@ -4,13 +4,13 @@ import { convertToAppConfig } from './utils';
 import { IndexerClient } from '../../../network/clients/indexer';
 import { useApiCall } from '../useApiCall';
 
-export interface IndexerEmailAddress {
+interface IndexerEmailAddress {
   email: string;
   type: 'primary' | 'domain' | 'delegated';
   source?: string;
 }
 
-export interface IndexerEmailResponse {
+interface IndexerEmailResponse {
   walletAddress: string;
   addressType: string;
   addresses: Array<{
@@ -21,7 +21,7 @@ export interface IndexerEmailResponse {
   timestamp: string;
 }
 
-export interface IndexerDelegationInfo {
+interface IndexerDelegationInfo {
   walletAddress: string;
   addressType: string;
   hasDelegation: boolean;
@@ -32,7 +32,7 @@ export interface IndexerDelegationInfo {
   timestamp: string;
 }
 
-export interface IndexerDelegatorInfo {
+interface IndexerDelegatorInfo {
   walletAddress: string;
   addressType: string;
   delegators: Array<{
@@ -45,7 +45,7 @@ export interface IndexerDelegatorInfo {
   timestamp: string;
 }
 
-export interface IndexerSignatureVerification {
+interface IndexerSignatureVerification {
   walletAddress: string;
   addressType: string;
   isValid: boolean;
@@ -53,7 +53,7 @@ export interface IndexerSignatureVerification {
   timestamp: string;
 }
 
-export interface IndexerSigningMessage {
+interface IndexerSigningMessage {
   walletAddress: string;
   addressType: string;
   chainId: number;
@@ -72,7 +72,7 @@ export interface IndexerSigningMessage {
   timestamp: string;
 }
 
-export interface IndexerNonceInfo {
+interface IndexerNonceInfo {
   walletAddress: string;
   addressType: string;
   nonce: string;
@@ -82,7 +82,7 @@ export interface IndexerNonceInfo {
   timestamp: string;
 }
 
-export interface IndexerEntitlement {
+interface IndexerEntitlement {
   walletAddress: string;
   addressType: string;
   entitlement: {
@@ -98,7 +98,7 @@ export interface IndexerEntitlement {
   timestamp: string;
 }
 
-export interface ValidateAddressResponse {
+interface ValidateAddressResponse {
   isValid: boolean;
   addressType: string;
   normalizedAddress: string;
@@ -112,7 +112,7 @@ export interface ValidateAddressResponse {
   timestamp: string;
 }
 
-export interface UseIndexerMailReturn {
+interface UseIndexerMailReturn {
   isLoading: boolean;
   error: string | null;
   validateAddress: (address: string) => Promise<ValidateAddressResponse | undefined>;
@@ -163,7 +163,7 @@ export interface UseIndexerMailReturn {
 /**
  * React hook for Indexer Mail API operations
  */
-export const useIndexerMail = (): UseIndexerMailReturn => {
+const useIndexerMail = (): UseIndexerMailReturn => {
   const config = useAppConfig();
   const appConfig = convertToAppConfig(config);
   const indexerClient = new IndexerClient(appConfig);
@@ -246,4 +246,18 @@ export const useIndexerMail = (): UseIndexerMailReturn => {
     getNameServiceEntitlement,
     clearError,
   };
+};
+
+export {
+  useIndexerMail,
+  type IndexerEmailAddress,
+  type IndexerEmailResponse,
+  type IndexerDelegationInfo,
+  type IndexerDelegatorInfo,
+  type IndexerSignatureVerification,
+  type IndexerSigningMessage,
+  type IndexerNonceInfo,
+  type IndexerEntitlement,
+  type ValidateAddressResponse,
+  type UseIndexerMailReturn
 };

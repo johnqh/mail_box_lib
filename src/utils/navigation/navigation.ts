@@ -37,7 +37,7 @@ function createNavigationService(
 /**
  * Get the default navigation service instance (singleton pattern)
  */
-export function getNavigationService(
+function getNavigationService(
   config?: Partial<NavigationConfig>
 ): NavigationService {
   if (!navigationService) {
@@ -50,7 +50,7 @@ export function getNavigationService(
  * Platform-agnostic navigation hook
  * Drop-in replacement for React Router's useNavigate
  */
-export function useNavigation(): NavigationHook {
+function useNavigation(): NavigationHook {
   const service = getNavigationService();
   const currentState = service.getCurrentState();
 
@@ -76,7 +76,7 @@ export function useNavigation(): NavigationHook {
  * Platform-agnostic location hook
  * Drop-in replacement for React Router's useLocation
  */
-export function useLocation(): LocationHook {
+function useLocation(): LocationHook {
   const service = getNavigationService();
   const currentState = service.getCurrentState();
 
@@ -100,7 +100,7 @@ export function useLocation(): LocationHook {
  * Platform-agnostic search params hook
  * Drop-in replacement for React Router's useSearchParams
  */
-export function useSearchParams(): [
+function useSearchParams(): [
   URLSearchParams,
   (params: URLSearchParams | Record<string, string>) => void,
 ] {
@@ -130,7 +130,7 @@ export function useSearchParams(): [
 /**
  * Convenience functions for common navigation operations
  */
-export const navigationHelper = {
+const navigationHelper = {
   /**
    * Navigate to a path
    * @param path Target path
@@ -233,3 +233,11 @@ export const navigationHelper = {
 // Note: NavigationState interface is available from business/core/navigation
 // Other navigation types are available from the main library exports
 // Avoid duplicate exports to prevent conflicts
+
+export {
+  navigationHelper,
+  getNavigationService,
+  useNavigation,
+  useLocation,
+  useSearchParams,
+};

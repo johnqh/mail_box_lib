@@ -8,7 +8,7 @@ type NodeJSTimeout = ReturnType<typeof setTimeout>;
  */
 
 // Optimized useState that only triggers re-renders when value actually changes
-export const useOptimizedState = <T>(
+const useOptimizedState = <T>(
   initialValue: T,
   isEqual?: (a: T, b: T) => boolean
 ) => {
@@ -39,9 +39,7 @@ export const useOptimizedState = <T>(
 };
 
 // Batched state updates for multiple related state changes
-export const useBatchedState = <T extends Record<string, any>>(
-  initialState: T
-) => {
+const useBatchedState = <T extends Record<string, any>>(initialState: T) => {
   const [state, setState] = useState(initialState);
   const pendingUpdates = useRef<Partial<T>>({});
   const timeoutRef = useRef<NodeJSTimeout | null>(null);
@@ -71,7 +69,7 @@ export const useBatchedState = <T extends Record<string, any>>(
 };
 
 // Debounced state for high-frequency updates (like search inputs)
-export const useDebouncedState = <T>(initialValue: T, delay: number = 300) => {
+const useDebouncedState = <T>(initialValue: T, delay: number = 300) => {
   const [value, setValue] = useState(initialValue);
   const [debouncedValue, setDebouncedValue] = useState(initialValue);
   const timeoutRef = useRef<NodeJSTimeout | null>(null);
@@ -95,7 +93,7 @@ export const useDebouncedState = <T>(initialValue: T, delay: number = 300) => {
 };
 
 // Optimized array state with built-in operations
-export const useArrayState = <T>(initialArray: T[] = []) => {
+const useArrayState = <T>(initialArray: T[] = []) => {
   const [array, setArray] = useState(initialArray);
 
   const operations = useMemo(
@@ -132,7 +130,7 @@ export const useArrayState = <T>(initialArray: T[] = []) => {
 };
 
 // Map/object state with optimized operations
-export const useMapState = <K, V>(initialMap?: Map<K, V>) => {
+const useMapState = <K, V>(initialMap?: Map<K, V>) => {
   const [map, setMap] = useState(() => initialMap || new Map<K, V>());
 
   const operations = useMemo(
@@ -159,7 +157,7 @@ export const useMapState = <K, V>(initialMap?: Map<K, V>) => {
 };
 
 // Previous value hook for debugging re-renders
-export const usePrevious = <T>(value: T): T | undefined => {
+const usePrevious = <T>(value: T): T | undefined => {
   const ref = useRef<T | undefined>(undefined);
   const previousRef = useRef<T | undefined>(undefined);
 
@@ -172,7 +170,7 @@ export const usePrevious = <T>(value: T): T | undefined => {
 };
 
 // Changed values detector for debugging
-export const useChangedValues = <T extends Record<string, any>>(values: T) => {
+const useChangedValues = <T extends Record<string, any>>(values: T) => {
   const previous = usePrevious(values);
   const changedValues = useRef<Partial<T>>({});
 
@@ -187,4 +185,14 @@ export const useChangedValues = <T extends Record<string, any>>(values: T) => {
   }
 
   return changedValues.current;
+};
+
+export {
+  useOptimizedState,
+  useBatchedState,
+  useDebouncedState,
+  useArrayState,
+  useMapState,
+  usePrevious,
+  useChangedValues,
 };

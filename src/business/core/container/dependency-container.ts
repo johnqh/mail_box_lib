@@ -36,7 +36,7 @@ import { DefaultFolderOperations } from '../folder/folder-operations';
 import { PlatformType } from '../enums';
 
 // Storage interface for platform abstraction
-export interface PlatformStorage {
+interface PlatformStorage {
   getItem(key: string): Promise<string | null> | string | null;
   setItem(key: string, value: string): Promise<void> | void;
   removeItem(key: string): Promise<void> | void;
@@ -44,7 +44,7 @@ export interface PlatformStorage {
 }
 
 // Analytics interface for platform abstraction
-export interface PlatformAnalytics {
+interface PlatformAnalytics {
   trackEvent(event: string, properties: Record<string, any>): void;
   setUserProperty(key: string, value: string): void;
   setUserId(userId: string): void;
@@ -52,7 +52,7 @@ export interface PlatformAnalytics {
 }
 
 // Notification interface for platform abstraction
-export interface PlatformNotifications {
+interface PlatformNotifications {
   showNotification(
     title: string,
     message: string,
@@ -63,7 +63,7 @@ export interface PlatformNotifications {
 }
 
 // Theme interface for platform abstraction
-export interface PlatformTheme {
+interface PlatformTheme {
   applyTheme(theme: string): void;
   applyFontSize(fontSize: string): void;
   getCurrentTheme(): string;
@@ -71,14 +71,14 @@ export interface PlatformTheme {
 }
 
 // Network interface for platform abstraction
-export interface PlatformNetwork {
+interface PlatformNetwork {
   request(url: string, options: RequestInit): Promise<Response>;
   isOnline(): boolean;
   watchNetworkStatus(callback: (isOnline: boolean) => void): () => void;
 }
 
 // Configuration interface
-export interface ServiceContainerConfig {
+interface ServiceContainerConfig {
   apiBaseUrl: string;
   apiToken?: string;
   revenueCatApiKey?: string;
@@ -92,7 +92,7 @@ export interface ServiceContainerConfig {
 /**
  * Service registry for dependency injection
  */
-export class ServiceContainer {
+class ServiceContainer {
   private services = new Map<string, any>();
   private singletons = new Map<string, any>();
 
@@ -150,7 +150,7 @@ export class ServiceContainer {
 /**
  * Service keys for type-safe service resolution
  */
-export const ServiceKeys = {
+const ServiceKeys = {
   // Platform services
   STORAGE: 'storage',
   ANALYTICS: 'analytics',
@@ -185,7 +185,7 @@ export const ServiceKeys = {
 /**
  * Factory function to create a pre-configured service container
  */
-export function createServiceContainer(
+function createServiceContainer(
   config: ServiceContainerConfig
 ): ServiceContainer {
   const container = new ServiceContainer(config);
@@ -222,7 +222,7 @@ export function createServiceContainer(
 /**
  * Type-safe service resolver
  */
-export class ServiceResolver {
+class ServiceResolver {
   constructor(private container: ServiceContainer) {}
 
   // Business logic services
@@ -316,3 +316,16 @@ export class ServiceResolver {
     return this.container.getConfig();
   }
 }
+
+export {
+  ServiceKeys,
+  createServiceContainer,
+  ServiceContainer,
+  ServiceResolver,
+  type PlatformStorage,
+  type PlatformAnalytics,
+  type PlatformNotifications,
+  type PlatformTheme,
+  type PlatformNetwork,
+  type ServiceContainerConfig,
+};

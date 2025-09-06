@@ -6,12 +6,12 @@
 import { useCallback, useState } from 'react';
 import { withLoadingState } from '../../utils/async-helpers';
 
-export interface UseApiCallOptions {
+interface UseApiCallOptions {
   onError?: (error: Error) => void;
   context?: string;
 }
 
-export interface UseApiCallReturn {
+interface UseApiCallReturn {
   isLoading: boolean;
   error: string | null;
   clearError: () => void;
@@ -24,9 +24,7 @@ export interface UseApiCallReturn {
 /**
  * Hook for managing API call state and error handling
  */
-export const useApiCall = (
-  options: UseApiCallOptions = {}
-): UseApiCallReturn => {
+const useApiCall = (options: UseApiCallOptions = {}): UseApiCallReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,7 +65,7 @@ export const useApiCall = (
 /**
  * Hook for API calls that throw errors instead of returning undefined
  */
-export const useApiCallStrict = (options: UseApiCallOptions = {}) => {
+const useApiCallStrict = (options: UseApiCallOptions = {}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -121,7 +119,7 @@ export const useApiCallStrict = (options: UseApiCallOptions = {}) => {
 /**
  * Hook for multiple related API calls with shared loading state
  */
-export const useApiGroup = (options: UseApiCallOptions = {}) => {
+const useApiGroup = (options: UseApiCallOptions = {}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -169,4 +167,12 @@ export const useApiGroup = (options: UseApiCallOptions = {}) => {
     clearError,
     createMethod,
   };
+};
+
+export {
+  useApiCall,
+  useApiCallStrict,
+  useApiGroup,
+  type UseApiCallOptions,
+  type UseApiCallReturn,
 };

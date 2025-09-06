@@ -6,7 +6,7 @@
 import { TransactionAnalysis } from './ai-types';
 import { ChainType } from '../../utils/blockchain';
 
-export interface AIWeb3Service {
+interface AIWeb3Service {
   analyzeTransaction(
     txHash: string,
     chainType: ChainType
@@ -24,7 +24,7 @@ export interface AIWeb3Service {
   ): Promise<TokenAnalysis>;
 }
 
-export interface ContractExplanation {
+interface ContractExplanation {
   name: string;
   type:
     | 'erc20'
@@ -46,7 +46,7 @@ export interface ContractExplanation {
   warnings?: string[];
 }
 
-export interface NFTAnalysis {
+interface NFTAnalysis {
   collectionName: string;
   floorPrice?: number;
   rarity?: {
@@ -66,7 +66,7 @@ export interface NFTAnalysis {
   };
 }
 
-export interface ScamAnalysis {
+interface ScamAnalysis {
   riskScore: number; // 0-100, higher = more risky
   indicators: {
     type:
@@ -82,7 +82,7 @@ export interface ScamAnalysis {
   safetyTips: string[];
 }
 
-export interface ProtocolExplanation {
+interface ProtocolExplanation {
   name: string;
   category:
     | 'dex'
@@ -104,7 +104,7 @@ export interface ProtocolExplanation {
   howItWorks: string;
 }
 
-export interface TokenAnalysis {
+interface TokenAnalysis {
   symbol: string;
   name: string;
   price: number;
@@ -543,4 +543,14 @@ class AIWeb3ServiceImpl implements AIWeb3Service {
   }
 }
 
-export const aiWeb3Service = new AIWeb3ServiceImpl();
+const aiWeb3Service = new AIWeb3ServiceImpl();
+
+export {
+  aiWeb3Service,
+  type AIWeb3Service,
+  type ContractExplanation,
+  type NFTAnalysis,
+  type ScamAnalysis,
+  type ProtocolExplanation,
+  type TokenAnalysis,
+};

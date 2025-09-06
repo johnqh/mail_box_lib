@@ -6,7 +6,7 @@
 import { AuthStatus, ChainType } from '../../business/core/enums';
 import { EmailAddress } from '../../types/email';
 
-export interface WalletUserData {
+interface WalletUserData {
   id: string;
   name: string;
   email: string;
@@ -22,7 +22,7 @@ export interface WalletUserData {
 /**
  * Platform-agnostic authentication service interface
  */
-export interface AuthService {
+interface AuthService {
   /**
    * Connect to wallet
    * @returns Promise<boolean> indicating success
@@ -85,7 +85,7 @@ export interface AuthService {
 /**
  * Platform-agnostic storage service for user data
  */
-export interface AuthStorageService {
+interface AuthStorageService {
   /**
    * Store user data for a wallet address
    * @param walletAddress Wallet address
@@ -117,7 +117,7 @@ export interface AuthStorageService {
 /**
  * Platform-agnostic email address service for authentication
  */
-export interface AuthEmailAddressService {
+interface AuthEmailAddressService {
   /**
    * Generate email addresses for a wallet address
    * @param walletAddress Wallet address
@@ -144,7 +144,7 @@ export interface AuthEmailAddressService {
 /**
  * Combined authentication manager interface
  */
-export interface AuthManager {
+interface AuthManager {
   /**
    * Current user data
    */
@@ -205,3 +205,11 @@ export interface AuthManager {
    */
   offAuthStateChange(callback: (authManager: AuthManager) => void): void;
 }
+
+export {
+  type WalletUserData,
+  type AuthService,
+  type AuthStorageService,
+  type AuthEmailAddressService,
+  type AuthManager,
+};

@@ -71,7 +71,7 @@ export async function createBusinessLogicServices() {
 /**
  * Sync version of factory function for immediate use
  */
-export function createBusinessLogicServicesSync() {
+function createBusinessLogicServicesSync() {
   return {
     emailOps: new DefaultEmailOperations(),
     mailboxOps: new DefaultMailboxOperations(),
@@ -104,3 +104,5 @@ export function createBusinessLogicServicesSync() {
  * The business logic is completely separated from UI frameworks,
  * so it can be used with React Native, React, Vue, or any other framework.
  */
+
+export { createBusinessLogicServicesSync };

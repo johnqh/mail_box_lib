@@ -28,7 +28,7 @@ const optimismClient = createPublicClient({
 const ensCache = new Map<string, { names: ENSName[]; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-export interface ENSName {
+interface ENSName {
   name: string;
   address: string;
 }
@@ -302,3 +302,5 @@ export async function validateENSName(
     return false;
   }
 }
+
+export { type ENSName };

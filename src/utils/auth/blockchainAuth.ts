@@ -12,7 +12,7 @@ import {
 // Re-export for convenience
 export { detectAddressType } from '../blockchain/addressDetection';
 
-export interface SigninMessage {
+interface SigninMessage {
   domain: string;
   address: string;
   statement: string;
@@ -26,7 +26,7 @@ export interface SigninMessage {
 /**
  * Create a Sign-in with Ethereum (SIWE) message compatible with WildDuck
  */
-export const createSIWEMessage = (
+const createSIWEMessage = (
   domain: string,
   address: string,
   nonce: string,
@@ -51,7 +51,7 @@ Issued At: ${issuedAt.toISOString()}`;
 /**
  * Create a Sign-in with Solana message compatible with WildDuck
  */
-export const createSolanaSignMessage = (
+const createSolanaSignMessage = (
   domain: string,
   address: string,
   nonce: string,
@@ -69,7 +69,7 @@ Issued At: ${issuedAt.toISOString()}`;
 /**
  * Generate a random nonce for signature messages (compatible with WildDuck)
  */
-export const generateNonce = (): string => {
+const generateNonce = (): string => {
   return (
     Math.random().toString(36).substring(2, 15) +
     Math.random().toString(36).substring(2, 15)
@@ -81,7 +81,7 @@ export const generateNonce = (): string => {
  * @deprecated WildDuck now accepts any valid signature from the wallet address
  * This function is kept for backward compatibility
  */
-export const createWildDuckAuthMessage = (nonce: string): string => {
+const _createWildDuckAuthMessage = (nonce: string): string => {
   return `Sign in to WildDuck\nNonce: ${nonce}`;
 };
 
@@ -89,7 +89,7 @@ export const createWildDuckAuthMessage = (nonce: string): string => {
  * Create authentication message based on chain type
  * WildDuck now verifies signatures against the nonce directly
  */
-export const createAuthMessage = (
+const _createAuthMessage = (
   chainType: ChainType,
   address: string,
   domain: string = '0xmail.box',
@@ -128,7 +128,7 @@ export const createAuthMessage = (
  * - EVM signatures: Convert to Base64 (per AUTHENTICATION.md lines 88-90)
  * - Solana signatures: Keep as base58 (per AUTHENTICATION.md lines 91-92, 369)
  */
-export const formatSignatureForWildDuck = (
+const formatSignatureForWildDuck = (
   signature: string | Uint8Array,
   chainType: ChainType
 ): string => {
@@ -191,7 +191,7 @@ export const formatSignatureForWildDuck = (
 /**
  * Validate blockchain username format (compatible with WildDuck validators)
  */
-export const isValidBlockchainUsername = (username: string): boolean => {
+const isValidBlockchainUsername = (username: string): boolean => {
   if (!username || typeof username !== 'string') {
     return false;
   }
@@ -230,4 +230,11 @@ const isBase64EVMAddress = (encoded: string): boolean => {
   } catch {
     return false;
   }
+};
+
+export {
+  type SigninMessage,
+  createSIWEMessage,
+  formatSignatureForWildDuck,
+  isValidBlockchainUsername,
 };

@@ -52,7 +52,7 @@ interface IndexerHookDependencies {
   indexerService: IndexerService;
 }
 
-export interface IndexerHowToEarn {
+interface IndexerHowToEarn {
   title: string;
   description: string;
   earnMethods: Array<{
@@ -81,7 +81,7 @@ export interface IndexerHowToEarn {
   lastUpdated: number;
 }
 
-export interface IndexerPublicStats {
+interface IndexerPublicStats {
   totalUsers: number;
   totalPointsDistributed: string;
   topEarningMethods: Array<{
@@ -105,7 +105,7 @@ export interface IndexerPublicStats {
  * Platform-agnostic hook for indexer points operations
  * Uses dependency injection pattern - the implementation is injected by the platform
  */
-export function useIndexerPoints(dependencies?: IndexerHookDependencies) {
+function useIndexerPoints(dependencies?: IndexerHookDependencies) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -349,3 +349,9 @@ function createMockIndexerService(): IndexerService {
     },
   };
 }
+
+export {
+  useIndexerPoints,
+  type IndexerHowToEarn,
+  type IndexerPublicStats
+};

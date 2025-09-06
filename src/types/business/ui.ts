@@ -7,9 +7,11 @@ import { ReactNode } from 'react';
 /**
  * Documentation section interface for technical documentation
  */
-export interface DocSection {
+interface DocSection {
   id: string;
   title: string;
   content: ReactNode;
   subsections?: DocSection[];
 }
+
+export { type DocSection };

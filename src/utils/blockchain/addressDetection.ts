@@ -3,12 +3,12 @@ import { PublicKey } from '@solana/web3.js';
 import { ChainType } from '../../business/core/enums';
 
 // Re-export ChainType for backward compatibility
-export { ChainType };
+export { ChainType, detectAddressType, isSolanaAddress, isValidEvmAddress };
 
 /**
  * Detect whether an address is an EVM address, Solana address, or unknown
  */
-export function detectAddressType(address: string): ChainType {
+function detectAddressType(address: string): ChainType {
   if (!address) return ChainType.UNKNOWN;
 
   // Check if it's an EVM address (starts with 0x and is 42 characters)
@@ -35,7 +35,7 @@ export function detectAddressType(address: string): ChainType {
 /**
  * Check if an address is a valid Solana address
  */
-export function isSolanaAddress(address: string): boolean {
+function isSolanaAddress(address: string): boolean {
   try {
     new PublicKey(address);
     return true;
@@ -47,6 +47,6 @@ export function isSolanaAddress(address: string): boolean {
 /**
  * Check if an address is a valid EVM address
  */
-export function isValidEvmAddress(address: string): boolean {
+function isValidEvmAddress(address: string): boolean {
   return isEvmAddress(address);
 }

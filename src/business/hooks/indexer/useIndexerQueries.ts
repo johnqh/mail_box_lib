@@ -12,7 +12,7 @@ import { convertToAppConfig } from './utils';
 import { queryKeys, STALE_TIMES } from '../../core/query';
 
 // Types for API responses
-export interface AddressValidationResponse {
+interface AddressValidationResponse {
   isValid: boolean;
   addressType: string;
   normalizedAddress: string;
@@ -25,7 +25,7 @@ export interface AddressValidationResponse {
   error?: string;
   timestamp: string;
 }
-export interface SigningMessageResponse {
+interface SigningMessageResponse {
   walletAddress: string;
   addressType: string;
   chainId: number;
@@ -61,7 +61,7 @@ export interface SigningMessageResponse {
 }
 
 
-export interface PointsLeaderboardResponse {
+interface PointsLeaderboardResponse {
   success: boolean;
   data: {
     leaderboard: Array<{
@@ -73,7 +73,7 @@ export interface PointsLeaderboardResponse {
   };
 }
 
-export interface SiteStatsResponse {
+interface SiteStatsResponse {
   success: boolean;
   data: {
     totalPoints: string;
@@ -83,7 +83,7 @@ export interface SiteStatsResponse {
   };
 }
 
-export interface SolanaStatusResponse {
+interface SolanaStatusResponse {
   solanaIndexers: Array<{
     chainId: number;
     initialized: boolean;
@@ -96,7 +96,7 @@ export interface SolanaStatusResponse {
 /**
  * Hook to validate address format (public endpoint)
  */
-export const useAddressValidation = (
+const useAddressValidation = (
   address: string,
   options?: UseQueryOptions<AddressValidationResponse>
 ): UseQueryResult<AddressValidationResponse> => {
@@ -117,7 +117,7 @@ export const useAddressValidation = (
 /**
  * Hook to get signing message for wallet verification
  */
-export const useSigningMessage = (
+const useSigningMessage = (
   chainId: number,
   walletAddress: string,
   domain: string,
@@ -143,7 +143,7 @@ export const useSigningMessage = (
 /**
  * Hook to get points leaderboard (new API)
  */
-export const usePointsLeaderboard = (
+const usePointsLeaderboard = (
   count: number = 10,
   options?: UseQueryOptions<PointsLeaderboardResponse>
 ): UseQueryResult<PointsLeaderboardResponse> => {
@@ -163,7 +163,7 @@ export const usePointsLeaderboard = (
 /**
  * Hook to get site-wide statistics
  */
-export const useSiteStats = (
+const useSiteStats = (
   options?: UseQueryOptions<SiteStatsResponse>
 ): UseQueryResult<SiteStatsResponse> => {
   const config = useAppConfig();
@@ -182,7 +182,7 @@ export const useSiteStats = (
 /**
  * Hook to get Solana indexer status
  */
-export const useSolanaStatus = (
+const useSolanaStatus = (
   options?: UseQueryOptions<SolanaStatusResponse>
 ): UseQueryResult<SolanaStatusResponse> => {
   const config = useAppConfig();
@@ -196,4 +196,17 @@ export const useSolanaStatus = (
     staleTime: STALE_TIMES.SOLANA_STATUS,
     ...options,
   });
+};
+
+export {
+  useAddressValidation,
+  useSigningMessage,
+  usePointsLeaderboard,
+  useSiteStats,
+  useSolanaStatus,
+  type AddressValidationResponse,
+  type SigningMessageResponse,
+  type PointsLeaderboardResponse,
+  type SiteStatsResponse,
+  type SolanaStatusResponse
 };

@@ -2,11 +2,11 @@ import { useCallback, useState } from 'react';
 import axios from 'axios';
 import { WildDuckAPI } from '../../../network/clients/wildduck';
 
-export interface WildduckSettings {
+interface WildduckSettings {
   [key: string]: any;
 }
 
-export interface UseWildduckSettingsReturn {
+interface UseWildduckSettingsReturn {
   isLoading: boolean;
   error: string | null;
   settings: WildduckSettings;
@@ -20,7 +20,7 @@ export interface UseWildduckSettingsReturn {
 /**
  * Hook for WildDuck settings management operations
  */
-export const useWildduckSettings = (): UseWildduckSettingsReturn => {
+const useWildduckSettings = (): UseWildduckSettingsReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [settings, setSettings] = useState<WildduckSettings>({});
@@ -131,4 +131,10 @@ export const useWildduckSettings = (): UseWildduckSettingsReturn => {
     clearError,
     refresh,
   };
+};
+
+export {
+  useWildduckSettings,
+  type WildduckSettings,
+  type UseWildduckSettingsReturn
 };

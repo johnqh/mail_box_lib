@@ -25,7 +25,7 @@ const publicClient = createPublicClient({
 const resolverCache = new Map<string, { address: string; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-export interface NameResolutionResult {
+interface NameResolutionResult {
   address: string;
   type: 'ens' | 'sns' | 'address';
   originalInput: string;
@@ -34,21 +34,21 @@ export interface NameResolutionResult {
 /**
  * Check if input looks like an ENS name
  */
-export function isENSName(input: string): boolean {
+function isENSName(input: string): boolean {
   return AddressHelper.getAddressType(input) === AddressType.ENSName;
 }
 
 /**
  * Check if input looks like an SNS name
  */
-export function isSNSName(input: string): boolean {
+function isSNSName(input: string): boolean {
   return AddressHelper.getAddressType(input) === AddressType.SNSName;
 }
 
 /**
  * Check if input is already a valid address
  */
-export function isValidAddress(input: string): boolean {
+function isValidAddress(input: string): boolean {
   try {
     // First check with viem (for EVM addresses)
     if (isAddress(input)) {
@@ -199,7 +199,7 @@ export async function resolveNameOrAddress(
 /**
  * Validate input and provide helpful error messages
  */
-export function validateNameOrAddressInput(input: string): {
+function validateNameOrAddressInput(input: string): {
   isValid: boolean;
   error?: string;
 } {
@@ -251,9 +251,7 @@ export function validateNameOrAddressInput(input: string): {
 /**
  * Get display text for resolved name
  */
-export function getDisplayTextForResolution(
-  result: NameResolutionResult
-): string {
+function getDisplayTextForResolution(result: NameResolutionResult): string {
   switch (result.type) {
     case 'ens':
       return `${result.originalInput} → ${result.address.slice(0, 6)}...${result.address.slice(-4)}`;
@@ -265,3 +263,12 @@ export function getDisplayTextForResolution(
       return result.address;
   }
 }
+
+export {
+  isENSName,
+  isSNSName,
+  isValidAddress,
+  validateNameOrAddressInput,
+  getDisplayTextForResolution,
+  type NameResolutionResult,
+};

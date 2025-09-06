@@ -10,7 +10,7 @@ interface ExtendedEmail extends Email {
   cc?: string | string[];
 }
 
-export interface EmailOperations {
+interface EmailOperations {
   /**
    * Format email date for display
    */
@@ -117,7 +117,7 @@ export interface EmailOperations {
   searchEmails(emails: Email[], query: string): Email[];
 }
 
-export class DefaultEmailOperations implements EmailOperations {
+class DefaultEmailOperations implements EmailOperations {
   formatEmailDate(date: Date): string {
     return date.toLocaleString('en-US', {
       weekday: 'long',
@@ -303,3 +303,5 @@ export class DefaultEmailOperations implements EmailOperations {
     );
   }
 }
+
+export { DefaultEmailOperations, type EmailOperations };

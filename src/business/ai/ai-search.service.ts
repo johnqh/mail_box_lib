@@ -6,7 +6,7 @@
 import { SearchResult } from './ai-types';
 import { Email } from '../../types/email';
 
-export interface AISearchService {
+interface AISearchService {
   semanticSearch(query: string, emails: Email[]): Promise<SearchResult[]>;
   suggestSearchQueries(userInput: string): Promise<string[]>;
   findSimilarEmails(email: Email, allEmails: Email[]): Promise<Email[]>;
@@ -15,7 +15,7 @@ export interface AISearchService {
   getSearchInsights(searchHistory: SearchQuery[]): Promise<SearchInsights>;
 }
 
-export interface SearchCategory {
+interface SearchCategory {
   category:
     | 'sender'
     | 'subject'
@@ -32,14 +32,14 @@ export interface SearchCategory {
   }[];
 }
 
-export interface SearchQuery {
+interface SearchQuery {
   query: string;
   timestamp: Date;
   resultsCount: number;
   selectedResult?: number;
 }
 
-export interface SearchInsights {
+interface SearchInsights {
   topSearchTerms: { term: string; frequency: number }[];
   searchPatterns: {
     timeOfDay: number[]; // hourly distribution
@@ -51,7 +51,7 @@ export interface SearchInsights {
   };
 }
 
-export interface EmailIndex {
+interface EmailIndex {
   emailId: string;
   tokens: string[];
   entities: string[];
@@ -690,4 +690,13 @@ class AISearchServiceImpl implements AISearchService {
   }
 }
 
-export const aiSearchService = new AISearchServiceImpl();
+const aiSearchService = new AISearchServiceImpl();
+
+export {
+  aiSearchService,
+  type AISearchService,
+  type SearchCategory,
+  type SearchQuery,
+  type SearchInsights,
+  type EmailIndex,
+};

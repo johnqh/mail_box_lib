@@ -4,7 +4,7 @@
 
 import { EmailFolder, EmailFolderUtils, StandardEmailFolder } from '../enums';
 
-export interface FolderInfo {
+interface FolderInfo {
   name: EmailFolder;
   displayName: string;
   isStandard: boolean;
@@ -13,7 +13,7 @@ export interface FolderInfo {
   unreadCount: number;
 }
 
-export interface FolderOperations {
+interface FolderOperations {
   createCustomFolder(name: string): Promise<FolderInfo>;
   deleteCustomFolder(name: string): Promise<boolean>;
   renameCustomFolder(oldName: string, newName: string): Promise<boolean>;
@@ -24,7 +24,7 @@ export interface FolderOperations {
   getCustomFolders(): Promise<FolderInfo[]>;
 }
 
-export class DefaultFolderOperations implements FolderOperations {
+class DefaultFolderOperations implements FolderOperations {
   async createCustomFolder(name: string): Promise<FolderInfo> {
     const validation = this.validateFolderName(name);
     if (!validation.isValid) {
@@ -190,3 +190,5 @@ export class DefaultFolderOperations implements FolderOperations {
     return StandardEmailFolder.TRASH;
   }
 }
+
+export { DefaultFolderOperations, type FolderInfo, type FolderOperations };

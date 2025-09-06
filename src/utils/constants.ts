@@ -4,27 +4,27 @@
 // - ./ui-constants.ts - Layout, typography, and component patterns
 
 // API Configuration
-export const API_BASE_URL = 'https://0xmail.box';
-export const API_TIMEOUT = 30000; // 30 seconds
-export const API_RETRY_ATTEMPTS = 3;
-export const API_RETRY_DELAY = 1000; // 1 second
+const API_BASE_URL = 'https://0xmail.box';
+const API_TIMEOUT = 30000; // 30 seconds
+const API_RETRY_ATTEMPTS = 3;
+const API_RETRY_DELAY = 1000; // 1 second
 
 // Authentication
-export const AUTH_STATUS = {
+const AUTH_STATUS = {
   DISCONNECTED: 'disconnected',
   CONNECTED: 'connected',
   VERIFIED: 'verified',
 } as const;
 
 // Chain Types
-export const CHAIN_TYPE = {
+const CHAIN_TYPE = {
   EVM: 'evm',
   SOLANA: 'solana',
   UNKNOWN: 'unknown',
 } as const;
 
 // Storage Keys
-export const STORAGE_KEYS = {
+const STORAGE_KEYS = {
   AUTH_TOKEN: 'authToken',
   USER_DATA: 'userData',
   THEME: 'theme',
@@ -34,7 +34,7 @@ export const STORAGE_KEYS = {
 } as const;
 
 // Email Configuration
-export const EMAIL_CONFIG = {
+const EMAIL_CONFIG = {
   MAX_ATTACHMENT_SIZE: 25 * 1024 * 1024, // 25MB
   MAX_RECIPIENTS: 100,
   ITEMS_PER_PAGE: 50,
@@ -43,7 +43,7 @@ export const EMAIL_CONFIG = {
 } as const;
 
 // Subscription Tiers
-export const SUBSCRIPTION_TIERS = {
+const SUBSCRIPTION_TIERS = {
   FREE: 'free',
   BASIC: 'basic',
   PRO: 'pro',
@@ -51,7 +51,7 @@ export const SUBSCRIPTION_TIERS = {
 } as const;
 
 // Time Formats
-export const TIME_FORMAT = {
+const TIME_FORMAT = {
   SHORT_DATE: 'MMM d',
   FULL_DATE: 'MMM d, yyyy',
   DATE_TIME: 'MMM d, yyyy h:mm a',
@@ -59,7 +59,7 @@ export const TIME_FORMAT = {
 } as const;
 
 // Error Messages
-export const ERROR_MESSAGES = {
+const ERROR_MESSAGES = {
   WALLET_NOT_CONNECTED: 'Please connect your wallet first',
   INVALID_ADDRESS: 'Please enter a valid address',
   NETWORK_ERROR: 'Network error. Please try again.',
@@ -72,7 +72,7 @@ export const ERROR_MESSAGES = {
 } as const;
 
 // Success Messages
-export const SUCCESS_MESSAGES = {
+const SUCCESS_MESSAGES = {
   EMAIL_SENT: 'Email sent successfully',
   EMAIL_DELETED: 'Email deleted successfully',
   PREFERENCES_SAVED: 'Preferences saved successfully',
@@ -83,7 +83,7 @@ export const SUCCESS_MESSAGES = {
 } as const;
 
 // Routes
-export const ROUTES = {
+const ROUTES = {
   HOME: '/',
   ABOUT: '/about',
   CONNECT: '/connect',
@@ -98,7 +98,7 @@ export const ROUTES = {
 } as const;
 
 // External Links
-export const EXTERNAL_LINKS = {
+const EXTERNAL_LINKS = {
   GITHUB: 'https://github.com/0xmailbox',
   TWITTER: 'https://twitter.com/0xmailbox',
   DISCORD: 'https://discord.gg/0xmailbox',
@@ -108,7 +108,7 @@ export const EXTERNAL_LINKS = {
 } as const;
 
 // Wallet Names
-export const WALLET_NAMES = {
+const WALLET_NAMES = {
   METAMASK: 'MetaMask',
   WALLETCONNECT: 'WalletConnect',
   COINBASE: 'Coinbase Wallet',
@@ -122,7 +122,7 @@ export const WALLET_NAMES = {
 } as const;
 
 // Network IDs
-export const NETWORK_IDS = {
+const NETWORK_IDS = {
   ETHEREUM_MAINNET: 1,
   POLYGON: 137,
   ARBITRUM: 42161,
@@ -133,7 +133,7 @@ export const NETWORK_IDS = {
 } as const;
 
 // Animation Durations
-export const ANIMATION = {
+const ANIMATION = {
   FAST: 150,
   NORMAL: 300,
   SLOW: 500,
@@ -141,7 +141,7 @@ export const ANIMATION = {
 } as const;
 
 // Z-Index Layers
-export const Z_INDEX = {
+const Z_INDEX = {
   DROPDOWN: 10,
   OVERLAY: 20,
   MODAL: 30,
@@ -151,3 +151,24 @@ export const Z_INDEX = {
 } as const;
 
 // Note: Formatting utilities moved to ./formatters.ts
+
+export {
+  API_BASE_URL,
+  API_TIMEOUT,
+  API_RETRY_ATTEMPTS,
+  API_RETRY_DELAY,
+  AUTH_STATUS,
+  CHAIN_TYPE,
+  STORAGE_KEYS,
+  EMAIL_CONFIG,
+  SUBSCRIPTION_TIERS,
+  TIME_FORMAT,
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
+  ROUTES,
+  EXTERNAL_LINKS,
+  WALLET_NAMES,
+  NETWORK_IDS,
+  ANIMATION,
+  Z_INDEX,
+};

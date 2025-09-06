@@ -4,7 +4,7 @@
 
 import { MediumView, MobileView } from '../enums';
 
-export interface NavigationState {
+interface NavigationState {
   // Mobile navigation
   mobileView: MobileView;
 
@@ -25,7 +25,7 @@ export interface NavigationState {
   isSearchActive: boolean;
 }
 
-export interface NavigationOperations {
+interface NavigationOperations {
   /**
    * Get mobile screen title based on current view
    */
@@ -81,7 +81,7 @@ export interface NavigationOperations {
   };
 }
 
-export class DefaultNavigationOperations implements NavigationOperations {
+class DefaultNavigationOperations implements NavigationOperations {
   getMobileTitle(
     view: MobileView,
     context: {
@@ -202,7 +202,7 @@ export class DefaultNavigationOperations implements NavigationOperations {
 /**
  * Navigation state manager for handling complex navigation flows
  */
-export class NavigationStateManager {
+class NavigationStateManager {
   private state: NavigationState;
   private operations: NavigationOperations;
 
@@ -314,3 +314,10 @@ export class NavigationStateManager {
     });
   }
 }
+
+export {
+  DefaultNavigationOperations,
+  NavigationStateManager,
+  type NavigationState,
+  type NavigationOperations,
+};

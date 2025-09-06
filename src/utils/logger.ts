@@ -3,14 +3,14 @@
  * Provides consistent logging across the application with proper formatting
  */
 
-export enum LogLevel {
+enum LogLevel {
   ERROR = 'error',
   WARN = 'warn',
   INFO = 'info',
   DEBUG = 'debug',
 }
 
-export interface LogEntry {
+interface LogEntry {
   level: LogLevel;
   message: string;
   context?: string;
@@ -95,11 +95,22 @@ class Logger {
 }
 
 // Export singleton instance
-export const logger = new Logger();
+const logger = new Logger();
 
 // Export contextual loggers for common areas
-export const authLogger = logger.withContext('AUTH');
-export const apiLogger = logger.withContext('API');
-export const contractLogger = logger.withContext('CONTRACT');
-export const ensLogger = logger.withContext('ENS');
-export const storageLogger = logger.withContext('STORAGE');
+const authLogger = logger.withContext('AUTH');
+const apiLogger = logger.withContext('API');
+const contractLogger = logger.withContext('CONTRACT');
+const ensLogger = logger.withContext('ENS');
+const storageLogger = logger.withContext('STORAGE');
+
+export {
+  LogLevel,
+  type LogEntry,
+  logger,
+  authLogger,
+  apiLogger,
+  contractLogger,
+  ensLogger,
+  storageLogger,
+};

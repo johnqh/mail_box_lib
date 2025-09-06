@@ -3,7 +3,7 @@
  * This interface can be implemented for web (localStorage) or React Native (AsyncStorage)
  */
 
-export interface PlatformStorage {
+interface PlatformStorage {
   /**
    * Store a value with a key
    * @param key Storage key
@@ -38,7 +38,7 @@ export interface PlatformStorage {
 /**
  * Advanced storage interface with TTL and prefix support
  */
-export interface AdvancedPlatformStorage extends PlatformStorage {
+interface AdvancedPlatformStorage extends PlatformStorage {
   /**
    * Store a value with optional TTL
    * @param key Storage key
@@ -63,10 +63,16 @@ export interface AdvancedPlatformStorage extends PlatformStorage {
 /**
  * Storage provider implementation that wraps platform storage
  */
-export interface StorageProvider {
+interface StorageProvider {
   storage: PlatformStorage | AdvancedPlatformStorage;
   get(key: string): Promise<string | null> | string | null;
   set(key: string, value: string, ttl?: number): Promise<void> | void;
   remove(key: string): Promise<void> | void;
   clear(): Promise<void> | void;
 }
+
+export {
+  type PlatformStorage,
+  type AdvancedPlatformStorage,
+  type StorageProvider,
+};

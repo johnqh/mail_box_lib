@@ -5,7 +5,7 @@
 
 import { Email } from '../../types/email';
 
-export interface EmailCategory {
+interface EmailCategory {
   primary:
     | 'priority'
     | 'promotional'
@@ -19,7 +19,7 @@ export interface EmailCategory {
   reasoning?: string;
 }
 
-export interface EmailSummary {
+interface EmailSummary {
   summary: string;
   keyPoints: string[];
   sentiment: 'positive' | 'negative' | 'neutral';
@@ -28,7 +28,7 @@ export interface EmailSummary {
   estimatedReadTime: number; // seconds
 }
 
-export interface Web3Entity {
+interface Web3Entity {
   type:
     | 'wallet_address'
     | 'contract_address'
@@ -43,7 +43,7 @@ export interface Web3Entity {
   context?: string;
 }
 
-export interface EmailEntities {
+interface EmailEntities {
   web3Entities: Web3Entity[];
   dates: Date[];
   amounts: {
@@ -60,7 +60,7 @@ export interface EmailEntities {
   topics: string[];
 }
 
-export interface TransactionAnalysis {
+interface TransactionAnalysis {
   txHash: string;
   chainType: string;
   type:
@@ -85,14 +85,14 @@ export interface TransactionAnalysis {
   explanation: string;
 }
 
-export interface SmartReply {
+interface SmartReply {
   text: string;
   tone: 'professional' | 'casual' | 'formal';
   confidence: number;
   context: string;
 }
 
-export interface SearchResult {
+interface SearchResult {
   email: Email;
   relevance: number;
   matchedFields: string[];
@@ -103,7 +103,7 @@ export interface SearchResult {
   }[];
 }
 
-export interface AIInsight {
+interface AIInsight {
   type: 'suggestion' | 'warning' | 'information' | 'action_required';
   title: string;
   description: string;
@@ -112,7 +112,7 @@ export interface AIInsight {
   actionCallback?: () => void;
 }
 
-export interface UserBehaviorPattern {
+interface UserBehaviorPattern {
   emailCheckingTimes: number[]; // hours of day
   responseTimePatterns: {
     sender: string;
@@ -130,7 +130,7 @@ export interface UserBehaviorPattern {
   }[];
 }
 
-export interface AIProcessingOptions {
+interface AIProcessingOptions {
   enableCategorization?: boolean;
   enableSummarization?: boolean;
   enableEntityExtraction?: boolean;
@@ -139,3 +139,16 @@ export interface AIProcessingOptions {
   privacyMode?: boolean; // When true, process locally only
   maxProcessingTime?: number; // milliseconds
 }
+
+export {
+  type EmailCategory,
+  type EmailSummary,
+  type Web3Entity,
+  type EmailEntities,
+  type TransactionAnalysis,
+  type SmartReply,
+  type SearchResult,
+  type AIInsight,
+  type UserBehaviorPattern,
+  type AIProcessingOptions,
+};

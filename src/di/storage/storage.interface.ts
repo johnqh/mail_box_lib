@@ -4,7 +4,7 @@
 
 import { StorageType } from '../../business/core/enums';
 
-export interface StorageService {
+interface StorageService {
   /**
    * Get item from storage
    */
@@ -44,7 +44,7 @@ export interface StorageService {
 /**
  * Serialized storage service for objects
  */
-export interface SerializedStorageService {
+interface SerializedStorageService {
   /**
    * Get object from storage
    */
@@ -69,7 +69,7 @@ export interface SerializedStorageService {
 /**
  * Storage factory interface
  */
-export interface StorageFactory {
+interface StorageFactory {
   /**
    * Create storage service
    */
@@ -89,9 +89,16 @@ export interface StorageFactory {
 /**
  * Storage configuration
  */
-export interface StorageConfig {
+interface StorageConfig {
   prefix?: string;
   encryption?: boolean;
   compression?: boolean;
   ttl?: number; // Time to live in milliseconds
 }
+
+export {
+  type StorageService,
+  type SerializedStorageService,
+  type StorageFactory,
+  type StorageConfig,
+};

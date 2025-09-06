@@ -81,7 +81,7 @@ interface _IndexerRefereeLoginResponse {
  * Business service for indexer operations
  * Provides high-level methods for interacting with the mail_box_indexer API
  */
-export class IndexerService {
+class IndexerService {
   private static instance: IndexerService;
   private indexerClient: IndexerClient;
   private cache = new Map<string, { data: any; expires: number }>();
@@ -304,6 +304,11 @@ export class IndexerService {
 /**
  * Factory function to create an IndexerService instance
  */
-export const createIndexerService = (config: AppConfig): IndexerService => {
+const createIndexerService = (config: AppConfig): IndexerService => {
   return IndexerService.getInstance(config);
+};
+
+export {
+  createIndexerService,
+  IndexerService
 };

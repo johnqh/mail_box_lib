@@ -6,13 +6,13 @@
 import { Email, EmailAddress } from '../email';
 export { EmailAddress };
 
-export interface EmailListOptions {
+interface EmailListOptions {
   limit?: number;
   page?: number;
   order?: 'asc' | 'desc';
 }
 
-export interface EmailService {
+interface EmailService {
   /**
    * Get emails from a specific mailbox
    * @param userId User identifier
@@ -71,7 +71,7 @@ export interface EmailService {
   ): Promise<Email[]>;
 }
 
-export interface MailboxService {
+interface MailboxService {
   /**
    * Get all mailboxes for a user
    * @param userId User identifier
@@ -98,7 +98,7 @@ export interface MailboxService {
   deleteMailbox(userId: string, mailboxId: string): Promise<void>;
 }
 
-export interface EmailAddressService {
+interface EmailAddressService {
   /**
    * Get all email addresses for a user
    * @param userId User identifier
@@ -126,7 +126,7 @@ export interface EmailAddressService {
 }
 
 // Types for mailbox and email address
-export interface Mailbox {
+interface Mailbox {
   id: string;
   name: string;
   path: string;
@@ -142,7 +142,7 @@ export interface Mailbox {
 /**
  * Mock data provider interface for development/testing
  */
-export interface MockDataProvider {
+interface MockDataProvider {
   generateEmails(
     mailboxId: string,
     userId: string,
@@ -152,3 +152,12 @@ export interface MockDataProvider {
   generateMailboxes(userId: string): Promise<Mailbox[]>;
   generateEmailAddresses(userId: string): Promise<EmailAddress[]>;
 }
+
+export {
+  type EmailListOptions,
+  type EmailService,
+  type MailboxService,
+  type EmailAddressService,
+  type Mailbox,
+  type MockDataProvider,
+};

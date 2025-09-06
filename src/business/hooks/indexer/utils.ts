@@ -8,7 +8,7 @@ import type { ServiceContainerConfig } from '../../core/container/dependency-con
 /**
  * Convert ServiceContainerConfig to AppConfig for IndexerClient compatibility
  */
-export function convertToAppConfig(config: ServiceContainerConfig): AppConfig {
+function convertToAppConfig(config: ServiceContainerConfig): AppConfig {
   return {
     wildDuckApiToken: '',
     wildDuckBackendUrl: 'https://0xmail.box',
@@ -30,3 +30,7 @@ export function convertToAppConfig(config: ServiceContainerConfig): AppConfig {
     useMockFallback: true,
   };
 }
+
+export {
+  convertToAppConfig
+};

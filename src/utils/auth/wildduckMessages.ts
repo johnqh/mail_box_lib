@@ -8,7 +8,7 @@ import { AppConfig as _AppConfig } from '../../types';
 // Platform-specific global
 declare const fetch: typeof globalThis.fetch;
 
-export interface UploadMessageParams {
+interface UploadMessageParams {
   raw?: string;
   from?: string;
   to?: string[];
@@ -31,14 +31,14 @@ export interface UploadMessageParams {
 import type { UpdateMessageParams } from '../../business/hooks/wildduck/useWildduckMessages';
 export type { UpdateMessageParams } from '../../business/hooks/wildduck/useWildduckMessages';
 
-export interface ForwardMessageParams {
+interface ForwardMessageParams {
   to: string[];
   subject?: string;
   text?: string;
   html?: string;
 }
 
-export interface SubmitMessageParams {
+interface SubmitMessageParams {
   to?: string[];
   cc?: string[];
   bcc?: string[];
@@ -47,7 +47,7 @@ export interface SubmitMessageParams {
   html?: string;
 }
 
-export interface SearchApplyParams {
+interface SearchApplyParams {
   query?: string;
   action: 'move' | 'delete' | 'flag' | 'unflag' | 'seen' | 'unseen';
   moveTo?: string;
@@ -61,7 +61,7 @@ const getWildDuckBaseUrl = (): string => {
  * WildDuck Message Helper Class
  * Contains methods for message operations that modify data
  */
-export class WildDuckMessageHelper {
+class WildDuckMessageHelper {
   /**
    * Upload a message to a mailbox
    */
@@ -388,3 +388,11 @@ export class WildDuckMessageHelper {
     return result;
   }
 }
+
+export {
+  WildDuckMessageHelper,
+  type UploadMessageParams,
+  type ForwardMessageParams,
+  type SubmitMessageParams,
+  type SearchApplyParams,
+};

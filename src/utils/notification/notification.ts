@@ -31,7 +31,7 @@ function createNotificationService(
 /**
  * Get the default notification service instance (singleton pattern)
  */
-export function getNotificationService(): NotificationService {
+function getNotificationService(): NotificationService {
   if (!notificationService) {
     notificationService = createNotificationService();
   }
@@ -41,7 +41,7 @@ export function getNotificationService(): NotificationService {
 /**
  * Convenience functions for common notification operations
  */
-export const notificationHelper = {
+const notificationHelper = {
   /**
    * Check if notifications are supported
    */
@@ -169,3 +169,5 @@ export type {
   NotificationCapabilities,
   NotificationConfig,
 } from '../../di';
+
+export { notificationHelper, getNotificationService };

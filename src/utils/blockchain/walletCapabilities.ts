@@ -2,7 +2,7 @@
  * Utility to detect wallet capabilities and supported chains
  */
 
-export interface WalletCapability {
+interface WalletCapability {
   name: string;
   supportsEVM: boolean;
   supportsSolana: boolean;
@@ -12,7 +12,7 @@ export interface WalletCapability {
 /**
  * Get wallet capabilities based on wallet name/type
  */
-export function getWalletCapabilities(walletName: string): WalletCapability {
+function getWalletCapabilities(walletName: string): WalletCapability {
   const name = walletName.toLowerCase();
 
   // Phantom supports both EVM and Solana
@@ -83,7 +83,7 @@ export function getWalletCapabilities(walletName: string): WalletCapability {
 /**
  * Check if a wallet is available for a specific chain
  */
-export function isWalletAvailable(
+function isWalletAvailable(
   walletName: string,
   chainType: 'evm' | 'solana'
 ): boolean {
@@ -99,7 +99,14 @@ export function isWalletAvailable(
 /**
  * Check if we need to show chain selection for this wallet
  */
-export function needsChainSelection(walletName: string): boolean {
+function needsChainSelection(walletName: string): boolean {
   const capabilities = getWalletCapabilities(walletName);
   return capabilities.isMultiChain;
 }
+
+export {
+  getWalletCapabilities,
+  isWalletAvailable,
+  needsChainSelection,
+  type WalletCapability,
+};

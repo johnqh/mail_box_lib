@@ -5,7 +5,7 @@ import { useCallback, useState } from 'react';
  * Provides consistent error handling and fallback patterns
  */
 
-export interface UseAsyncOperationOptions<T> {
+interface UseAsyncOperationOptions<T> {
   initialData?: T;
   fallbackOperation?: () => Promise<T>;
   onSuccess?: (data: T) => void;
@@ -14,7 +14,7 @@ export interface UseAsyncOperationOptions<T> {
   retryDelay?: number;
 }
 
-export interface UseAsyncOperationReturn<T> {
+interface UseAsyncOperationReturn<T> {
   data: T | null;
   loading: boolean;
   error: string | null;
@@ -23,7 +23,7 @@ export interface UseAsyncOperationReturn<T> {
   retry: () => Promise<T | null>;
 }
 
-export const useAsyncOperation = <T = any>(
+const useAsyncOperation = <T = any>(
   options: UseAsyncOperationOptions<T> = {}
 ): UseAsyncOperationReturn<T> => {
   const {
@@ -135,11 +135,11 @@ export const useAsyncOperation = <T = any>(
 /**
  * Specialized hook for API operations with common patterns
  */
-export interface UseApiOperationOptions<T> extends UseAsyncOperationOptions<T> {
+interface UseApiOperationOptions<T> extends UseAsyncOperationOptions<T> {
   mockService?: () => Promise<T>;
 }
 
-export const useApiOperation = <T = any>(
+const useApiOperation = <T = any>(
   options: UseApiOperationOptions<T> = {}
 ): UseAsyncOperationReturn<T> => {
   const { mockService, ...baseOptions } = options;
@@ -159,7 +159,7 @@ export const useApiOperation = <T = any>(
 /**
  * Hook for operations that require authentication
  */
-export const useAuthenticatedOperation = <T = any>(
+const useAuthenticatedOperation = <T = any>(
   isAuthenticated: boolean,
   options: UseAsyncOperationOptions<T> = {}
 ): UseAsyncOperationReturn<T> & { canExecute: boolean } => {
@@ -181,4 +181,13 @@ export const useAuthenticatedOperation = <T = any>(
     execute,
     canExecute: isAuthenticated,
   };
+};
+
+export {
+  useAsyncOperation,
+  useApiOperation,
+  useAuthenticatedOperation,
+  type UseAsyncOperationOptions,
+  type UseAsyncOperationReturn,
+  type UseApiOperationOptions,
 };
