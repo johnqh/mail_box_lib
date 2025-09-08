@@ -22,7 +22,7 @@ export {
   useIndexerSolana,
   // TanStack Query hooks
   useSigningMessage,
-  usePointsLeaderboard as usePointsLeaderboardQuery,
+  useIndexerPointsLeaderboard as usePointsLeaderboardQuery,
   useSiteStats,
   useSolanaStatus,
 } from './indexer';

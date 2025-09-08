@@ -4,7 +4,7 @@
  */
 
 import {
-  usePointsLeaderboard as usePointsLeaderboardQuery,
+  useIndexerPointsLeaderboard as usePointsLeaderboardQuery,
   useSiteStats,
 } from '../indexer/useIndexerQueries';
 import { UseQueryOptions } from '@tanstack/react-query';

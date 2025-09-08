@@ -141,9 +141,9 @@ const useSigningMessage = (
 
 
 /**
- * Hook to get points leaderboard (new API)
+ * Hook to get points leaderboard from indexer (new API)
  */
-const usePointsLeaderboard = (
+const useIndexerPointsLeaderboard = (
   count: number = 10,
   options?: UseQueryOptions<PointsLeaderboardResponse>
 ): UseQueryResult<PointsLeaderboardResponse> => {
@@ -201,7 +201,7 @@ const useSolanaStatus = (
 export {
   useAddressValidation,
   useSigningMessage,
-  usePointsLeaderboard,
+  useIndexerPointsLeaderboard,
   useSiteStats,
   useSolanaStatus,
   type AddressValidationResponse,

@@ -23,6 +23,9 @@ export * from './nameservice';
 // Smart contract utilities
 export * from './contracts';
 
+// Indexer utilities
+export * from './indexer';
+
 // General utilities
 export * from './url-params';
 export * from './document-helpers';
