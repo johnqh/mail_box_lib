@@ -53,11 +53,12 @@
  * - Configured via `VITE_INDEXER_BACKEND_URL` environment variable
  */
 
-import axios from 'axios';
+import { NetworkClient } from '../../types/infrastructure/network';
 
 // Configuration interface for indexer GraphQL endpoint
 export interface IndexerGraphQLConfig {
   indexerBackendUrl: string;
+  networkClient: NetworkClient;
 }
 
 export interface GraphQLResponse<T = unknown> {
@@ -204,9 +205,11 @@ const getIndexerGraphQLUrl = (config: IndexerGraphQLConfig): string => {
  */
 export class IndexerGraphQLHelper {
   private config: IndexerGraphQLConfig;
+  private client: NetworkClient;
   
   constructor(config: IndexerGraphQLConfig) {
     this.config = config;
+    this.client = config.networkClient;
   }
   /**
    * Execute a GraphQL query with comprehensive error handling
@@ -246,14 +249,14 @@ export class IndexerGraphQLHelper {
     query: string,
     variables?: Record<string, unknown>
   ): Promise<T> {
-    const response = await axios.post(getIndexerGraphQLUrl(this.config), {
+    const response = await this.client.post(getIndexerGraphQLUrl(this.config), {
       query,
       variables,
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
     const result: GraphQLResponse<T> = response.data;
     
@@ -528,3 +531,16 @@ export class IndexerGraphQLHelper {
     return result.delegations.items;
   }
 }
+
+/**
+ * Factory function to create IndexerGraphQLHelper with network client
+ */
+export const createIndexerGraphQLHelper = (
+  indexerBackendUrl: string, 
+  networkClient: NetworkClient
+): IndexerGraphQLHelper => {
+  return new IndexerGraphQLHelper({
+    indexerBackendUrl,
+    networkClient
+  });
+};

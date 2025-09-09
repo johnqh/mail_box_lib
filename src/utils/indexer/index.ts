@@ -11,3 +11,6 @@ export * from '../../business/core/indexer';
 export * from './indexer-admin';
 export * from './indexer-graphql'; 
 export * from './indexer-webhooks';
+
+// Convenience functions with IndexerClient auto-injection
+export * from './indexer-factory';

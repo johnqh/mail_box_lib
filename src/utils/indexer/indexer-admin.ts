@@ -3,11 +3,12 @@
  * These functions are designed for admin panel usage and require special permissions
  */
 
-import axios from 'axios';
+import { NetworkClient } from '../../types/infrastructure/network';
 
 // Configuration interface for indexer admin endpoints
 export interface IndexerAdminConfig {
   indexerBackendUrl: string;
+  networkClient: NetworkClient;
 }
 
 export interface AdminCampaignConfig {
@@ -98,9 +99,11 @@ const getIndexerBaseUrl = (config: IndexerAdminConfig): string => {
  */
 export class IndexerAdminHelper {
   private config: IndexerAdminConfig;
+  private client: NetworkClient;
   
   constructor(config: IndexerAdminConfig) {
     this.config = config;
+    this.client = config.networkClient;
   }
   /**
    * Create a new promotional campaign
@@ -111,16 +114,16 @@ export class IndexerAdminHelper {
     signature: string,
     message?: string
   ): Promise<{ campaignId: string; message: string }> {
-    const response = await axios.post(`${getIndexerBaseUrl(this.config)}/admin/campaigns/create`, {
+    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/admin/campaigns/create`, {
       campaign,
       walletAddress,
       signature,
       message,
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
+
+    if (!response.ok) {
+      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+    }
 
     return response.data.data;
   }
@@ -134,15 +137,15 @@ export class IndexerAdminHelper {
     signature: string,
     message?: string
   ): Promise<{ message: string }> {
-    const response = await axios.post(`${getIndexerBaseUrl(this.config)}/admin/campaigns/${encodeURIComponent(campaignId)}/deactivate`, {
+    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/admin/campaigns/${encodeURIComponent(campaignId)}/deactivate`, {
       walletAddress,
       signature,
       message,
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
+
+    if (!response.ok) {
+      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+    }
 
     return response.data.data;
   }
@@ -161,16 +164,16 @@ export class IndexerAdminHelper {
     points: number;
     reason: string;
   }> {
-    const response = await axios.post(`${getIndexerBaseUrl(this.config)}/admin/points/award`, {
+    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/admin/points/award`, {
       ...award,
       walletAddress,
       signature,
       message,
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
+
+    if (!response.ok) {
+      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+    }
 
     return response.data.data;
   }
@@ -189,16 +192,16 @@ export class IndexerAdminHelper {
     flagged: boolean;
     reason: string | null;
   }> {
-    const response = await axios.post(`${getIndexerBaseUrl(this.config)}/admin/points/flag-user`, {
+    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/admin/points/flag-user`, {
       ...userFlag,
       walletAddress,
       signature,
       message,
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
+
+    if (!response.ok) {
+      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+    }
 
     return response.data.data;
   }
@@ -207,12 +210,15 @@ export class IndexerAdminHelper {
    * Get system overview statistics (requires admin signature in header)
    */
   async getOverviewStats(adminSignature: string): Promise<AdminOverviewStats> {
-    const response = await axios.get(`${getIndexerBaseUrl(this.config)}/admin/stats/overview`, {
+    const response = await this.client.get(`${getIndexerBaseUrl(this.config)}/admin/stats/overview`, {
       headers: {
-        'Content-Type': 'application/json',
         'x-admin-signature': adminSignature,
       },
     });
+
+    if (!response.ok) {
+      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+    }
 
     return response.data.data;
   }
@@ -230,12 +236,15 @@ export class IndexerAdminHelper {
       limit: limit.toString(),
     });
 
-    const response = await axios.get(`${getIndexerBaseUrl(this.config)}/admin/users/flagged?${params}`, {
+    const response = await this.client.get(`${getIndexerBaseUrl(this.config)}/admin/users/flagged?${params}`, {
       headers: {
-        'Content-Type': 'application/json',
         'x-admin-signature': adminSignature,
       },
     });
+
+    if (!response.ok) {
+      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+    }
 
     return response.data.data;
   }
@@ -254,18 +263,31 @@ export class IndexerAdminHelper {
       throw new Error('Count must be between 1 and 1000');
     }
 
-    const response = await axios.post(`${getIndexerBaseUrl(this.config)}/admin/campaigns/bulk-codes`, {
+    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/admin/campaigns/bulk-codes`, {
       campaignId,
       count,
       walletAddress,
       signature,
       message,
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
+
+    if (!response.ok) {
+      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+    }
 
     return response.data.data;
   }
 }
+
+/**
+ * Factory function to create IndexerAdminHelper with network client
+ */
+export const createIndexerAdminHelper = (
+  indexerBackendUrl: string, 
+  networkClient: NetworkClient
+): IndexerAdminHelper => {
+  return new IndexerAdminHelper({
+    indexerBackendUrl,
+    networkClient
+  });
+};

@@ -4,11 +4,12 @@
  * Note: These endpoints are typically called from backend services, not frontend
  */
 
-import axios from 'axios';
+import { NetworkClient } from '../../types/infrastructure/network';
 
 // Configuration interface for indexer webhook endpoints
 export interface IndexerWebhookConfig {
   indexerBackendUrl: string;
+  networkClient: NetworkClient;
 }
 
 export interface WebhookEmailSent {
@@ -65,20 +66,22 @@ const getIndexerBaseUrl = (config: IndexerWebhookConfig): string => {
  */
 export class IndexerWebhookHelper {
   private config: IndexerWebhookConfig;
+  private client: NetworkClient;
   
   constructor(config: IndexerWebhookConfig) {
     this.config = config;
+    this.client = config.networkClient;
   }
   /**
    * Process email sent event
    * This would typically be called from the WildDuck email backend
    */
   async processEmailSent(emailData: WebhookEmailSent): Promise<WebhookResponse> {
-    const response = await axios.post(`${getIndexerBaseUrl(this.config)}/webhook/email-sent`, emailData, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/webhook/email-sent`, emailData);
+
+    if (!response.ok) {
+      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+    }
 
     return response.data;
   }
@@ -88,11 +91,11 @@ export class IndexerWebhookHelper {
    * This would typically be called from the authentication backend
    */
   async processRecipientLogin(loginData: WebhookRecipientLogin): Promise<WebhookResponse> {
-    const response = await axios.post(`${getIndexerBaseUrl(this.config)}/webhook/recipient-login`, loginData, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/webhook/recipient-login`, loginData);
+
+    if (!response.ok) {
+      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+    }
 
     return response.data;
   }
@@ -102,11 +105,11 @@ export class IndexerWebhookHelper {
    * This would typically be called from the authentication backend
    */
   async registerReferral(referralData: WebhookReferralRegistration): Promise<WebhookResponse> {
-    const response = await axios.post(`${getIndexerBaseUrl(this.config)}/points/register-referral`, referralData, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/points/register-referral`, referralData);
+
+    if (!response.ok) {
+      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+    }
 
     return response.data;
   }
@@ -120,15 +123,15 @@ export class IndexerWebhookHelper {
     signature: string,
     message?: string
   ): Promise<WebhookResponse> {
-    const response = await axios.post(`${getIndexerBaseUrl(this.config)}/points/referee-login`, {
+    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/points/referee-login`, {
       walletAddress,
       signature,
       message,
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
+
+    if (!response.ok) {
+      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+    }
 
     return response.data;
   }
@@ -138,11 +141,11 @@ export class IndexerWebhookHelper {
    * This would typically be called from the authentication backend
    */
   async processLogin(loginData: WebhookLoginEvent): Promise<WebhookLoginResult> {
-    const response = await axios.post(`${getIndexerBaseUrl(this.config)}/webhook/login`, loginData, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/webhook/login`, loginData);
+
+    if (!response.ok) {
+      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+    }
 
     return response.data.data;
   }
@@ -156,12 +159,25 @@ export class IndexerWebhookHelper {
     processed: number;
     total: number;
   }> {
-    const response = await axios.post(`${getIndexerBaseUrl(this.config)}/api/solana/webhook`, transactions, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/api/solana/webhook`, transactions);
+
+    if (!response.ok) {
+      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+    }
 
     return response.data;
   }
 }
+
+/**
+ * Factory function to create IndexerWebhookHelper with network client
+ */
+export const createIndexerWebhookHelper = (
+  indexerBackendUrl: string, 
+  networkClient: NetworkClient
+): IndexerWebhookHelper => {
+  return new IndexerWebhookHelper({
+    indexerBackendUrl,
+    networkClient
+  });
+};
