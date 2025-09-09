@@ -3,7 +3,7 @@ import {
   NetworkClient,
   NetworkRequestOptions,
   NetworkResponse,
-} from '../../types';
+} from '../../di';
 // Note: TypeScript types are available in ../../types/api but not currently used in implementation
 
 // Platform-specific global

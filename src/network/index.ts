@@ -5,10 +5,10 @@
 // API clients
 export * from './clients';
 
-// Re-export network types from centralized types
+// Re-export network types from DI layer
 export type {
   NetworkClient,
   NetworkResponse,
   NetworkRequestOptions,
-} from '../types';
-export { NetworkError } from '../types';
+} from '../di/network';
+export { NetworkError } from '../di/network';
