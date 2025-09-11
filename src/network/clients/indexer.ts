@@ -56,7 +56,13 @@ class IndexerClient implements NetworkClient {
         statusText: response.statusText,
         data: responseData,
         headers: response.headers
-          ? Object.fromEntries(Array.from(response.headers.entries()))
+          ? (() => {
+              const headerObj: Record<string, string> = {};
+              response.headers.forEach((value, key) => {
+                headerObj[key] = value;
+              });
+              return headerObj;
+            })()
           : {},
       };
     } catch (error) {
