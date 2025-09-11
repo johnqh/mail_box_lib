@@ -13,7 +13,7 @@ import {
   AuthManager,
   AuthService,
   AuthStorageService,
-} from '../../../di';
+} from '@johnqh/di';
 import {
   DefaultEmailOperations,
   EmailOperations,

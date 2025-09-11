@@ -5,10 +5,10 @@
 // API clients
 export * from './clients';
 
-// Re-export network types from DI layer
+// Re-export network types from @johnqh/di
 export type {
   NetworkClient,
   NetworkResponse,
   NetworkRequestOptions,
-} from '../di/network';
-export { NetworkError } from '../di/network';
+} from '@johnqh/di';
+export { NetworkError } from '@johnqh/di';

@@ -9,7 +9,7 @@ import {
   NavigationHook,
   NavigationOptions,
   NavigationService,
-} from '../../di';
+} from '@johnqh/di';
 
 let navigationService: NavigationService;
 

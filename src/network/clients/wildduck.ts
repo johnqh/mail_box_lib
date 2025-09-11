@@ -1,4 +1,4 @@
-import { AppConfig, NetworkClient, NetworkResponse } from '../../di';
+import { AppConfig, NetworkClient, NetworkResponse } from '@johnqh/di';
 import { getWildDuckStorageKeys } from '../../utils/auth/wildDuckAuth';
 import { createURLSearchParams } from '../../utils/url-params';
 

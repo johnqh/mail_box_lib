@@ -46,7 +46,8 @@ export type {
   StorageProvider,
   StorageService,
   SerializedStorageService,
-} from './di';
+  StorageType,
+} from '@johnqh/di';
 
 // Infrastructure - Separated networking and storage logic (Goal 3)
 export * from './network';

@@ -3,7 +3,7 @@
  * These functions are designed for admin panel usage and require special permissions
  */
 
-import { NetworkClient } from '../../di/network';
+import { NetworkClient } from '@johnqh/di';
 
 // Configuration interface for indexer admin endpoints
 export interface IndexerAdminConfig {

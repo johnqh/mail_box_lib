@@ -3,7 +3,7 @@ import {
   NetworkClient,
   NetworkRequestOptions,
   NetworkResponse,
-} from '../../di';
+} from '@johnqh/di';
 // Note: TypeScript types are available in ../../types/api but not currently used in implementation
 
 // Platform-specific global
@@ -56,7 +56,7 @@ class IndexerClient implements NetworkClient {
         statusText: response.statusText,
         data: responseData,
         headers: response.headers
-          ? Object.fromEntries(Array.from((response.headers as any).entries()))
+          ? Object.fromEntries(Array.from(response.headers.entries()))
           : {},
       };
     } catch (error) {

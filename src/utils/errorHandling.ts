@@ -1,5 +1,5 @@
 import { ERROR_MESSAGES } from './constants';
-import { env } from '../di/env';
+// import { EnvUtils } from '@johnqh/di'; // TODO: Implement proper DI setup
 import { logger } from './logger';
 
 // Platform-specific global
@@ -86,10 +86,12 @@ const logError = (error: unknown, context?: string): void => {
   logger.error(errorMessage, context, error);
 
   // In production, you might want to send this to an error tracking service
-  if (env.isProduction()) {
-    // Send to error tracking service
-    // e.g., Sentry, LogRocket, etc.
-  }
+  // Note: EnvUtils would need to be instantiated with a platform-specific implementation
+  // For now, we'll comment this out until proper DI setup
+  // if (envUtils.isProduction()) {
+  //   // Send to error tracking service
+  //   // e.g., Sentry, LogRocket, etc.
+  // }
 };
 
 const retryWithBackoff = async <T>(

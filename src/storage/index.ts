@@ -2,7 +2,7 @@
  * Storage layer - Types and interfaces only
  */
 
-// Re-export storage types from DI layer
+// Re-export storage types from @johnqh/di
 export type {
   StorageProvider,
   PlatformStorage,
@@ -11,4 +11,5 @@ export type {
   SerializedStorageService,
   StorageFactory,
   StorageConfig,
-} from '../di/storage/storage';
+  StorageType,
+} from '@johnqh/di';
