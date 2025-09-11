@@ -5,19 +5,12 @@
 // Core utility hooks
 export * from './core';
 
-// Data layer hooks
-export * from './data/useEmail';
-export * from './data/useEmails';
-export * from './data/useEmailAddresses';
-export * from './data/useMailBoxes';
-
-// WildDuck API hooks
+// WildDuck API hooks (includes data hooks moved from /data)
 export * from './wildduck';
 
-// Indexer hooks (excluding conflicting exports)
+// Indexer hooks (excludes conflicting exports)
 export {
   useIndexerPoints,
-  useIndexerGraphQL,
   useIndexerMail,
   useIndexerSolana,
   // TanStack Query hooks
@@ -25,7 +18,12 @@ export {
   useIndexerPointsLeaderboard as usePointsLeaderboardQuery,
   useSiteStats,
   useSolanaStatus,
+  // Points hooks (moved from /points)
+  useTopUsers,
+  usePointsSiteStats,
+  usePointsLeaderboard,
+  useTopUsersLegacy,
 } from './indexer';
 
-// Points hooks (new TanStack Query based)
-export * from './points';
+// Contract hooks for @johnqh/mail_box_contracts
+export * from './contracts';

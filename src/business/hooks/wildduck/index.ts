@@ -12,6 +12,12 @@ export * from './useWildduckFilters';
 export * from './useWildduckAddresses';
 export * from './useWildduckAuth';
 
+// Data hooks (moved from /business/hooks/data)
+export * from './useEmail';
+export * from './useEmails';
+export * from './useEmailAddresses';
+export * from './useMailBoxes';
+
 // New TanStack Query hooks (with prefixed names to avoid conflicts)
 export {
   useWildduckHealth as useWildduckHealthQuery,

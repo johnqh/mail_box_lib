@@ -3,6 +3,7 @@
 This document provides context and instructions for AI assistants working on the @johnqh/lib project.
 
 ## Quick Reference
+
 - **Version**: 2.1.0
 - **Package**: @johnqh/lib
 - **Type**: React Native-compatible shared library
@@ -11,7 +12,9 @@ This document provides context and instructions for AI assistants working on the
 ## Project Context
 
 ### What is @johnqh/lib?
+
 A React Native-compatible shared utilities library for 0xmail.box projects, providing:
+
 - Platform-agnostic business logic
 - Email management services (WildDuck integration)
 - Blockchain integration (Solana & EVM)
@@ -21,6 +24,7 @@ A React Native-compatible shared utilities library for 0xmail.box projects, prov
 - UI hooks and utilities
 
 ### Key Principles
+
 1. **Platform Abstraction**: Code MUST work on both web and React Native
 2. **Interface-First Design**: ALWAYS define interfaces before implementations
 3. **Business Logic Separation**: Pure domain logic separate from platform code
@@ -49,11 +53,12 @@ src/
 ### Adding a New Service (Complete Example)
 
 1. **Define Interface** (`src/types/services/my-service.interface.ts`)
+
    ```typescript
    export interface MyService {
      method(param: string): Promise<Result>;
    }
-   
+
    export interface Result {
      success: boolean;
      data?: any;
@@ -62,27 +67,28 @@ src/
    ```
 
 2. **Create Business Operations** (`src/business/core/my-service/my-service-operations.ts`)
+
    ```typescript
    import { MyService } from '../../../types/services/my-service.interface';
-   
+
    export class MyServiceOperations {
      constructor(private myService: MyService) {}
-     
+
      async businessMethod(data: BusinessData): Promise<BusinessResult> {
        // Pure business logic - NO platform imports!
        const result = await this.myService.method(data.param);
-       
+
        if (!result.success) {
          throw new MyServiceError(result.error || 'Operation failed');
        }
-       
+
        return {
          processed: true,
-         value: result.data
+         value: result.data,
        };
      }
    }
-   
+
    export class MyServiceError extends Error {
      constructor(message: string) {
        super(message);
@@ -91,28 +97,30 @@ src/
    }
    ```
 
-3. **Implement Platform Services** 
-   
+3. **Implement Platform Services**
+
    Web Implementation (`src/utils/my-service/my-service.web.ts`):
+
    ```typescript
    import { MyService } from '../../types/services/my-service.interface';
-   
+
    export class WebMyService implements MyService {
      async method(param: string): Promise<Result> {
        // Web-specific implementation
        const response = await fetch('/api/my-service', {
          method: 'POST',
-         body: JSON.stringify({ param })
+         body: JSON.stringify({ param }),
        });
        return response.json();
      }
    }
    ```
-   
+
    React Native Implementation (`src/utils/my-service/my-service.reactnative.ts`):
+
    ```typescript
    import { MyService } from '../../types/services/my-service.interface';
-   
+
    export class ReactNativeMyService implements MyService {
      async method(param: string): Promise<Result> {
        // React Native-specific implementation
@@ -121,11 +129,12 @@ src/
      }
    }
    ```
-   
+
    Platform Detection (`src/utils/my-service/index.ts`):
+
    ```typescript
    import { Platform } from '../../types/environment';
-   
+
    export const createMyService = (): MyService => {
      if (Platform.OS === 'web') {
        const { WebMyService } = require('./my-service.web');
@@ -138,21 +147,22 @@ src/
    ```
 
 4. **Create React Hook** (`src/business/hooks/data/useMyService.ts`)
+
    ```typescript
    import { useState, useCallback } from 'react';
    import { MyServiceOperations } from '../../core/my-service/my-service-operations';
    import { createMyService } from '../../../utils/my-service';
-   
+
    export const useMyService = () => {
      const [loading, setLoading] = useState(false);
      const [error, setError] = useState<Error | null>(null);
-     
+
      const operations = new MyServiceOperations(createMyService());
-     
+
      const executeMethod = useCallback(async (data: BusinessData) => {
        setLoading(true);
        setError(null);
-       
+
        try {
          const result = await operations.businessMethod(data);
          return result;
@@ -163,47 +173,48 @@ src/
          setLoading(false);
        }
      }, []);
-     
+
      return {
        executeMethod,
        loading,
-       error
+       error,
      };
    };
    ```
 
 5. **Write Tests** (`src/business/core/my-service/__tests__/my-service-operations.test.ts`)
+
    ```typescript
    import { describe, it, expect, vi } from 'vitest';
    import { MyServiceOperations } from '../my-service-operations';
-   
+
    describe('MyServiceOperations', () => {
      it('should process data successfully', async () => {
        const mockService = {
          method: vi.fn().mockResolvedValue({
            success: true,
-           data: 'processed'
-         })
+           data: 'processed',
+         }),
        };
-       
+
        const operations = new MyServiceOperations(mockService);
        const result = await operations.businessMethod({ param: 'test' });
-       
+
        expect(result.processed).toBe(true);
        expect(result.value).toBe('processed');
        expect(mockService.method).toHaveBeenCalledWith('test');
      });
-     
+
      it('should handle errors properly', async () => {
        const mockService = {
          method: vi.fn().mockResolvedValue({
            success: false,
-           error: 'Failed'
-         })
+           error: 'Failed',
+         }),
        };
-       
+
        const operations = new MyServiceOperations(mockService);
-       
+
        await expect(
          operations.businessMethod({ param: 'test' })
        ).rejects.toThrow('Failed');
@@ -212,23 +223,27 @@ src/
    ```
 
 6. **Export from Index Files**
-   
+
    Add to `src/types/services/index.ts`:
+
    ```typescript
    export * from './my-service.interface';
    ```
-   
+
    Add to `src/business/core/index.ts`:
+
    ```typescript
    export * from './my-service/my-service-operations';
    ```
-   
+
    Add to `src/business/hooks/data/index.ts`:
+
    ```typescript
    export { useMyService } from './useMyService';
    ```
 
 ### File Naming Conventions
+
 - Interfaces: `*.interface.ts`
 - Web implementations: `*.web.ts`
 - React Native implementations: `*.reactnative.ts`
@@ -236,6 +251,7 @@ src/
 - Tests: `*.test.ts` or `*.spec.ts`
 
 ### Import/Export Patterns
+
 ```typescript
 // Always export interfaces and implementations separately
 export { MyService } from './my-service.interface';
@@ -250,6 +266,7 @@ export * from './service-b';
 ## Development Commands
 
 Essential commands to know:
+
 ```bash
 npm run build         # TypeScript compilation
 npm test             # Run all tests
@@ -262,16 +279,21 @@ npm run typecheck    # Type checking without build
 ## Code Quality Standards
 
 ### TypeScript
+
 - Use strict typing throughout
 - Define interfaces for all data structures
 - Use generics for reusable components
 - Avoid `any` type unless absolutely necessary
 
 ### Error Handling
+
 ```typescript
 // Use custom error types
 export class MyServiceError extends Error {
-  constructor(message: string, public code: string) {
+  constructor(
+    message: string,
+    public code: string
+  ) {
     super(message);
     this.name = 'MyServiceError';
   }
@@ -289,6 +311,7 @@ try {
 ```
 
 ### Testing
+
 - Test all business logic
 - Mock external dependencies
 - Use descriptive test names
@@ -300,6 +323,7 @@ try {
 ### Task Checklist for Common Operations
 
 #### Adding a New Feature
+
 - [ ] Define TypeScript interfaces first
 - [ ] Implement business logic in `src/business/core/`
 - [ ] Create platform implementations in `src/utils/`
@@ -311,6 +335,7 @@ try {
 - [ ] Update API documentation if public
 
 #### Fixing a Bug
+
 - [ ] Locate the bug using search/grep
 - [ ] Check if bug exists in both platforms
 - [ ] Write a failing test first
@@ -320,6 +345,7 @@ try {
 - [ ] Run full test suite
 
 #### Refactoring Code
+
 - [ ] Ensure interface compatibility
 - [ ] Update all platform implementations
 - [ ] Maintain test coverage
@@ -358,7 +384,7 @@ import { MyService } from '../../types/services/my-service.interface';
 import { ServiceA, ServiceB } from '../services';
 
 // Platform-aware imports (use dynamic requires)
-const Service = Platform.OS === 'web' 
+const Service = Platform.OS === 'web'
   ? require('./service.web').WebService
   : require('./service.reactnative').ReactNativeService;
 
@@ -396,12 +422,12 @@ async protectedCall(walletAddress: string, signature: string, message: string) {
 ```typescript
 // Mock platform detection
 vi.mock('../../types/environment', () => ({
-  Platform: { OS: 'web' }
+  Platform: { OS: 'web' },
 }));
 
 // Mock services
 const mockService = {
-  method: vi.fn().mockResolvedValue({ success: true })
+  method: vi.fn().mockResolvedValue({ success: true }),
 };
 
 // Test async operations
@@ -414,6 +440,7 @@ await waitFor(() => expect(result.current.loading).toBe(false));
 ```
 
 ### Common Pitfalls to Avoid
+
 - ❌ Don't import React Native modules in business logic
 - ❌ Don't skip interface definitions
 - ❌ Don't forget platform detection in index files
@@ -426,6 +453,7 @@ await waitFor(() => expect(result.current.loading).toBe(false));
 ### Quick Fixes for Common Issues
 
 **Platform Detection Not Working:**
+
 ```typescript
 // Check Platform import
 import { Platform } from '../../types/environment';
@@ -433,18 +461,21 @@ import { Platform } from '../../types/environment';
 ```
 
 **TypeScript Errors:**
+
 ```bash
 npm run typecheck  # Find all type errors
 npm run build      # Full compilation check
 ```
 
 **Test Failures:**
+
 ```bash
 npm test -- --watch  # Run tests in watch mode
 npm test -- path/to/specific.test.ts  # Run specific test
 ```
 
 **Lint Issues:**
+
 ```bash
 npm run lint:fix  # Auto-fix most issues
 npm run format    # Format with Prettier
@@ -452,13 +483,19 @@ npm run format    # Format with Prettier
 
 ## External Dependencies
 
+### Project dependencies
+
+- `@johnqh/di` → `../di` (Dependency Injection definitions)
+
 ### Symbolic Links
+
 - `./indexer` → `~/mail_box_indexer` (Email indexing service)
 - `./wildduck` → `~/wildduck` (Email server)
 
 These are external projects linked for development but should not be modified directly.
 
 ### Key Libraries
+
 - **React/React Native**: UI framework compatibility
 - **Firebase**: Backend services
 - **Blockchain**: @solana/web3.js, viem for crypto operations
@@ -468,6 +505,7 @@ These are external projects linked for development but should not be modified di
 ## Project Files Structure
 
 ### Important Files
+
 - `.claude_context`: AI development context
 - `DEVELOPMENT.md`: Detailed development guide
 - `docs/API.md`: API documentation
@@ -475,6 +513,7 @@ These are external projects linked for development but should not be modified di
 - `templates/`: Code templates for common patterns
 
 ### Configuration Files
+
 - `tsconfig.json`: TypeScript configuration
 - `.eslintrc.js`: Linting rules
 - `.prettierrc`: Code formatting rules
@@ -484,6 +523,7 @@ These are external projects linked for development but should not be modified di
 ## Getting Help
 
 ### Resources
+
 1. **Development Guide**: `DEVELOPMENT.md`
 2. **API Documentation**: `docs/API.md`
 3. **Type Documentation**: `docs/TYPES.md`
@@ -491,6 +531,7 @@ These are external projects linked for development but should not be modified di
 5. **Test Examples**: Existing `__tests__` directories
 
 ### When Stuck
+
 1. Look at similar existing implementations
 2. Check the templates directory for patterns
 3. Review the type definitions for interfaces
@@ -500,6 +541,7 @@ These are external projects linked for development but should not be modified di
 ## Deployment & CI/CD
 
 ### Automated Processes
+
 - **CI Pipeline**: Runs on every push/PR
 - **AI Code Review**: Automated analysis of changes
 - **Security Audits**: Vulnerability scanning
@@ -507,6 +549,7 @@ These are external projects linked for development but should not be modified di
 - **Auto-publishing**: Publishes to npm on version changes
 
 ### Manual Processes
+
 - **Version Updates**: Update package.json version manually
 - **Documentation Updates**: Keep docs in sync with code changes
 - **Breaking Changes**: Document in CHANGELOG.md
