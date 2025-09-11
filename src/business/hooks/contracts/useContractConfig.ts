@@ -42,14 +42,14 @@ export const useContractConfig = (): UseContractConfigReturn => {
   const [config, setConfig] = useState<ChainConfig | null>(null);
 
   const setEVMConfig = useCallback((evmConfig: EVMConfig) => {
-    setConfig(prev => ({
+    setConfig((prev: ChainConfig | null) => ({
       ...prev,
       evm: evmConfig,
     }));
   }, []);
 
   const setSolanaConfig = useCallback((solanaConfig: SolanaConfig) => {
-    setConfig(prev => ({
+    setConfig((prev: ChainConfig | null) => ({
       ...prev,
       solana: solanaConfig,
     }));
