@@ -130,7 +130,7 @@ const useWildduckMailboxes = (): UseWildduckMailboxesReturn => {
           }
         );
 
-        return response.data;
+        return response.data as { success: boolean };
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to update mailbox';
@@ -160,7 +160,7 @@ const useWildduckMailboxes = (): UseWildduckMailboxesReturn => {
           }
         );
 
-        return response.data;
+        return response.data as { success: boolean };
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to delete mailbox';

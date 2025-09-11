@@ -173,7 +173,7 @@ const useWildduckMessages = (): UseWildduckMessagesReturn => {
           }
         );
 
-        return response.data;
+        return response.data as { success: boolean; id: string };
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to send message';
@@ -205,7 +205,7 @@ const useWildduckMessages = (): UseWildduckMessagesReturn => {
           }
         );
 
-        return response.data;
+        return response.data as { success: boolean };
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to update message';
@@ -235,7 +235,7 @@ const useWildduckMessages = (): UseWildduckMessagesReturn => {
           }
         );
 
-        return response.data;
+        return response.data as { success: boolean };
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to delete message';
@@ -267,7 +267,7 @@ const useWildduckMessages = (): UseWildduckMessagesReturn => {
           }
         );
 
-        return response.data;
+        return response.data as { success: boolean };
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to move message';
@@ -298,10 +298,11 @@ const useWildduckMessages = (): UseWildduckMessagesReturn => {
           }
         );
 
-        const messageList = response.data.results || [];
+        const searchResponse = response.data as { results?: WildDuckMessage[], total?: number, page?: number };
+        const messageList = searchResponse.results || [];
         setMessages(messageList);
-        setTotalMessages(response.data.total || 0);
-        setCurrentPage(response.data.page || 1);
+        setTotalMessages(searchResponse.total || 0);
+        setCurrentPage(searchResponse.page || 1);
         return messageList;
       } catch (err) {
         const errorMessage =

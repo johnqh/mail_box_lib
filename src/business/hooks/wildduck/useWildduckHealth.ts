@@ -77,8 +77,9 @@ const useWildduckHealth = (): UseWildduckHealthReturn => {
         headers: WildDuckAPI['headers'],
       });
 
-      setHealthStatus(response.data);
-      return response.data;
+      const healthData = response.data as WildduckHealthStatus;
+      setHealthStatus(healthData);
+      return healthData;
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to check health';

@@ -119,7 +119,7 @@ const useWildduckFilters = (): UseWildduckFiltersReturn => {
           }
         );
 
-        const filterList = response.data.results || [];
+        const filterList = (response.data as { results?: WildduckFilter[] }).results || [];
         setFilters(filterList);
         return filterList;
       } catch (err) {
@@ -149,7 +149,7 @@ const useWildduckFilters = (): UseWildduckFiltersReturn => {
           }
         );
 
-        return response.data;
+        return response.data as WildduckFilter;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to get filter';
@@ -180,7 +180,7 @@ const useWildduckFilters = (): UseWildduckFiltersReturn => {
           }
         );
 
-        return response.data;
+        return response.data as { success: boolean; id: string };
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to create filter';
@@ -212,7 +212,7 @@ const useWildduckFilters = (): UseWildduckFiltersReturn => {
           }
         );
 
-        return response.data;
+        return response.data as { success: boolean };
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to update filter';
@@ -239,7 +239,7 @@ const useWildduckFilters = (): UseWildduckFiltersReturn => {
           }
         );
 
-        return response.data;
+        return response.data as { success: boolean };
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to delete filter';

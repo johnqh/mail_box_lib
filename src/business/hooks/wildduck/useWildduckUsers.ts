@@ -78,9 +78,10 @@ const useWildduckUsers = (): UseWildduckUsersReturn => {
           }
         );
 
+        const usersData = response.data as { results?: WildduckUser[], total?: number };
         return {
-          users: response.data.results || [],
-          total: response.data.total || 0,
+          users: usersData.results || [],
+          total: usersData.total || 0,
         };
       } catch (err) {
         const errorMessage =

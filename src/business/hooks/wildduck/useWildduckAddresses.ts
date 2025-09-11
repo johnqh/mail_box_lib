@@ -116,7 +116,7 @@ const useWildduckAddresses = (): UseWildduckAddressesReturn => {
           }
         );
 
-        return response.data;
+        return response.data as { success: boolean; id: string };
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to create address';
@@ -148,7 +148,7 @@ const useWildduckAddresses = (): UseWildduckAddressesReturn => {
           }
         );
 
-        return response.data;
+        return response.data as { success: boolean };
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to update address';
@@ -178,7 +178,7 @@ const useWildduckAddresses = (): UseWildduckAddressesReturn => {
           }
         );
 
-        return response.data;
+        return response.data as { success: boolean };
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to delete address';
@@ -206,7 +206,7 @@ const useWildduckAddresses = (): UseWildduckAddressesReturn => {
         }
       );
 
-      return response.data.results || [];
+      return (response.data as { results?: ForwardedAddress[] }).results || [];
     } catch (err) {
       const errorMessage =
         err instanceof Error
@@ -237,7 +237,7 @@ const useWildduckAddresses = (): UseWildduckAddressesReturn => {
           }
         );
 
-        return response.data;
+        return response.data as { success: boolean; id: string };
       } catch (err) {
         const errorMessage =
           err instanceof Error
@@ -266,7 +266,7 @@ const useWildduckAddresses = (): UseWildduckAddressesReturn => {
           }
         );
 
-        return response.data;
+        return response.data as { success: boolean };
       } catch (err) {
         const errorMessage =
           err instanceof Error
@@ -295,7 +295,7 @@ const useWildduckAddresses = (): UseWildduckAddressesReturn => {
           }
         );
 
-        return response.data;
+        return response.data as { success: boolean; user?: string };
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to resolve address';

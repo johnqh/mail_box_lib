@@ -39,7 +39,7 @@ const useWildduckSettings = (): UseWildduckSettingsReturn => {
         headers: WildDuckAPI['headers'],
       });
 
-      const settingsData = response.data.results || response.data;
+      const settingsData = (response.data as { results?: WildduckSettings } | WildduckSettings).results || response.data as WildduckSettings;
       setSettings(settingsData);
       return settingsData;
     } catch (err) {
@@ -71,7 +71,7 @@ const useWildduckSettings = (): UseWildduckSettingsReturn => {
         // Update local settings
         setSettings(prev => ({ ...prev, [key]: value }));
 
-        return response.data;
+        return response.data as { success: boolean };
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to update setting';
@@ -104,7 +104,7 @@ const useWildduckSettings = (): UseWildduckSettingsReturn => {
           return rest;
         });
 
-        return response.data;
+        return response.data as { success: boolean };
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to delete setting';
