@@ -79,7 +79,10 @@
       "Bash(npm link:*)",
       "Bash(npm run:*)",
       "Bash(npm update:*)",
-      "Bash(npm audit:*)"
+      "Bash(npm audit:*)",
+      "Read(//Users/qianghuang/di/**)",
+      "Bash(npm publish:*)",
+      "Bash(npm:*)"
     ],
     "deny": [],
     "ask": []
