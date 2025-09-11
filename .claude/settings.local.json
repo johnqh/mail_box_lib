@@ -86,7 +86,8 @@
       "Read(//Users/qianghuang/mail_box_indexer/**)",
       "Read(//Users/qianghuang/wildduck/**)",
       "Bash(cp:*)",
-      "Bash(ln:*)"
+      "Bash(ln:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []
