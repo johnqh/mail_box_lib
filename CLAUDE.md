@@ -2,12 +2,27 @@
 
 This document provides context and instructions for AI assistants working on the @johnqh/lib project.
 
+## AI Assistant Quick Start
+
+**Before any task, run these checks:**
+```bash
+npm run check-all  # Ensures build, tests, and lint all pass
+```
+
+**Common tasks you might be asked to do:**
+1. Add new service → Start with interface definition in `src/types/services/`
+2. Fix type errors → Check @johnqh/di imports first
+3. Update dependencies → Use `npm install package@latest`
+4. Debug tests → Run `npm test -- --watch`
+5. Find code → Use Glob for files, Grep for content
+
 ## Quick Reference
 
-- **Version**: 2.1.0
+- **Version**: 3.1.1
 - **Package**: @johnqh/lib
 - **Type**: React Native-compatible shared library
 - **Primary Use**: 0xmail.box projects (web & mobile)
+- **Dependencies**: @johnqh/di (^1.1.0), @johnqh/mail_box_contracts (^1.5.3)
 
 ## Project Context
 
@@ -31,6 +46,25 @@ A React Native-compatible shared utilities library for 0xmail.box projects, prov
 4. **Comprehensive Testing**: All business logic MUST be tested
 5. **Type Safety**: Everything is strictly typed with TypeScript
 6. **No Direct Platform Imports**: Never import React Native or web-specific modules in business logic
+
+### Recent Updates (v3.1.1)
+
+- **LoginMethod removal**: Completely removed LoginMethod enum - use string literals instead
+- **Dependency Updates**: @johnqh/di updated to v1.1.0 for improved type safety
+- **Type Deduplication**: Removed duplicate types that exist in @johnqh/di (WalletType, AnalyticsEvent, etc.)
+- **Local Type Definitions**: Added WalletUserData interface locally (not in @johnqh/di)
+- **Interface Alignment**: EmailAddress interface updated to match new structure
+- **Type Assertions**: Added for indexer utilities to handle stricter NetworkResponse typing
+
+### Type Migration Notes
+
+**Removed Types (use alternatives):**
+- `LoginMethod` → Use string literals ('email', 'wallet', 'google', etc.)
+- Duplicate enums from @johnqh/di are now imported instead of locally defined
+
+**Local Types (not in @johnqh/di):**
+- `WalletUserData` - wallet-based user information interface
+- `ChainType` - includes local 'unknown' value not in @johnqh/di
 
 ## Architecture Overview
 
@@ -274,6 +308,65 @@ npm run lint         # ESLint checking
 npm run lint:fix     # Auto-fix lint issues
 npm run format       # Format code with Prettier
 npm run typecheck    # Type checking without build
+npm run check-all    # Run lint, typecheck, and tests
+```
+
+## Troubleshooting Guide
+
+### Common Type Issues
+
+**NetworkResponse typing from @johnqh/di:**
+```typescript
+// response.data is typed as 'unknown', use type assertions:
+const result = response.data as MyExpectedType;
+// or
+const error = (response.data as any)?.error;
+```
+
+**Missing types from @johnqh/di:**
+```typescript
+// Import shared types from @johnqh/di:
+import { LoginMethod, WalletType, AnalyticsEvent } from '@johnqh/di';
+// Don't create local duplicates!
+```
+
+**EmailAddress interface changes:**
+```typescript
+// Old structure (deprecated):
+{ email: string, isPrimary: boolean, isActive: boolean }
+// New structure (current):
+{ address: string, primary?: boolean, verified: boolean }
+```
+
+**LoginMethod removed - use strings:**
+```typescript
+// Old (removed):
+import { LoginMethod } from './enums';
+method: LoginMethod.WALLET
+
+// New (current):
+method: 'wallet' // or 'email', 'google', 'apple', 'github'
+```
+
+### Quick Fixes for Common Errors
+
+**"Module '@johnqh/di' has no exported member 'X'":**
+- Check if type exists in @johnqh/di's exports
+- If missing, define locally in appropriate types file
+- Types like WalletUserData are defined locally, not in @johnqh/di
+
+**Build errors after dependency updates:**
+```bash
+npm run check-all  # Run all checks
+npm run typecheck  # Check types only
+```
+
+**Import/export issues:**
+```bash
+# Find all uses of a type
+rg "TypeName" src/
+# Find where a type is defined
+rg "interface TypeName\|enum TypeName\|type TypeName" src/
 ```
 
 ## Code Quality Standards
@@ -485,7 +578,10 @@ npm run format    # Format with Prettier
 
 ### Project dependencies
 
-- `@johnqh/di` → `../di` (Dependency Injection definitions)
+- `@johnqh/di` (v1.1.0) - Dependency Injection interfaces and types
+  - Provides: NetworkClient, AnalyticsService, StorageService, NavigationService, etc.
+  - Enums: LoginMethod, WalletType, AnalyticsEvent
+  - DO NOT duplicate these types locally
 
 ### Symbolic Links
 

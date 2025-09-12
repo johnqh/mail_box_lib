@@ -78,8 +78,11 @@ const queryKeys = {
       [...wildduckBase(), 'addresses', userId] as const,
 
     messages: () => [...wildduckBase(), 'messages'] as const,
-    userMessages: (userId: string, filters?: Record<string, unknown>) =>
-      [...wildduckBase(), 'messages', userId, filters] as const,
+    userMessages: (
+      userId: string,
+      mailboxId: string,
+      filters?: Record<string, unknown>
+    ) => [...wildduckBase(), 'messages', userId, mailboxId, filters] as const,
     message: (userId: string, messageId: string) =>
       [...wildduckBase(), 'messages', userId, messageId] as const,
 

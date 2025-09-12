@@ -258,7 +258,7 @@ export class IndexerGraphQLHelper {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const result: GraphQLResponse<T> = response.data;
+    const result: GraphQLResponse<T> = response.data as GraphQLResponse<T>;
     
     if (result.errors && result.errors.length > 0) {
       throw new Error(`GraphQL error: ${result.errors[0].message}`);

@@ -8,16 +8,29 @@ Handles all email-related operations across platforms.
 
 ```typescript
 interface EmailService {
-  getEmails(userId: string, mailboxId: string, options?: EmailListOptions): Promise<Email[]>;
+  getEmails(
+    userId: string,
+    mailboxId: string,
+    options?: EmailListOptions
+  ): Promise<Email[]>;
   getEmail(userId: string, emailId: string): Promise<Email>;
-  updateEmail(userId: string, emailId: string, updates: Partial<Email>): Promise<Email>;
+  updateEmail(
+    userId: string,
+    emailId: string,
+    updates: Partial<Email>
+  ): Promise<Email>;
   deleteEmail(userId: string, emailId: string): Promise<void>;
   sendEmail(userId: string, email: Partial<Email>): Promise<Email>;
-  searchEmails(userId: string, query: string, options?: EmailListOptions): Promise<Email[]>;
+  searchEmails(
+    userId: string,
+    query: string,
+    options?: EmailListOptions
+  ): Promise<Email[]>;
 }
 ```
 
 **Usage:**
+
 ```typescript
 import { getEmailService } from '@johnqh/lib';
 
@@ -32,20 +45,12 @@ Manages email folders and mailbox operations.
 ```typescript
 interface MailboxService {
   getMailboxes(userId: string): Promise<Mailbox[]>;
-  createMailbox(userId: string, name: string, options?: { hidden?: boolean }): Promise<Mailbox>;
+  createMailbox(
+    userId: string,
+    name: string,
+    options?: { hidden?: boolean }
+  ): Promise<Mailbox>;
   deleteMailbox(userId: string, mailboxId: string): Promise<void>;
-}
-```
-
-### EmailAddressService
-
-Manages user email addresses and aliases.
-
-```typescript
-interface EmailAddressService {
-  getEmailAddresses(userId: string): Promise<EmailAddress[]>;
-  addEmailAddress(userId: string, address: string, options?: { main?: boolean }): Promise<EmailAddress>;
-  deleteEmailAddress(userId: string, addressId: string): Promise<void>;
 }
 ```
 
@@ -57,9 +62,18 @@ High-level business logic for email operations.
 
 ```typescript
 class EmailOperations {
-  async getEmailsWithMetadata(userId: string, mailboxId: string): Promise<EnrichedEmail[]>
-  async sendEmailWithValidation(userId: string, emailData: EmailDraft): Promise<Email>
-  async searchEmailsWithFilters(userId: string, searchParams: SearchParams): Promise<SearchResult>
+  async getEmailsWithMetadata(
+    userId: string,
+    mailboxId: string
+  ): Promise<EnrichedEmail[]>;
+  async sendEmailWithValidation(
+    userId: string,
+    emailData: EmailDraft
+  ): Promise<Email>;
+  async searchEmailsWithFilters(
+    userId: string,
+    searchParams: SearchParams
+  ): Promise<SearchResult>;
 }
 ```
 
@@ -69,9 +83,15 @@ Authentication and user management business logic.
 
 ```typescript
 class AuthOperations {
-  async authenticateWithBlockchain(walletAddress: string, signature: string): Promise<AuthResult>
-  async refreshAuthToken(refreshToken: string): Promise<AuthResult>
-  async validateUserPermissions(userId: string, resource: string): Promise<boolean>
+  async authenticateWithBlockchain(
+    walletAddress: string,
+    signature: string
+  ): Promise<AuthResult>;
+  async refreshAuthToken(refreshToken: string): Promise<AuthResult>;
+  async validateUserPermissions(
+    userId: string,
+    resource: string
+  ): Promise<boolean>;
 }
 ```
 
@@ -84,7 +104,7 @@ Hook for fetching and managing email lists.
 ```typescript
 const useEmails = (mailboxId: string, options?: UseEmailsOptions) => {
   const { emails, loading, error, refetch, loadMore, hasMore } = useEmails('inbox');
-  
+
   return {
     emails: Email[],
     loading: boolean,
@@ -97,6 +117,7 @@ const useEmails = (mailboxId: string, options?: UseEmailsOptions) => {
 ```
 
 **Example:**
+
 ```tsx
 function EmailList({ mailboxId }: { mailboxId: string }) {
   const { emails, loading, error, refetch } = useEmails(mailboxId);
@@ -143,9 +164,9 @@ const useAuth = () => {
     loading: boolean,
     login: (credentials: LoginCredentials) => Promise<void>,
     logout: () => Promise<void>,
-    refreshAuth: () => Promise<void>
+    refreshAuth: () => Promise<void>,
   };
-}
+};
 ```
 
 ## Storage Services
@@ -165,6 +186,7 @@ interface StorageService {
 ```
 
 **Implementations:**
+
 - **Web**: Uses localStorage/sessionStorage
 - **React Native**: Uses AsyncStorage
 
@@ -206,10 +228,13 @@ Blockchain wallet interaction utilities.
 
 ```typescript
 export class WalletCapabilities {
-  static async detectWallets(): Promise<WalletInfo[]>
-  static async connectWallet(walletType: WalletType): Promise<WalletConnection>
-  static async signMessage(message: string, wallet: WalletConnection): Promise<string>
-  static async getBalance(address: string, chainId: string): Promise<string>
+  static async detectWallets(): Promise<WalletInfo[]>;
+  static async connectWallet(walletType: WalletType): Promise<WalletConnection>;
+  static async signMessage(
+    message: string,
+    wallet: WalletConnection
+  ): Promise<string>;
+  static async getBalance(address: string, chainId: string): Promise<string>;
 }
 ```
 
@@ -219,9 +244,9 @@ Blockchain address validation and network detection.
 
 ```typescript
 export class AddressDetection {
-  static isValidAddress(address: string, chainType?: ChainType): boolean
-  static detectChainType(address: string): ChainType | null
-  static normalizeAddress(address: string, chainType: ChainType): string
+  static isValidAddress(address: string, chainType?: ChainType): boolean;
+  static detectChainType(address: string): ChainType | null;
+  static normalizeAddress(address: string, chainType: ChainType): string;
 }
 ```
 
@@ -258,7 +283,10 @@ interface AISearchService {
 
 ```typescript
 export class EmailServiceError extends Error {
-  constructor(message: string, public code: string) {
+  constructor(
+    message: string,
+    public code: string
+  ) {
     super(message);
     this.name = 'EmailServiceError';
   }
@@ -272,7 +300,10 @@ export class AuthenticationError extends Error {
 }
 
 export class ValidationError extends Error {
-  constructor(message: string, public field: string) {
+  constructor(
+    message: string,
+    public field: string
+  ) {
     super(message);
     this.name = 'ValidationError';
   }
@@ -360,7 +391,7 @@ interface Mailbox {
 enum ChainType {
   ETHEREUM = 'ethereum',
   SOLANA = 'solana',
-  POLYGON = 'polygon'
+  POLYGON = 'polygon',
 }
 
 enum EmailFolder {
@@ -369,13 +400,13 @@ enum EmailFolder {
   DRAFTS = 'drafts',
   TRASH = 'trash',
   SPAM = 'spam',
-  ARCHIVE = 'archive'
+  ARCHIVE = 'archive',
 }
 
 enum Theme {
   LIGHT = 'light',
   DARK = 'dark',
-  SYSTEM = 'system'
+  SYSTEM = 'system',
 }
 ```
 

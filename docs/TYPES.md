@@ -22,37 +22,37 @@ Core email data structure used throughout the application.
 interface Email {
   /** Unique email identifier */
   id: string;
-  
+
   /** Sender email address */
   from: string;
-  
+
   /** Recipient email address */
   to: string;
-  
+
   /** Email subject line */
   subject: string;
-  
+
   /** Email body content (HTML or plain text) */
   body: string;
-  
+
   /** Email timestamp */
   date: Date;
-  
+
   /** Whether the email has been read */
   read: boolean;
-  
+
   /** Whether the email is starred/favorited */
   starred: boolean;
-  
+
   /** Whether the email is marked as important */
   important?: boolean;
-  
+
   /** Email folder/mailbox */
   folder: EmailFolder;
-  
+
   /** Email labels/tags */
   labels?: string[];
-  
+
   /** Attachment file names */
   attachments?: string[];
 }
@@ -66,16 +66,16 @@ User account information and preferences.
 interface User {
   /** Unique user identifier */
   id: string;
-  
+
   /** User display name */
   name: string;
-  
+
   /** Primary email address */
   email: string;
-  
+
   /** User avatar URL */
   avatar?: string;
-  
+
   /** All associated email addresses */
   emailAddresses: EmailAddress[];
 }
@@ -89,16 +89,16 @@ Individual email address with metadata.
 interface EmailAddress {
   /** Unique address identifier */
   id: string;
-  
+
   /** The email address */
   email: string;
-  
+
   /** Display name for this address */
   name: string;
-  
+
   /** Whether this is the primary address */
   isPrimary: boolean;
-  
+
   /** Whether this address is active */
   isActive: boolean;
 }
@@ -112,25 +112,25 @@ Email folder/mailbox structure.
 interface Mailbox {
   /** Unique mailbox identifier */
   id: string;
-  
+
   /** Display name */
   name: string;
-  
+
   /** Full path (e.g., "INBOX/Work/Projects") */
   path: string;
-  
+
   /** Special use designation (INBOX, SENT, etc.) */
   specialUse?: string;
-  
+
   /** Whether user is subscribed to this mailbox */
   subscribed: boolean;
-  
+
   /** Whether mailbox is hidden in UI */
   hidden: boolean;
-  
+
   /** Total number of emails */
   total?: number;
-  
+
   /** Number of unread emails */
   unseen?: number;
 }
@@ -150,44 +150,56 @@ interface EmailService {
    * @param mailboxId - Mailbox identifier
    * @param options - Pagination and sorting options
    */
-  getEmails(userId: string, mailboxId: string, options?: EmailListOptions): Promise<Email[]>;
-  
+  getEmails(
+    userId: string,
+    mailboxId: string,
+    options?: EmailListOptions
+  ): Promise<Email[]>;
+
   /**
    * Get a specific email by ID
    * @param userId - User identifier
    * @param emailId - Email identifier
    */
   getEmail(userId: string, emailId: string): Promise<Email>;
-  
+
   /**
    * Update email properties
    * @param userId - User identifier
    * @param emailId - Email identifier
    * @param updates - Properties to update
    */
-  updateEmail(userId: string, emailId: string, updates: Partial<Email>): Promise<Email>;
-  
+  updateEmail(
+    userId: string,
+    emailId: string,
+    updates: Partial<Email>
+  ): Promise<Email>;
+
   /**
    * Delete an email
    * @param userId - User identifier
    * @param emailId - Email identifier
    */
   deleteEmail(userId: string, emailId: string): Promise<void>;
-  
+
   /**
    * Send a new email
    * @param userId - User identifier
    * @param email - Email data to send
    */
   sendEmail(userId: string, email: Partial<Email>): Promise<Email>;
-  
+
   /**
    * Search emails by query
    * @param userId - User identifier
    * @param query - Search query string
    * @param options - Search options
    */
-  searchEmails(userId: string, query: string, options?: EmailListOptions): Promise<Email[]>;
+  searchEmails(
+    userId: string,
+    query: string,
+    options?: EmailListOptions
+  ): Promise<Email[]>;
 }
 ```
 
@@ -203,25 +215,25 @@ interface StorageService {
    * @returns Promise resolving to the stored value or null
    */
   get<T>(key: string): Promise<T | null>;
-  
+
   /**
    * Store a value
    * @param key - Storage key
    * @param value - Value to store
    */
   set<T>(key: string, value: T): Promise<void>;
-  
+
   /**
    * Remove a value from storage
    * @param key - Storage key
    */
   remove(key: string): Promise<void>;
-  
+
   /**
    * Clear all stored values
    */
   clear(): Promise<void>;
-  
+
   /**
    * Get all storage keys
    * @returns Promise resolving to array of keys
@@ -242,7 +254,7 @@ interface NetworkService {
    * @param options - Request options
    */
   get<T>(url: string, options?: RequestOptions): Promise<T>;
-  
+
   /**
    * Perform POST request
    * @param url - Request URL
@@ -250,7 +262,7 @@ interface NetworkService {
    * @param options - Request options
    */
   post<T>(url: string, data?: any, options?: RequestOptions): Promise<T>;
-  
+
   /**
    * Perform PUT request
    * @param url - Request URL
@@ -258,7 +270,7 @@ interface NetworkService {
    * @param options - Request options
    */
   put<T>(url: string, data?: any, options?: RequestOptions): Promise<T>;
-  
+
   /**
    * Perform DELETE request
    * @param url - Request URL
@@ -280,21 +292,21 @@ interface AnalyticsService {
    * @param properties - Event properties
    */
   track(event: string, properties?: Record<string, any>): Promise<void>;
-  
+
   /**
    * Identify a user
    * @param userId - User identifier
    * @param traits - User traits/properties
    */
   identify(userId: string, traits?: Record<string, any>): Promise<void>;
-  
+
   /**
    * Track screen view
    * @param name - Screen name
    * @param properties - Screen properties
    */
   screen(name: string, properties?: Record<string, any>): Promise<void>;
-  
+
   /**
    * Flush pending events
    */
@@ -311,135 +323,30 @@ High-level email business logic operations.
 ```typescript
 class EmailOperations {
   constructor(private emailService: EmailService) {}
-  
+
   /**
    * Get emails with additional metadata and enrichment
    */
-  async getEmailsWithMetadata(userId: string, mailboxId: string): Promise<EnrichedEmail[]>;
-  
+  async getEmailsWithMetadata(
+    userId: string,
+    mailboxId: string
+  ): Promise<EnrichedEmail[]>;
+
   /**
    * Send email with validation and processing
    */
-  async sendEmailWithValidation(userId: string, emailData: EmailDraft): Promise<Email>;
-  
+  async sendEmailWithValidation(
+    userId: string,
+    emailData: EmailDraft
+  ): Promise<Email>;
+
   /**
    * Advanced search with filters and ranking
    */
-  async searchEmailsWithFilters(userId: string, searchParams: SearchParams): Promise<SearchResult>;
-}
-```
-
-### AuthOperations
-
-Authentication business logic operations.
-
-```typescript
-class AuthOperations {
-  constructor(
-    private authService: AuthService,
-    private storageService: StorageService
-  ) {}
-  
-  /**
-   * Authenticate user with blockchain wallet
-   */
-  async authenticateWithBlockchain(walletAddress: string, signature: string): Promise<AuthResult>;
-  
-  /**
-   * Refresh authentication token
-   */
-  async refreshAuthToken(refreshToken: string): Promise<AuthResult>;
-  
-  /**
-   * Validate user permissions for a resource
-   */
-  async validateUserPermissions(userId: string, resource: string): Promise<boolean>;
-}
-```
-
-## Hook Types
-
-### UseEmailsReturn
-
-Return type for the useEmails hook.
-
-```typescript
-interface UseEmailsReturn {
-  /** Array of emails */
-  emails: Email[];
-  
-  /** Loading state */
-  loading: boolean;
-  
-  /** Error state */
-  error: Error | null;
-  
-  /** Function to refetch emails */
-  refetch: () => Promise<void>;
-  
-  /** Function to load more emails (pagination) */
-  loadMore: () => Promise<void>;
-  
-  /** Whether more emails are available */
-  hasMore: boolean;
-  
-  /** Total count of emails */
-  totalCount: number;
-}
-```
-
-### UseEmailsOptions
-
-Options for configuring the useEmails hook.
-
-```typescript
-interface UseEmailsOptions {
-  /** Whether to automatically fetch data */
-  enabled?: boolean;
-  
-  /** Number of emails per page */
-  limit?: number;
-  
-  /** Sort order */
-  order?: 'asc' | 'desc';
-  
-  /** Refetch interval in milliseconds */
-  refetchInterval?: number;
-  
-  /** Callback for successful fetch */
-  onSuccess?: (emails: Email[]) => void;
-  
-  /** Callback for fetch error */
-  onError?: (error: Error) => void;
-}
-```
-
-### UseAuthReturn
-
-Return type for the useAuth hook.
-
-```typescript
-interface UseAuthReturn {
-  /** Current user or null if not authenticated */
-  user: User | null;
-  
-  /** Whether user is authenticated */
-  isAuthenticated: boolean;
-  
-  /** Loading state */
-  loading: boolean;
-  
-  /** Authentication error */
-  error: Error | null;
-  
-  /** Login function */
-  login: (credentials: LoginCredentials) => Promise<void>;
-  
-  /** Logout function */
-  logout: () => Promise<void>;
-  
-  /** Refresh authentication */
-  refreshAuth: () => Promise<void>;
+  async searchEmailsWithFilters(
+    userId: string,
+    searchParams: SearchParams
+  ): Promise<SearchResult>;
 }
 ```
 
@@ -605,7 +512,7 @@ enum ChainType {
   ETHEREUM = 'ethereum',
   SOLANA = 'solana',
   POLYGON = 'polygon',
-  BITCOIN = 'bitcoin'
+  BITCOIN = 'bitcoin',
 }
 ```
 
@@ -621,7 +528,7 @@ enum EmailFolder {
   TRASH = 'trash',
   SPAM = 'spam',
   ARCHIVE = 'archive',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
 }
 ```
 
@@ -633,7 +540,7 @@ UI theme options.
 enum Theme {
   LIGHT = 'light',
   DARK = 'dark',
-  SYSTEM = 'system'
+  SYSTEM = 'system',
 }
 ```
 
@@ -646,7 +553,7 @@ enum FontSize {
   SMALL = 'small',
   MEDIUM = 'medium',
   LARGE = 'large',
-  EXTRA_LARGE = 'extra-large'
+  EXTRA_LARGE = 'extra-large',
 }
 ```
 
@@ -754,7 +661,7 @@ interface UseServiceReturn<T, E = Error> {
  */
 abstract class Operations<T, S extends Service<T>> {
   constructor(protected service: S) {}
-  
+
   abstract validate(data: Partial<T>): boolean;
   abstract transform(data: any): T;
 }

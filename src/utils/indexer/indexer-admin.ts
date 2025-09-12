@@ -122,10 +122,10 @@ export class IndexerAdminHelper {
     });
 
     if (!response.ok) {
-      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);
     }
 
-    return response.data.data;
+    return (response.data as any).data;
   }
 
   /**
@@ -144,10 +144,10 @@ export class IndexerAdminHelper {
     });
 
     if (!response.ok) {
-      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);
     }
 
-    return response.data.data;
+    return (response.data as any).data;
   }
 
   /**
@@ -172,10 +172,10 @@ export class IndexerAdminHelper {
     });
 
     if (!response.ok) {
-      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);
     }
 
-    return response.data.data;
+    return (response.data as any).data;
   }
 
   /**
@@ -200,10 +200,10 @@ export class IndexerAdminHelper {
     });
 
     if (!response.ok) {
-      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);
     }
 
-    return response.data.data;
+    return (response.data as any).data;
   }
 
   /**
@@ -217,10 +217,10 @@ export class IndexerAdminHelper {
     });
 
     if (!response.ok) {
-      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);
     }
 
-    return response.data.data;
+    return (response.data as any).data;
   }
 
   /**
@@ -243,10 +243,10 @@ export class IndexerAdminHelper {
     });
 
     if (!response.ok) {
-      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);
     }
 
-    return response.data.data;
+    return (response.data as any).data;
   }
 
   /**
@@ -272,10 +272,10 @@ export class IndexerAdminHelper {
     });
 
     if (!response.ok) {
-      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);
     }
 
-    return response.data.data;
+    return (response.data as any).data;
   }
 }
 

@@ -4,17 +4,16 @@
  */
 
 import {
-  AnalyticsEvent,
+  AppAnalyticsEvent,
   ChainType,
   EmailAction,
   EmailFolder,
-  LoginMethod,
   SubscriptionAction,
-  WalletType,
 } from '../enums';
+import { WalletType } from '@johnqh/di';
 
 interface AnalyticsEventData {
-  name: AnalyticsEvent | string;
+  name: AppAnalyticsEvent | string;
   properties: Record<string, any>;
   timestamp: number;
 }
@@ -23,7 +22,7 @@ interface UserProperties {
   userId?: string;
   walletAddress?: string;
   chainType?: ChainType;
-  loginMethod?: LoginMethod;
+  loginMethod?: string;
   subscriptionStatus?: string;
   [key: string]: any;
 }
@@ -33,7 +32,7 @@ interface AnalyticsOperations {
    * Create authentication event
    */
   createAuthEvent(
-    method: LoginMethod,
+    method: string,
     walletType?: WalletType,
     chainType?: ChainType
   ): AnalyticsEventData;
@@ -115,7 +114,7 @@ interface AnalyticsOperations {
   createUserProperties(userData: {
     walletAddress?: string;
     chainType?: ChainType;
-    loginMethod?: LoginMethod;
+    loginMethod?: string;
     subscriptionStatus?: string;
   }): UserProperties;
 
@@ -146,12 +145,12 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
   private readonly MAX_EVENT_NAME_LENGTH = 40;
 
   createAuthEvent(
-    method: LoginMethod,
+    method: string,
     walletType?: WalletType,
     chainType?: ChainType
   ): AnalyticsEventData {
     return {
-      name: AnalyticsEvent.USER_LOGIN,
+      name: AppAnalyticsEvent.USER_LOGIN,
       properties: {
         method,
         wallet_type: walletType,
@@ -166,15 +165,15 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
     emailId: string,
     folder?: EmailFolder
   ): AnalyticsEventData {
-    const eventMap: Record<EmailAction, AnalyticsEvent> = {
-      [EmailAction.OPEN]: AnalyticsEvent.EMAIL_OPEN,
-      [EmailAction.REPLY]: AnalyticsEvent.EMAIL_REPLY,
-      [EmailAction.FORWARD]: AnalyticsEvent.EMAIL_FORWARD,
-      [EmailAction.DELETE]: AnalyticsEvent.EMAIL_DELETE,
-      [EmailAction.STAR]: AnalyticsEvent.EMAIL_STAR,
-      [EmailAction.UNSTAR]: AnalyticsEvent.EMAIL_STAR,
-      [EmailAction.MARK_READ]: AnalyticsEvent.EMAIL_OPEN,
-      [EmailAction.MARK_UNREAD]: AnalyticsEvent.EMAIL_OPEN,
+    const eventMap: Record<EmailAction, AppAnalyticsEvent> = {
+      [EmailAction.OPEN]: AppAnalyticsEvent.EMAIL_OPEN,
+      [EmailAction.REPLY]: AppAnalyticsEvent.EMAIL_REPLY,
+      [EmailAction.FORWARD]: AppAnalyticsEvent.EMAIL_FORWARD,
+      [EmailAction.DELETE]: AppAnalyticsEvent.EMAIL_DELETE,
+      [EmailAction.STAR]: AppAnalyticsEvent.EMAIL_STAR,
+      [EmailAction.UNSTAR]: AppAnalyticsEvent.EMAIL_STAR,
+      [EmailAction.MARK_READ]: AppAnalyticsEvent.EMAIL_OPEN,
+      [EmailAction.MARK_UNREAD]: AppAnalyticsEvent.EMAIL_OPEN,
     };
 
     return {
@@ -191,7 +190,7 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
 
   createPageViewEvent(pageName: string, pagePath: string): AnalyticsEventData {
     return {
-      name: AnalyticsEvent.PAGE_VIEW,
+      name: AppAnalyticsEvent.PAGE_VIEW,
       properties: {
         page_name: pageName,
         page_path: pagePath,
@@ -206,11 +205,11 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
     amount?: number,
     currency?: string
   ): AnalyticsEventData {
-    const eventMap: Record<SubscriptionAction, AnalyticsEvent> = {
-      [SubscriptionAction.VIEW]: AnalyticsEvent.SUBSCRIPTION_VIEW,
-      [SubscriptionAction.PURCHASE]: AnalyticsEvent.SUBSCRIPTION_PURCHASE,
-      [SubscriptionAction.CANCEL]: AnalyticsEvent.SUBSCRIPTION_CANCEL,
-      [SubscriptionAction.RESTORE]: AnalyticsEvent.SUBSCRIPTION_VIEW,
+    const eventMap: Record<SubscriptionAction, AppAnalyticsEvent> = {
+      [SubscriptionAction.VIEW]: AppAnalyticsEvent.SUBSCRIPTION_VIEW,
+      [SubscriptionAction.PURCHASE]: AppAnalyticsEvent.SUBSCRIPTION_PURCHASE,
+      [SubscriptionAction.CANCEL]: AppAnalyticsEvent.SUBSCRIPTION_CANCEL,
+      [SubscriptionAction.RESTORE]: AppAnalyticsEvent.SUBSCRIPTION_VIEW,
     };
 
     return {
@@ -227,7 +226,7 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
 
   createSearchEvent(query: string, resultsCount: number): AnalyticsEventData {
     return {
-      name: AnalyticsEvent.SEARCH_PERFORMED,
+      name: AppAnalyticsEvent.SEARCH_PERFORMED,
       properties: {
         query: this.sanitizeString(query),
         results_count: resultsCount,
@@ -243,7 +242,7 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
     pageName?: string
   ): AnalyticsEventData {
     return {
-      name: AnalyticsEvent.ERROR_OCCURRED,
+      name: AppAnalyticsEvent.ERROR_OCCURRED,
       properties: {
         error_type: errorType,
         error_message: this.sanitizeString(errorMessage),
@@ -261,8 +260,8 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
   ): AnalyticsEventData {
     const eventName =
       action === 'viewed'
-        ? AnalyticsEvent.AB_TEST_VIEWED
-        : AnalyticsEvent.AB_TEST_CONVERTED;
+        ? AppAnalyticsEvent.AB_TEST_VIEWED
+        : AppAnalyticsEvent.AB_TEST_CONVERTED;
 
     return {
       name: eventName,
@@ -277,7 +276,7 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
 
   createNavigationEvent(fromPage: string, toPage: string): AnalyticsEventData {
     return {
-      name: AnalyticsEvent.PAGE_VIEW,
+      name: AppAnalyticsEvent.PAGE_VIEW,
       properties: {
         from_page: fromPage,
         to_page: toPage,
@@ -292,7 +291,7 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
     toFolder: EmailFolder
   ): AnalyticsEventData {
     return {
-      name: AnalyticsEvent.FOLDER_SWITCH,
+      name: AppAnalyticsEvent.FOLDER_SWITCH,
       properties: {
         from_folder: fromFolder,
         to_folder: toFolder,
@@ -361,7 +360,7 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
   createUserProperties(userData: {
     walletAddress?: string;
     chainType?: ChainType;
-    loginMethod?: LoginMethod;
+    loginMethod?: string;
     subscriptionStatus?: string;
   }): UserProperties {
     const properties: UserProperties = {};

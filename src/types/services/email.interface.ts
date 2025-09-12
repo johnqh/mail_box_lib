@@ -98,33 +98,6 @@ interface MailboxService {
   deleteMailbox(userId: string, mailboxId: string): Promise<void>;
 }
 
-interface EmailAddressService {
-  /**
-   * Get all email addresses for a user
-   * @param userId User identifier
-   */
-  getEmailAddresses(userId: string): Promise<EmailAddress[]>;
-
-  /**
-   * Add a new email address
-   * @param userId User identifier
-   * @param address Email address
-   * @param options Additional options
-   */
-  addEmailAddress(
-    userId: string,
-    address: string,
-    options?: { main?: boolean }
-  ): Promise<EmailAddress>;
-
-  /**
-   * Delete an email address
-   * @param userId User identifier
-   * @param addressId Address identifier
-   */
-  deleteEmailAddress(userId: string, addressId: string): Promise<void>;
-}
-
 // Types for mailbox and email address
 interface Mailbox {
   id: string;
@@ -157,7 +130,6 @@ export {
   type EmailListOptions,
   type EmailService,
   type MailboxService,
-  type EmailAddressService,
   type Mailbox,
   type MockDataProvider,
 };

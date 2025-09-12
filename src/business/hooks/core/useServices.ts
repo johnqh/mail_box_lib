@@ -2,8 +2,6 @@
  * Custom hooks for accessing services from the dependency injection container
  */
 
-import { ServiceKeys } from '../../core/container/dependency-container';
-import { useServiceContainer, useServiceResolver } from './ServiceProvider';
 import type {
   PlatformAnalytics,
   PlatformNetwork,
@@ -11,6 +9,8 @@ import type {
   PlatformStorage,
   PlatformTheme,
 } from '../../core/container/dependency-container';
+import { ServiceKeys } from '../../core/container/dependency-container';
+import { useServiceContainer, useServiceResolver } from './ServiceProvider';
 
 /**
  * Get a service from the dependency injection container
@@ -65,34 +65,6 @@ function usePersistenceService(): any {
 }
 
 /**
- * Get the email service
- */
-function useEmailService(): any {
-  return useService(ServiceKeys.EMAIL_SERVICE);
-}
-
-/**
- * Get the auth service
- */
-function useAuthService(): any {
-  return useService(ServiceKeys.AUTH_SERVICE);
-}
-
-/**
- * Get the mailbox service
- */
-function useMailboxService(): any {
-  return useService(ServiceKeys.MAILBOX_SERVICE);
-}
-
-/**
- * Get the email address service
- */
-function useEmailAddressService(): any {
-  return useService(ServiceKeys.EMAIL_ADDRESS_SERVICE);
-}
-
-/**
  * Get the folder operations service
  */
 function useFolderOperations() {
@@ -110,17 +82,13 @@ function useAppConfig() {
 }
 
 export {
+  useAnalyticsService,
+  useAppConfig,
+  useFolderOperations,
+  useNetworkService,
+  useNotificationsService,
+  usePersistenceService,
   useService,
   useStorageService,
-  useAnalyticsService,
   useThemeService,
-  useNotificationsService,
-  useNetworkService,
-  usePersistenceService,
-  useEmailService,
-  useAuthService,
-  useMailboxService,
-  useEmailAddressService,
-  useFolderOperations,
-  useAppConfig,
 };

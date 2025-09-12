@@ -80,10 +80,10 @@ export class IndexerWebhookHelper {
     const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/webhook/email-sent`, emailData);
 
     if (!response.ok) {
-      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);
     }
 
-    return response.data;
+    return response.data as WebhookResponse;
   }
 
   /**
@@ -94,10 +94,10 @@ export class IndexerWebhookHelper {
     const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/webhook/recipient-login`, loginData);
 
     if (!response.ok) {
-      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);
     }
 
-    return response.data;
+    return response.data as WebhookResponse;
   }
 
   /**
@@ -108,10 +108,10 @@ export class IndexerWebhookHelper {
     const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/points/register-referral`, referralData);
 
     if (!response.ok) {
-      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);
     }
 
-    return response.data;
+    return response.data as WebhookResponse;
   }
 
   /**
@@ -130,10 +130,10 @@ export class IndexerWebhookHelper {
     });
 
     if (!response.ok) {
-      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);
     }
 
-    return response.data;
+    return response.data as WebhookResponse;
   }
 
   /**
@@ -144,10 +144,10 @@ export class IndexerWebhookHelper {
     const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/webhook/login`, loginData);
 
     if (!response.ok) {
-      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);
     }
 
-    return response.data.data;
+    return (response.data as any).data;
   }
 
   /**
@@ -162,10 +162,14 @@ export class IndexerWebhookHelper {
     const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/api/solana/webhook`, transactions);
 
     if (!response.ok) {
-      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);
+      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);
     }
 
-    return response.data;
+    return response.data as {
+      success: boolean;
+      processed: number;
+      total: number;
+    };
   }
 }
 

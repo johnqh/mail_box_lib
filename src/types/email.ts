@@ -21,10 +21,11 @@ interface Folder {
 
 interface EmailAddress {
   id: string;
-  email: string;
-  name: string;
-  isPrimary: boolean;
-  isActive: boolean;
+  address: string;
+  verified: boolean;
+  primary?: boolean;
+  createdAt: Date;
+  updatedAt?: Date;
 }
 
 interface User {
@@ -42,9 +43,15 @@ import {
   Theme,
 } from '../business/core/enums';
 
-// WalletUserData is now imported from auth.interface.ts (more comprehensive definition)
-import type { WalletUserData } from '@johnqh/di';
-export type { WalletUserData };
+// WalletUserData interface for wallet-based user information
+export interface WalletUserData {
+  walletAddress: string;
+  chainType: string;
+  walletType?: string;
+  displayName?: string;
+  avatar?: string;
+  metadata?: Record<string, any>;
+}
 
 // Re-export types from enums for backward compatibility
 export { Theme, FontSize };

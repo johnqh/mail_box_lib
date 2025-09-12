@@ -1,6 +1,6 @@
 {
   "name": "@johnqh/lib",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "React Native-compatible shared utilities and common functions for 0xmail.box projects",
   "type": "module",
   "main": "dist/index.js",
@@ -38,6 +38,7 @@
   "author": "0xmail.box team",
   "license": "MIT",
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
     "@types/node": "^18.0.0",
@@ -63,7 +64,7 @@
   },
   "dependencies": {
     "@bonfida/spl-name-service": "^3.0.16",
-    "@johnqh/di": "^1.0.1",
+    "@johnqh/di": "^1.1.0",
     "@johnqh/mail_box_contracts": "^1.5.3",
     "@noble/hashes": "^1.8.0",
     "@solana/web3.js": "^1.98.4",

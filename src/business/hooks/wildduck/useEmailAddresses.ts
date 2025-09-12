@@ -31,10 +31,10 @@ const useEmailAddresses = (): UseEmailAddressesReturn => {
     (walletAddress: string): EmailAddress => {
       return {
         id: '1',
-        email: `${walletAddress.toLowerCase()}@0xmail.box`,
-        name: 'Wallet Address',
-        isPrimary: true,
-        isActive: true,
+        address: `${walletAddress.toLowerCase()}@0xmail.box`,
+        verified: true,
+        primary: true,
+        createdAt: new Date(),
       };
     },
     []
@@ -53,10 +53,10 @@ const useEmailAddresses = (): UseEmailAddressesReturn => {
         snsNames.forEach((snsName, index) => {
           snsEmailAddresses.push({
             id: `sns_${startId + index}`,
-            email: `${snsName.name}@0xmail.box`,
-            name: snsName.name,
-            isPrimary: false,
-            isActive: true,
+            address: `${snsName.name}@0xmail.box`,
+            verified: false,
+            primary: false,
+            createdAt: new Date(),
           });
         });
       } catch (error) {
@@ -83,10 +83,10 @@ const useEmailAddresses = (): UseEmailAddressesReturn => {
         ensNames.forEach((ensName, index) => {
           const emailAddress = {
             id: `ens_${startId + index}`,
-            email: `${ensName.name}@0xmail.box`,
-            name: ensName.name,
-            isPrimary: false,
-            isActive: true,
+            address: `${ensName.name}@0xmail.box`,
+            verified: false,
+            primary: false,
+            createdAt: new Date(),
           };
 
           ensEmailAddresses.push(emailAddress);

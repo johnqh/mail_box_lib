@@ -3,14 +3,15 @@
  * These replace string literals throughout the application
  */
 
-// Authentication states
+// Authentication states - aligned with @johnqh/di
 enum AuthStatus {
-  DISCONNECTED = 'disconnected',
-  CONNECTED = 'connected',
-  VERIFIED = 'verified',
+  AUTHENTICATED = 'authenticated',
+  UNAUTHENTICATED = 'unauthenticated',
+  LOADING = 'loading',
+  ERROR = 'error',
 }
 
-// Chain types
+// Chain types (more specific than @johnqh/di version)
 enum ChainType {
   EVM = 'evm',
   SOLANA = 'solana',
@@ -101,8 +102,8 @@ enum MediumView {
   RIGHT = 'right',
 }
 
-// Analytics events
-enum AnalyticsEvent {
+// App-specific analytics events (extends @johnqh/di AnalyticsEvent)
+enum AppAnalyticsEvent {
   USER_LOGIN = 'user_login',
   USER_LOGOUT = 'user_logout',
   EMAIL_OPEN = 'email_open',
@@ -199,23 +200,6 @@ enum MailboxType {
   CUSTOM = 'custom',
 }
 
-// Login methods
-enum LoginMethod {
-  WALLET = 'wallet',
-  EMAIL = 'email',
-  SOCIAL = 'social',
-}
-
-// Wallet types for analytics
-enum WalletType {
-  ETHEREUM = 'ethereum',
-  SOLANA = 'solana',
-  METAMASK = 'metamask',
-  PHANTOM = 'phantom',
-  COINBASE = 'coinbase',
-  WALLETCONNECT = 'walletconnect',
-}
-
 // Network status
 enum NetworkStatus {
   UNKNOWN = 'unknown',
@@ -298,7 +282,7 @@ export {
   EmailComposeType,
   MobileView,
   MediumView,
-  AnalyticsEvent,
+  AppAnalyticsEvent,
   EmailAction,
   SubscriptionAction,
   RequestStatus,
@@ -308,8 +292,6 @@ export {
   SortOrder,
   EmailSortCriteria,
   MailboxType,
-  LoginMethod,
-  WalletType,
   NetworkStatus,
   ConnectionType,
   ConnectionState,

@@ -137,7 +137,7 @@ class DefaultAuthBusinessLogic implements AuthBusinessLogic {
 
     // Also check the email address part using AddressHelper
     if (!isENS && !isSNS) {
-      const emailParts = emailAddress.email.split('@');
+      const emailParts = emailAddress.address.split('@');
       if (emailParts.length === 2) {
         const addressType = AddressHelper.getAddressType(emailParts[0]);
         isENS = addressType === AddressType.ENSName;
@@ -150,19 +150,21 @@ class DefaultAuthBusinessLogic implements AuthBusinessLogic {
 
   getAuthStatusText(status: AuthStatus): string {
     switch (status) {
-      case AuthStatus.DISCONNECTED:
+      case AuthStatus.UNAUTHENTICATED:
         return 'Not connected';
-      case AuthStatus.CONNECTED:
+      case AuthStatus.LOADING:
         return 'Connected - Please verify';
-      case AuthStatus.VERIFIED:
+      case AuthStatus.AUTHENTICATED:
         return 'Authenticated';
+      case AuthStatus.ERROR:
+        return 'Authentication error';
       default:
         return 'Unknown status';
     }
   }
 
   canAccessProtectedFeatures(status: AuthStatus): boolean {
-    return status === AuthStatus.VERIFIED;
+    return status === AuthStatus.AUTHENTICATED;
   }
 
   generateUserDisplayName(
@@ -176,7 +178,7 @@ class DefaultAuthBusinessLogic implements AuthBusinessLogic {
 
     if (namedAddress) {
       // Extract name from email (e.g., "vitalik.eth@0xmail.box" -> "vitalik.eth")
-      const name = namedAddress.email.split('@')[0];
+      const name = namedAddress.address.split('@')[0];
       return name || this.formatWalletAddressForDisplay(walletAddress);
     }
 
@@ -190,7 +192,7 @@ class DefaultAuthBusinessLogic implements AuthBusinessLogic {
 
     switch (chainType) {
       case ChainType.EVM:
-        // Ethereum signature validation (0x followed by 130 hex characters)
+        // EVM signature validation (0x followed by 130 hex characters)
         return /^0x[a-fA-F0-9]{130}$/.test(signature);
 
       case ChainType.SOLANA:
@@ -277,10 +279,10 @@ class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLogic {
     const addresses: EmailAddress[] = [
       {
         id: `direct_${walletAddress}`,
-        name: this.formatAddressForDisplay(walletAddress),
-        email: `${walletAddress}@0xmail.box`,
-        isPrimary: true,
-        isActive: true,
+        address: `${walletAddress}@0xmail.box`,
+        verified: true,
+        primary: true,
+        createdAt: new Date(),
       },
     ];
 
@@ -288,10 +290,10 @@ class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLogic {
     if (chainType === ChainType.EVM) {
       addresses.push({
         id: `ens_${walletAddress}`,
-        name: 'ENS Domain',
-        email: 'your-domain.eth@0xmail.box',
-        isPrimary: false,
-        isActive: true,
+        address: 'your-domain.eth@0xmail.box',
+        verified: false,
+        primary: false,
+        createdAt: new Date(),
       });
     }
 
@@ -299,10 +301,10 @@ class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLogic {
     if (chainType === ChainType.SOLANA) {
       addresses.push({
         id: `sns_${walletAddress}`,
-        name: 'SNS Domain',
-        email: 'your-domain.sol@0xmail.box',
-        isPrimary: false,
-        isActive: true,
+        address: 'your-domain.sol@0xmail.box',
+        verified: false,
+        primary: false,
+        createdAt: new Date(),
       });
     }
 
@@ -310,14 +312,14 @@ class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLogic {
   }
 
   isPrimaryEmailAddress(emailAddress: EmailAddress): boolean {
-    return emailAddress.isPrimary;
+    return emailAddress.primary === true;
   }
 
   sortEmailAddresses(emailAddresses: EmailAddress[]): EmailAddress[] {
     return [...emailAddresses].sort((a, b) => {
       // Primary addresses first
-      if (a.isPrimary && !b.isPrimary) return -1;
-      if (!a.isPrimary && b.isPrimary) return 1;
+      if (a.primary && !b.primary) return -1;
+      if (!a.primary && b.primary) return 1;
 
       // Then by type priority: direct, ENS, SNS, custom
       const aPriority = this.getAddressPriority(a);
@@ -328,7 +330,7 @@ class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLogic {
       }
 
       // Finally alphabetically
-      return a.email.localeCompare(b.email);
+      return a.address.localeCompare(b.address);
     });
   }
 
@@ -342,7 +344,7 @@ class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLogic {
   }
 
   getEmailAddressDisplayName(emailAddress: EmailAddress): string {
-    return emailAddress.name || emailAddress.email.split('@')[0];
+    return emailAddress.address.split('@')[0];
   }
 
   private formatAddressForDisplay(address: string): string {

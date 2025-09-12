@@ -3,21 +3,19 @@
  * Manages all services and their dependencies
  */
 
+import { EmailService, MailboxService } from '../../../types/services';
 import {
-  EmailAddressService,
-  EmailService,
-  MailboxService,
-} from '../../../types/services';
-import {
-  AuthEmailAddressService,
-  AuthManager,
-  AuthService,
-  AuthStorageService,
-} from '@johnqh/di';
+  AuthBusinessLogic,
+  DefaultAuthBusinessLogic,
+  DefaultEmailAddressBusinessLogic,
+  EmailAddressBusinessLogic,
+} from '../auth/auth-business-logic';
 import {
   DefaultEmailOperations,
   EmailOperations,
 } from '../email/email-operations';
+import { PlatformType } from '../enums';
+import { DefaultFolderOperations } from '../folder/folder-operations';
 import {
   DefaultMailboxOperations,
   MailboxOperations,
@@ -26,14 +24,6 @@ import {
   DefaultNavigationOperations,
   NavigationOperations,
 } from '../navigation/navigation-state';
-import {
-  AuthBusinessLogic,
-  DefaultAuthBusinessLogic,
-  DefaultEmailAddressBusinessLogic,
-  EmailAddressBusinessLogic,
-} from '../auth/auth-business-logic';
-import { DefaultFolderOperations } from '../folder/folder-operations';
-import { PlatformType } from '../enums';
 
 // Storage interface for platform abstraction
 interface PlatformStorage {
@@ -170,13 +160,6 @@ const ServiceKeys = {
   // Data services
   EMAIL_SERVICE: 'emailService',
   MAILBOX_SERVICE: 'mailboxService',
-  EMAIL_ADDRESS_SERVICE: 'emailAddressService',
-
-  // Auth services
-  AUTH_SERVICE: 'authService',
-  AUTH_STORAGE_SERVICE: 'authStorageService',
-  AUTH_EMAIL_ADDRESS_SERVICE: 'authEmailAddressService',
-  AUTH_MANAGER: 'authManager',
 
   // Configuration
   CONFIG: 'config',
@@ -284,33 +267,6 @@ class ServiceResolver {
     return this.container.get<MailboxService>(ServiceKeys.MAILBOX_SERVICE);
   }
 
-  getEmailAddressService(): EmailAddressService {
-    return this.container.get<EmailAddressService>(
-      ServiceKeys.EMAIL_ADDRESS_SERVICE
-    );
-  }
-
-  // Auth services
-  getAuthService(): AuthService {
-    return this.container.get<AuthService>(ServiceKeys.AUTH_SERVICE);
-  }
-
-  getAuthStorageService(): AuthStorageService {
-    return this.container.get<AuthStorageService>(
-      ServiceKeys.AUTH_STORAGE_SERVICE
-    );
-  }
-
-  getAuthEmailAddressService(): AuthEmailAddressService {
-    return this.container.get<AuthEmailAddressService>(
-      ServiceKeys.AUTH_EMAIL_ADDRESS_SERVICE
-    );
-  }
-
-  getAuthManager(): AuthManager {
-    return this.container.get<AuthManager>(ServiceKeys.AUTH_MANAGER);
-  }
-
   // Configuration
   getConfig(): ServiceContainerConfig {
     return this.container.getConfig();
@@ -318,14 +274,14 @@ class ServiceResolver {
 }
 
 export {
-  ServiceKeys,
   createServiceContainer,
   ServiceContainer,
+  ServiceKeys,
   ServiceResolver,
-  type PlatformStorage,
   type PlatformAnalytics,
-  type PlatformNotifications,
-  type PlatformTheme,
   type PlatformNetwork,
+  type PlatformNotifications,
+  type PlatformStorage,
+  type PlatformTheme,
   type ServiceContainerConfig,
 };
