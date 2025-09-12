@@ -40,11 +40,10 @@ export type {
   SerializedStorageService,
   StorageProvider,
   StorageService,
-  StorageType,
 } from '@johnqh/di';
 
 // Re-export enums from @johnqh/di that were removed from local definitions
-export { AnalyticsEvent, WalletType } from '@johnqh/di';
+export { AnalyticsEvent, WalletType, StorageType } from '@johnqh/di';
 
 // Infrastructure - Separated networking and storage logic (Goal 3)
 export * from './network';
