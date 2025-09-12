@@ -151,13 +151,6 @@ enum RequestStatus {
   ERROR = 'error',
 }
 
-// Storage types
-enum StorageType {
-  LOCAL = 'local',
-  SESSION = 'session',
-  MEMORY = 'memory',
-}
-
 // Notification types
 enum NotificationType {
   INFO = 'info',
@@ -296,7 +289,6 @@ export {
   RequestStatus,
   SortOrder,
   StandardEmailFolder,
-  StorageType,
   SubscriptionAction,
   Theme,
   type EmailFolder,

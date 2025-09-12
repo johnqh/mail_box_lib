@@ -1,10 +1,10 @@
 /**
  * Contract hooks for interacting with @johnqh/mail_box_contracts
- * Provides React hooks for UnifiedMailBoxClient and related utilities
+ * Provides React hooks for OnchainMailerClient and related utilities
  */
 
 // Main client hook
-export * from './useMailBoxClient';
+export * from './useMailerClient';
 
 // Wallet detection utilities
 export * from './useWalletDetector';

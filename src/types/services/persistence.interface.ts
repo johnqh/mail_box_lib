@@ -3,7 +3,8 @@
  * Handles data persistence across different storage mechanisms
  */
 
-import { RequestStatus, StorageType } from '../../business/core/enums';
+import { RequestStatus } from '../../business/core/enums';
+import { StorageType } from '@johnqh/di';
 
 interface PersistenceOptions {
   ttl?: number; // Time to live in milliseconds
