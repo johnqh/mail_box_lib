@@ -49,12 +49,14 @@ A React Native-compatible shared utilities library for 0xmail.box projects, prov
 
 ### Recent Updates (v3.1.1)
 
+- **AuthStatus enum refactoring**: Updated enum values to CONNECTED/DISCONNECTED/VERIFIED
 - **LoginMethod removal**: Completely removed LoginMethod enum - use string literals instead
 - **Dependency Updates**: @johnqh/di updated to v1.1.0 for improved type safety
 - **Type Deduplication**: Removed duplicate types that exist in @johnqh/di (WalletType, AnalyticsEvent, etc.)
 - **Local Type Definitions**: Added WalletUserData interface locally (not in @johnqh/di)
 - **Interface Alignment**: EmailAddress interface updated to match new structure
 - **Type Assertions**: Added for indexer utilities to handle stricter NetworkResponse typing
+- **AI Development Optimization**: Enhanced documentation with comprehensive troubleshooting guides
 
 ### Type Migration Notes
 
@@ -65,6 +67,8 @@ A React Native-compatible shared utilities library for 0xmail.box projects, prov
 **Local Types (not in @johnqh/di):**
 - `WalletUserData` - wallet-based user information interface
 - `ChainType` - includes local 'unknown' value not in @johnqh/di
+- `AuthStatus` - authentication states (CONNECTED/DISCONNECTED/VERIFIED)
+- `AppAnalyticsEvent` - app-specific analytics events extending base AnalyticsEvent
 
 ## Architecture Overview
 
@@ -346,6 +350,19 @@ method: LoginMethod.WALLET
 
 // New (current):
 method: 'wallet' // or 'email', 'google', 'apple', 'github'
+```
+
+**AuthStatus enum values updated:**
+```typescript
+// Current AuthStatus values:
+enum AuthStatus {
+  CONNECTED = 'connected',      // User wallet connected
+  DISCONNECTED = 'disconnected', // User wallet not connected  
+  VERIFIED = 'verified',        // User authenticated/verified
+}
+
+// Old values (no longer valid):
+// AUTHENTICATED, UNAUTHENTICATED, LOADING, ERROR
 ```
 
 ### Quick Fixes for Common Errors
