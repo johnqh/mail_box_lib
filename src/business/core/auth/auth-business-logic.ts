@@ -150,21 +150,19 @@ class DefaultAuthBusinessLogic implements AuthBusinessLogic {
 
   getAuthStatusText(status: AuthStatus): string {
     switch (status) {
-      case AuthStatus.UNAUTHENTICATED:
+      case AuthStatus.DISCONNECTED:
         return 'Not connected';
-      case AuthStatus.LOADING:
+      case AuthStatus.CONNECTED:
         return 'Connected - Please verify';
-      case AuthStatus.AUTHENTICATED:
+      case AuthStatus.VERIFIED:
         return 'Authenticated';
-      case AuthStatus.ERROR:
-        return 'Authentication error';
       default:
         return 'Unknown status';
     }
   }
 
   canAccessProtectedFeatures(status: AuthStatus): boolean {
-    return status === AuthStatus.AUTHENTICATED;
+    return status === AuthStatus.VERIFIED;
   }
 
   generateUserDisplayName(
