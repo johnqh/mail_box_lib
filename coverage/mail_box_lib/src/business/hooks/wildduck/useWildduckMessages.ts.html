@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/233</span>
+                <span class='fraction'>0/234</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/233</span>
+                <span class='fraction'>0/234</span>
             </div>
         
             
@@ -416,7 +416,8 @@
 <a name='L351'></a><a href='#L351'>351</a>
 <a name='L352'></a><a href='#L352'>352</a>
 <a name='L353'></a><a href='#L353'>353</a>
-<a name='L354'></a><a href='#L354'>354</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L354'></a><a href='#L354'>354</a>
+<a name='L355'></a><a href='#L355'>355</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -716,6 +717,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -944,7 +946,7 @@ interface UseWildduckMessagesReturn {
 <span class="cstat-no" title="statement not covered" >          }</span>
 <span class="cstat-no" title="statement not covered" >        );</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        return response.data;</span>
+<span class="cstat-no" title="statement not covered" >        return response.data as { success: boolean; id: string };</span>
 <span class="cstat-no" title="statement not covered" >      } catch (err) {</span>
 <span class="cstat-no" title="statement not covered" >        const errorMessage =</span>
 <span class="cstat-no" title="statement not covered" >          err instanceof Error ? err.message : 'Failed to send message';</span>
@@ -976,7 +978,7 @@ interface UseWildduckMessagesReturn {
 <span class="cstat-no" title="statement not covered" >          }</span>
 <span class="cstat-no" title="statement not covered" >        );</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        return response.data;</span>
+<span class="cstat-no" title="statement not covered" >        return response.data as { success: boolean };</span>
 <span class="cstat-no" title="statement not covered" >      } catch (err) {</span>
 <span class="cstat-no" title="statement not covered" >        const errorMessage =</span>
 <span class="cstat-no" title="statement not covered" >          err instanceof Error ? err.message : 'Failed to update message';</span>
@@ -1006,7 +1008,7 @@ interface UseWildduckMessagesReturn {
 <span class="cstat-no" title="statement not covered" >          }</span>
 <span class="cstat-no" title="statement not covered" >        );</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        return response.data;</span>
+<span class="cstat-no" title="statement not covered" >        return response.data as { success: boolean };</span>
 <span class="cstat-no" title="statement not covered" >      } catch (err) {</span>
 <span class="cstat-no" title="statement not covered" >        const errorMessage =</span>
 <span class="cstat-no" title="statement not covered" >          err instanceof Error ? err.message : 'Failed to delete message';</span>
@@ -1038,7 +1040,7 @@ interface UseWildduckMessagesReturn {
 <span class="cstat-no" title="statement not covered" >          }</span>
 <span class="cstat-no" title="statement not covered" >        );</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        return response.data;</span>
+<span class="cstat-no" title="statement not covered" >        return response.data as { success: boolean };</span>
 <span class="cstat-no" title="statement not covered" >      } catch (err) {</span>
 <span class="cstat-no" title="statement not covered" >        const errorMessage =</span>
 <span class="cstat-no" title="statement not covered" >          err instanceof Error ? err.message : 'Failed to move message';</span>
@@ -1069,10 +1071,11 @@ interface UseWildduckMessagesReturn {
 <span class="cstat-no" title="statement not covered" >          }</span>
 <span class="cstat-no" title="statement not covered" >        );</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        const messageList = response.data.results || [];</span>
+<span class="cstat-no" title="statement not covered" >        const searchResponse = response.data as { results?: WildDuckMessage[], total?: number, page?: number };</span>
+<span class="cstat-no" title="statement not covered" >        const messageList = searchResponse.results || [];</span>
 <span class="cstat-no" title="statement not covered" >        setMessages(messageList);</span>
-<span class="cstat-no" title="statement not covered" >        setTotalMessages(response.data.total || 0);</span>
-<span class="cstat-no" title="statement not covered" >        setCurrentPage(response.data.page || 1);</span>
+<span class="cstat-no" title="statement not covered" >        setTotalMessages(searchResponse.total || 0);</span>
+<span class="cstat-no" title="statement not covered" >        setCurrentPage(searchResponse.page || 1);</span>
 <span class="cstat-no" title="statement not covered" >        return messageList;</span>
 <span class="cstat-no" title="statement not covered" >      } catch (err) {</span>
 <span class="cstat-no" title="statement not covered" >        const errorMessage =</span>
@@ -1129,7 +1132,7 @@ export {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-11T18:17:28.875Z
+                at 2025-09-11T20:50:33.991Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

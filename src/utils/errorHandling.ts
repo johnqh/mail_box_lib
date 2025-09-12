@@ -1,5 +1,5 @@
 import { ERROR_MESSAGES } from './constants';
-// import { EnvUtils } from '@johnqh/di'; // TODO: Implement proper DI setup
+// import { EnvUtils } from '../../di'; // TODO: Implement proper DI setup
 import { logger } from './logger';
 
 // Platform-specific global

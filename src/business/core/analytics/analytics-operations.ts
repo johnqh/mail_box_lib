@@ -10,7 +10,7 @@ import {
   EmailFolder,
   SubscriptionAction,
 } from '../enums';
-import { WalletType } from '@johnqh/di';
+import { WalletType } from '../../../di';
 
 interface AnalyticsEventData {
   name: AppAnalyticsEvent | string;

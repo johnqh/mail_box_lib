@@ -4,7 +4,7 @@
  */
 
 import { RequestStatus } from '../../business/core/enums';
-import { StorageType } from '@johnqh/di';
+import { StorageType } from '../../di';
 
 interface PersistenceOptions {
   ttl?: number; // Time to live in milliseconds

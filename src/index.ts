@@ -5,7 +5,7 @@
 // Business Logic - Core business operations and enums (Goal 4)
 export * from './business';
 
-// Dependency Injection - Interfaces only (Goal 2) - Selective exports to avoid conflicts
+// Dependency Injection - All DI types and interfaces from local di module
 export type {
   AdvancedPlatformStorage,
   AnalyticsClient,
@@ -26,6 +26,10 @@ export type {
   // Navigation types
   NavigationService,
   NavigationState,
+  // Network types
+  NetworkClient,
+  NetworkResponse,
+  NetworkRequestOptions,
   NotificationCapabilities,
   NotificationClient,
   NotificationConfig,
@@ -40,14 +44,13 @@ export type {
   SerializedStorageService,
   StorageProvider,
   StorageService,
-} from '@johnqh/di';
+} from './di';
 
-// Re-export enums from @johnqh/di that were removed from local definitions
-export { AnalyticsEvent, WalletType, StorageType } from '@johnqh/di';
+// Re-export enums from local di module
+export { AnalyticsEvent, WalletType, StorageType, NetworkError } from './di';
 
-// Infrastructure - Separated networking and storage logic (Goal 3)
+// Infrastructure - Network clients only
 export * from './network';
-export * from './storage';
 
 // Utilities - General utility functions
 export * from './utils';

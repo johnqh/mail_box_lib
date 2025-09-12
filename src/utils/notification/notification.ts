@@ -3,7 +3,7 @@
  * Automatically selects the appropriate notification implementation based on platform
  */
 
-import { NotificationConfig, NotificationService } from '@johnqh/di';
+import { NotificationConfig, NotificationService } from '../../di';
 
 let notificationService: NotificationService;
 
@@ -168,6 +168,6 @@ export type {
   NotificationPermissionResult,
   NotificationCapabilities,
   NotificationConfig,
-} from '@johnqh/di';
+} from '../../di';
 
 export { notificationHelper, getNotificationService };
