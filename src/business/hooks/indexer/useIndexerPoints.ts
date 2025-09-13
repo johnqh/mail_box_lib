@@ -4,18 +4,15 @@
  */
 
 import { useCallback, useState } from 'react';
-import { useAppConfig } from '../core/useServices';
-import { convertToAppConfig } from './utils';
 import { IndexerClient } from '../../../network/clients/indexer';
 
 /**
  * React hook for Indexer Points API operations using actual API endpoints
  */
-function useIndexerPoints() {
+function useIndexerPoints(endpointUrl: string, dev: boolean = false) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const config = useAppConfig();
-  const indexerClient = new IndexerClient(convertToAppConfig(config));
+  const indexerClient = new IndexerClient(endpointUrl, dev);
 
   const clearError = useCallback(() => {
     setError(null);

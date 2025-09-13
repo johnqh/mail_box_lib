@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
-import { WildDuckAPI } from '../../../network/clients/wildduck';
+import { WildDuckConfig } from '../../../network/clients/wildduck';
 
 interface WildduckHealthStatus {
   success: boolean;
@@ -47,7 +47,7 @@ interface UseWildduckHealthReturn {
 /**
  * Hook for WildDuck health monitoring and status operations
  */
-const useWildduckHealth = (): UseWildduckHealthReturn => {
+const useWildduckHealth = (config: WildDuckConfig): UseWildduckHealthReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [healthStatus, setHealthStatus] = useState<WildduckHealthStatus | null>(
@@ -72,10 +72,21 @@ const useWildduckHealth = (): UseWildduckHealthReturn => {
     setError(null);
 
     try {
-      // This would need to be added to the WildDuckAPI class
-      const response = await axios.get(`${WildDuckAPI['baseUrl']}/health`, {
-        headers: WildDuckAPI['headers'],
-      });
+      // Use config URLs and headers
+      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      };
+
+      if (config.cloudflareWorkerUrl) {
+        headers['Authorization'] = `Bearer ${config.apiToken}`;
+        headers['X-App-Source'] = '0xmail-box';
+      } else {
+        headers['X-Access-Token'] = config.apiToken;
+      }
+
+      const response = await axios.get(`${apiUrl}/health`, { headers });
 
       const healthData = response.data as WildduckHealthStatus;
       setHealthStatus(healthData);

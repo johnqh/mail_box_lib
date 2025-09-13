@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import axios from 'axios';
 import {
-  WildDuckAPI,
+  WildDuckConfig,
   WildDuckMessage,
   WildDuckMessageResponse,
   WildDuckMessagesResponse,
@@ -84,7 +84,7 @@ interface UseWildduckMessagesReturn {
 /**
  * Hook for WildDuck message operations
  */
-const useWildduckMessages = (): UseWildduckMessagesReturn => {
+const useWildduckMessages = (config: WildDuckConfig): UseWildduckMessagesReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [messages, setMessages] = useState<WildDuckMessage[]>([]);
@@ -111,12 +111,34 @@ const useWildduckMessages = (): UseWildduckMessagesReturn => {
       setLastFetchParams({ userId, mailboxId, options });
 
       try {
-        const response: WildDuckMessagesResponse =
-          await WildDuckAPI.getMessages(userId, mailboxId, options);
-        const messageList = response.results || [];
+        // Use config URLs and headers
+        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        };
+
+        if (config.cloudflareWorkerUrl) {
+          headers['Authorization'] = `Bearer ${config.apiToken}`;
+          headers['X-App-Source'] = '0xmail-box';
+        } else {
+          headers['X-Access-Token'] = config.apiToken;
+        }
+
+        const queryParams = new URLSearchParams();
+        if (options.limit) queryParams.append('limit', options.limit.toString());
+        if (options.page) queryParams.append('page', options.page.toString());
+        if (options.order) queryParams.append('order', options.order);
+
+        const query = queryParams.toString();
+        const endpoint = `/users/${userId}/mailboxes/${mailboxId}/messages${query ? `?${query}` : ''}`;
+
+        const response = await axios.get(`${apiUrl}${endpoint}`, { headers });
+        const messageData = response.data as WildDuckMessagesResponse;
+        const messageList = messageData.results || [];
         setMessages(messageList);
-        setTotalMessages(response.total || 0);
-        setCurrentPage(response.page || 1);
+        setTotalMessages(messageData.total || 0);
+        setCurrentPage(messageData.page || 1);
         return messageList;
       } catch (err) {
         const errorMessage =
@@ -141,8 +163,26 @@ const useWildduckMessages = (): UseWildduckMessagesReturn => {
       setError(null);
 
       try {
-        const response = await WildDuckAPI.getMessage(userId, messageId);
-        return response;
+        // Use config URLs and headers
+        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        };
+
+        if (config.cloudflareWorkerUrl) {
+          headers['Authorization'] = `Bearer ${config.apiToken}`;
+          headers['X-App-Source'] = '0xmail-box';
+        } else {
+          headers['X-Access-Token'] = config.apiToken;
+        }
+
+        const response = await axios.get(
+          `${apiUrl}/users/${userId}/messages/${messageId}`,
+          { headers }
+        );
+
+        return response.data as WildDuckMessageResponse;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to get message';
@@ -164,13 +204,24 @@ const useWildduckMessages = (): UseWildduckMessagesReturn => {
       setError(null);
 
       try {
-        // This would need to be added to the WildDuckAPI class
+        // Use config URLs and headers
+        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        };
+
+        if (config.cloudflareWorkerUrl) {
+          headers['Authorization'] = `Bearer ${config.apiToken}`;
+          headers['X-App-Source'] = '0xmail-box';
+        } else {
+          headers['X-Access-Token'] = config.apiToken;
+        }
+
         const response = await axios.post(
-          `${WildDuckAPI['baseUrl']}/users/${userId}/submit`,
+          `${apiUrl}/users/${userId}/submit`,
           params,
-          {
-            headers: WildDuckAPI['headers'],
-          }
+          { headers }
         );
 
         return response.data as { success: boolean; id: string };
@@ -196,13 +247,24 @@ const useWildduckMessages = (): UseWildduckMessagesReturn => {
       setError(null);
 
       try {
-        // This would need to be added to the WildDuckAPI class
+        // Use config URLs and headers
+        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        };
+
+        if (config.cloudflareWorkerUrl) {
+          headers['Authorization'] = `Bearer ${config.apiToken}`;
+          headers['X-App-Source'] = '0xmail-box';
+        } else {
+          headers['X-Access-Token'] = config.apiToken;
+        }
+
         const response = await axios.put(
-          `${WildDuckAPI['baseUrl']}/users/${userId}/messages/${messageId}`,
+          `${apiUrl}/users/${userId}/messages/${messageId}`,
           params,
-          {
-            headers: WildDuckAPI['headers'],
-          }
+          { headers }
         );
 
         return response.data as { success: boolean };
@@ -227,12 +289,23 @@ const useWildduckMessages = (): UseWildduckMessagesReturn => {
       setError(null);
 
       try {
-        // This would need to be added to the WildDuckAPI class
+        // Use config URLs and headers
+        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        };
+
+        if (config.cloudflareWorkerUrl) {
+          headers['Authorization'] = `Bearer ${config.apiToken}`;
+          headers['X-App-Source'] = '0xmail-box';
+        } else {
+          headers['X-Access-Token'] = config.apiToken;
+        }
+
         const response = await axios.delete(
-          `${WildDuckAPI['baseUrl']}/users/${userId}/messages/${messageId}`,
-          {
-            headers: WildDuckAPI['headers'],
-          }
+          `${apiUrl}/users/${userId}/messages/${messageId}`,
+          { headers }
         );
 
         return response.data as { success: boolean };
@@ -258,13 +331,24 @@ const useWildduckMessages = (): UseWildduckMessagesReturn => {
       setError(null);
 
       try {
-        // This would need to be added to the WildDuckAPI class
+        // Use config URLs and headers
+        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        };
+
+        if (config.cloudflareWorkerUrl) {
+          headers['Authorization'] = `Bearer ${config.apiToken}`;
+          headers['X-App-Source'] = '0xmail-box';
+        } else {
+          headers['X-Access-Token'] = config.apiToken;
+        }
+
         const response = await axios.put(
-          `${WildDuckAPI['baseUrl']}/users/${userId}/messages/${messageId}/move`,
+          `${apiUrl}/users/${userId}/messages/${messageId}/move`,
           { mailbox: targetMailbox },
-          {
-            headers: WildDuckAPI['headers'],
-          }
+          { headers }
         );
 
         return response.data as { success: boolean };
@@ -290,12 +374,23 @@ const useWildduckMessages = (): UseWildduckMessagesReturn => {
       setError(null);
 
       try {
-        // This would need to be added to the WildDuckAPI class - search across all mailboxes
+        // Use config URLs and headers
+        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        };
+
+        if (config.cloudflareWorkerUrl) {
+          headers['Authorization'] = `Bearer ${config.apiToken}`;
+          headers['X-App-Source'] = '0xmail-box';
+        } else {
+          headers['X-Access-Token'] = config.apiToken;
+        }
+
         const response = await axios.get(
-          `${WildDuckAPI['baseUrl']}/users/${userId}/search?q=${encodeURIComponent(query)}&limit=${options.limit || 50}&page=${options.page || 1}`,
-          {
-            headers: WildDuckAPI['headers'],
-          }
+          `${apiUrl}/users/${userId}/search?q=${encodeURIComponent(query)}&limit=${options.limit || 50}&page=${options.page || 1}`,
+          { headers }
         );
 
         const searchResponse = response.data as { results?: WildDuckMessage[], total?: number, page?: number };

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import axios from 'axios';
-import { WildDuckAPI } from '../../../network/clients/wildduck';
+import { WildDuckConfig } from '../../../network/clients/wildduck';
 
 interface WildduckUser {
   success: boolean;
@@ -33,7 +33,7 @@ interface UseWildduckUsersReturn {
 /**
  * Hook for WildDuck user management operations
  */
-const useWildduckUsers = (): UseWildduckUsersReturn => {
+const useWildduckUsers = (config: WildDuckConfig): UseWildduckUsersReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,8 +46,23 @@ const useWildduckUsers = (): UseWildduckUsersReturn => {
     setError(null);
 
     try {
-      const response = await WildDuckAPI.getUser(userId);
-      return response as WildduckUser;
+      // Use configured URL
+      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      };
+
+      // Set authentication headers based on configuration
+      if (config.cloudflareWorkerUrl) {
+        headers['Authorization'] = `Bearer ${config.apiToken}`;
+        headers['X-App-Source'] = '0xmail-box';
+      } else {
+        headers['X-Access-Token'] = config.apiToken;
+      }
+
+      const response = await axios.get(`${apiUrl}/users/${userId}`, { headers });
+      return response.data as WildduckUser;
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to get user';
@@ -56,7 +71,7 @@ const useWildduckUsers = (): UseWildduckUsersReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [config]);
 
   const getUsers = useCallback(
     async (
@@ -71,11 +86,24 @@ const useWildduckUsers = (): UseWildduckUsersReturn => {
         if (query) params.set('query', query);
         params.set('limit', limit.toString());
 
+        // Use configured URL
+        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        };
+
+        // Set authentication headers based on configuration
+        if (config.cloudflareWorkerUrl) {
+          headers['Authorization'] = `Bearer ${config.apiToken}`;
+          headers['X-App-Source'] = '0xmail-box';
+        } else {
+          headers['X-Access-Token'] = config.apiToken;
+        }
+
         const response = await axios.get(
-          `${WildDuckAPI['baseUrl']}/users?${params}`,
-          {
-            headers: WildDuckAPI['headers'],
-          }
+          `${apiUrl}/users?${params}`,
+          { headers }
         );
 
         const usersData = response.data as { results?: WildduckUser[], total?: number };
@@ -92,7 +120,7 @@ const useWildduckUsers = (): UseWildduckUsersReturn => {
         setIsLoading(false);
       }
     },
-    []
+    [config]
   );
 
   return {

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import axios from 'axios';
-import { WildDuckAPI } from '../../../network/clients/wildduck';
+import { WildDuckConfig } from '../../../network/clients/wildduck';
 
 interface WildduckSettings {
   [key: string]: any;
@@ -20,7 +20,7 @@ interface UseWildduckSettingsReturn {
 /**
  * Hook for WildDuck settings management operations
  */
-const useWildduckSettings = (): UseWildduckSettingsReturn => {
+const useWildduckSettings = (config: WildDuckConfig): UseWildduckSettingsReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [settings, setSettings] = useState<WildduckSettings>({});
@@ -34,10 +34,21 @@ const useWildduckSettings = (): UseWildduckSettingsReturn => {
     setError(null);
 
     try {
-      // This would need to be added to the WildDuckAPI class
-      const response = await axios.get(`${WildDuckAPI['baseUrl']}/settings`, {
-        headers: WildDuckAPI['headers'],
-      });
+      // Use config URLs and headers
+      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      };
+
+      if (config.cloudflareWorkerUrl) {
+        headers['Authorization'] = `Bearer ${config.apiToken}`;
+        headers['X-App-Source'] = '0xmail-box';
+      } else {
+        headers['X-Access-Token'] = config.apiToken;
+      }
+
+      const response = await axios.get(`${apiUrl}/settings`, { headers });
 
       const settingsData = (response.data as { results?: WildduckSettings } | WildduckSettings).results || response.data as WildduckSettings;
       setSettings(settingsData);
@@ -59,13 +70,24 @@ const useWildduckSettings = (): UseWildduckSettingsReturn => {
       setError(null);
 
       try {
-        // This would need to be added to the WildDuckAPI class
+        // Use config URLs and headers
+        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        };
+
+        if (config.cloudflareWorkerUrl) {
+          headers['Authorization'] = `Bearer ${config.apiToken}`;
+          headers['X-App-Source'] = '0xmail-box';
+        } else {
+          headers['X-Access-Token'] = config.apiToken;
+        }
+
         const response = await axios.put(
-          `${WildDuckAPI['baseUrl']}/settings/${key}`,
+          `${apiUrl}/settings/${key}`,
           { value },
-          {
-            headers: WildDuckAPI['headers'],
-          }
+          { headers }
         );
 
         // Update local settings
@@ -90,12 +112,23 @@ const useWildduckSettings = (): UseWildduckSettingsReturn => {
       setError(null);
 
       try {
-        // This would need to be added to the WildDuckAPI class
+        // Use config URLs and headers
+        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        };
+
+        if (config.cloudflareWorkerUrl) {
+          headers['Authorization'] = `Bearer ${config.apiToken}`;
+          headers['X-App-Source'] = '0xmail-box';
+        } else {
+          headers['X-Access-Token'] = config.apiToken;
+        }
+
         const response = await axios.delete(
-          `${WildDuckAPI['baseUrl']}/settings/${key}`,
-          {
-            headers: WildDuckAPI['headers'],
-          }
+          `${apiUrl}/settings/${key}`,
+          { headers }
         );
 
         // Remove from local settings

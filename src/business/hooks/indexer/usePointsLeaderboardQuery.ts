@@ -58,11 +58,13 @@ const transformLeaderboardData = (
  * - Error handling with retry logic
  */
 function useTopUsers(
+  endpointUrl: string,
+  dev: boolean,
   count: number = 10,
   options?: Partial<UseQueryOptions<PointsLeaderboardResponse>>
 ) {
   // Use TanStack Query hook for points leaderboard
-  const query = usePointsLeaderboardQuery(count, {
+  const query = usePointsLeaderboardQuery(endpointUrl, dev, count, {
     // Return cached data immediately, then fetch in background
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
@@ -98,9 +100,11 @@ function useTopUsers(
  * Hook for site-wide statistics with TanStack Query
  */
 function usePointsSiteStats(
+  endpointUrl: string,
+  dev: boolean,
   options?: Partial<UseQueryOptions<SiteStatsResponse>>
 ) {
-  const query = useSiteStats({
+  const query = useSiteStats(endpointUrl, dev, {
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     ...options,
@@ -131,10 +135,12 @@ function usePointsSiteStats(
  * This replaces the complex usePointsLeaderboard hook
  */
 function usePointsLeaderboard(
+  endpointUrl: string,
+  dev: boolean,
   initialCount: number = 50,
   options?: Partial<UseQueryOptions<PointsLeaderboardResponse>>
 ) {
-  const query = usePointsLeaderboardQuery(initialCount, {
+  const query = usePointsLeaderboardQuery(endpointUrl, dev, initialCount, {
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 5 * 60 * 1000, // 5 minutes
     ...options,
@@ -172,8 +178,8 @@ function usePointsLeaderboard(
  * Legacy compatibility wrapper
  * Provides the same interface as the old useTopUsers for backward compatibility
  */
-function useTopUsersLegacy(count: number = 10) {
-  const result = useTopUsers(count);
+function useTopUsersLegacy(endpointUrl: string, dev: boolean, count: number = 10) {
+  const result = useTopUsers(endpointUrl, dev, count);
 
   // Add methods expected by legacy code
   return {

@@ -1,32 +1,32 @@
-import { AppConfig, NetworkClient, NetworkResponse } from '../../di';
+import { NetworkClient } from '../../di';
 import { getWildDuckStorageKeys } from '../../utils/auth/wildDuckAuth';
 import { createURLSearchParams } from '../../utils/url-params';
 
 // Platform-specific globals
-declare const fetch: typeof globalThis.fetch;
 declare const sessionStorage: Storage;
 
+// WildDuck configuration interface
+export interface WildDuckConfig {
+  backendUrl: string; // Required: WildDuck backend URL
+  apiToken: string; // Required: API access token
+  cloudflareWorkerUrl?: string; // Optional: Cloudflare worker proxy URL
+}
+
 // Determine API base URL based on Cloudflare worker configuration
-const getApiBaseUrl = (config: AppConfig): string => {
-  if (config.useCloudflareWorker && config.cloudflareWorkerUrl) {
+const getApiBaseUrl = (config: WildDuckConfig): string => {
+  if (config.cloudflareWorkerUrl) {
     return config.cloudflareWorkerUrl;
   }
 
-  // Use configured WildDuck backend URL (from environment variable) or fallback to 0xmail.box
-  const backendUrl = config.wildDuckBackendUrl;
-  if (backendUrl && backendUrl !== 'http://localhost:8080') {
-    return backendUrl;
-  }
-
-  return 'https://0xmail.box';
+  return config.backendUrl;
 };
 
 // WildDuck API configuration factory
-const createApiConfig = (config: AppConfig) => ({
+const createApiConfig = (config: WildDuckConfig) => ({
   BASE_URL: getApiBaseUrl(config),
-  BACKEND_URL: config.wildDuckBackendUrl, // Direct backend URL for non-API calls
-  API_TOKEN: config.wildDuckApiToken, // Platform-agnostic environment variable access
-  USE_CLOUDFLARE: config.useCloudflareWorker,
+  BACKEND_URL: config.backendUrl, // Direct backend URL for non-API calls
+  API_TOKEN: config.apiToken, // API access token
+  USE_CLOUDFLARE: !!config.cloudflareWorkerUrl,
   ENDPOINTS: {
     // WildDuck API endpoints
     // Authentication
@@ -60,13 +60,7 @@ const createApiConfig = (config: AppConfig) => ({
   },
 });
 
-// Legacy export for backward compatibility
-const API_CONFIG = createApiConfig({
-  wildDuckBackendUrl: 'https://0xmail.box',
-  wildDuckApiToken: '',
-  useCloudflareWorker: false,
-  cloudflareWorkerUrl: '',
-} as AppConfig);
+// Removed: Legacy API_CONFIG - consumers must provide their own WildDuckConfig
 
 // WildDuck API client
 class WildDuckAPI {
@@ -77,11 +71,12 @@ class WildDuckAPI {
   private useCloudflare: boolean;
   private config: ReturnType<typeof createApiConfig>;
 
-  constructor(networkClient: NetworkClient, config: AppConfig) {
+  constructor(networkClient: NetworkClient, config: WildDuckConfig) {
     this.config = createApiConfig(config);
     this.baseUrl = this.config.BASE_URL;
     this.apiToken = this.config.API_TOKEN;
     this.useCloudflare = this.config.USE_CLOUDFLARE;
+    this.networkClient = networkClient;
 
     // Set headers based on whether we're using Cloudflare worker or direct connection
     this.headers = {
@@ -98,8 +93,6 @@ class WildDuckAPI {
       // Direct connection to WildDuck API
       this.headers['X-Access-Token'] = this.apiToken;
     }
-
-    this.networkClient = networkClient;
   }
 
   private async request<T>(
@@ -190,7 +183,7 @@ class WildDuckAPI {
       username?: string;
       address?: string;
       scope?: string;
-    }>(API_CONFIG.ENDPOINTS.AUTHENTICATE, {
+    }>('/authenticate', {
       method: 'POST',
       body: {
         username,
@@ -249,7 +242,7 @@ class WildDuckAPI {
       username?: string;
       address?: string;
       scope?: string;
-    }>(API_CONFIG.ENDPOINTS.AUTHENTICATE, {
+    }>('/authenticate', {
       method: 'POST',
       body: {
         username,
@@ -290,7 +283,7 @@ class WildDuckAPI {
       id: string;
       username: string;
       address?: string;
-    }>(API_CONFIG.ENDPOINTS.USER(validatedUserId));
+    }>(`/users/${validatedUserId}`);
   }
 
   // Get mailboxes for a user
@@ -314,7 +307,7 @@ class WildDuckAPI {
     if (options.sizes) queryParams.append('sizes', 'true');
 
     const query = queryParams.toString();
-    const endpoint = `${API_CONFIG.ENDPOINTS.MAILBOXES(validatedUserId)}${query ? `?${query}` : ''}`;
+    const endpoint = `/users/${validatedUserId}/mailboxes${query ? `?${query}` : ''}`;
 
     return this.request<WildDuckMailboxResponse>(endpoint);
   }
@@ -346,7 +339,7 @@ class WildDuckAPI {
     if (options.order) queryParams.append('order', options.order);
 
     const query = queryParams.toString();
-    const endpoint = `${API_CONFIG.ENDPOINTS.MESSAGES(validatedUserId, mailboxId)}${query ? `?${query}` : ''}`;
+    const endpoint = `/users/${validatedUserId}/mailboxes/${mailboxId}/messages${query ? `?${query}` : ''}`;
 
     return this.request<WildDuckMessagesResponse>(endpoint);
   }
@@ -366,10 +359,7 @@ class WildDuckAPI {
       );
     }
 
-    const endpoint = API_CONFIG.ENDPOINTS.MESSAGE_BY_ID(
-      validatedUserId,
-      messageId
-    );
+    const endpoint = `/users/${validatedUserId}/messages/${messageId}`;
 
     return this.request<WildDuckMessageResponse>(endpoint);
   }
@@ -382,7 +372,7 @@ class WildDuckAPI {
     // Validate user ID format
     const validatedUserId = validateUserId(userId);
 
-    const endpoint = API_CONFIG.ENDPOINTS.ADDRESSES(validatedUserId);
+    const endpoint = `/users/${validatedUserId}/addresses`;
 
     return this.request<{
       success: boolean;
@@ -400,7 +390,7 @@ class WildDuckAPI {
     }
   ): Promise<{ success: boolean; id: string }> {
     return this.request<{ success: boolean; id: string }>(
-      API_CONFIG.ENDPOINTS.MAILBOXES(userId),
+      `/users/${userId}/mailboxes`,
       {
         method: 'POST',
         body: { path, ...options },
@@ -491,175 +481,13 @@ interface WildDuckMessageResponse {
 // Factory function to create WildDuck API client with dependencies
 const createWildDuckAPI = (
   networkClient: NetworkClient,
-  config: AppConfig
+  config: WildDuckConfig
 ): WildDuckAPI => {
   return new WildDuckAPI(networkClient, config);
 };
 
-// Export the class for direct instantiation if needed (renamed to avoid conflict)
-export { WildDuckAPI as WildDuckAPIClass };
-
-// Create a static API instance for backward compatibility
-// This allows the main project to use WildDuckAPI.method() instead of instantiating
-class StaticWildDuckAPI {
-  private static instance: WildDuckAPI | null = null;
-
-  private static getInstance(): WildDuckAPI {
-    if (!StaticWildDuckAPI.instance) {
-      // Create a basic network client for the static instance
-      const networkClient: NetworkClient = {
-        async request<T>(
-          url: string,
-          options: any = {}
-        ): Promise<NetworkResponse<T>> {
-          const response = await fetch(url, {
-            method: options.method || 'GET',
-            headers: options.headers,
-            body: options.body,
-          });
-
-          const data = await response.json();
-
-          const headers: Record<string, string> = {};
-          response.headers.forEach((value, key) => {
-            headers[key] = value;
-          });
-
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
-
-          return {
-            ok: response.ok,
-            status: response.status,
-            statusText: response.statusText,
-            data,
-            headers,
-          };
-        },
-
-        async get<T>(
-          url: string,
-          options: any = {}
-        ): Promise<NetworkResponse<T>> {
-          return this.request<T>(url, { ...options, method: 'GET' });
-        },
-
-        async post<T>(
-          url: string,
-          body: any,
-          options: any = {}
-        ): Promise<NetworkResponse<T>> {
-          return this.request<T>(url, { ...options, method: 'POST', body });
-        },
-
-        async put<T>(
-          url: string,
-          body: any,
-          options: any = {}
-        ): Promise<NetworkResponse<T>> {
-          return this.request<T>(url, { ...options, method: 'PUT', body });
-        },
-
-        async delete<T>(
-          url: string,
-          options: any = {}
-        ): Promise<NetworkResponse<T>> {
-          return this.request<T>(url, { ...options, method: 'DELETE' });
-        },
-      };
-
-      // Use default config - can be overridden later
-      const defaultConfig = {
-        wildDuckApiToken: '',
-        wildDuckBackendUrl: 'https://0xmail.box',
-        indexerBackendUrl: 'https://indexer.0xmail.box',
-        revenueCatApiKey: '',
-        walletConnectProjectId: '',
-        privyAppId: '',
-        firebase: {
-          apiKey: '',
-          authDomain: '',
-          projectId: '',
-          storageBucket: '',
-          messagingSenderId: '',
-          appId: '',
-          measurementId: '',
-          vapidKey: '',
-        },
-        useCloudflareWorker: false,
-        cloudflareWorkerUrl: '',
-        useMockFallback: true,
-      } as AppConfig;
-
-      StaticWildDuckAPI.instance = new WildDuckAPI(
-        networkClient,
-        defaultConfig
-      );
-    }
-
-    return StaticWildDuckAPI.instance;
-  }
-
-  // Expose baseUrl and headers as properties for compatibility
-  static get baseUrl(): string {
-    return StaticWildDuckAPI.getInstance()['baseUrl'];
-  }
-
-  static get headers(): Record<string, string> {
-    return StaticWildDuckAPI.getInstance()['headers'];
-  }
-
-  // Proxy all methods to the instance
-  static async authenticate(
-    username: string,
-    signature: string,
-    nonce: string,
-    scope?: string
-  ) {
-    return StaticWildDuckAPI.getInstance().authenticate(
-      username,
-      signature,
-      nonce,
-      scope
-    );
-  }
-
-  static async preAuth(username: string, scope?: string) {
-    return StaticWildDuckAPI.getInstance().preAuth(username, scope);
-  }
-
-  static async getUser(userId: string) {
-    return StaticWildDuckAPI.getInstance().getUser(userId);
-  }
-
-  static async getAddresses(userId: string) {
-    return StaticWildDuckAPI.getInstance().getAddresses(userId);
-  }
-
-  static async getMailboxes(userId: string, options?: any) {
-    return StaticWildDuckAPI.getInstance().getMailboxes(userId, options);
-  }
-
-  static async createMailbox(userId: string, path: string, options?: any) {
-    return StaticWildDuckAPI.getInstance().createMailbox(userId, path, options);
-  }
-
-  static async getMessages(userId: string, mailboxId: string, options?: any) {
-    return StaticWildDuckAPI.getInstance().getMessages(
-      userId,
-      mailboxId,
-      options
-    );
-  }
-
-  static async getMessage(userId: string, messageId: string) {
-    return StaticWildDuckAPI.getInstance().getMessage(userId, messageId);
-  }
-}
-
-// Override the WildDuckAPI export to point to the static version for backward compatibility
-export { StaticWildDuckAPI as WildDuckAPI };
+// Export the main WildDuckAPI class
+export { WildDuckAPI };
 
 // Helper function to validate MongoDB ObjectId format
 const isValidObjectId = (id: string): boolean => {

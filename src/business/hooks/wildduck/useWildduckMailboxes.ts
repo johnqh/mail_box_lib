@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import axios from 'axios';
 import {
-  WildDuckAPI,
+  WildDuckConfig,
   WildDuckMailbox,
   WildDuckMailboxResponse,
 } from '../../../network/clients/wildduck';
@@ -52,7 +52,7 @@ interface UseWildduckMailboxesReturn {
 /**
  * Hook for WildDuck mailbox operations
  */
-const useWildduckMailboxes = (): UseWildduckMailboxesReturn => {
+const useWildduckMailboxes = (config: WildDuckConfig): UseWildduckMailboxesReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mailboxes, setMailboxes] = useState<WildDuckMailbox[]>([]);
@@ -62,14 +62,42 @@ const useWildduckMailboxes = (): UseWildduckMailboxesReturn => {
   }, []);
 
   const getMailboxes = useCallback(
-    async (userId: string, options = {}): Promise<WildDuckMailbox[]> => {
+    async (userId: string, options: {
+      specialUse?: boolean;
+      showHidden?: boolean;
+      counters?: boolean;
+      sizes?: boolean;
+    } = {}): Promise<WildDuckMailbox[]> => {
       setIsLoading(true);
       setError(null);
 
       try {
-        const response: WildDuckMailboxResponse =
-          await WildDuckAPI.getMailboxes(userId, options);
-        const mailboxList = response.results || [];
+        // Use config URLs and headers
+        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        };
+
+        if (config.cloudflareWorkerUrl) {
+          headers['Authorization'] = `Bearer ${config.apiToken}`;
+          headers['X-App-Source'] = '0xmail-box';
+        } else {
+          headers['X-Access-Token'] = config.apiToken;
+        }
+
+        const queryParams = new URLSearchParams();
+        if (options.specialUse) queryParams.append('specialUse', 'true');
+        if (options.showHidden) queryParams.append('showHidden', 'true');
+        if (options.counters) queryParams.append('counters', 'true');
+        if (options.sizes) queryParams.append('sizes', 'true');
+
+        const query = queryParams.toString();
+        const endpoint = `/users/${userId}/mailboxes${query ? `?${query}` : ''}`;
+
+        const response = await axios.get(`${apiUrl}${endpoint}`, { headers });
+        const mailboxData = response.data as WildDuckMailboxResponse;
+        const mailboxList = mailboxData.results || [];
         setMailboxes(mailboxList);
         return mailboxList;
       } catch (err) {
@@ -94,11 +122,31 @@ const useWildduckMailboxes = (): UseWildduckMailboxesReturn => {
       setError(null);
 
       try {
-        const response = await WildDuckAPI.createMailbox(userId, params.path, {
-          hidden: params.hidden,
-          retention: params.retention,
-        });
-        return response;
+        // Use config URLs and headers
+        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        };
+
+        if (config.cloudflareWorkerUrl) {
+          headers['Authorization'] = `Bearer ${config.apiToken}`;
+          headers['X-App-Source'] = '0xmail-box';
+        } else {
+          headers['X-Access-Token'] = config.apiToken;
+        }
+
+        const response = await axios.post(
+          `${apiUrl}/users/${userId}/mailboxes`,
+          {
+            path: params.path,
+            hidden: params.hidden,
+            retention: params.retention,
+          },
+          { headers }
+        );
+
+        return response.data as { success: boolean; id: string };
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to create mailbox';
@@ -121,13 +169,24 @@ const useWildduckMailboxes = (): UseWildduckMailboxesReturn => {
       setError(null);
 
       try {
-        // This would need to be added to the WildDuckAPI class
+        // Use config URLs and headers
+        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        };
+
+        if (config.cloudflareWorkerUrl) {
+          headers['Authorization'] = `Bearer ${config.apiToken}`;
+          headers['X-App-Source'] = '0xmail-box';
+        } else {
+          headers['X-Access-Token'] = config.apiToken;
+        }
+
         const response = await axios.put(
-          `${WildDuckAPI['baseUrl']}/users/${userId}/mailboxes/${mailboxId}`,
+          `${apiUrl}/users/${userId}/mailboxes/${mailboxId}`,
           params,
-          {
-            headers: WildDuckAPI['headers'],
-          }
+          { headers }
         );
 
         return response.data as { success: boolean };
@@ -152,12 +211,23 @@ const useWildduckMailboxes = (): UseWildduckMailboxesReturn => {
       setError(null);
 
       try {
-        // This would need to be added to the WildDuckAPI class
+        // Use config URLs and headers
+        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        };
+
+        if (config.cloudflareWorkerUrl) {
+          headers['Authorization'] = `Bearer ${config.apiToken}`;
+          headers['X-App-Source'] = '0xmail-box';
+        } else {
+          headers['X-Access-Token'] = config.apiToken;
+        }
+
         const response = await axios.delete(
-          `${WildDuckAPI['baseUrl']}/users/${userId}/mailboxes/${mailboxId}`,
-          {
-            headers: WildDuckAPI['headers'],
-          }
+          `${apiUrl}/users/${userId}/mailboxes/${mailboxId}`,
+          { headers }
         );
 
         return response.data as { success: boolean };

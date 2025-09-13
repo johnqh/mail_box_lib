@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import axios from 'axios';
-import { WildDuckAPI } from '../../../network/clients/wildduck';
 import { useStorageService } from '../core/useServices';
+import { WildDuckConfig } from '../../../network/clients/wildduck';
 
 interface AuthResponse {
   success: boolean;
@@ -30,7 +30,7 @@ interface UseWildduckAuthReturn {
 /**
  * Hook for WildDuck authentication operations
  */
-const useWildduckAuth = (): UseWildduckAuthReturn => {
+const useWildduckAuth = (config: WildDuckConfig): UseWildduckAuthReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const storageService = useStorageService();
@@ -53,14 +53,25 @@ const useWildduckAuth = (): UseWildduckAuthReturn => {
         return { authenticated: false };
       }
 
+      // Use cloudflare worker URL if available, otherwise use backend URL
+      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+
       // Validate token by making a test request
       try {
-        const response = await axios.get(`${WildDuckAPI['baseUrl']}/users/me`, {
-          headers: {
-            ...WildDuckAPI['headers'],
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        };
+
+        // Set authentication headers based on configuration
+        if (config.cloudflareWorkerUrl) {
+          headers['Authorization'] = `Bearer ${token}`;
+          headers['X-App-Source'] = '0xmail-box';
+        } else {
+          headers['X-Access-Token'] = token;
+        }
+
+        const response = await axios.get(`${apiUrl}/users/me`, { headers });
 
         return { authenticated: true, user: response.data };
       } catch {
@@ -74,7 +85,7 @@ const useWildduckAuth = (): UseWildduckAuthReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [storageService]);
+  }, [config, storageService]);
 
   return {
     isLoading,

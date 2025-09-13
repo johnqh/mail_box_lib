@@ -6,9 +6,7 @@
  */
 
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { useAppConfig } from '../core/useServices';
 import { IndexerClient } from '../../../network/clients/indexer';
-import { convertToAppConfig } from './utils';
 import { queryKeys, STALE_TIMES } from '../../core/query';
 
 // Types for API responses
@@ -97,15 +95,15 @@ interface SolanaStatusResponse {
  * Hook to validate address format (public endpoint)
  */
 const useAddressValidation = (
+  endpointUrl: string,
+  dev: boolean,
   address: string,
   options?: UseQueryOptions<AddressValidationResponse>
 ): UseQueryResult<AddressValidationResponse> => {
-  const config = useAppConfig();
-  
   return useQuery({
     queryKey: queryKeys.indexer.validateAddress(address),
     queryFn: async (): Promise<AddressValidationResponse> => {
-      const client = new IndexerClient(convertToAppConfig(config));
+      const client = new IndexerClient(endpointUrl, dev);
       return client.validateAddress(address);
     },
     staleTime: STALE_TIMES.ADDRESS_VALIDATION,
@@ -118,18 +116,18 @@ const useAddressValidation = (
  * Hook to get signing message for wallet verification
  */
 const useSigningMessage = (
+  endpointUrl: string,
+  dev: boolean,
   chainId: number,
   walletAddress: string,
   domain: string,
   url: string,
   options?: UseQueryOptions<SigningMessageResponse>
 ): UseQueryResult<SigningMessageResponse> => {
-  const config = useAppConfig();
-  
   return useQuery({
     queryKey: queryKeys.indexer.message(chainId, walletAddress, domain, url),
     queryFn: async (): Promise<SigningMessageResponse> => {
-      const client = new IndexerClient(convertToAppConfig(config));
+      const client = new IndexerClient(endpointUrl, dev);
       return client.getMessage(chainId, walletAddress, domain, url);
     },
     staleTime: STALE_TIMES.SIGNING_MESSAGE,
@@ -144,15 +142,15 @@ const useSigningMessage = (
  * Hook to get points leaderboard from indexer (new API)
  */
 const useIndexerPointsLeaderboard = (
+  endpointUrl: string,
+  dev: boolean,
   count: number = 10,
   options?: UseQueryOptions<PointsLeaderboardResponse>
 ): UseQueryResult<PointsLeaderboardResponse> => {
-  const config = useAppConfig();
-  
   return useQuery({
     queryKey: queryKeys.indexer.pointsLeaderboard(count),
     queryFn: async (): Promise<PointsLeaderboardResponse> => {
-      const client = new IndexerClient(convertToAppConfig(config));
+      const client = new IndexerClient(endpointUrl, dev);
       return client.getPointsLeaderboard(count);
     },
     staleTime: STALE_TIMES.LEADERBOARD,
@@ -164,14 +162,14 @@ const useIndexerPointsLeaderboard = (
  * Hook to get site-wide statistics
  */
 const useSiteStats = (
+  endpointUrl: string,
+  dev: boolean,
   options?: UseQueryOptions<SiteStatsResponse>
 ): UseQueryResult<SiteStatsResponse> => {
-  const config = useAppConfig();
-  
   return useQuery({
     queryKey: queryKeys.indexer.siteStats(),
     queryFn: async (): Promise<SiteStatsResponse> => {
-      const client = new IndexerClient(convertToAppConfig(config));
+      const client = new IndexerClient(endpointUrl, dev);
       return client.getPointsSiteStats();
     },
     staleTime: STALE_TIMES.SITE_STATS,
@@ -183,14 +181,14 @@ const useSiteStats = (
  * Hook to get Solana indexer status
  */
 const useSolanaStatus = (
+  endpointUrl: string,
+  dev: boolean,
   options?: UseQueryOptions<SolanaStatusResponse>
 ): UseQueryResult<SolanaStatusResponse> => {
-  const config = useAppConfig();
-  
   return useQuery({
     queryKey: queryKeys.indexer.solanaStatus(),
     queryFn: async (): Promise<SolanaStatusResponse> => {
-      const client = new IndexerClient(convertToAppConfig(config));
+      const client = new IndexerClient(endpointUrl, dev);
       return client.getSolanaStatus();
     },
     staleTime: STALE_TIMES.SOLANA_STATUS,

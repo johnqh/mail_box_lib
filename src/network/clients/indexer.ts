@@ -16,10 +16,27 @@ declare const fetch: typeof globalThis.fetch;
 class IndexerClient implements NetworkClient {
   private readonly baseUrl: string;
   private readonly timeout: number;
+  private readonly dev: boolean;
 
-  constructor(config: AppConfig, timeout: number = 30000) {
-    this.baseUrl = config.indexerBackendUrl || 'https://indexer.0xmail.box';
-    this.timeout = timeout;
+  constructor(config: AppConfig, timeout?: number);
+  constructor(endpointUrl: string, dev?: boolean, timeout?: number);
+  constructor(
+    configOrUrl: AppConfig | string,
+    timeoutOrDev: number | boolean = false,
+    timeout: number = 30000
+  ) {
+    if (typeof configOrUrl === 'string') {
+      // New constructor: (endpointUrl, dev, timeout)
+      this.baseUrl = configOrUrl;
+      this.dev = typeof timeoutOrDev === 'boolean' ? timeoutOrDev : false;
+      this.timeout = timeout;
+    } else {
+      // Legacy constructor: (config, timeout)
+      this.baseUrl =
+        configOrUrl.indexerBackendUrl || 'https://indexer.0xmail.box';
+      this.dev = false;
+      this.timeout = typeof timeoutOrDev === 'number' ? timeoutOrDev : 30000;
+    }
   }
 
   /**
@@ -32,6 +49,7 @@ class IndexerClient implements NetworkClient {
     const fullUrl = url.startsWith('http') ? url : `${this.baseUrl}${url}`;
     const requestHeaders: Record<string, string> = {
       'Content-Type': 'application/json',
+      ...(this.dev && { 'x-dev': 'true' }),
       ...(options?.headers || {}),
     };
 
