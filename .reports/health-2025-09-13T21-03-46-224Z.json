@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-09-13T21:03:28.059Z",
+  "overall": 72,
+  "categories": {
+    "codeQuality": {
+      "score": 50,
+      "issues": [],
+      "recommendations": []
+    },
+    "typeScript": {
+      "score": 100,
+      "issues": [],
+      "recommendations": []
+    },
+    "testing": {
+      "score": 75,
+      "issues": [],
+      "recommendations": []
+    },
+    "dependencies": {
+      "score": 45,
+      "issues": [],
+      "recommendations": []
+    },
+    "aiReadiness": {
+      "score": 90,
+      "issues": [],
+      "recommendations": []
+    }
+  },
+  "trends": [],
+  "alerts": []
+}
