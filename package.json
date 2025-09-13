@@ -16,6 +16,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:coverage:watch": "vitest --coverage --watch",
+    "test:coverage:threshold": "vitest run --coverage --reporter=verbose",
     "test:watch": "vitest --watch",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
@@ -31,6 +33,7 @@
     "create:service": "node scripts/create-service.js",
     "create:hook": "node scripts/create-hook.js",
     "create:type": "node scripts/create-type.js",
+    "create:test": "node scripts/create-test.cjs",
     "analyze": "npm run typecheck && npm run lint && npm run test:coverage",
     "analyze:deps": "npm audit && npm outdated",
     "analyze:size": "npm run build && du -sh dist/",
@@ -42,7 +45,7 @@
     "analyze:code": "node scripts/analyze-code.cjs",
     "health:monitor": "node scripts/health-monitor.cjs",
     "health:watch": "node scripts/health-monitor.cjs --continuous",
-    "ai:help": "echo 'AI Development Help:' && echo '- npm run quick-check: Fast validation' && echo '- npm run create:type: Generate interface' && echo '- npm run create:hook: Generate new hook' && echo '- npm run types:check: Validate types' && echo '- npm run analyze:code: Project analysis' && echo '- npm run health:monitor: Health monitoring' && echo '- npm run analyze:deps: Check dependencies' && echo 'See CLAUDE.md for full guide'"
+    "ai:help": "echo 'AI Development Help:' && echo '- npm run quick-check: Fast validation' && echo '- npm run create:type: Generate interface' && echo '- npm run create:hook: Generate new hook' && echo '- npm run create:test: Generate test file' && echo '- npm run test:coverage: Run tests with coverage' && echo '- npm run types:check: Validate types' && echo '- npm run analyze:code: Project analysis' && echo '- npm run health:monitor: Health monitoring' && echo '- npm run analyze:deps: Check dependencies' && echo 'See CLAUDE.md for full guide'"
   },
   "keywords": [
     "web3",
@@ -59,7 +62,7 @@
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
     "@types/node": "^24.3.3",
-    "@types/react": "^19.1.12",
+    "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@typescript-eslint/eslint-plugin": "^8.41.0",
     "@typescript-eslint/parser": "^8.41.0",
@@ -86,16 +89,18 @@
     "@johnqh/mail_box_contracts": "^1.5.6",
     "@noble/hashes": "^2.0.0",
     "@solana/web3.js": "^1.98.4",
-    "@tanstack/react-query": "^5.85.9",
+    "@tanstack/react-query": "^5.87.4",
+    "@vitejs/plugin-react": "^5.0.2",
     "axios": "^1.12.1",
     "bs58": "^6.0.0",
-    "firebase": "^12.1.0",
-    "viem": "^2.36.0"
+    "firebase": "^12.2.1",
+    "jsdom": "^27.0.0",
+    "lucide-react": "^0.544.0",
+    "react-router-dom": "^7.9.1",
+    "viem": "^2.37.5"
   },
   "overrides": {
-    "bigint-buffer": {
-      ".": "1.1.5"
-    }
+    "bigint-buffer": "1.1.5"
   },
   "repository": {
     "type": "git",
