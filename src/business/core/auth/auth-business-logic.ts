@@ -89,6 +89,11 @@ interface AuthBusinessLogic {
    * Format wallet address for display
    */
   formatWalletAddressForDisplay(address: string): string;
+
+  /**
+   * Check if wallet is connected
+   */
+  isWalletConnected(status: AuthStatus): boolean;
 }
 
 class DefaultAuthBusinessLogic implements AuthBusinessLogic {
@@ -232,6 +237,10 @@ class DefaultAuthBusinessLogic implements AuthBusinessLogic {
     // Show first 6 and last 4 characters with ellipsis
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   }
+
+  isWalletConnected(status: AuthStatus): boolean {
+    return status === AuthStatus.CONNECTED || status === AuthStatus.VERIFIED;
+  }
 }
 
 /**
@@ -267,6 +276,11 @@ interface EmailAddressBusinessLogic {
    * Get display name for email address
    */
   getEmailAddressDisplayName(emailAddress: EmailAddress): string;
+
+  /**
+   * Parse email address string
+   */
+  parseEmailAddress(email: string): ParsedEmailAddress | undefined;
 }
 
 class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLogic {
@@ -343,6 +357,10 @@ class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLogic {
 
   getEmailAddressDisplayName(emailAddress: EmailAddress): string {
     return emailAddress.address.split('@')[0];
+  }
+
+  parseEmailAddress(email: string): ParsedEmailAddress | undefined {
+    return EmailAddressHelper.parse(email);
   }
 
   private formatAddressForDisplay(address: string): string {

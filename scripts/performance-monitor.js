@@ -84,7 +84,7 @@ async function measureTestPerformance() {
   log(colors.cyan, '🧪 Measuring test performance...');
   
   const testStart = Date.now();
-  const { stdout } = await runCommand('npm test');
+  const { stdout } = await runCommand('npm run test:run');
   const testTime = Date.now() - testStart;
   
   // Parse test output for metrics

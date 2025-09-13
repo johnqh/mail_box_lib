@@ -4,6 +4,7 @@
  */
 
 import { Email } from '../../../types/email';
+import { PersistenceService, AnalyticsService } from '../../../di';
 
 // Extended Email interface for business logic
 interface ExtendedEmail extends Email {
@@ -115,9 +116,23 @@ interface EmailOperations {
    * Search emails by query
    */
   searchEmails(emails: Email[], query: string): Email[];
+
+  /**
+   * Process email data
+   */
+  processEmailData(data: any): Promise<Email>;
+
+  /**
+   * Validate email data structure
+   */
+  validateEmailData(data: any): boolean;
 }
 
 class DefaultEmailOperations implements EmailOperations {
+  constructor(
+    private persistence: PersistenceService,
+    private analytics: AnalyticsService
+  ) {}
   formatEmailDate(date: Date): string {
     return date.toLocaleString('en-US', {
       weekday: 'long',
@@ -301,6 +316,52 @@ class DefaultEmailOperations implements EmailOperations {
           ? email.to.toLowerCase().includes(lowerQuery)
           : false)
     );
+  }
+
+  async processEmailData(data: any): Promise<Email> {
+    try {
+      if (!data) {
+        throw new Error('Email data is required');
+      }
+      if (!this.validateEmailData(data)) {
+        throw new Error('Invalid email data structure');
+      }
+
+      const email = data as Email;
+      
+      // Save email data
+      await this.persistence.save(`email_${email.id}`, email);
+      
+      // Track processing
+      this.analytics.track('email_processed', {
+        emailId: email.id,
+        from: email.from,
+        subject: email.subject,
+      });
+
+      return email;
+    } catch (error) {
+      // Track error
+      this.analytics.track('email_processing_error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        data: data?.id || 'unknown',
+      });
+      throw error;
+    }
+  }
+
+  validateEmailData(data: any): boolean {
+    if (!data || typeof data !== 'object') {
+      return false;
+    }
+    const required = ['id', 'subject', 'from', 'to', 'body'];
+    return required.every(field => {
+      const value = data[field];
+      if (field === 'to') {
+        return Array.isArray(value) ? value.length > 0 : typeof value === 'string' && value.length > 0;
+      }
+      return typeof value === 'string' && value.length > 0;
+    });
   }
 }
 

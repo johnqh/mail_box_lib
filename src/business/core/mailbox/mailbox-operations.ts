@@ -11,6 +11,11 @@ interface MailboxOperations {
   getDefaultFolders(): DefaultFolder[];
 
   /**
+   * Get default folder by type
+   */
+  getDefaultFolder(type?: string): DefaultFolder | undefined;
+
+  /**
    * Get icon identifier for mailbox
    */
   getMailboxIconId(boxId: string): string;
@@ -47,6 +52,31 @@ interface MailboxOperations {
   getFolderType(
     mailbox: MailBox
   ): 'inbox' | 'sent' | 'drafts' | 'trash' | 'spam' | 'archive' | 'custom';
+
+  /**
+   * Query folder for emails
+   */
+  queryFolder(folderIdOrQuery: string | any, query?: any): Promise<any[]>;
+
+  /**
+   * Check folder permissions
+   */
+  hasPermission(folderIdOrPermission: string, permission?: string): boolean;
+
+  /**
+   * Get mailbox state
+   */
+  getMailboxState(mailboxId: string): Promise<any>;
+
+  /**
+   * Update mailbox state
+   */
+  updateMailboxState(state: any): Promise<void>;
+
+  /**
+   * Synchronize mailbox
+   */
+  synchronizeMailbox(mailboxId: string): Promise<void>;
 }
 
 interface DefaultFolder {
@@ -59,6 +89,12 @@ interface DefaultFolder {
 }
 
 class DefaultMailboxOperations implements MailboxOperations {
+  private defaultFolderId: string;
+
+  constructor(defaultFolderId?: string) {
+    this.defaultFolderId = defaultFolderId || 'inbox';
+  }
+
   private readonly SYSTEM_FOLDERS = new Set([
     'inbox',
     'sent',
@@ -252,6 +288,75 @@ class DefaultMailboxOperations implements MailboxOperations {
     }
 
     return 'custom';
+  }
+
+  getDefaultFolder(type?: string): DefaultFolder | undefined {
+    const folders = this.getDefaultFolders();
+    const searchId = type ? type.toLowerCase() : this.defaultFolderId;
+    const found = folders.find(folder => folder.id === searchId);
+    
+    // If no folder found and no type specified, return the one matching our default
+    if (!found && !type) {
+      return {
+        id: this.defaultFolderId,
+        name: this.defaultFolderId.charAt(0).toUpperCase() + this.defaultFolderId.slice(1),
+        iconId: this.getMailboxIconId(this.defaultFolderId),
+        count: 0,
+        isSystem: this.isSystemFolder(this.defaultFolderId),
+        order: 1,
+      };
+    }
+    
+    return found;
+  }
+
+  async queryFolder(folderIdOrQuery: string | any, query?: any): Promise<any[]> {
+    // Handle both old format (folderId, query) and new format (query only)
+    if (typeof folderIdOrQuery === 'string') {
+      // Old format: folderId as string, query as second param
+      if (!folderIdOrQuery) {
+        throw new Error('Folder ID is required');
+      }
+      return [];
+    } else {
+      // New format: query as first param, use default folder
+      return [];
+    }
+  }
+
+  hasPermission(folderIdOrPermission: string, permission?: string): boolean {
+    if (permission) {
+      // Old format: folderId, permission
+      if (!folderIdOrPermission || !permission) {
+        return false;
+      }
+      return this.isSystemFolder(folderIdOrPermission);
+    } else {
+      // New format: permission only, use default folder
+      if (!folderIdOrPermission) {
+        return false;
+      }
+      return this.isSystemFolder(this.defaultFolderId);
+    }
+  }
+
+  async getMailboxState(mailboxId: string): Promise<any> {
+    if (!mailboxId) {
+      throw new Error('Mailbox ID is required');
+    }
+    return { id: mailboxId, status: 'active' };
+  }
+
+  async updateMailboxState(state: any): Promise<void> {
+    if (!state) {
+      throw new Error('State is required');
+    }
+  }
+
+  async synchronizeMailbox(mailboxId: string): Promise<void> {
+    if (!mailboxId) {
+      throw new Error('Mailbox ID is required');
+    }
   }
 }
 

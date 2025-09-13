@@ -13,6 +13,7 @@ enum AuthStatus {
 // Chain types (more specific than @johnqh/di version)
 enum ChainType {
   EVM = 'evm',
+  ETHEREUM = 'ethereum',
   SOLANA = 'solana',
   UNKNOWN = 'unknown',
 }
