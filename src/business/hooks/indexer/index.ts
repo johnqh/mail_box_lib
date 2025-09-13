@@ -5,4 +5,3 @@
 export * from './useIndexerPoints';
 export * from './useIndexerMail';
 export * from './useIndexerSolana';
-export * from './useIndexerQueries';

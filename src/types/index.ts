@@ -114,3 +114,6 @@ export * from './wildduck';
 
 // Common types and validation utilities
 export * from './common';
+
+// Wallet status types
+export * from './wallet-status';

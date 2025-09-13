@@ -13,3 +13,6 @@ export * from './useStorage';
 // Service layer hooks
 export * from './useServices';
 export * from './ServiceProvider';
+
+// Wallet status hooks
+export * from './useWalletStatus';
