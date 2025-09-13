@@ -245,7 +245,11 @@
 <a name='L180'></a><a href='#L180'>180</a>
 <a name='L181'></a><a href='#L181'>181</a>
 <a name='L182'></a><a href='#L182'>182</a>
-<a name='L183'></a><a href='#L183'>183</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L183'></a><a href='#L183'>183</a>
+<a name='L184'></a><a href='#L184'>184</a>
+<a name='L185'></a><a href='#L185'>185</a>
+<a name='L186'></a><a href='#L186'>186</a>
+<a name='L187'></a><a href='#L187'>187</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -413,6 +417,10 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -433,7 +441,7 @@
  * Note: These endpoints are typically called from backend services, not frontend
  */
 &nbsp;
-import { NetworkClient } from '@johnqh/di';
+import { NetworkClient } from '../../di';
 &nbsp;
 // Configuration interface for indexer webhook endpoints
 export interface IndexerWebhookConfig {
@@ -509,10 +517,10 @@ export interface WebhookResponse {
 <span class="cstat-no" title="statement not covered" >    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/webhook/email-sent`, emailData);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!response.ok) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);</span>
+<span class="cstat-no" title="statement not covered" >      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    return response.data;</span>
+<span class="cstat-no" title="statement not covered" >    return response.data as WebhookResponse;</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
   /**
@@ -523,10 +531,10 @@ export interface WebhookResponse {
 <span class="cstat-no" title="statement not covered" >    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/webhook/recipient-login`, loginData);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!response.ok) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);</span>
+<span class="cstat-no" title="statement not covered" >      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    return response.data;</span>
+<span class="cstat-no" title="statement not covered" >    return response.data as WebhookResponse;</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
   /**
@@ -537,10 +545,10 @@ export interface WebhookResponse {
 <span class="cstat-no" title="statement not covered" >    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/points/register-referral`, referralData);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!response.ok) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);</span>
+<span class="cstat-no" title="statement not covered" >      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    return response.data;</span>
+<span class="cstat-no" title="statement not covered" >    return response.data as WebhookResponse;</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
   /**
@@ -559,10 +567,10 @@ export interface WebhookResponse {
 <span class="cstat-no" title="statement not covered" >    });</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!response.ok) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);</span>
+<span class="cstat-no" title="statement not covered" >      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    return response.data;</span>
+<span class="cstat-no" title="statement not covered" >    return response.data as WebhookResponse;</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
   /**
@@ -573,10 +581,10 @@ export interface WebhookResponse {
 <span class="cstat-no" title="statement not covered" >    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/webhook/login`, loginData);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!response.ok) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);</span>
+<span class="cstat-no" title="statement not covered" >      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    return response.data.data;</span>
+<span class="cstat-no" title="statement not covered" >    return (response.data as any).data;</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
   /**
@@ -591,10 +599,14 @@ export interface WebhookResponse {
 <span class="cstat-no" title="statement not covered" >    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/api/solana/webhook`, transactions);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!response.ok) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);</span>
+<span class="cstat-no" title="statement not covered" >      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    return response.data;</span>
+<span class="cstat-no" title="statement not covered" >    return response.data as {</span>
+      success: boolean;
+      processed: number;
+      total: number;
+    };
 <span class="cstat-no" title="statement not covered" >  }</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;
@@ -616,7 +628,7 @@ export interface WebhookResponse {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-11T20:50:33.991Z
+                at 2025-09-13T20:11:55.942Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

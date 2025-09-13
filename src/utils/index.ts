@@ -34,3 +34,6 @@ export * from './constants';
 export * from './formatters';
 export * from './async-helpers';
 export * from './logger';
+
+// Type validation utilities
+export * from './type-validation';

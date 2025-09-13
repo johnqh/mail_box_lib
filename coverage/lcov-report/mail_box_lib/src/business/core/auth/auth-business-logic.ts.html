@@ -1920,7 +1920,7 @@ interface AuthBusinessLogic {
 &nbsp;
     // Also check the email address part using AddressHelper
 <span class="cstat-no" title="statement not covered" >    if (!isENS &amp;&amp; !isSNS) {</span>
-<span class="cstat-no" title="statement not covered" >      const emailParts = emailAddress.email.split('@');</span>
+<span class="cstat-no" title="statement not covered" >      const emailParts = emailAddress.address.split('@');</span>
 <span class="cstat-no" title="statement not covered" >      if (emailParts.length === 2) {</span>
 <span class="cstat-no" title="statement not covered" >        const addressType = AddressHelper.getAddressType(emailParts[0]);</span>
 <span class="cstat-no" title="statement not covered" >        isENS = addressType === AddressType.ENSName;</span>
@@ -1959,7 +1959,7 @@ interface AuthBusinessLogic {
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (namedAddress) {</span>
       // Extract name from email (e.g., "vitalik.eth@0xmail.box" -&gt; "vitalik.eth")
-<span class="cstat-no" title="statement not covered" >      const name = namedAddress.email.split('@')[0];</span>
+<span class="cstat-no" title="statement not covered" >      const name = namedAddress.address.split('@')[0];</span>
 <span class="cstat-no" title="statement not covered" >      return name || this.formatWalletAddressForDisplay(walletAddress);</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 &nbsp;
@@ -1973,7 +1973,7 @@ interface AuthBusinessLogic {
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    switch (chainType) {</span>
 <span class="cstat-no" title="statement not covered" >      case ChainType.EVM:</span>
-        // Ethereum signature validation (0x followed by 130 hex characters)
+        // EVM signature validation (0x followed by 130 hex characters)
 <span class="cstat-no" title="statement not covered" >        return /^0x[a-fA-F0-9]{130}$/.test(signature);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >      case ChainType.SOLANA:</span>
@@ -2060,10 +2060,10 @@ interface EmailAddressBusinessLogic {
 <span class="cstat-no" title="statement not covered" >    const addresses: EmailAddress[] = [</span>
 <span class="cstat-no" title="statement not covered" >      {</span>
 <span class="cstat-no" title="statement not covered" >        id: `direct_${walletAddress}`,</span>
-<span class="cstat-no" title="statement not covered" >        name: this.formatAddressForDisplay(walletAddress),</span>
-<span class="cstat-no" title="statement not covered" >        email: `${walletAddress}@0xmail.box`,</span>
-<span class="cstat-no" title="statement not covered" >        isPrimary: true,</span>
-<span class="cstat-no" title="statement not covered" >        isActive: true,</span>
+<span class="cstat-no" title="statement not covered" >        address: `${walletAddress}@0xmail.box`,</span>
+<span class="cstat-no" title="statement not covered" >        verified: true,</span>
+<span class="cstat-no" title="statement not covered" >        primary: true,</span>
+<span class="cstat-no" title="statement not covered" >        createdAt: new Date(),</span>
 <span class="cstat-no" title="statement not covered" >      },</span>
 <span class="cstat-no" title="statement not covered" >    ];</span>
 &nbsp;
@@ -2071,10 +2071,10 @@ interface EmailAddressBusinessLogic {
 <span class="cstat-no" title="statement not covered" >    if (chainType === ChainType.EVM) {</span>
 <span class="cstat-no" title="statement not covered" >      addresses.push({</span>
 <span class="cstat-no" title="statement not covered" >        id: `ens_${walletAddress}`,</span>
-<span class="cstat-no" title="statement not covered" >        name: 'ENS Domain',</span>
-<span class="cstat-no" title="statement not covered" >        email: 'your-domain.eth@0xmail.box',</span>
-<span class="cstat-no" title="statement not covered" >        isPrimary: false,</span>
-<span class="cstat-no" title="statement not covered" >        isActive: true,</span>
+<span class="cstat-no" title="statement not covered" >        address: 'your-domain.eth@0xmail.box',</span>
+<span class="cstat-no" title="statement not covered" >        verified: false,</span>
+<span class="cstat-no" title="statement not covered" >        primary: false,</span>
+<span class="cstat-no" title="statement not covered" >        createdAt: new Date(),</span>
 <span class="cstat-no" title="statement not covered" >      });</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 &nbsp;
@@ -2082,10 +2082,10 @@ interface EmailAddressBusinessLogic {
 <span class="cstat-no" title="statement not covered" >    if (chainType === ChainType.SOLANA) {</span>
 <span class="cstat-no" title="statement not covered" >      addresses.push({</span>
 <span class="cstat-no" title="statement not covered" >        id: `sns_${walletAddress}`,</span>
-<span class="cstat-no" title="statement not covered" >        name: 'SNS Domain',</span>
-<span class="cstat-no" title="statement not covered" >        email: 'your-domain.sol@0xmail.box',</span>
-<span class="cstat-no" title="statement not covered" >        isPrimary: false,</span>
-<span class="cstat-no" title="statement not covered" >        isActive: true,</span>
+<span class="cstat-no" title="statement not covered" >        address: 'your-domain.sol@0xmail.box',</span>
+<span class="cstat-no" title="statement not covered" >        verified: false,</span>
+<span class="cstat-no" title="statement not covered" >        primary: false,</span>
+<span class="cstat-no" title="statement not covered" >        createdAt: new Date(),</span>
 <span class="cstat-no" title="statement not covered" >      });</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 &nbsp;
@@ -2093,14 +2093,14 @@ interface EmailAddressBusinessLogic {
 <span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  isPrimaryEmailAddress(emailAddress: EmailAddress): boolean {</span>
-<span class="cstat-no" title="statement not covered" >    return emailAddress.isPrimary;</span>
+<span class="cstat-no" title="statement not covered" >    return emailAddress.primary === true;</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  sortEmailAddresses(emailAddresses: EmailAddress[]): EmailAddress[] {</span>
 <span class="cstat-no" title="statement not covered" >    return [...emailAddresses].sort((a, b) =&gt; {</span>
       // Primary addresses first
-<span class="cstat-no" title="statement not covered" >      if (a.isPrimary &amp;&amp; !b.isPrimary) return -1;</span>
-<span class="cstat-no" title="statement not covered" >      if (!a.isPrimary &amp;&amp; b.isPrimary) return 1;</span>
+<span class="cstat-no" title="statement not covered" >      if (a.primary &amp;&amp; !b.primary) return -1;</span>
+<span class="cstat-no" title="statement not covered" >      if (!a.primary &amp;&amp; b.primary) return 1;</span>
 &nbsp;
       // Then by type priority: direct, ENS, SNS, custom
 <span class="cstat-no" title="statement not covered" >      const aPriority = this.getAddressPriority(a);</span>
@@ -2111,7 +2111,7 @@ interface EmailAddressBusinessLogic {
 <span class="cstat-no" title="statement not covered" >      }</span>
 &nbsp;
       // Finally alphabetically
-<span class="cstat-no" title="statement not covered" >      return a.email.localeCompare(b.email);</span>
+<span class="cstat-no" title="statement not covered" >      return a.address.localeCompare(b.address);</span>
 <span class="cstat-no" title="statement not covered" >    });</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
@@ -2125,7 +2125,7 @@ interface EmailAddressBusinessLogic {
 <span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  getEmailAddressDisplayName(emailAddress: EmailAddress): string {</span>
-<span class="cstat-no" title="statement not covered" >    return emailAddress.name || emailAddress.email.split('@')[0];</span>
+<span class="cstat-no" title="statement not covered" >    return emailAddress.address.split('@')[0];</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  private formatAddressForDisplay(address: string): string {</span>
@@ -2647,7 +2647,7 @@ export {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-11T20:50:34.062Z
+                at 2025-09-13T20:11:56.015Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

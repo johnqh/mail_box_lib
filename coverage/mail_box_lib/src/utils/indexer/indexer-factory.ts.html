@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/32</span>
+                <span class='fraction'>0/41</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/32</span>
+                <span class='fraction'>0/41</span>
             </div>
         
             
@@ -183,7 +183,16 @@
 <a name='L118'></a><a href='#L118'>118</a>
 <a name='L119'></a><a href='#L119'>119</a>
 <a name='L120'></a><a href='#L120'>120</a>
-<a name='L121'></a><a href='#L121'>121</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -226,6 +235,9 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -250,6 +262,9 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -271,6 +286,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -308,7 +326,7 @@
  * These functions use the IndexerClient by default for easy integration
  */
 &nbsp;
-import { AppConfig } from '../../types';
+import { AppConfig } from '../../types/environment';
 <span class="cstat-no" title="statement not covered" >import { IndexerClient } from '../../network/clients/indexer';</span>
 <span class="cstat-no" title="statement not covered" >import { </span>
   createIndexerAdminHelper, 
@@ -340,7 +358,10 @@ import { AppConfig } from '../../types';
  * ```
  */
 <span class="cstat-no" title="statement not covered" >export const createIndexerAdmin = (config: AppConfig): IndexerAdminHelper =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  const networkClient = new IndexerClient(config);</span>
+<span class="cstat-no" title="statement not covered" >  const networkClient = new IndexerClient(</span>
+<span class="cstat-no" title="statement not covered" >    config.indexerBackendUrl || 'https://indexer.0xmail.box',</span>
+<span class="cstat-no" title="statement not covered" >    config.devMode</span>
+<span class="cstat-no" title="statement not covered" >  );</span>
 <span class="cstat-no" title="statement not covered" >  return createIndexerAdminHelper(</span>
 <span class="cstat-no" title="statement not covered" >    config.indexerBackendUrl || 'https://indexer.0xmail.box',</span>
 <span class="cstat-no" title="statement not covered" >    networkClient</span>
@@ -364,7 +385,10 @@ import { AppConfig } from '../../types';
  * ```
  */
 <span class="cstat-no" title="statement not covered" >export const createIndexerGraphQL = (config: AppConfig): IndexerGraphQLHelper =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  const networkClient = new IndexerClient(config);</span>
+<span class="cstat-no" title="statement not covered" >  const networkClient = new IndexerClient(</span>
+<span class="cstat-no" title="statement not covered" >    config.indexerBackendUrl || 'https://indexer.0xmail.box',</span>
+<span class="cstat-no" title="statement not covered" >    config.devMode</span>
+<span class="cstat-no" title="statement not covered" >  );</span>
 <span class="cstat-no" title="statement not covered" >  return createIndexerGraphQLHelper(</span>
 <span class="cstat-no" title="statement not covered" >    config.indexerBackendUrl || 'https://indexer.0xmail.box',</span>
 <span class="cstat-no" title="statement not covered" >    networkClient</span>
@@ -392,7 +416,10 @@ import { AppConfig } from '../../types';
  * ```
  */
 <span class="cstat-no" title="statement not covered" >export const createIndexerWebhook = (config: AppConfig): IndexerWebhookHelper =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  const networkClient = new IndexerClient(config);</span>
+<span class="cstat-no" title="statement not covered" >  const networkClient = new IndexerClient(</span>
+<span class="cstat-no" title="statement not covered" >    config.indexerBackendUrl || 'https://indexer.0xmail.box',</span>
+<span class="cstat-no" title="statement not covered" >    config.devMode</span>
+<span class="cstat-no" title="statement not covered" >  );</span>
 <span class="cstat-no" title="statement not covered" >  return createIndexerWebhookHelper(</span>
 <span class="cstat-no" title="statement not covered" >    config.indexerBackendUrl || 'https://indexer.0xmail.box',</span>
 <span class="cstat-no" title="statement not covered" >    networkClient</span>
@@ -430,7 +457,7 @@ import { AppConfig } from '../../types';
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-11T20:50:33.991Z
+                at 2025-09-13T20:11:55.942Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

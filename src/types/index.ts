@@ -111,3 +111,6 @@ export * from './mailbox';
 
 // WildDuck shared types
 export * from './wildduck';
+
+// Common types and validation utilities
+export * from './common';

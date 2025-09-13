@@ -16,6 +16,99 @@ npm run check-all  # Ensures build, tests, and lint all pass
 4. Debug tests → Run `npm test -- --watch`
 5. Find code → Use Glob for files, Grep for content
 
+## AI Development Optimization
+
+### Quick Command Reference
+```bash
+# Validation
+npm run check-all       # Run all checks (lint, typecheck, tests)
+npm run validate        # Full validation with coverage
+npm run quick-check     # Fast validation (no coverage)
+
+# Development
+npm run dev            # Watch mode for development
+npm run test:watch     # Watch tests
+npm run lint:watch     # Watch linting
+
+# Code Generation
+npm run create:service  # Create new service with template
+npm run create:hook     # Create new React hook
+npm run create:type     # Generate TypeScript definitions
+
+# Analysis
+npm run analyze:deps    # Check dependency issues
+npm run analyze:size    # Bundle size analysis
+npm run analyze:types   # Type coverage report
+```
+
+### AI-Friendly File Structure
+```
+src/
+├── business/           # ✅ Core business logic (AI: modify here for features)
+│   ├── hooks/         # React hooks (AI: extend functionality here)
+│   │   ├── indexer/   # Indexer API hooks - (endpointUrl, dev) params
+│   │   └── wildduck/  # WildDuck hooks - (config: WildDuckConfig) params
+│   └── core/          # Domain operations (AI: business rules here)
+├── network/           # ✅ API clients (AI: update endpoints here)
+│   └── clients/
+│       ├── indexer.ts # IndexerClient with dev mode support
+│       └── wildduck.ts # WildDuckAPI with WildDuckConfig
+├── types/             # ✅ TypeScript definitions (AI: start here for new features)
+└── utils/             # ✅ Utility functions (AI: helpers and tools)
+```
+
+### Pattern Recognition for AI
+
+#### 🎯 Adding a New Hook Pattern
+```typescript
+// 1. Check if similar hook exists
+Grep -n "use.*Hook" src/business/hooks/
+
+// 2. Use template for consistency
+// For Indexer hooks:
+const useIndexerFeature = (endpointUrl: string, dev: boolean) => {
+  const client = new IndexerClient(endpointUrl, dev);
+  // ... implementation
+};
+
+// For WildDuck hooks:
+const useWildduckFeature = (config: WildDuckConfig) => {
+  // ... implementation using config
+};
+
+// 3. Export from index
+export { useIndexerFeature } from './useIndexerFeature';
+```
+
+#### 🎯 Configuration Pattern
+```typescript
+// Always require configuration from consumer
+interface ServiceConfig {
+  required: string;      // Required fields
+  alsoRequired: string;  // Required fields
+  optional?: string;     // Optional fields
+}
+
+// Never create default configs internally
+// ❌ WRONG: const defaultConfig = { ... }
+// ✅ RIGHT: Accept config as parameter
+```
+
+#### 🎯 Error Handling Pattern
+```typescript
+// Consistent error handling across hooks
+try {
+  const result = await apiCall();
+  return result;
+} catch (err) {
+  const errorMessage = err instanceof Error 
+    ? err.message 
+    : 'Operation failed';
+  setError(errorMessage);
+  throw err;
+}
+```
+
 ## Quick Reference
 
 - **Version**: 3.1.4
@@ -323,7 +416,183 @@ npm run typecheck    # Type checking without build
 npm run check-all    # Run lint, typecheck, and tests
 ```
 
-## Troubleshooting Guide
+## AI Code Examples and Troubleshooting
+
+### 🚀 Quick Start Templates
+
+#### Creating a New Indexer Hook
+```typescript
+// File: src/business/hooks/indexer/useIndexerNewFeature.ts
+import { useCallback, useState } from 'react';
+import { IndexerClient } from '../../../network/clients/indexer';
+
+export const useIndexerNewFeature = (endpointUrl: string, dev: boolean) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const client = new IndexerClient(endpointUrl, dev);
+
+  const fetchData = useCallback(async (param: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const result = await client.newEndpoint(param);
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Operation failed';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [client]);
+
+  return { fetchData, isLoading, error, clearError: () => setError(null) };
+};
+```
+
+#### Creating a New WildDuck Hook
+```typescript
+// File: src/business/hooks/wildduck/useWildduckNewFeature.ts
+import { useCallback, useState } from 'react';
+import { WildDuckConfig } from '../../../network/clients/wildduck';
+import axios from 'axios';
+
+export const useWildduckNewFeature = (config: WildDuckConfig) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async (param: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      };
+
+      if (config.cloudflareWorkerUrl) {
+        headers['Authorization'] = `Bearer ${config.apiToken}`;
+        headers['X-App-Source'] = '0xmail-box';
+      } else {
+        headers['X-Access-Token'] = config.apiToken;
+      }
+
+      const response = await axios.get(`${apiUrl}/new-endpoint/${param}`, { headers });
+      return response.data;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Operation failed';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [config]);
+
+  return { fetchData, isLoading, error, clearError: () => setError(null) };
+};
+```
+
+#### Adding New API Endpoint to Client
+```typescript
+// File: src/network/clients/indexer.ts
+// Add to IndexerClient class:
+
+async newEndpoint(param: string) {
+  const response = await this.get(`/api/new-endpoint/${encodeURIComponent(param)}`);
+  
+  if (!response.ok) {
+    throw new Error(
+      `Failed to call new endpoint: ${(response.data as any)?.error || 'Unknown error'}`
+    );
+  }
+  
+  return response.data;
+}
+```
+
+### 🎯 Common Patterns Recognition
+
+#### Configuration Extraction Pattern
+```typescript
+// BEFORE (Internal config ❌)
+const useService = () => {
+  const client = new APIClient('https://hardcoded-url.com');
+  // ...
+};
+
+// AFTER (Consumer config ✅)
+const useService = (config: ServiceConfig) => {
+  const client = new APIClient(config.apiUrl);
+  // ...
+};
+```
+
+#### Hook Parameter Patterns
+```typescript
+// Indexer hooks ALWAYS use:
+(endpointUrl: string, dev: boolean)
+
+// WildDuck hooks ALWAYS use:
+(config: WildDuckConfig)
+
+// TanStack Query hooks ADD options:
+(endpointUrl: string, dev: boolean, options?: UseQueryOptions<T>)
+```
+
+### 🔍 AI Search Commands
+
+#### Find Similar Code
+```bash
+# Find all hooks with similar functionality
+Grep -n "useIndexer.*" src/business/hooks/indexer/
+Grep -n "useWildduck.*" src/business/hooks/wildduck/
+
+# Find configuration patterns
+Grep -n "Config" src/network/clients/
+Grep -n "interface.*Config" src/
+
+# Find error handling patterns
+Grep -n "catch.*err" src/business/hooks/
+```
+
+#### Locate Files by Pattern
+```bash
+# Find all hook files
+Glob "**/use*.ts"
+
+# Find all interface definitions
+Glob "**/*.interface.ts"
+
+# Find all test files
+Glob "**/*.test.ts"
+```
+
+### 🛠️ Troubleshooting Guide for AI
+
+#### Type Errors
+1. **Missing @johnqh/di imports**: Check if type exists in @johnqh/di first
+2. **Unknown type**: Look in src/types/ directory
+3. **NetworkResponse<T> issues**: Use type assertions for response.data
+
+```typescript
+// Type assertion pattern
+const result = response.data as ExpectedType;
+```
+
+#### Hook Issues
+1. **Wrong parameter pattern**: Check if it's Indexer or WildDuck hook
+2. **Missing config**: Ensure WildDuck hooks receive WildDuckConfig
+3. **Dev mode not working**: Check if dev parameter is passed as x-dev header
+
+#### API Client Issues
+1. **Endpoint not found**: Check if endpoint exists in client class
+2. **Authentication fails**: Verify header configuration (Bearer vs X-Access-Token)
+3. **CORS issues**: Check if using correct API URL
+
+## Legacy Troubleshooting Guide
 
 ### Common Type Issues
 

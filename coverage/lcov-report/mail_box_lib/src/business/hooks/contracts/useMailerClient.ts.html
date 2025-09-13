@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for mail_box_lib/src/business/hooks/contracts/useMailBoxClient.ts</title>
+    <title>Code coverage report for mail_box_lib/src/business/hooks/contracts/useMailerClient.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../../../../prettify.css" />
     <link rel="stylesheet" href="../../../../../base.css" />
@@ -19,7 +19,7 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../../../../index.html">All files</a> / <a href="index.html">mail_box_lib/src/business/hooks/contracts</a> useMailBoxClient.ts</h1>
+        <h1><a href="../../../../../index.html">All files</a> / <a href="index.html">mail_box_lib/src/business/hooks/contracts</a> useMailerClient.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
@@ -506,19 +506,19 @@
   type DelegationResult as ContractDelegationResult,
   type DomainResult,
   type MessageResult,
-  UnifiedMailBoxClient,
+  OnchainMailerClient,
   type UnifiedTransaction,
   type UnifiedWallet,
 } from '@johnqh/mail_box_contracts';
 &nbsp;
-interface UseMailBoxClientOptions {
+interface UseMailerClientOptions {
   wallet?: UnifiedWallet;
   config?: ChainConfig;
 }
 &nbsp;
-interface UseMailBoxClientReturn {
+interface UseMailerClientReturn {
   // Client instance
-  client: UnifiedMailBoxClient | null;
+  client: OnchainMailerClient | null;
 &nbsp;
   // State
   isLoading: boolean;
@@ -549,15 +549,15 @@ interface UseMailBoxClientReturn {
 /**
  * Hook for interacting with MailBox contracts across EVM and Solana chains
  */
-<span class="cstat-no" title="statement not covered" >export const useMailBoxClient = (</span>
-<span class="cstat-no" title="statement not covered" >  options: UseMailBoxClientOptions = {}</span>
-<span class="cstat-no" title="statement not covered" >): UseMailBoxClientReturn =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  const [client, setClient] = useState&lt;UnifiedMailBoxClient | null&gt;(() =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >export const useMailerClient = (</span>
+<span class="cstat-no" title="statement not covered" >  options: UseMailerClientOptions = {}</span>
+<span class="cstat-no" title="statement not covered" >): UseMailerClientReturn =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  const [client, setClient] = useState&lt;OnchainMailerClient | null&gt;(() =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    if (options.wallet &amp;&amp; options.config) {</span>
 <span class="cstat-no" title="statement not covered" >      try {</span>
-<span class="cstat-no" title="statement not covered" >        return new UnifiedMailBoxClient(options.wallet, options.config);</span>
+<span class="cstat-no" title="statement not covered" >        return new OnchainMailerClient(options.wallet, options.config);</span>
 <span class="cstat-no" title="statement not covered" >      } catch (error) {</span>
-<span class="cstat-no" title="statement not covered" >        console.warn('Failed to initialize UnifiedMailBoxClient:', error);</span>
+<span class="cstat-no" title="statement not covered" >        console.warn('Failed to initialize OnchainMailerClient:', error);</span>
 <span class="cstat-no" title="statement not covered" >        return null;</span>
 <span class="cstat-no" title="statement not covered" >      }</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
@@ -574,7 +574,7 @@ interface UseMailBoxClientReturn {
 <span class="cstat-no" title="statement not covered" >  const initializeClient = useCallback(</span>
 <span class="cstat-no" title="statement not covered" >    (wallet: UnifiedWallet, config: ChainConfig) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >      try {</span>
-<span class="cstat-no" title="statement not covered" >        const newClient = new UnifiedMailBoxClient(wallet, config);</span>
+<span class="cstat-no" title="statement not covered" >        const newClient = new OnchainMailerClient(wallet, config);</span>
 <span class="cstat-no" title="statement not covered" >        setClient(newClient);</span>
 <span class="cstat-no" title="statement not covered" >        setError(null);</span>
 <span class="cstat-no" title="statement not covered" >      } catch (err) {</span>
@@ -710,7 +710,7 @@ interface UseMailBoxClientReturn {
 <span class="cstat-no" title="statement not covered" >  };</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 &nbsp;
-export type { UseMailBoxClientReturn, UseMailBoxClientOptions };
+export type { UseMailerClientReturn, UseMailerClientOptions };
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -718,7 +718,7 @@ export type { UseMailBoxClientReturn, UseMailBoxClientOptions };
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-11T20:50:34.062Z
+                at 2025-09-13T20:11:56.015Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

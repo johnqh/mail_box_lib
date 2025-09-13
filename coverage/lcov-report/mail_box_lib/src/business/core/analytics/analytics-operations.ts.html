@@ -531,14 +531,12 @@
 <a name='L466'></a><a href='#L466'>466</a>
 <a name='L467'></a><a href='#L467'>467</a>
 <a name='L468'></a><a href='#L468'>468</a>
-<a name='L469'></a><a href='#L469'>469</a>
-<a name='L470'></a><a href='#L470'>470</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L469'></a><a href='#L469'>469</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1007,17 +1005,16 @@
  */
 &nbsp;
 <span class="cstat-no" title="statement not covered" >import {</span>
-  AnalyticsEvent,
+  AppAnalyticsEvent,
   ChainType,
   EmailAction,
   EmailFolder,
-  LoginMethod,
   SubscriptionAction,
-  WalletType,
 } from '../enums';
+import { WalletType } from '../../../di';
 &nbsp;
 interface AnalyticsEventData {
-  name: AnalyticsEvent | string;
+  name: AppAnalyticsEvent | string;
   properties: Record&lt;string, any&gt;;
   timestamp: number;
 }
@@ -1026,7 +1023,7 @@ interface UserProperties {
   userId?: string;
   walletAddress?: string;
   chainType?: ChainType;
-  loginMethod?: LoginMethod;
+  loginMethod?: string;
   subscriptionStatus?: string;
   [key: string]: any;
 }
@@ -1036,7 +1033,7 @@ interface AnalyticsOperations {
    * Create authentication event
    */
   createAuthEvent(
-    method: LoginMethod,
+    method: string,
     walletType?: WalletType,
     chainType?: ChainType
   ): AnalyticsEventData;
@@ -1118,7 +1115,7 @@ interface AnalyticsOperations {
   createUserProperties(userData: {
     walletAddress?: string;
     chainType?: ChainType;
-    loginMethod?: LoginMethod;
+    loginMethod?: string;
     subscriptionStatus?: string;
   }): UserProperties;
 &nbsp;
@@ -1149,12 +1146,12 @@ interface AnalyticsOperations {
 <span class="cstat-no" title="statement not covered" >  private readonly MAX_EVENT_NAME_LENGTH = 40;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  createAuthEvent(</span>
-<span class="cstat-no" title="statement not covered" >    method: LoginMethod,</span>
+<span class="cstat-no" title="statement not covered" >    method: string,</span>
 <span class="cstat-no" title="statement not covered" >    walletType?: WalletType,</span>
 <span class="cstat-no" title="statement not covered" >    chainType?: ChainType</span>
 <span class="cstat-no" title="statement not covered" >  ): AnalyticsEventData {</span>
 <span class="cstat-no" title="statement not covered" >    return {</span>
-<span class="cstat-no" title="statement not covered" >      name: AnalyticsEvent.USER_LOGIN,</span>
+<span class="cstat-no" title="statement not covered" >      name: AppAnalyticsEvent.USER_LOGIN,</span>
 <span class="cstat-no" title="statement not covered" >      properties: {</span>
 <span class="cstat-no" title="statement not covered" >        method,</span>
 <span class="cstat-no" title="statement not covered" >        wallet_type: walletType,</span>
@@ -1169,15 +1166,15 @@ interface AnalyticsOperations {
 <span class="cstat-no" title="statement not covered" >    emailId: string,</span>
 <span class="cstat-no" title="statement not covered" >    folder?: EmailFolder</span>
 <span class="cstat-no" title="statement not covered" >  ): AnalyticsEventData {</span>
-<span class="cstat-no" title="statement not covered" >    const eventMap: Record&lt;EmailAction, AnalyticsEvent&gt; = {</span>
-<span class="cstat-no" title="statement not covered" >      [EmailAction.OPEN]: AnalyticsEvent.EMAIL_OPEN,</span>
-<span class="cstat-no" title="statement not covered" >      [EmailAction.REPLY]: AnalyticsEvent.EMAIL_REPLY,</span>
-<span class="cstat-no" title="statement not covered" >      [EmailAction.FORWARD]: AnalyticsEvent.EMAIL_FORWARD,</span>
-<span class="cstat-no" title="statement not covered" >      [EmailAction.DELETE]: AnalyticsEvent.EMAIL_DELETE,</span>
-<span class="cstat-no" title="statement not covered" >      [EmailAction.STAR]: AnalyticsEvent.EMAIL_STAR,</span>
-<span class="cstat-no" title="statement not covered" >      [EmailAction.UNSTAR]: AnalyticsEvent.EMAIL_STAR,</span>
-<span class="cstat-no" title="statement not covered" >      [EmailAction.MARK_READ]: AnalyticsEvent.EMAIL_OPEN,</span>
-<span class="cstat-no" title="statement not covered" >      [EmailAction.MARK_UNREAD]: AnalyticsEvent.EMAIL_OPEN,</span>
+<span class="cstat-no" title="statement not covered" >    const eventMap: Record&lt;EmailAction, AppAnalyticsEvent&gt; = {</span>
+<span class="cstat-no" title="statement not covered" >      [EmailAction.OPEN]: AppAnalyticsEvent.EMAIL_OPEN,</span>
+<span class="cstat-no" title="statement not covered" >      [EmailAction.REPLY]: AppAnalyticsEvent.EMAIL_REPLY,</span>
+<span class="cstat-no" title="statement not covered" >      [EmailAction.FORWARD]: AppAnalyticsEvent.EMAIL_FORWARD,</span>
+<span class="cstat-no" title="statement not covered" >      [EmailAction.DELETE]: AppAnalyticsEvent.EMAIL_DELETE,</span>
+<span class="cstat-no" title="statement not covered" >      [EmailAction.STAR]: AppAnalyticsEvent.EMAIL_STAR,</span>
+<span class="cstat-no" title="statement not covered" >      [EmailAction.UNSTAR]: AppAnalyticsEvent.EMAIL_STAR,</span>
+<span class="cstat-no" title="statement not covered" >      [EmailAction.MARK_READ]: AppAnalyticsEvent.EMAIL_OPEN,</span>
+<span class="cstat-no" title="statement not covered" >      [EmailAction.MARK_UNREAD]: AppAnalyticsEvent.EMAIL_OPEN,</span>
 <span class="cstat-no" title="statement not covered" >    };</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    return {</span>
@@ -1194,7 +1191,7 @@ interface AnalyticsOperations {
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  createPageViewEvent(pageName: string, pagePath: string): AnalyticsEventData {</span>
 <span class="cstat-no" title="statement not covered" >    return {</span>
-<span class="cstat-no" title="statement not covered" >      name: AnalyticsEvent.PAGE_VIEW,</span>
+<span class="cstat-no" title="statement not covered" >      name: AppAnalyticsEvent.PAGE_VIEW,</span>
 <span class="cstat-no" title="statement not covered" >      properties: {</span>
 <span class="cstat-no" title="statement not covered" >        page_name: pageName,</span>
 <span class="cstat-no" title="statement not covered" >        page_path: pagePath,</span>
@@ -1209,11 +1206,11 @@ interface AnalyticsOperations {
 <span class="cstat-no" title="statement not covered" >    amount?: number,</span>
 <span class="cstat-no" title="statement not covered" >    currency?: string</span>
 <span class="cstat-no" title="statement not covered" >  ): AnalyticsEventData {</span>
-<span class="cstat-no" title="statement not covered" >    const eventMap: Record&lt;SubscriptionAction, AnalyticsEvent&gt; = {</span>
-<span class="cstat-no" title="statement not covered" >      [SubscriptionAction.VIEW]: AnalyticsEvent.SUBSCRIPTION_VIEW,</span>
-<span class="cstat-no" title="statement not covered" >      [SubscriptionAction.PURCHASE]: AnalyticsEvent.SUBSCRIPTION_PURCHASE,</span>
-<span class="cstat-no" title="statement not covered" >      [SubscriptionAction.CANCEL]: AnalyticsEvent.SUBSCRIPTION_CANCEL,</span>
-<span class="cstat-no" title="statement not covered" >      [SubscriptionAction.RESTORE]: AnalyticsEvent.SUBSCRIPTION_VIEW,</span>
+<span class="cstat-no" title="statement not covered" >    const eventMap: Record&lt;SubscriptionAction, AppAnalyticsEvent&gt; = {</span>
+<span class="cstat-no" title="statement not covered" >      [SubscriptionAction.VIEW]: AppAnalyticsEvent.SUBSCRIPTION_VIEW,</span>
+<span class="cstat-no" title="statement not covered" >      [SubscriptionAction.PURCHASE]: AppAnalyticsEvent.SUBSCRIPTION_PURCHASE,</span>
+<span class="cstat-no" title="statement not covered" >      [SubscriptionAction.CANCEL]: AppAnalyticsEvent.SUBSCRIPTION_CANCEL,</span>
+<span class="cstat-no" title="statement not covered" >      [SubscriptionAction.RESTORE]: AppAnalyticsEvent.SUBSCRIPTION_VIEW,</span>
 <span class="cstat-no" title="statement not covered" >    };</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    return {</span>
@@ -1230,7 +1227,7 @@ interface AnalyticsOperations {
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  createSearchEvent(query: string, resultsCount: number): AnalyticsEventData {</span>
 <span class="cstat-no" title="statement not covered" >    return {</span>
-<span class="cstat-no" title="statement not covered" >      name: AnalyticsEvent.SEARCH_PERFORMED,</span>
+<span class="cstat-no" title="statement not covered" >      name: AppAnalyticsEvent.SEARCH_PERFORMED,</span>
 <span class="cstat-no" title="statement not covered" >      properties: {</span>
 <span class="cstat-no" title="statement not covered" >        query: this.sanitizeString(query),</span>
 <span class="cstat-no" title="statement not covered" >        results_count: resultsCount,</span>
@@ -1246,7 +1243,7 @@ interface AnalyticsOperations {
 <span class="cstat-no" title="statement not covered" >    pageName?: string</span>
 <span class="cstat-no" title="statement not covered" >  ): AnalyticsEventData {</span>
 <span class="cstat-no" title="statement not covered" >    return {</span>
-<span class="cstat-no" title="statement not covered" >      name: AnalyticsEvent.ERROR_OCCURRED,</span>
+<span class="cstat-no" title="statement not covered" >      name: AppAnalyticsEvent.ERROR_OCCURRED,</span>
 <span class="cstat-no" title="statement not covered" >      properties: {</span>
 <span class="cstat-no" title="statement not covered" >        error_type: errorType,</span>
 <span class="cstat-no" title="statement not covered" >        error_message: this.sanitizeString(errorMessage),</span>
@@ -1264,8 +1261,8 @@ interface AnalyticsOperations {
 <span class="cstat-no" title="statement not covered" >  ): AnalyticsEventData {</span>
 <span class="cstat-no" title="statement not covered" >    const eventName =</span>
 <span class="cstat-no" title="statement not covered" >      action === 'viewed'</span>
-<span class="cstat-no" title="statement not covered" >        ? AnalyticsEvent.AB_TEST_VIEWED</span>
-<span class="cstat-no" title="statement not covered" >        : AnalyticsEvent.AB_TEST_CONVERTED;</span>
+<span class="cstat-no" title="statement not covered" >        ? AppAnalyticsEvent.AB_TEST_VIEWED</span>
+<span class="cstat-no" title="statement not covered" >        : AppAnalyticsEvent.AB_TEST_CONVERTED;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    return {</span>
 <span class="cstat-no" title="statement not covered" >      name: eventName,</span>
@@ -1280,7 +1277,7 @@ interface AnalyticsOperations {
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  createNavigationEvent(fromPage: string, toPage: string): AnalyticsEventData {</span>
 <span class="cstat-no" title="statement not covered" >    return {</span>
-<span class="cstat-no" title="statement not covered" >      name: AnalyticsEvent.PAGE_VIEW,</span>
+<span class="cstat-no" title="statement not covered" >      name: AppAnalyticsEvent.PAGE_VIEW,</span>
 <span class="cstat-no" title="statement not covered" >      properties: {</span>
 <span class="cstat-no" title="statement not covered" >        from_page: fromPage,</span>
 <span class="cstat-no" title="statement not covered" >        to_page: toPage,</span>
@@ -1295,7 +1292,7 @@ interface AnalyticsOperations {
 <span class="cstat-no" title="statement not covered" >    toFolder: EmailFolder</span>
 <span class="cstat-no" title="statement not covered" >  ): AnalyticsEventData {</span>
 <span class="cstat-no" title="statement not covered" >    return {</span>
-<span class="cstat-no" title="statement not covered" >      name: AnalyticsEvent.FOLDER_SWITCH,</span>
+<span class="cstat-no" title="statement not covered" >      name: AppAnalyticsEvent.FOLDER_SWITCH,</span>
 <span class="cstat-no" title="statement not covered" >      properties: {</span>
 <span class="cstat-no" title="statement not covered" >        from_folder: fromFolder,</span>
 <span class="cstat-no" title="statement not covered" >        to_folder: toFolder,</span>
@@ -1364,7 +1361,7 @@ interface AnalyticsOperations {
 <span class="cstat-no" title="statement not covered" >  createUserProperties(userData: {</span>
     walletAddress?: string;
     chainType?: ChainType;
-    loginMethod?: LoginMethod;
+    loginMethod?: string;
     subscriptionStatus?: string;
 <span class="cstat-no" title="statement not covered" >  }): UserProperties {</span>
 <span class="cstat-no" title="statement not covered" >    const properties: UserProperties = {};</span>
@@ -1477,7 +1474,7 @@ export {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-11T20:50:34.062Z
+                at 2025-09-13T20:11:56.015Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

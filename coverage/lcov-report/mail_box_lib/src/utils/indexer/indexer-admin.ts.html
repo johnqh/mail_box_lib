@@ -652,7 +652,7 @@
  * These functions are designed for admin panel usage and require special permissions
  */
 &nbsp;
-import { NetworkClient } from '@johnqh/di';
+import { NetworkClient } from '../../di';
 &nbsp;
 // Configuration interface for indexer admin endpoints
 export interface IndexerAdminConfig {
@@ -771,10 +771,10 @@ export interface AdminBulkCodesResponse {
 <span class="cstat-no" title="statement not covered" >    });</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!response.ok) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);</span>
+<span class="cstat-no" title="statement not covered" >      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    return response.data.data;</span>
+<span class="cstat-no" title="statement not covered" >    return (response.data as any).data;</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
   /**
@@ -793,10 +793,10 @@ export interface AdminBulkCodesResponse {
 <span class="cstat-no" title="statement not covered" >    });</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!response.ok) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);</span>
+<span class="cstat-no" title="statement not covered" >      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    return response.data.data;</span>
+<span class="cstat-no" title="statement not covered" >    return (response.data as any).data;</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
   /**
@@ -821,10 +821,10 @@ export interface AdminBulkCodesResponse {
 <span class="cstat-no" title="statement not covered" >    });</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!response.ok) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);</span>
+<span class="cstat-no" title="statement not covered" >      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    return response.data.data;</span>
+<span class="cstat-no" title="statement not covered" >    return (response.data as any).data;</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
   /**
@@ -849,10 +849,10 @@ export interface AdminBulkCodesResponse {
 <span class="cstat-no" title="statement not covered" >    });</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!response.ok) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);</span>
+<span class="cstat-no" title="statement not covered" >      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    return response.data.data;</span>
+<span class="cstat-no" title="statement not covered" >    return (response.data as any).data;</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
   /**
@@ -866,10 +866,10 @@ export interface AdminBulkCodesResponse {
 <span class="cstat-no" title="statement not covered" >    });</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!response.ok) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);</span>
+<span class="cstat-no" title="statement not covered" >      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    return response.data.data;</span>
+<span class="cstat-no" title="statement not covered" >    return (response.data as any).data;</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
   /**
@@ -892,10 +892,10 @@ export interface AdminBulkCodesResponse {
 <span class="cstat-no" title="statement not covered" >    });</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!response.ok) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);</span>
+<span class="cstat-no" title="statement not covered" >      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    return response.data.data;</span>
+<span class="cstat-no" title="statement not covered" >    return (response.data as any).data;</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
   /**
@@ -921,10 +921,10 @@ export interface AdminBulkCodesResponse {
 <span class="cstat-no" title="statement not covered" >    });</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!response.ok) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error(response.data?.error || `HTTP error! status: ${response.status}`);</span>
+<span class="cstat-no" title="statement not covered" >      throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    return response.data.data;</span>
+<span class="cstat-no" title="statement not covered" >    return (response.data as any).data;</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;
@@ -946,7 +946,7 @@ export interface AdminBulkCodesResponse {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-11T20:50:34.062Z
+                at 2025-09-13T20:11:56.015Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

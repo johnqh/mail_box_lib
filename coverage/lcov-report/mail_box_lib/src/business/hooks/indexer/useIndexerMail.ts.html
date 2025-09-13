@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/79</span>
+                <span class='fraction'>0/75</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/79</span>
+                <span class='fraction'>0/75</span>
             </div>
         
             
@@ -321,13 +321,7 @@
 <a name='L256'></a><a href='#L256'>256</a>
 <a name='L257'></a><a href='#L257'>257</a>
 <a name='L258'></a><a href='#L258'>258</a>
-<a name='L259'></a><a href='#L259'>259</a>
-<a name='L260'></a><a href='#L260'>260</a>
-<a name='L261'></a><a href='#L261'>261</a>
-<a name='L262'></a><a href='#L262'>262</a>
-<a name='L263'></a><a href='#L263'>263</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L259'></a><a href='#L259'>259</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -490,8 +484,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -588,8 +580,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import { useCallback } from 'react';<span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ></span></span></span>
-<span class="cstat-no" title="statement not covered" >import { useAppConfig } from '../core/useServices';</span>
-<span class="cstat-no" title="statement not covered" >import { convertToAppConfig } from './utils';</span>
 <span class="cstat-no" title="statement not covered" >import { IndexerClient } from '../../../network/clients/indexer';</span>
 <span class="cstat-no" title="statement not covered" >import { useApiCall } from '../useApiCall';</span>
 &nbsp;
@@ -726,8 +716,8 @@ interface UseIndexerMailReturn {
     message: string
   ) =&gt; Promise&lt;IndexerSignatureVerification | undefined&gt;;
   getSigningMessage: (
-    chainId: number,
     walletAddress: string,
+    chainId: number,
     domain: string,
     url: string
   ) =&gt; Promise&lt;IndexerSigningMessage | undefined&gt;;
@@ -752,10 +742,8 @@ interface UseIndexerMailReturn {
 /**
  * React hook for Indexer Mail API operations
  */
-<span class="cstat-no" title="statement not covered" >const useIndexerMail = (): UseIndexerMailReturn =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  const config = useAppConfig();</span>
-<span class="cstat-no" title="statement not covered" >  const appConfig = convertToAppConfig(config);</span>
-<span class="cstat-no" title="statement not covered" >  const indexerClient = new IndexerClient(appConfig);</span>
+<span class="cstat-no" title="statement not covered" >const useIndexerMail = (endpointUrl: string, dev: boolean = false): UseIndexerMailReturn =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  const indexerClient = new IndexerClient(endpointUrl, dev);</span>
 <span class="cstat-no" title="statement not covered" >  const { isLoading, error, clearError, execute } = useApiCall({</span>
 <span class="cstat-no" title="statement not covered" >    context: 'IndexerMail',</span>
 <span class="cstat-no" title="statement not covered" >  });</span>
@@ -794,7 +782,7 @@ interface UseIndexerMailReturn {
 <span class="cstat-no" title="statement not covered" >  );</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  const getSigningMessage = useCallback(</span>
-<span class="cstat-no" title="statement not covered" >    execute((chainId: number, walletAddress: string, domain: string, url: string) =&gt;</span>
+<span class="cstat-no" title="statement not covered" >    execute((walletAddress: string, chainId: number, domain: string, url: string) =&gt;</span>
 <span class="cstat-no" title="statement not covered" >      indexerClient.getMessage(chainId, walletAddress, domain, url)</span>
 <span class="cstat-no" title="statement not covered" >    ),</span>
 <span class="cstat-no" title="statement not covered" >    [execute, indexerClient]</span>
@@ -856,7 +844,7 @@ export {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-11T20:50:34.062Z
+                at 2025-09-13T20:11:56.015Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>
