@@ -91,6 +91,42 @@ interface SolanaStatusResponse {
   configured: boolean;
 }
 
+interface IndexerEmailAddressesResponse {
+  success: boolean;
+  data: Array<{
+    address: string;
+    verified: boolean;
+    primary?: boolean;
+  }>;
+}
+
+interface IndexerDelegatedResponse {
+  success: boolean;
+  data: Array<{
+    delegatedAddress: string;
+    permissions: string[];
+  }>;
+}
+
+interface IndexerPointsBalanceResponse {
+  success: boolean;
+  data: {
+    walletAddress: string;
+    pointsEarned: string;
+    totalTransactions: number;
+    lastUpdated: string;
+  };
+}
+
+interface IndexerNameServiceEntitlementResponse {
+  success: boolean;
+  data: {
+    entitled: boolean;
+    subscriptionType?: string;
+    expiresAt?: string;
+  };
+}
+
 /**
  * Hook to validate address format (public endpoint)
  */
@@ -196,15 +232,139 @@ const useSolanaStatus = (
   });
 };
 
+/**
+ * Hook to get email addresses for a wallet (protected endpoint)
+ */
+const useIndexerEmailAddresses = (
+  endpointUrl: string,
+  dev: boolean,
+  walletAddress: string,
+  signature: string,
+  message: string,
+  options?: UseQueryOptions<IndexerEmailAddressesResponse>
+): UseQueryResult<IndexerEmailAddressesResponse> => {
+  return useQuery({
+    queryKey: [...queryKeys.indexer.addresses(), 'email-addresses', walletAddress, signature] as const,
+    queryFn: async (): Promise<IndexerEmailAddressesResponse> => {
+      const client = new IndexerClient(endpointUrl, dev);
+      return client.getEmailAddresses(walletAddress, signature, message);
+    },
+    staleTime: STALE_TIMES.INDEXER_EMAIL_ADDRESSES,
+    enabled: !!(walletAddress && signature && message),
+    ...options,
+  });
+};
+
+/**
+ * Hook to get delegated addresses (protected endpoint)
+ */
+const useIndexerDelegated = (
+  endpointUrl: string,
+  dev: boolean,
+  walletAddress: string,
+  signature: string,
+  message: string,
+  options?: UseQueryOptions<IndexerDelegatedResponse>
+): UseQueryResult<IndexerDelegatedResponse> => {
+  return useQuery({
+    queryKey: [...queryKeys.indexer.addresses(), 'delegated', walletAddress, signature] as const,
+    queryFn: async (): Promise<IndexerDelegatedResponse> => {
+      const client = new IndexerClient(endpointUrl, dev);
+      return client.getDelegated(walletAddress, signature, message);
+    },
+    staleTime: STALE_TIMES.INDEXER_EMAIL_ADDRESSES,
+    enabled: !!(walletAddress && signature && message),
+    ...options,
+  });
+};
+
+/**
+ * Hook to get delegated-to addresses (protected endpoint)
+ */
+const useIndexerDelegatedTo = (
+  endpointUrl: string,
+  dev: boolean,
+  walletAddress: string,
+  signature: string,
+  message: string,
+  options?: UseQueryOptions<IndexerDelegatedResponse>
+): UseQueryResult<IndexerDelegatedResponse> => {
+  return useQuery({
+    queryKey: [...queryKeys.indexer.addresses(), 'delegated-to', walletAddress, signature] as const,
+    queryFn: async (): Promise<IndexerDelegatedResponse> => {
+      const client = new IndexerClient(endpointUrl, dev);
+      return client.getDelegatedTo(walletAddress, signature, message);
+    },
+    staleTime: STALE_TIMES.INDEXER_EMAIL_ADDRESSES,
+    enabled: !!(walletAddress && signature && message),
+    ...options,
+  });
+};
+
+/**
+ * Hook to get points balance for a wallet (protected endpoint)
+ */
+const useIndexerPointsBalance = (
+  endpointUrl: string,
+  dev: boolean,
+  walletAddress: string,
+  signature: string,
+  message: string,
+  options?: UseQueryOptions<IndexerPointsBalanceResponse>
+): UseQueryResult<IndexerPointsBalanceResponse> => {
+  return useQuery({
+    queryKey: [...queryKeys.indexer.points(), 'balance', walletAddress, signature] as const,
+    queryFn: async (): Promise<IndexerPointsBalanceResponse> => {
+      const client = new IndexerClient(endpointUrl, dev);
+      return client.getPointsBalance(walletAddress, signature, message);
+    },
+    staleTime: STALE_TIMES.POINTS_BALANCE,
+    enabled: !!(walletAddress && signature && message),
+    ...options,
+  });
+};
+
+/**
+ * Hook to check name service entitlement (protected endpoint)
+ */
+const useIndexerNameServiceEntitlement = (
+  endpointUrl: string,
+  dev: boolean,
+  walletAddress: string,
+  signature: string,
+  message: string,
+  options?: UseQueryOptions<IndexerNameServiceEntitlementResponse>
+): UseQueryResult<IndexerNameServiceEntitlementResponse> => {
+  return useQuery({
+    queryKey: [...queryKeys.indexer.addresses(), 'entitlement', walletAddress, signature] as const,
+    queryFn: async (): Promise<IndexerNameServiceEntitlementResponse> => {
+      const client = new IndexerClient(endpointUrl, dev);
+      return client.checkNameServiceEntitlement(walletAddress, signature, message);
+    },
+    staleTime: STALE_TIMES.NAME_SERVICE_RESOLUTION,
+    enabled: !!(walletAddress && signature && message),
+    ...options,
+  });
+};
+
 export {
   useAddressValidation,
   useSigningMessage,
   useIndexerPointsLeaderboard,
   useSiteStats,
   useSolanaStatus,
+  useIndexerEmailAddresses,
+  useIndexerDelegated,
+  useIndexerDelegatedTo,
+  useIndexerPointsBalance,
+  useIndexerNameServiceEntitlement,
   type AddressValidationResponse,
   type SigningMessageResponse,
   type PointsLeaderboardResponse,
   type SiteStatsResponse,
-  type SolanaStatusResponse
+  type SolanaStatusResponse,
+  type IndexerEmailAddressesResponse,
+  type IndexerDelegatedResponse,
+  type IndexerPointsBalanceResponse,
+  type IndexerNameServiceEntitlementResponse
 };

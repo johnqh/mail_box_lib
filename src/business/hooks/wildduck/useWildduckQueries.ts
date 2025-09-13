@@ -5,7 +5,7 @@
  */
 
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { queryKeys } from '../../core/query';
+import { queryKeys, STALE_TIMES } from '../../core/query';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
 import axios from 'axios';
 
@@ -95,6 +95,33 @@ interface WildduckFilter {
   // Add other filter fields
 }
 
+interface WildduckMailbox {
+  id: string;
+  name: string;
+  path: string;
+  specialUse: boolean;
+  modifyIndex: number;
+  subscribed: boolean;
+  hidden: boolean;
+  total: number;
+  unseen: number;
+}
+
+interface WildduckMailboxesResponse {
+  success: boolean;
+  results: WildduckMailbox[];
+}
+
+interface WildduckAuthStatusResponse {
+  success: boolean;
+  user?: {
+    id: string;
+    username: string;
+    address?: string;
+  };
+  authenticated: boolean;
+}
+
 /**
  * Hook to get WildDuck server health status
  */
@@ -122,8 +149,7 @@ const useWildduckHealth = (
       const response = await axios.get(`${apiUrl}/health`, { headers });
       return response.data as WildduckHealthResponse;
     },
-    staleTime: 30 * 1000, // 30 seconds
-    gcTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: STALE_TIMES.HEALTH_STATUS,
     ...options,
   });
 };
@@ -167,8 +193,7 @@ const useWildduckUsersList = (
       );
       return response.data as WildduckUsersListResponse;
     },
-    staleTime: 1 * 60 * 1000, // 1 minute
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: STALE_TIMES.USER_PROFILE,
     ...options,
   });
 };
@@ -216,8 +241,7 @@ const useWildduckUser = (
         updated: new Date().toISOString(),
       };
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: STALE_TIMES.USER_PROFILE,
     enabled: !!userId,
     ...options,
   });
@@ -259,8 +283,7 @@ const useWildduckUserAddresses = (
         main: addr.main,
       })) || [];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 15 * 60 * 1000, // 15 minutes
+    staleTime: STALE_TIMES.EMAIL_ADDRESSES,
     enabled: !!userId,
     ...options,
   });
@@ -319,8 +342,7 @@ const useWildduckUserMessages = (
         pages: Math.ceil(messagesData.total / (messagesData.results?.length || 1)),
       };
     },
-    staleTime: 30 * 1000, // 30 seconds (messages change frequently)
-    gcTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: STALE_TIMES.MESSAGES,
     enabled: !!(userId && mailboxId),
     ...options,
   });
@@ -372,8 +394,7 @@ const useWildduckMessage = (
         flags: [],
       };
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes (specific messages don't change often)
-    gcTime: 15 * 60 * 1000, // 15 minutes
+    staleTime: STALE_TIMES.MESSAGE_CONTENT,
     enabled: !!(userId && messageId),
     ...options,
   });
@@ -415,8 +436,7 @@ const useWildduckUserFilters = (
         created: filter.created || new Date().toISOString(),
       })) || [];
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes (filters change rarely)
-    gcTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: STALE_TIMES.USER_PROFILE, // Filters are part of user profile data
     enabled: !!userId,
     ...options,
   });
@@ -451,10 +471,152 @@ const useWildduckUserSettings = (
       const data = response.data as Record<string, unknown>;
       return data || {};
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: STALE_TIMES.USER_PROFILE, // Settings are part of user profile data
     enabled: !!userId,
     ...options,
+  });
+};
+
+/**
+ * Hook to get user mailboxes
+ */
+const useWildduckUserMailboxes = (
+  config: WildDuckConfig,
+  userId: string,
+  options?: {
+    specialUse?: boolean;
+    showHidden?: boolean;
+    counters?: boolean;
+    sizes?: boolean;
+  },
+  queryOptions?: UseQueryOptions<WildduckMailboxesResponse>
+): UseQueryResult<WildduckMailboxesResponse> => {
+  
+  return useQuery({
+    queryKey: queryKeys.wildduck.userMailboxes(userId, options),
+    queryFn: async (): Promise<WildduckMailboxesResponse> => {
+      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      };
+
+      if (config.cloudflareWorkerUrl) {
+        headers['Authorization'] = `Bearer ${config.apiToken}`;
+        headers['X-App-Source'] = '0xmail-box';
+      } else {
+        headers['X-Access-Token'] = config.apiToken;
+      }
+
+      const params = new URLSearchParams();
+      if (options?.specialUse) params.set('specialUse', 'true');
+      if (options?.showHidden) params.set('showHidden', 'true');
+      if (options?.counters) params.set('counters', 'true');
+      if (options?.sizes) params.set('sizes', 'true');
+
+      const queryString = params.toString();
+      const endpoint = `${apiUrl}/users/${userId}/mailboxes${queryString ? `?${queryString}` : ''}`;
+
+      const response = await axios.get(endpoint, { headers });
+      return response.data as WildduckMailboxesResponse;
+    },
+    staleTime: STALE_TIMES.MAILBOXES,
+    enabled: !!userId,
+    ...queryOptions,
+  });
+};
+
+/**
+ * Hook to check authentication status
+ */
+const useWildduckAuthStatus = (
+  config: WildDuckConfig,
+  token?: string,
+  queryOptions?: UseQueryOptions<WildduckAuthStatusResponse>
+): UseQueryResult<WildduckAuthStatusResponse> => {
+  
+  return useQuery({
+    queryKey: queryKeys.wildduck.authStatus(token),
+    queryFn: async (): Promise<WildduckAuthStatusResponse> => {
+      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      };
+
+      if (config.cloudflareWorkerUrl) {
+        headers['Authorization'] = `Bearer ${token || config.apiToken}`;
+        headers['X-App-Source'] = '0xmail-box';
+      } else {
+        headers['X-Access-Token'] = token || config.apiToken;
+      }
+
+      const response = await axios.get(`${apiUrl}/users/me`, { headers });
+      const data = response.data as { success: boolean; id?: string; username?: string; address?: string };
+      
+      return {
+        success: data.success,
+        user: data.success ? {
+          id: data.id || '',
+          username: data.username || '',
+          address: data.address,
+        } : undefined,
+        authenticated: data.success,
+      };
+    },
+    staleTime: STALE_TIMES.USER_PROFILE,
+    enabled: !!token || !!config.apiToken,
+    ...queryOptions,
+  });
+};
+
+/**
+ * Hook to search messages
+ */
+const useWildduckSearchMessages = (
+  config: WildDuckConfig,
+  userId: string,
+  mailboxId: string,
+  query: string,
+  searchOptions?: Record<string, unknown>,
+  queryOptions?: UseQueryOptions<WildduckMessagesResponse>
+): UseQueryResult<WildduckMessagesResponse> => {
+  
+  return useQuery({
+    queryKey: queryKeys.wildduck.searchMessages(userId, mailboxId, query, searchOptions),
+    queryFn: async (): Promise<WildduckMessagesResponse> => {
+      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      };
+
+      if (config.cloudflareWorkerUrl) {
+        headers['Authorization'] = `Bearer ${config.apiToken}`;
+        headers['X-App-Source'] = '0xmail-box';
+      } else {
+        headers['X-Access-Token'] = config.apiToken;
+      }
+
+      const params = new URLSearchParams();
+      params.set('q', query);
+      if (searchOptions) {
+        Object.entries(searchOptions).forEach(([key, value]) => {
+          if (value !== undefined) {
+            params.set(key, String(value));
+          }
+        });
+      }
+
+      const response = await axios.get(
+        `${apiUrl}/users/${userId}/mailboxes/${mailboxId}/messages?${params}`,
+        { headers }
+      );
+      return response.data as WildduckMessagesResponse;
+    },
+    staleTime: STALE_TIMES.MESSAGES,
+    enabled: !!(userId && mailboxId && query),
+    ...queryOptions,
   });
 };
 
@@ -467,6 +629,9 @@ export {
   useWildduckMessage,
   useWildduckUserFilters,
   useWildduckUserSettings,
+  useWildduckUserMailboxes,
+  useWildduckAuthStatus,
+  useWildduckSearchMessages,
   type WildduckHealthResponse,
   type WildduckUser,
   type WildduckUsersListResponse,
@@ -474,5 +639,8 @@ export {
   type WildduckMessage,
   type WildduckMessagesResponse,
   type WildduckUserSettings,
-  type WildduckFilter
+  type WildduckFilter,
+  type WildduckMailbox,
+  type WildduckMailboxesResponse,
+  type WildduckAuthStatusResponse
 };

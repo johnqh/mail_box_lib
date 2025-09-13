@@ -1,9 +1,9 @@
 import {
-  AppConfig,
   NetworkClient,
   NetworkRequestOptions,
   NetworkResponse,
 } from '../../di';
+import type { AppConfig } from '../../types/environment';
 // Note: TypeScript types are available in ../../types/api but not currently used in implementation
 
 // Platform-specific global
@@ -495,7 +495,10 @@ class IndexerClient implements NetworkClient {
  * Factory function to create an IndexerClient instance
  */
 const createIndexerClient = (config: AppConfig): IndexerClient => {
-  return new IndexerClient(config);
+  return new IndexerClient(
+    config.indexerBackendUrl || 'https://indexer.0xmail.box',
+    config.devMode
+  );
 };
 
 /**

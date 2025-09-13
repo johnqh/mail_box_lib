@@ -445,6 +445,6 @@ export {
   useWildduckMessages,
   type GetMessagesOptions,
   type SendMessageParams,
-  type UpdateMessageParams,
+  // type UpdateMessageParams, // Moved to shared types
   type UseWildduckMessagesReturn
 };

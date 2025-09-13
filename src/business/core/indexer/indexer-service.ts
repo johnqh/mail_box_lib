@@ -88,7 +88,10 @@ class IndexerService {
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
   constructor(config: AppConfig) {
-    this.indexerClient = new IndexerClient(config);
+    this.indexerClient = new IndexerClient(
+      config.indexerBackendUrl || 'https://indexer.0xmail.box',
+      config.devMode
+    );
   }
 
   public static getInstance(config: AppConfig): IndexerService {

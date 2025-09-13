@@ -438,8 +438,8 @@ const useWildduckAddresses = (config: WildDuckConfig): UseWildduckAddressesRetur
 export {
   useWildduckAddresses,
   type WildduckAddress,
-  type CreateAddressParams,
-  type UpdateAddressParams,
+  // type CreateAddressParams, // Moved to shared types
+  // type UpdateAddressParams, // Moved to shared types
   type ForwardedAddress,
   type UseWildduckAddressesReturn
 };

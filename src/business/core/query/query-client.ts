@@ -13,19 +13,28 @@ const STALE_TIMES = {
   // Very stable data - rarely changes
   CAMPAIGNS: 5 * 60 * 1000, // 5 minutes
   HOW_TO_EARN: 10 * 60 * 1000, // 10 minutes
+  USER_PROFILE: 5 * 60 * 1000, // 5 minutes (user data changes infrequently)
+  MAILBOXES: 5 * 60 * 1000, // 5 minutes (mailbox structure is stable)
 
   // Moderately stable data
   PUBLIC_STATS: 2 * 60 * 1000, // 2 minutes
   SITE_STATS: 2 * 60 * 1000, // 2 minutes
   SOLANA_STATUS: 1 * 60 * 1000, // 1 minute
+  EMAIL_ADDRESSES: 2 * 60 * 1000, // 2 minutes (addresses change occasionally)
+  HEALTH_STATUS: 1 * 60 * 1000, // 1 minute
 
   // Dynamic data - changes frequently
   LEADERBOARD: 30 * 1000, // 30 seconds
   CAMPAIGN_STATS: 1 * 60 * 1000, // 1 minute
+  MESSAGES: 30 * 1000, // 30 seconds (new emails arrive frequently)
+  MESSAGE_CONTENT: 5 * 60 * 1000, // 5 minutes (message content is immutable)
 
   // User-specific or contextual data
   ADDRESS_VALIDATION: 10 * 60 * 1000, // 10 minutes (address format is deterministic)
   SIGNING_MESSAGE: 5 * 60 * 1000, // 5 minutes (deterministic)
+  NAME_SERVICE_RESOLUTION: 5 * 60 * 1000, // 5 minutes (ENS/SNS resolution)
+  INDEXER_EMAIL_ADDRESSES: 2 * 60 * 1000, // 2 minutes (indexer data)
+  POINTS_BALANCE: 1 * 60 * 1000, // 1 minute (points can change frequently)
 } as const;
 
 /**

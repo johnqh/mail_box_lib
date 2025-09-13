@@ -18,9 +18,8 @@ interface EnvironmentVariables {
   VITE_FIREBASE_APP_ID?: string;
   VITE_FIREBASE_MEASUREMENT_ID?: string;
   VITE_FIREBASE_VAPID_KEY?: string;
-  VITE_USE_CLOUDFLARE_WORKER?: string;
   VITE_CLOUDFLARE_WORKER_URL?: string;
-  VITE_USE_MOCK_FALLBACK?: string;
+  VITE_DEV_MODE?: string;
 }
 
 /**
@@ -32,7 +31,10 @@ interface EnvProvider {
    * @param key Environment variable key
    * @param defaultValue Default value if not found
    */
-  get(key: keyof EnvironmentVariables, defaultValue?: string): string;
+  get(
+    key: keyof EnvironmentVariables,
+    defaultValue?: string | boolean
+  ): string | boolean;
 
   /**
    * Get all environment variables
@@ -70,9 +72,8 @@ interface AppConfig {
     measurementId?: string;
     vapidKey: string;
   };
-  useCloudflareWorker: boolean;
   cloudflareWorkerUrl: string;
-  useMockFallback: boolean;
+  devMode: boolean;
 }
 
-export { type EnvironmentVariables, type EnvProvider, type AppConfig };
+export { type AppConfig, type EnvironmentVariables, type EnvProvider };

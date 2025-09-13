@@ -140,4 +140,4 @@ class WildDuckAuthHelper {
   }
 }
 
-export { WildDuckAuthHelper, type PreAuthParams, type AuthenticateParams };
+export { WildDuckAuthHelper };

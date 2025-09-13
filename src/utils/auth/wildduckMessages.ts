@@ -28,8 +28,8 @@ interface UploadMessageParams {
 }
 
 // Import from business hooks to avoid conflicts
-import type { UpdateMessageParams } from '../../business/hooks/wildduck/useWildduckMessages';
-export type { UpdateMessageParams } from '../../business/hooks/wildduck/useWildduckMessages';
+import type { UpdateMessageParams } from '../../types/wildduck';
+export type { UpdateMessageParams } from '../../types/wildduck';
 
 interface ForwardMessageParams {
   to: string[];

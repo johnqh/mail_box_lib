@@ -12,11 +12,7 @@ export * from './useWildduckFilters';
 export * from './useWildduckAddresses';
 export * from './useWildduckAuth';
 
-// Data hooks (moved from /business/hooks/data)
-export * from './useEmail';
-export * from './useEmails';
-export * from './useEmailAddresses';
-export * from './useMailBoxes';
+// Legacy data hooks have been removed - use newer TanStack Query hooks or other alternatives
 
 // New TanStack Query hooks (with prefixed names to avoid conflicts)
 export {
@@ -27,5 +23,23 @@ export {
   useWildduckUserMessages as useWildduckUserMessagesQuery,
   useWildduckMessage as useWildduckMessageQuery,
   useWildduckUserFilters as useWildduckUserFiltersQuery,
-  useWildduckUserSettings as useWildduckUserSettingsQuery
+  useWildduckUserSettings as useWildduckUserSettingsQuery,
+  useWildduckUserMailboxes as useWildduckUserMailboxesQuery,
+  useWildduckAuthStatus as useWildduckAuthStatusQuery,
+  useWildduckSearchMessages as useWildduckSearchMessagesQuery
+} from './useWildduckQueries';
+
+// Export types from TanStack Query hooks
+export type {
+  WildduckHealthResponse,
+  WildduckUser,
+  WildduckUsersListResponse,
+  WildduckAddress,
+  WildduckMessage,
+  WildduckMessagesResponse,
+  WildduckUserSettings,
+  WildduckFilter,
+  WildduckMailbox,
+  WildduckMailboxesResponse,
+  WildduckAuthStatusResponse
 } from './useWildduckQueries';

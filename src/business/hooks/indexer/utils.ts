@@ -25,9 +25,8 @@ function convertToAppConfig(config: ServiceContainerConfig): AppConfig {
       appId: '',
       vapidKey: '',
     },
-    useCloudflareWorker: false,
     cloudflareWorkerUrl: '',
-    useMockFallback: true,
+    devMode: config.isDevelopment || false,
   };
 }
 

@@ -2,7 +2,7 @@
  * Platform-agnostic mailbox business logic operations
  */
 
-import { MailBox } from '../../hooks/wildduck/useMailBoxes';
+import { MailBox } from '../../../types/mailbox';
 
 interface MailboxOperations {
   /**

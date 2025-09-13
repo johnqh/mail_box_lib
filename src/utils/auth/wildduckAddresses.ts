@@ -12,11 +12,11 @@ declare const fetch: typeof globalThis.fetch;
 import type {
   CreateAddressParams,
   UpdateAddressParams,
-} from '../../business/hooks/wildduck/useWildduckAddresses';
+} from '../../types/wildduck';
 export type {
   CreateAddressParams,
   UpdateAddressParams,
-} from '../../business/hooks/wildduck/useWildduckAddresses';
+} from '../../types/wildduck';
 
 interface CreateForwardedAddressParams {
   address: string;

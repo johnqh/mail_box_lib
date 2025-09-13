@@ -3,7 +3,7 @@
  * These functions use the IndexerClient by default for easy integration
  */
 
-import { AppConfig } from '../../types';
+import { AppConfig } from '../../types/environment';
 import { IndexerClient } from '../../network/clients/indexer';
 import { 
   createIndexerAdminHelper, 
@@ -35,7 +35,10 @@ import {
  * ```
  */
 export const createIndexerAdmin = (config: AppConfig): IndexerAdminHelper => {
-  const networkClient = new IndexerClient(config);
+  const networkClient = new IndexerClient(
+    config.indexerBackendUrl || 'https://indexer.0xmail.box',
+    config.devMode
+  );
   return createIndexerAdminHelper(
     config.indexerBackendUrl || 'https://indexer.0xmail.box',
     networkClient
@@ -59,7 +62,10 @@ export const createIndexerAdmin = (config: AppConfig): IndexerAdminHelper => {
  * ```
  */
 export const createIndexerGraphQL = (config: AppConfig): IndexerGraphQLHelper => {
-  const networkClient = new IndexerClient(config);
+  const networkClient = new IndexerClient(
+    config.indexerBackendUrl || 'https://indexer.0xmail.box',
+    config.devMode
+  );
   return createIndexerGraphQLHelper(
     config.indexerBackendUrl || 'https://indexer.0xmail.box',
     networkClient
@@ -87,7 +93,10 @@ export const createIndexerGraphQL = (config: AppConfig): IndexerGraphQLHelper =>
  * ```
  */
 export const createIndexerWebhook = (config: AppConfig): IndexerWebhookHelper => {
-  const networkClient = new IndexerClient(config);
+  const networkClient = new IndexerClient(
+    config.indexerBackendUrl || 'https://indexer.0xmail.box',
+    config.devMode
+  );
   return createIndexerWebhookHelper(
     config.indexerBackendUrl || 'https://indexer.0xmail.box',
     networkClient
