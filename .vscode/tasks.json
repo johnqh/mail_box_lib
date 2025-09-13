@@ -112,6 +112,112 @@
         "clear": true,
         "panel": "dedicated"
       }
+    },
+    {
+      "label": "AI: Quick Check",
+      "type": "npm",
+      "script": "quick-check",
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false
+      },
+      "problemMatcher": [
+        "$eslint-stylish",
+        "$tsc"
+      ]
+    },
+    {
+      "label": "AI: Full Validation",
+      "type": "npm", 
+      "script": "check-all",
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always", 
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false
+      },
+      "problemMatcher": [
+        "$eslint-stylish",
+        "$tsc"
+      ]
+    },
+    {
+      "label": "AI: Create Hook",
+      "type": "shell",
+      "command": "npm run create:hook ${input:hookName} ${input:hookType}",
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "AI: Create Type",
+      "type": "shell", 
+      "command": "npm run create:type ${input:typeName} ${input:typeKind}",
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "AI: Code Analysis",
+      "type": "shell",
+      "command": "node scripts/analyze-code.cjs",
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "hookName", 
+      "description": "Hook name (e.g. useMyFeature)",
+      "default": "useMyFeature",
+      "type": "promptString"
+    },
+    {
+      "id": "hookType",
+      "description": "Hook type",
+      "default": "indexer",
+      "type": "pickString",
+      "options": [
+        "indexer",
+        "wildduck"
+      ]
+    },
+    {
+      "id": "typeName",
+      "description": "Type name (e.g. UserProfile)", 
+      "default": "MyInterface",
+      "type": "promptString"
+    },
+    {
+      "id": "typeKind",
+      "description": "Type kind",
+      "default": "interface",
+      "type": "pickString", 
+      "options": [
+        "service",
+        "data", 
+        "api",
+        "interface"
+      ]
     }
   ]
 }
