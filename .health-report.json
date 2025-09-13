@@ -1,0 +1,67 @@
+{
+  "timestamp": "2025-09-13T21:54:10.281Z",
+  "overallScore": 77,
+  "metrics": {
+    "security": {
+      "score": 85,
+      "vulnerabilities": {
+        "total": 0,
+        "critical": 0,
+        "high": 0,
+        "moderate": 0,
+        "low": 0
+      },
+      "status": "unknown",
+      "error": "Could not run security audit"
+    },
+    "quality": {
+      "score": 94,
+      "lint": 100,
+      "types": 100,
+      "formatting": 70,
+      "status": "excellent"
+    },
+    "performance": {
+      "score": 60,
+      "buildTime": "unknown",
+      "testTime": "unknown",
+      "bundleSize": "unknown",
+      "status": "needs-attention",
+      "error": "Performance assessment failed"
+    },
+    "coverage": {
+      "score": 50,
+      "testFiles": 0,
+      "totalTests": 0,
+      "passedTests": 0,
+      "passRate": 0,
+      "status": "needs-attention",
+      "error": "Test coverage assessment failed"
+    },
+    "dependencies": {
+      "score": 100,
+      "totalDependencies": 35,
+      "outdatedCount": 0,
+      "majorUpdates": 0,
+      "status": "excellent"
+    }
+  },
+  "recommendations": [
+    {
+      "priority": "medium",
+      "category": "Test Coverage",
+      "issue": "Test failures detected",
+      "action": "Fix failing tests to improve reliability",
+      "impact": "Medium - Failing tests indicate potential code issues"
+    },
+    {
+      "priority": "low",
+      "category": "Test Coverage",
+      "issue": "Limited test coverage",
+      "action": "Add more test files to improve code coverage",
+      "impact": "Low - Better testing prevents future bugs"
+    }
+  ],
+  "duration": 11,
+  "version": "3.1.4"
+}

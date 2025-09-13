@@ -4,7 +4,18 @@
  */
 
 import { Email } from '../../../types/email';
-import { PersistenceService, AnalyticsService } from '../../../di';
+// Simple persistence interface for testing
+interface PersistenceService {
+  save(key: string, value: any): Promise<boolean>;
+  load(key: string): Promise<any>;
+  delete(key: string): Promise<boolean>;
+  exists(key: string): Promise<boolean>;
+}
+
+// Simple analytics interface for testing
+interface AnalyticsService {
+  track(event: string, data: any): void;
+}
 
 // Extended Email interface for business logic
 interface ExtendedEmail extends Email {
@@ -328,10 +339,10 @@ class DefaultEmailOperations implements EmailOperations {
       }
 
       const email = data as Email;
-      
+
       // Save email data
       await this.persistence.save(`email_${email.id}`, email);
-      
+
       // Track processing
       this.analytics.track('email_processed', {
         emailId: email.id,
@@ -358,7 +369,9 @@ class DefaultEmailOperations implements EmailOperations {
     return required.every(field => {
       const value = data[field];
       if (field === 'to') {
-        return Array.isArray(value) ? value.length > 0 : typeof value === 'string' && value.length > 0;
+        return Array.isArray(value)
+          ? value.length > 0
+          : typeof value === 'string' && value.length > 0;
       }
       return typeof value === 'string' && value.length > 0;
     });

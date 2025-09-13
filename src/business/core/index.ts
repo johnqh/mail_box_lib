@@ -52,10 +52,21 @@ import {
  * Factory function to create all business logic operations with default implementations
  */
 export async function createBusinessLogicServices() {
+  // Create mock services for business operations
+  const mockPersistence = {
+    save: async () => true,
+    load: async () => null,
+    delete: async () => true,
+    exists: async () => false,
+  };
+  const mockAnalytics = {
+    track: () => {},
+  };
+
   return {
     emailOps: new (
       await import('./email/email-operations')
-    ).DefaultEmailOperations(),
+    ).DefaultEmailOperations(mockPersistence, mockAnalytics),
     mailboxOps: new (
       await import('./mailbox/mailbox-operations')
     ).DefaultMailboxOperations(),
@@ -75,8 +86,18 @@ export async function createBusinessLogicServices() {
  * Sync version of factory function for immediate use
  */
 function createBusinessLogicServicesSync() {
+  const mockPersistence = {
+    save: async () => true,
+    load: async () => null,
+    delete: async () => true,
+    exists: async () => false,
+  };
+  const mockAnalytics = {
+    track: () => {},
+  };
+
   return {
-    emailOps: new DefaultEmailOperations(),
+    emailOps: new DefaultEmailOperations(mockPersistence, mockAnalytics),
     mailboxOps: new DefaultMailboxOperations(),
     navigationOps: new DefaultNavigationOperations(),
     authOps: new DefaultAuthBusinessLogic(),

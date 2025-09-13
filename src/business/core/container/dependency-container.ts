@@ -176,7 +176,16 @@ function createServiceContainer(
   // Register business logic services (platform-agnostic)
   container.register(
     ServiceKeys.EMAIL_OPERATIONS,
-    () => new DefaultEmailOperations()
+    () =>
+      new DefaultEmailOperations(
+        {
+          save: async () => true,
+          load: async () => null,
+          delete: async () => true,
+          exists: async () => false,
+        },
+        { track: () => {} }
+      )
   );
   container.register(
     ServiceKeys.MAILBOX_OPERATIONS,

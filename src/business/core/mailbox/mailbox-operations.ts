@@ -294,23 +294,28 @@ class DefaultMailboxOperations implements MailboxOperations {
     const folders = this.getDefaultFolders();
     const searchId = type ? type.toLowerCase() : this.defaultFolderId;
     const found = folders.find(folder => folder.id === searchId);
-    
+
     // If no folder found and no type specified, return the one matching our default
     if (!found && !type) {
       return {
         id: this.defaultFolderId,
-        name: this.defaultFolderId.charAt(0).toUpperCase() + this.defaultFolderId.slice(1),
+        name:
+          this.defaultFolderId.charAt(0).toUpperCase() +
+          this.defaultFolderId.slice(1),
         iconId: this.getMailboxIconId(this.defaultFolderId),
         count: 0,
         isSystem: this.isSystemFolder(this.defaultFolderId),
         order: 1,
       };
     }
-    
+
     return found;
   }
 
-  async queryFolder(folderIdOrQuery: string | any, query?: any): Promise<any[]> {
+  async queryFolder(
+    folderIdOrQuery: string | any,
+    _query?: any
+  ): Promise<any[]> {
     // Handle both old format (folderId, query) and new format (query only)
     if (typeof folderIdOrQuery === 'string') {
       // Old format: folderId as string, query as second param

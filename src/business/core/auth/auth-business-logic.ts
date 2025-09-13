@@ -144,7 +144,7 @@ class DefaultAuthBusinessLogic implements AuthBusinessLogic {
     if (!isENS && !isSNS) {
       const emailParts = emailAddress.address.split('@');
       if (emailParts.length === 2) {
-        const addressType = AddressHelper.getAddressType(emailParts[0]);
+        const addressType = AddressHelper.getAddressType(emailParts[0] || '');
         isENS = addressType === AddressType.ENSName;
         isSNS = addressType === AddressType.SNSName;
       }
@@ -356,16 +356,11 @@ class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLogic {
   }
 
   getEmailAddressDisplayName(emailAddress: EmailAddress): string {
-    return emailAddress.address.split('@')[0];
+    return emailAddress.address.split('@')[0] || emailAddress.address;
   }
 
   parseEmailAddress(email: string): ParsedEmailAddress | undefined {
     return EmailAddressHelper.parse(email);
-  }
-
-  private formatAddressForDisplay(address: string): string {
-    if (address.length < 10) return address;
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
   }
 
   private getAddressPriority(emailAddress: EmailAddress): number {
@@ -850,7 +845,7 @@ class EmailAddressHelper {
     const [address, domain] = parts;
 
     // Both address and domain parts must be non-empty
-    if (address.length === 0 || domain.length === 0) {
+    if (!address || !domain || address.length === 0 || domain.length === 0) {
       return undefined;
     }
 
