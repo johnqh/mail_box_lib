@@ -137,8 +137,8 @@ interface UseIndexerMailReturn {
     message: string
   ) => Promise<IndexerSignatureVerification | undefined>;
   getSigningMessage: (
-    chainId: number,
     walletAddress: string,
+    chainId: number,
     domain: string,
     url: string
   ) => Promise<IndexerSigningMessage | undefined>;
@@ -205,7 +205,7 @@ const useIndexerMail = (): UseIndexerMailReturn => {
   );
 
   const getSigningMessage = useCallback(
-    execute((chainId: number, walletAddress: string, domain: string, url: string) =>
+    execute((walletAddress: string, chainId: number, domain: string, url: string) =>
       indexerClient.getMessage(chainId, walletAddress, domain, url)
     ),
     [execute, indexerClient]

@@ -128,11 +128,11 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Validate address format (public endpoint)
-   * GET /api/addresses/validate/:address
+   * GET /api/addresses/:address/validate
    */
   async validateAddress(address: string) {
     const response = await this.get(
-      `/api/addresses/validate/${encodeURIComponent(address)}`
+      `/api/addresses/${encodeURIComponent(address)}/validate`
     );
 
     if (!response.ok) {
@@ -146,18 +146,22 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get email addresses for a wallet address (requires signature verification)
-   * POST /api/addresses
+   * GET /api/addresses/:walletAddress
    */
   async getEmailAddresses(
     walletAddress: string,
     signature: string,
     message: string
   ) {
-    const response = await this.post('/api/addresses', {
-      walletAddress,
-      signature,
-      message,
-    });
+    const response = await this.get(
+      `/api/addresses/${encodeURIComponent(walletAddress)}`,
+      {
+        headers: {
+          'x-signature': signature,
+          'x-message': message,
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -170,18 +174,22 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get delegation information for a wallet (requires signature verification)
-   * POST /api/addresses/delegated
+   * GET /api/addresses/:walletAddress/delegated
    */
   async getDelegated(
     walletAddress: string,
     signature: string,
     message: string
   ) {
-    const response = await this.post('/api/addresses/delegated', {
-      walletAddress,
-      signature,
-      message,
-    });
+    const response = await this.get(
+      `/api/addresses/${encodeURIComponent(walletAddress)}/delegated`,
+      {
+        headers: {
+          'x-signature': signature,
+          'x-message': message,
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -194,18 +202,22 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get all addresses that have delegated TO a specific wallet address (requires signature verification)
-   * POST /api/addresses/delegated/to
+   * GET /api/addresses/:walletAddress/delegated/to
    */
   async getDelegatedTo(
     walletAddress: string,
     signature: string,
     message: string
   ) {
-    const response = await this.post('/api/addresses/delegated/to', {
-      walletAddress,
-      signature,
-      message,
-    });
+    const response = await this.get(
+      `/api/addresses/${encodeURIComponent(walletAddress)}/delegated/to`,
+      {
+        headers: {
+          'x-signature': signature,
+          'x-message': message,
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -218,7 +230,7 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get deterministic message for signing
-   * GET /api/message/:chainId/:walletAddress/:domain/:url
+   * GET /api/addresses/:walletAddress/message/:chainId/:domain/:url
    */
   async getMessage(
     chainId: number,
@@ -227,7 +239,7 @@ class IndexerClient implements NetworkClient {
     url: string
   ) {
     const response = await this.get(
-      `/api/message/${chainId}/${encodeURIComponent(walletAddress)}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`
+      `/api/addresses/${encodeURIComponent(walletAddress)}/message/${chainId}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`
     );
 
     if (!response.ok) {
@@ -241,14 +253,17 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Create/update nonce for wallet address
-   * POST /api/nonce/create
+   * POST /api/addresses/:walletAddress/nonce
    */
   async createNonce(walletAddress: string, signature: string, message: string) {
-    const response = await this.post('/api/nonce/create', {
-      walletAddress,
-      signature,
-      message,
-    });
+    const response = await this.post(
+      `/api/addresses/${encodeURIComponent(walletAddress)}/nonce`,
+      {
+        walletAddress,
+        signature,
+        message,
+      }
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -261,14 +276,18 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Retrieve nonce for wallet address
-   * POST /api/nonce
+   * GET /api/addresses/:walletAddress/nonce
    */
   async getNonce(walletAddress: string, signature: string, message: string) {
-    const response = await this.post('/api/nonce', {
-      walletAddress,
-      signature,
-      message,
-    });
+    const response = await this.get(
+      `/api/addresses/${encodeURIComponent(walletAddress)}/nonce`,
+      {
+        headers: {
+          'x-signature': signature,
+          'x-message': message,
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -281,18 +300,21 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Verify wallet signature
-   * POST /api/signature/verify
+   * POST /api/addresses/:address/verify
    */
   async verifySignature(
     walletAddress: string,
     signature: string,
     message: string
   ) {
-    const response = await this.post('/api/signature/verify', {
-      walletAddress,
-      signature,
-      message,
-    });
+    const response = await this.post(
+      `/api/addresses/${encodeURIComponent(walletAddress)}/verify`,
+      {
+        walletAddress,
+        signature,
+        message,
+      }
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -305,18 +327,22 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Check nameservice entitlement for a wallet address (requires signature verification)
-   * POST /api/entitlements/nameservice
+   * GET /api/addresses/:walletAddress/entitlements/
    */
   async checkNameServiceEntitlement(
     walletAddress: string,
     signature: string,
     message: string
   ) {
-    const response = await this.post('/api/entitlements/nameservice', {
-      walletAddress,
-      signature,
-      message,
-    });
+    const response = await this.get(
+      `/api/addresses/${encodeURIComponent(walletAddress)}/entitlements/`,
+      {
+        headers: {
+          'x-signature': signature,
+          'x-message': message,
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -333,18 +359,22 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get user points balance (requires signature verification)
-   * POST /api/points
+   * GET /api/addresses/:walletAddress/points
    */
   async getPointsBalance(
     walletAddress: string,
     signature: string,
     message: string
   ) {
-    const response = await this.post('/api/points', {
-      walletAddress,
-      signature,
-      message,
-    });
+    const response = await this.get(
+      `/api/addresses/${encodeURIComponent(walletAddress)}/points`,
+      {
+        headers: {
+          'x-signature': signature,
+          'x-message': message,
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -458,24 +488,33 @@ const createIndexerApiConfig = (config: AppConfig) => ({
   VERSION: '2.2.0',
   ENDPOINTS: {
     // Mail endpoints
-    ADDRESSES_VALIDATE: '/api/addresses/validate',
-    ADDRESSES: '/api/addresses',
-    ADDRESSES_DELEGATED: '/api/addresses/delegated',
-    ADDRESSES_DELEGATED_TO: '/api/addresses/delegated/to',
+    ADDRESSES_VALIDATE: (address: string) =>
+      `/api/addresses/${encodeURIComponent(address)}/validate`,
+    ADDRESSES: (walletAddress: string) =>
+      `/api/addresses/${encodeURIComponent(walletAddress)}`,
+    ADDRESSES_DELEGATED: (walletAddress: string) =>
+      `/api/addresses/${encodeURIComponent(walletAddress)}/delegated`,
+    ADDRESSES_DELEGATED_TO: (walletAddress: string) =>
+      `/api/addresses/${encodeURIComponent(walletAddress)}/delegated/to`,
     MESSAGE: (
-      chainId: number,
       walletAddress: string,
+      chainId: number,
       domain: string,
       url: string
     ) =>
-      `/api/message/${chainId}/${encodeURIComponent(walletAddress)}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`,
-    NONCE_CREATE: '/api/nonce/create',
-    NONCE_GET: '/api/nonce',
-    SIGNATURE_VERIFY: '/api/signature/verify',
-    ENTITLEMENTS_NAMESERVICE: '/api/entitlements/nameservice',
+      `/api/addresses/${encodeURIComponent(walletAddress)}/message/${chainId}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`,
+    NONCE_CREATE: (walletAddress: string) =>
+      `/api/addresses/${encodeURIComponent(walletAddress)}/nonce`,
+    NONCE_GET: (walletAddress: string) =>
+      `/api/addresses/${encodeURIComponent(walletAddress)}/nonce`,
+    SIGNATURE_VERIFY: (address: string) =>
+      `/api/addresses/${encodeURIComponent(address)}/verify`,
+    ENTITLEMENTS_NAMESERVICE: (walletAddress: string) =>
+      `/api/addresses/${encodeURIComponent(walletAddress)}/entitlements/`,
 
     // Points endpoints (actual available endpoints)
-    POINTS_BALANCE: '/api/points',
+    POINTS_BALANCE: (walletAddress: string) =>
+      `/api/addresses/${encodeURIComponent(walletAddress)}/points`,
     POINTS_LEADERBOARD: (count: number) => `/api/points/leaderboard/${count}`,
     POINTS_SITE_STATS: '/api/points/site-stats',
 

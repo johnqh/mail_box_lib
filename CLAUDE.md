@@ -18,7 +18,7 @@ npm run check-all  # Ensures build, tests, and lint all pass
 
 ## Quick Reference
 
-- **Version**: 3.1.1
+- **Version**: 3.1.4
 - **Package**: @johnqh/lib
 - **Type**: React Native-compatible shared library
 - **Primary Use**: 0xmail.box projects (web & mobile)
@@ -47,8 +47,16 @@ A React Native-compatible shared utilities library for 0xmail.box projects, prov
 5. **Type Safety**: Everything is strictly typed with TypeScript
 6. **No Direct Platform Imports**: Never import React Native or web-specific modules in business logic
 
-### Recent Updates (v3.1.1)
+### Recent Updates (v3.1.4)
 
+- **Indexer API Endpoint Updates**: Updated all indexer client endpoints to match new mail_box_indexer v2.2.0 structure
+  - Address validation: `GET /api/addresses/:address/validate`
+  - Email addresses: `GET /api/addresses/:walletAddress` (with signature headers)
+  - Delegation endpoints: `GET /api/addresses/:walletAddress/delegated[/to]`
+  - Signing messages: `GET /api/addresses/:walletAddress/message/:chainId/:domain/:url`
+  - Nonce operations: `GET/POST /api/addresses/:walletAddress/nonce`
+  - Points balance: `GET /api/addresses/:walletAddress/points`
+  - Authentication via `x-signature` and `x-message` headers for GET requests
 - **AuthStatus enum refactoring**: Updated enum values to CONNECTED/DISCONNECTED/VERIFIED
 - **LoginMethod removal**: Completely removed LoginMethod enum - use string literals instead
 - **Dependency Updates**: @johnqh/di updated to v1.1.0 for improved type safety
