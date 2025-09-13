@@ -51,18 +51,16 @@ describe('DefaultMailboxOperations', () => {
 
   describe('mailbox management', () => {
     it('should manage mailbox state', async () => {
-      const initialState = await mailboxOps.getMailboxState();
+      const initialState = await mailboxOps.getMailboxState(mockFolderId);
       expect(initialState).toBeDefined();
 
-      const updatedState = await mailboxOps.updateMailboxState({ 
+      await expect(mailboxOps.updateMailboxState({ 
         lastAccessed: new Date() 
-      });
-      expect(updatedState).toBeDefined();
+      })).resolves.toBeUndefined();
     });
 
     it('should handle mailbox synchronization', async () => {
-      const syncResult = await mailboxOps.synchronizeMailbox();
-      expect(syncResult).toBeDefined();
+      await expect(mailboxOps.synchronizeMailbox(mockFolderId)).resolves.toBeUndefined();
     });
   });
 

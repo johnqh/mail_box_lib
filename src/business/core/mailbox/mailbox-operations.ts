@@ -92,6 +92,9 @@ class DefaultMailboxOperations implements MailboxOperations {
   private defaultFolderId: string;
 
   constructor(defaultFolderId?: string) {
+    if (defaultFolderId === '') {
+      throw new Error('Default folder ID cannot be empty string');
+    }
     this.defaultFolderId = defaultFolderId || 'inbox';
   }
 
@@ -325,6 +328,9 @@ class DefaultMailboxOperations implements MailboxOperations {
       return [];
     } else {
       // New format: query as first param, use default folder
+      if (folderIdOrQuery === null || folderIdOrQuery === undefined) {
+        throw new Error('Query parameter cannot be null or undefined');
+      }
       return [];
     }
   }
@@ -333,13 +339,13 @@ class DefaultMailboxOperations implements MailboxOperations {
     if (permission) {
       // Old format: folderId, permission
       if (!folderIdOrPermission || !permission) {
-        return false;
+        throw new Error('Both folderId and permission are required');
       }
       return this.isSystemFolder(folderIdOrPermission);
     } else {
       // New format: permission only, use default folder
-      if (!folderIdOrPermission) {
-        return false;
+      if (!folderIdOrPermission || folderIdOrPermission === '') {
+        throw new Error('Permission parameter is required');
       }
       return this.isSystemFolder(this.defaultFolderId);
     }

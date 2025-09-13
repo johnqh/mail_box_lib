@@ -143,7 +143,14 @@ class DefaultEmailOperations implements EmailOperations {
   constructor(
     private persistence: PersistenceService,
     private analytics: AnalyticsService
-  ) {}
+  ) {
+    if (!persistence) {
+      throw new Error('PersistenceService is required');
+    }
+    if (!analytics) {
+      throw new Error('AnalyticsService is required');
+    }
+  }
   formatEmailDate(date: Date): string {
     return date.toLocaleString('en-US', {
       weekday: 'long',
