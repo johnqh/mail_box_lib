@@ -40,7 +40,9 @@
     "types:extract": "tsc --declaration --emitDeclarationOnly --outDir temp-types && rm -rf temp-types",
     "types:check": "npm run types:validate && echo '✅ All types valid'",
     "analyze:code": "node scripts/analyze-code.cjs",
-    "ai:help": "echo 'AI Development Help:' && echo '- npm run quick-check: Fast validation' && echo '- npm run create:type: Generate interface' && echo '- npm run create:hook: Generate new hook' && echo '- npm run types:check: Validate types' && echo '- npm run analyze:code: Project analysis' && echo '- npm run analyze:deps: Check dependencies' && echo 'See CLAUDE.md for full guide'"
+    "health:monitor": "node scripts/health-monitor.cjs",
+    "health:watch": "node scripts/health-monitor.cjs --continuous",
+    "ai:help": "echo 'AI Development Help:' && echo '- npm run quick-check: Fast validation' && echo '- npm run create:type: Generate interface' && echo '- npm run create:hook: Generate new hook' && echo '- npm run types:check: Validate types' && echo '- npm run analyze:code: Project analysis' && echo '- npm run health:monitor: Health monitoring' && echo '- npm run analyze:deps: Check dependencies' && echo 'See CLAUDE.md for full guide'"
   },
   "keywords": [
     "web3",

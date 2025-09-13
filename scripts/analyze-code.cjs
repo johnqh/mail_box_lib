@@ -1,174 +1,336 @@
 #!/usr/bin/env node
 
 /**
- * AI-Friendly Code Analysis Tool
- * Provides quick insights about the codebase for AI assistants
+ * AI-Assisted Development Code Analysis Tool
+ * Provides comprehensive project analysis for AI assistants
  */
 
 const fs = require('fs');
 const path = require('path');
 
-function countLines(filePath) {
-  try {
-    const content = fs.readFileSync(filePath, 'utf8');
-    return content.split('\n').length;
-  } catch {
-    return 0;
+class ProjectAnalyzer {
+  constructor(rootDir = process.cwd()) {
+    this.rootDir = rootDir;
+    this.stats = {
+      files: { total: 0, byType: {} },
+      lines: { total: 0, byType: {} },
+      complexity: { hooks: 0, services: 0, components: 0, tests: 0 },
+      patterns: { singleton: 0, hooks: 0, factories: 0, interfaces: 0 },
+      dependencies: { internal: [], external: [] },
+      quality: { coverage: 0, lintErrors: 0, typeErrors: 0 }
+    };
   }
-}
 
-function scanDirectory(dir, extensions = ['.ts', '.tsx', '.js', '.jsx']) {
-  const results = {
-    files: [],
-    totalLines: 0,
-    directories: new Set(),
-    fileTypes: {},
-  };
+  async analyze() {
+    console.log('🤖 AI-Assisted Development Analysis');
+    console.log('==================================\n');
+    
+    this.analyzeFileStructure();
+    this.analyzeCodePatterns();
+    this.analyzeDependencies();
+    this.analyzeQualityMetrics();
+    this.generateAIRecommendations();
+    
+    return this.stats;
+  }
 
-  function walkDir(currentDir, depth = 0) {
-    if (depth > 10) return; // Prevent infinite recursion
+  analyzeFileStructure() {
+    console.log('📁 Project Structure Analysis');
+    console.log('----------------------------');
+    
+    const srcDir = path.join(this.rootDir, 'src');
+    this.walkDirectory(srcDir);
+    
+    console.log(`Total files: ${this.stats.files.total}`);
+    console.log(`Total lines: ${this.stats.lines.total}\n`);
+    
+    console.log('File types:');
+    Object.entries(this.stats.files.byType).forEach(([type, count]) => {
+      console.log(`  ${type}: ${count} files`);
+    });
+    console.log('');
+  }
 
-    try {
-      const items = fs.readdirSync(currentDir);
-
-      for (const item of items) {
-        const itemPath = path.join(currentDir, item);
-        const stat = fs.statSync(itemPath);
-
-        if (stat.isDirectory()) {
-          if (item === 'node_modules' || item === '.git' || item === 'coverage' || item === 'dist') {
-            continue;
-          }
-          results.directories.add(currentDir);
-          walkDir(itemPath, depth + 1);
-        } else if (stat.isFile()) {
-          const ext = path.extname(item);
-          if (extensions.includes(ext)) {
-            const relativePath = path.relative(process.cwd(), itemPath);
-            const lines = countLines(itemPath);
-            
-            results.files.push({
-              path: relativePath,
-              lines,
-              extension: ext,
-              size: stat.size,
-            });
-            
-            results.totalLines += lines;
-            results.fileTypes[ext] = (results.fileTypes[ext] || 0) + 1;
-          }
+  walkDirectory(dir) {
+    if (!fs.existsSync(dir)) return;
+    
+    const items = fs.readdirSync(dir);
+    
+    for (const item of items) {
+      const fullPath = path.join(dir, item);
+      const stat = fs.statSync(fullPath);
+      
+      if (stat.isDirectory()) {
+        if (!['node_modules', '.git', 'dist', 'coverage'].includes(item)) {
+          this.walkDirectory(fullPath);
         }
+      } else if (stat.isFile()) {
+        this.analyzeFile(fullPath);
       }
-    } catch (err) {
-      // Skip inaccessible directories
     }
   }
 
-  walkDir(dir);
-  return results;
+  analyzeFile(filePath) {
+    const ext = path.extname(filePath);
+    const content = fs.readFileSync(filePath, 'utf8');
+    const lines = content.split('\n').length;
+    
+    this.stats.files.total++;
+    this.stats.files.byType[ext] = (this.stats.files.byType[ext] || 0) + 1;
+    this.stats.lines.total += lines;
+    this.stats.lines.byType[ext] = (this.stats.lines.byType[ext] || 0) + lines;
+    
+    // Analyze code patterns in TypeScript files
+    if (['.ts', '.tsx'].includes(ext)) {
+      this.analyzeTypeScriptFile(filePath, content);
+    }
+  }
+
+  analyzeTypeScriptFile(filePath, content) {
+    const relativePath = path.relative(this.rootDir, filePath);
+    
+    // Count patterns
+    if (content.includes('interface ')) this.stats.patterns.interfaces++;
+    if (content.includes('class ') && content.includes('private static instance')) {
+      this.stats.patterns.singleton++;
+    }
+    if (content.includes('export function create') || content.includes('Factory')) {
+      this.stats.patterns.factories++;
+    }
+    if (content.includes('use') && content.includes('useState')) {
+      this.stats.patterns.hooks++;
+      this.stats.complexity.hooks++;
+    }
+    
+    // Count component types
+    if (relativePath.includes('/hooks/')) this.stats.complexity.hooks++;
+    if (relativePath.includes('/services/') || relativePath.includes('-service.ts')) {
+      this.stats.complexity.services++;
+    }
+    if (content.includes('React.FC') || content.includes('function') && content.includes('return')) {
+      this.stats.complexity.components++;
+    }
+    if (relativePath.includes('test') || relativePath.includes('spec')) {
+      this.stats.complexity.tests++;
+    }
+  }
+
+  analyzeCodePatterns() {
+    console.log('🎨 Code Patterns Analysis');
+    console.log('-------------------------');
+    
+    console.log(`Design Patterns:`);
+    console.log(`  Singletons: ${this.stats.patterns.singleton}`);
+    console.log(`  Factories: ${this.stats.patterns.factories}`);
+    console.log(`  Interfaces: ${this.stats.patterns.interfaces}`);
+    console.log(`  Hooks: ${this.stats.patterns.hooks}\n`);
+    
+    console.log(`Code Complexity:`);
+    console.log(`  React Hooks: ${this.stats.complexity.hooks}`);
+    console.log(`  Services: ${this.stats.complexity.services}`);
+    console.log(`  Components: ${this.stats.complexity.components}`);
+    console.log(`  Tests: ${this.stats.complexity.tests}\n`);
+  }
+
+  analyzeDependencies() {
+    console.log('📦 Dependencies Analysis');
+    console.log('------------------------');
+    
+    try {
+      const packageJson = JSON.parse(fs.readFileSync(
+        path.join(this.rootDir, 'package.json'), 'utf8'
+      ));
+      
+      const deps = Object.keys(packageJson.dependencies || {});
+      const devDeps = Object.keys(packageJson.devDependencies || {});
+      
+      this.stats.dependencies.external = [...deps, ...devDeps];
+      
+      console.log(`External dependencies: ${deps.length}`);
+      console.log(`Development dependencies: ${devDeps.length}`);
+      
+      // Identify internal dependencies (starting with @johnqh)
+      const internalDeps = deps.filter(dep => dep.startsWith('@johnqh'));
+      this.stats.dependencies.internal = internalDeps;
+      
+      console.log(`Internal dependencies: ${internalDeps.length}`);
+      if (internalDeps.length > 0) {
+        internalDeps.forEach(dep => console.log(`  - ${dep}`));
+      }
+      console.log('');
+    } catch (error) {
+      console.log('Could not analyze package.json\n');
+    }
+  }
+
+  analyzeQualityMetrics() {
+    console.log('🏆 Quality Metrics');
+    console.log('------------------');
+    
+    // Test coverage (if coverage files exist)
+    const coverageFile = path.join(this.rootDir, 'coverage/coverage-summary.json');
+    if (fs.existsSync(coverageFile)) {
+      try {
+        const coverage = JSON.parse(fs.readFileSync(coverageFile, 'utf8'));
+        this.stats.quality.coverage = coverage.total?.statements?.pct || 0;
+        console.log(`Test coverage: ${this.stats.quality.coverage}%`);
+      } catch (error) {
+        console.log('Test coverage: Unable to read');
+      }
+    } else {
+      console.log('Test coverage: Not available');
+    }
+    
+    console.log(`Test files: ${this.stats.complexity.tests}`);
+    console.log(`Test to code ratio: ${this.calculateTestRatio()}%\n`);
+  }
+
+  calculateTestRatio() {
+    const codeFiles = this.stats.files.total - this.stats.complexity.tests;
+    if (codeFiles === 0) return 0;
+    return Math.round((this.stats.complexity.tests / codeFiles) * 100);
+  }
+
+  generateAIRecommendations() {
+    console.log('🤖 AI Assistant Recommendations');
+    console.log('-------------------------------');
+    
+    const recommendations = [];
+    
+    // Architecture recommendations
+    if (this.stats.patterns.interfaces < 10) {
+      recommendations.push('🔷 Consider defining more interfaces for better type safety');
+    }
+    
+    if (this.stats.patterns.singleton > 0) {
+      recommendations.push('✅ Good use of singleton pattern detected');
+    }
+    
+    if (this.stats.complexity.hooks > 10) {
+      recommendations.push('🎣 Rich hook ecosystem - easy to extend functionality');
+    }
+    
+    // Quality recommendations
+    if (this.stats.quality.coverage < 80) {
+      recommendations.push('🧪 Consider increasing test coverage (target: 80%+)');
+    }
+    
+    if (this.calculateTestRatio() < 30) {
+      recommendations.push('📝 Consider adding more test files');
+    }
+    
+    // AI Development recommendations
+    recommendations.push('🔄 Use `npm run check-all` before AI tasks');
+    recommendations.push('📖 Check CLAUDE.md for AI development patterns');
+    recommendations.push('🛠️ Use templates in templates/ for new components');
+    
+    if (recommendations.length === 0) {
+      recommendations.push('✅ Project is well-structured for AI development!');
+    }
+    
+    recommendations.forEach((rec, i) => {
+      console.log(`${i + 1}. ${rec}`);
+    });
+    console.log('');
+  }
+
+  generateAIContext() {
+    console.log('📋 AI Development Context');
+    console.log('-------------------------');
+    
+    console.log('Key project characteristics for AI assistants:');
+    console.log(`• TypeScript library with ${this.stats.files.byType['.ts'] || 0} TS files`);
+    console.log(`• React integration with ${this.stats.patterns.hooks} custom hooks`);
+    console.log(`• ${this.stats.patterns.interfaces} interfaces for type safety`);
+    console.log(`• ${this.stats.complexity.services} service classes`);
+    console.log(`• ${this.stats.complexity.tests} test files for quality assurance`);
+    
+    if (this.stats.patterns.singleton > 0) {
+      console.log(`• Singleton pattern used for state management`);
+    }
+    
+    console.log('\nCommon AI tasks:');
+    console.log('• Adding new hooks: Use templates/react-hook.ts');
+    console.log('• Creating services: Use templates/service-template.ts');
+    console.log('• Type definitions: Add to src/types/');
+    console.log('• Business logic: Add to src/business/core/');
+    console.log('• Network clients: Add to src/network/clients/');
+    
+    console.log('\nQuick commands:');
+    console.log('• npm run quick-check    # Fast validation');
+    console.log('• npm run check-all      # Full quality check');
+    console.log('• npm run create:hook    # Generate new hook');
+    console.log('• npm run create:service # Generate new service');
+    console.log('• npm run analyze:code   # This analysis');
+    console.log('');
+  }
+
+  generateReport() {
+    this.generateAIContext();
+    
+    console.log('💡 Project Health Summary');
+    console.log('-------------------------');
+    
+    const health = this.calculateHealthScore();
+    console.log(`Overall Health Score: ${health}/100`);
+    
+    const healthIndicators = [
+      { name: 'Type Safety', score: Math.min(this.stats.patterns.interfaces * 10, 100) },
+      { name: 'Test Coverage', score: this.stats.quality.coverage || 0 },
+      { name: 'Code Organization', score: this.stats.complexity.services > 0 ? 90 : 70 },
+      { name: 'AI Readiness', score: this.calculateAIReadiness() }
+    ];
+    
+    healthIndicators.forEach(indicator => {
+      const status = indicator.score >= 80 ? '🟢' : indicator.score >= 60 ? '🟡' : '🔴';
+      console.log(`${status} ${indicator.name}: ${indicator.score}/100`);
+    });
+    console.log('');
+  }
+
+  calculateHealthScore() {
+    let score = 0;
+    
+    // Code organization (25 points)
+    score += Math.min((this.stats.patterns.interfaces / 20) * 25, 25);
+    
+    // Test coverage (25 points)  
+    score += (this.stats.quality.coverage || 0) * 0.25;
+    
+    // Code patterns (25 points)
+    score += Math.min((this.stats.complexity.hooks / 10) * 25, 25);
+    
+    // AI readiness (25 points)
+    score += this.calculateAIReadiness() * 0.25;
+    
+    return Math.round(score);
+  }
+
+  calculateAIReadiness() {
+    let score = 0;
+    
+    // Documentation
+    if (fs.existsSync(path.join(this.rootDir, 'CLAUDE.md'))) score += 20;
+    if (fs.existsSync(path.join(this.rootDir, 'templates'))) score += 20;
+    if (fs.existsSync(path.join(this.rootDir, 'docs'))) score += 20;
+    
+    // Code quality
+    if (this.stats.complexity.tests > 0) score += 20;
+    if (this.stats.patterns.interfaces > 10) score += 20;
+    
+    return score;
+  }
 }
 
-function analyzeProject() {
-  console.log('🔍 AI Code Analysis for @johnqh/lib');
-  console.log('=====================================\n');
-
-  // Analyze source code
-  const srcAnalysis = scanDirectory('./src');
-  console.log('📊 Source Code Analysis:');
-  console.log(`  • Total files: ${srcAnalysis.files.length}`);
-  console.log(`  • Total lines: ${srcAnalysis.totalLines.toLocaleString()}`);
-  console.log(`  • File types: ${Object.entries(srcAnalysis.fileTypes).map(([ext, count]) => `${ext}(${count})`).join(', ')}`);
-  
-  // Find largest files
-  const largestFiles = srcAnalysis.files
-    .sort((a, b) => b.lines - a.lines)
-    .slice(0, 5);
-  
-  console.log('\n📄 Largest Files:');
-  largestFiles.forEach((file, i) => {
-    console.log(`  ${i + 1}. ${file.path} (${file.lines} lines)`);
-  });
-
-  // Analyze architecture
-  const hooks = srcAnalysis.files.filter(f => f.path.includes('/hooks/'));
-  const types = srcAnalysis.files.filter(f => f.path.includes('/types/'));
-  const business = srcAnalysis.files.filter(f => f.path.includes('/business/'));
-  const utils = srcAnalysis.files.filter(f => f.path.includes('/utils/'));
-
-  console.log('\n🏗️ Architecture Breakdown:');
-  console.log(`  • Business Logic: ${business.length} files (${business.reduce((sum, f) => sum + f.lines, 0)} lines)`);
-  console.log(`  • React Hooks: ${hooks.length} files (${hooks.reduce((sum, f) => sum + f.lines, 0)} lines)`);
-  console.log(`  • Type Definitions: ${types.length} files (${types.reduce((sum, f) => sum + f.lines, 0)} lines)`);
-  console.log(`  • Utilities: ${utils.length} files (${utils.reduce((sum, f) => sum + f.lines, 0)} lines)`);
-
-  // Analyze tests
-  const testFiles = srcAnalysis.files.filter(f => f.path.includes('.test.') || f.path.includes('.spec.'));
-  const testCoverage = testFiles.length > 0 ? ((testFiles.length / srcAnalysis.files.length) * 100).toFixed(1) : 0;
-
-  console.log('\n🧪 Testing:');
-  console.log(`  • Test files: ${testFiles.length}`);
-  console.log(`  • Test coverage: ${testCoverage}% (files with tests)`);
-
-  // Find potential issues
-  console.log('\n⚠️  Potential Areas for AI Attention:');
-  
-  // Large files that might need refactoring
-  const largeFiles = srcAnalysis.files.filter(f => f.lines > 300);
-  if (largeFiles.length > 0) {
-    console.log(`  • ${largeFiles.length} files >300 lines (consider refactoring):`);
-    largeFiles.forEach(f => console.log(`    - ${f.path} (${f.lines} lines)`));
-  }
-
-  // Files without tests
-  const sourceFiles = srcAnalysis.files.filter(f => 
-    !f.path.includes('.test.') && 
-    !f.path.includes('.spec.') && 
-    !f.path.includes('/types/') &&
-    (f.path.includes('/business/') || f.path.includes('/utils/'))
-  );
-  
-  const filesWithoutTests = sourceFiles.filter(f => {
-    const testPath1 = f.path.replace('.ts', '.test.ts');
-    const testPath2 = f.path.replace('.ts', '.spec.ts');
-    const testDirPath = f.path.replace(/\/([^\/]+)\.ts$/, '/__tests__/$1.test.ts');
-    
-    return !testFiles.some(t => t.path === testPath1 || t.path === testPath2 || t.path === testDirPath);
-  });
-
-  if (filesWithoutTests.length > 0 && filesWithoutTests.length < 20) {
-    console.log(`  • ${filesWithoutTests.length} business files without tests:`);
-    filesWithoutTests.slice(0, 10).forEach(f => console.log(`    - ${f.path}`));
-    if (filesWithoutTests.length > 10) console.log(`    ... and ${filesWithoutTests.length - 10} more`);
-  }
-
-  // Hook patterns analysis
-  const indexerHooks = hooks.filter(f => f.path.includes('/indexer/'));
-  const wildduckHooks = hooks.filter(f => f.path.includes('/wildduck/'));
-  
-  console.log('\n🪝 Hook Patterns:');
-  console.log(`  • Indexer hooks: ${indexerHooks.length} (use endpointUrl, dev params)`);
-  console.log(`  • WildDuck hooks: ${wildduckHooks.length} (use config: WildDuckConfig param)`);
-
-  // Package analysis
-  try {
-    const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
-    const depCount = Object.keys(packageJson.dependencies || {}).length;
-    const devDepCount = Object.keys(packageJson.devDependencies || {}).length;
-    
-    console.log('\n📦 Dependencies:');
-    console.log(`  • Runtime dependencies: ${depCount}`);
-    console.log(`  • Dev dependencies: ${devDepCount}`);
-    console.log(`  • Package version: ${packageJson.version}`);
-  } catch {
-    // Skip if package.json not readable
-  }
-
-  console.log('\n🤖 AI Development Tips:');
-  console.log('  • Use `npm run create:hook` for new hooks');
-  console.log('  • Use `npm run create:type` for new interfaces');
-  console.log('  • Run `npm run check-all` before committing');
-  console.log('  • See CLAUDE.md for complete development guide');
-  console.log('  • Hook params: indexer(endpointUrl, dev), wildduck(config)');
+// CLI usage
+async function main() {
+  const analyzer = new ProjectAnalyzer();
+  await analyzer.analyze();
+  analyzer.generateReport();
 }
 
-analyzeProject();
+if (require.main === module) {
+  main().catch(console.error);
+}
+
+module.exports = { ProjectAnalyzer };

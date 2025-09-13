@@ -1,0 +1,13 @@
+[
+  {
+    "timestamp": "2025-09-13T20:57:48.016Z",
+    "overall": 72,
+    "categories": {
+      "codeQuality": 50,
+      "typeScript": 100,
+      "testing": 75,
+      "dependencies": 45,
+      "aiReadiness": 90
+    }
+  }
+]
