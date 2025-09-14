@@ -26,7 +26,7 @@ class Logger {
   }
 
   private formatMessage(
-    level: LogLevel,
+    _level: LogLevel,
     message: string,
     context?: string
   ): string {

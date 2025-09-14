@@ -33,7 +33,9 @@ class SimpleURLSearchParams implements URLSearchParamsLike {
         }
       } else {
         for (const [key, value] of Object.entries(init)) {
-          this.append(key, value);
+          if (value !== undefined) {
+            this.append(key, value);
+          }
         }
       }
     }
@@ -45,7 +47,9 @@ class SimpleURLSearchParams implements URLSearchParamsLike {
 
     for (const pair of params.split('&')) {
       const [key, value = ''] = pair.split('=');
-      this.append(decodeURIComponent(key), decodeURIComponent(value));
+      if (key) {
+        this.append(decodeURIComponent(key), decodeURIComponent(value));
+      }
     }
   }
 

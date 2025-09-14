@@ -39,7 +39,7 @@ class AIEmailServiceImpl implements AIEmailService {
   private readonly ENS_REGEX = /\b[a-zA-Z0-9-]+\.eth\b/g;
   private readonly SNS_REGEX = /\b[a-zA-Z0-9-]+\.sol\b/g;
   private readonly TRANSACTION_HASH_REGEX = /\b0x[a-fA-F0-9]{64}\b/g;
-  private readonly SOLANA_ADDRESS_REGEX = /\b[1-9A-HJ-NP-Za-km-z]{32,44}\b/g;
+  // private readonly _SOLANA_ADDRESS_REGEX = /\b[1-9A-HJ-NP-Za-km-z]{32,44}\b/g;
 
   async categorizeEmail(
     email: Email,
@@ -633,32 +633,39 @@ class AIEmailServiceImpl implements AIEmailService {
     const usdRegex = /\$\s*(\d+(?:,\d{3})*(?:\.\d{2})?)/g;
     let match;
     while ((match = usdRegex.exec(content)) !== null) {
-      amounts.push({
-        value: parseFloat(match[1].replace(/,/g, '')),
-        currency: 'USD',
-      });
+      if (match[1]) {
+        amounts.push({
+          value: parseFloat(match[1].replace(/,/g, '')),
+          currency: 'USD',
+        });
+      }
     }
 
     // ETH amounts
     const ethRegex = /(\d+(?:\.\d+)?)\s*ETH/gi;
     while ((match = ethRegex.exec(content)) !== null) {
-      amounts.push({
-        value: parseFloat(match[1]),
-        currency: 'ETH',
-      });
+      if (match[1]) {
+        amounts.push({
+          value: parseFloat(match[1]),
+          currency: 'ETH',
+        });
+      }
     }
 
     return amounts;
   }
 
   private extractPeople(
-    content: string,
+    _content: string,
     fromEmail: string
   ): { name: string; email?: string; role?: string }[] {
     const people: { name: string; email?: string; role?: string }[] = [];
 
     // Extract email from sender
-    const fromName = fromEmail.split('@')[0].replace(/[._]/g, ' ');
+    const fromName = (fromEmail.split('@')[0] || 'Unknown').replace(
+      /[._]/g,
+      ' '
+    );
     people.push({
       name: fromName,
       email: fromEmail,
@@ -689,7 +696,7 @@ class AIEmailServiceImpl implements AIEmailService {
       }
     });
 
-    return [...new Set(organizations)]; // Remove duplicates
+    return Array.from(new Set(organizations)); // Remove duplicates
   }
 
   private extractTopics(content: string): string[] {

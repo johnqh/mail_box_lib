@@ -116,7 +116,6 @@
     "axios": "^1.12.1",
     "bs58": "^6.0.0",
     "firebase": "^12.2.1",
-    "react-router-dom": "^7.9.1",
     "viem": "^2.37.5"
   },
   "overrides": {

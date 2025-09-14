@@ -218,6 +218,9 @@ class DefaultMailboxOperations implements MailboxOperations {
     const lastName = pathParts[pathParts.length - 1];
 
     // Capitalize first letter
+    if (!lastName) {
+      return 'Unknown';
+    }
     return lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase();
   }
 
