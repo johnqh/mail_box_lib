@@ -261,7 +261,8 @@ export class IndexerGraphQLHelper {
     const result: GraphQLResponse<T> = response.data as GraphQLResponse<T>;
     
     if (result.errors && result.errors.length > 0) {
-      throw new Error(`GraphQL error: ${result.errors[0].message}`);
+      const firstError = result.errors[0];
+      throw new Error(`GraphQL error: ${firstError ? firstError.message : 'Unknown GraphQL error'}`);
     }
 
     if (!result.data) {

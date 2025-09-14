@@ -192,7 +192,12 @@ export const useMailerClient = (
   }, [client]);
 
   const getChainType = useCallback((): ChainType | null => {
-    return client ? client.getChainType() : null;
+    if (!client) return null;
+    const chainType = client.getChainType();
+    // Map string values to ChainType enum
+    if (chainType === 'evm') return ChainType.EVM;
+    if (chainType === 'solana') return ChainType.SOLANA;
+    return null;
   }, [client]);
 
   const getWalletAddress = useCallback((): string | null => {

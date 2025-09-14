@@ -1,7 +1,7 @@
-import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
+// import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
 
 // Create connection to Solana mainnet
-const _connection = new Connection(clusterApiUrl('mainnet-beta'), 'confirmed');
+// const _connection = new Connection(clusterApiUrl('mainnet-beta'), 'confirmed');
 
 interface SNSName {
   name: string;
@@ -29,7 +29,7 @@ export async function getSNSNames(address: string): Promise<SNSName[]> {
 
     try {
       // Convert address string to PublicKey
-      const _walletPublicKey = new PublicKey(address);
+      // const _walletPublicKey = new PublicKey(address);
 
       // Query on-chain SNS domains owned by this address
       const domains = await querySOLDomains(address);

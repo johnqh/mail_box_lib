@@ -142,9 +142,8 @@ export const useWalletStatus = (): UseWalletStatusReturn => {
   const isConnected = checkWalletConnected(status);
   const isVerified = checkWalletVerified(status);
 
-  return {
+  const result: UseWalletStatusReturn = {
     status,
-    walletAddress: status?.walletAddress,
     connectionState,
     isConnected,
     isVerified,
@@ -154,6 +153,13 @@ export const useWalletStatus = (): UseWalletStatusReturn => {
     updateWalletAddress,
     clearVerification,
   };
+
+  // Add walletAddress only if it exists
+  if (status?.walletAddress) {
+    result.walletAddress = status.walletAddress;
+  }
+
+  return result;
 };
 
 /**

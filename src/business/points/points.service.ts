@@ -77,8 +77,12 @@ class PointsService {
       action,
       points,
       timestamp: new Date(),
-      metadata,
     };
+
+    // Only add metadata if it exists
+    if (metadata) {
+      pointsAction.metadata = metadata;
+    }
 
     // In a real implementation, this would be sent to the backend
     await this.recordPointsAction(pointsAction);
@@ -234,6 +238,9 @@ class PointsService {
   ): Promise<void> {
     // Extract referrer wallet from referral code
     const referrerWallet = _referralCode.split('_')[0];
+    if (!referrerWallet) {
+      throw new Error('Invalid referral code format');
+    }
 
     // Award points to referrer
     await this.awardPoints(referrerWallet, 'referral', {
@@ -290,6 +297,8 @@ class PointsService {
     if (claimableIndex === -1) return false;
 
     const claimable = claimables[claimableIndex];
+    if (!claimable) return false;
+
     claimable.claimedAt = new Date();
 
     // Award the points
@@ -299,7 +308,7 @@ class PointsService {
     });
 
     // Update storage
-    claimables[claimableIndex] = claimable;
+    claimables.splice(claimableIndex, 1, claimable);
     localStorage.setItem(storageKey, JSON.stringify(claimables));
 
     return true;

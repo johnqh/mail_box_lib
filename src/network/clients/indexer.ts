@@ -57,12 +57,23 @@ class IndexerClient implements NetworkClient {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
-      const response = await fetch(fullUrl, {
+      const fetchOptions: RequestInit = {
         method: options?.method || 'GET',
         headers: requestHeaders,
-        body: options?.body,
         signal: options?.signal || controller.signal,
-      });
+      };
+
+      // Only add body if it exists and method supports it
+      if (
+        options?.body &&
+        (options.method === 'POST' ||
+          options.method === 'PUT' ||
+          options.method === 'PATCH')
+      ) {
+        fetchOptions.body = options.body;
+      }
+
+      const response = await fetch(fullUrl, fetchOptions);
 
       clearTimeout(timeoutId);
 
@@ -108,11 +119,16 @@ class IndexerClient implements NetworkClient {
     body?: any,
     options?: Omit<NetworkRequestOptions, 'method'>
   ): Promise<NetworkResponse<T>> {
-    return this.request<T>(url, {
+    const requestOptions: NetworkRequestOptions = {
       ...options,
       method: 'POST',
-      body: body ? JSON.stringify(body) : undefined,
-    });
+    };
+
+    if (body) {
+      requestOptions.body = JSON.stringify(body);
+    }
+
+    return this.request<T>(url, requestOptions);
   }
 
   /**
@@ -123,11 +139,16 @@ class IndexerClient implements NetworkClient {
     body?: any,
     options?: Omit<NetworkRequestOptions, 'method'>
   ): Promise<NetworkResponse<T>> {
-    return this.request<T>(url, {
+    const requestOptions: NetworkRequestOptions = {
       ...options,
       method: 'PUT',
-      body: body ? JSON.stringify(body) : undefined,
-    });
+    };
+
+    if (body) {
+      requestOptions.body = JSON.stringify(body);
+    }
+
+    return this.request<T>(url, requestOptions);
   }
 
   /**

@@ -45,7 +45,8 @@ const useENSFromWallet = (
     queryFn: async (): Promise<ENSResolutionResponse> => {
       try {
         const ensNames = await getENSNames(walletAddress);
-        const primaryENS = ensNames.length > 0 ? ensNames[0].name : null;
+        const primaryENS =
+          ensNames.length > 0 && ensNames[0] ? ensNames[0].name : null;
         return {
           address: walletAddress,
           ensName: primaryENS,
@@ -111,7 +112,8 @@ const useSNSFromWallet = (
     queryFn: async (): Promise<SNSResolutionResponse> => {
       try {
         const snsNames = await getSNSNames(walletAddress);
-        const primarySNS = snsNames.length > 0 ? snsNames[0].name : null;
+        const primarySNS =
+          snsNames.length > 0 && snsNames[0] ? snsNames[0].name : null;
         return {
           address: walletAddress,
           snsName: primarySNS,
@@ -184,7 +186,8 @@ const useNameServiceResolution = (
         // Resolve ENS from Ethereum address
         try {
           const ensNames = await getENSNames(input);
-          const primaryENS = ensNames.length > 0 ? ensNames[0].name : null;
+          const primaryENS =
+            ensNames.length > 0 && ensNames[0] ? ensNames[0].name : null;
           return {
             address: input,
             ensName: primaryENS,
@@ -201,7 +204,8 @@ const useNameServiceResolution = (
         // Resolve SNS from Solana address
         try {
           const snsNames = await getSNSNames(input);
-          const primarySNS = snsNames.length > 0 ? snsNames[0].name : null;
+          const primarySNS =
+            snsNames.length > 0 && snsNames[0] ? snsNames[0].name : null;
           return {
             address: input,
             snsName: primarySNS,

@@ -29,7 +29,9 @@ class SimpleURLSearchParams implements URLSearchParamsLike {
         this.parseString(init);
       } else if (Array.isArray(init)) {
         for (const [key, value] of init) {
-          this.append(key, value);
+          if (key && value !== undefined) {
+            this.append(key, value);
+          }
         }
       } else {
         for (const [key, value] of Object.entries(init)) {
@@ -69,7 +71,9 @@ class SimpleURLSearchParams implements URLSearchParamsLike {
 
   get(name: string): string | null {
     const values = this.params.get(name);
-    return values && values.length > 0 ? values[0] : null;
+    return values && values.length > 0 && values[0] !== undefined
+      ? values[0]
+      : null;
   }
 
   getAll(name: string): string[] {

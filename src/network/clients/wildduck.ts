@@ -111,19 +111,33 @@ class WildDuckAPI {
     }
 
     try {
-      const response = await this.networkClient.request<T>(url, {
+      const requestOptions: any = {
         method: options.method || 'GET',
         headers: {
           ...this.headers,
           ...options.headers,
         },
-        body: (options.body &&
-        typeof options.body === 'object' &&
-        !(options.body instanceof FormData) &&
-        !(options.body instanceof Blob)
-          ? JSON.stringify(options.body)
-          : options.body) as string | FormData | Blob | undefined,
-      });
+      };
+
+      // Only add body if it exists and method supports it
+      if (
+        options.body &&
+        (options.method === 'POST' ||
+          options.method === 'PUT' ||
+          options.method === 'DELETE')
+      ) {
+        if (
+          typeof options.body === 'object' &&
+          !(options.body instanceof FormData) &&
+          !(options.body instanceof Blob)
+        ) {
+          requestOptions.body = JSON.stringify(options.body);
+        } else {
+          requestOptions.body = options.body;
+        }
+      }
+
+      const response = await this.networkClient.request<T>(url, requestOptions);
 
       return response.data;
     } catch (error) {
@@ -500,7 +514,8 @@ const emailToUserId = (emailAddress: string): string => {
   // Extract the wallet address part from email if it's in email format
   let username = emailAddress.toLowerCase();
   if (username.includes('@')) {
-    username = username.split('@')[0]; // Extract just the address part
+    const parts = username.split('@');
+    username = parts[0] || username; // Extract just the address part
   }
 
   try {

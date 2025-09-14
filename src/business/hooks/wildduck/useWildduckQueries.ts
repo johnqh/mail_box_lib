@@ -551,18 +551,26 @@ const useWildduckAuthStatus = (
         headers['X-Access-Token'] = token || config.apiToken;
       }
 
-      const response = await axios.get(`${apiUrl}/users/me`, { headers });
-      const data = response.data as { success: boolean; id?: string; username?: string; address?: string };
+      const httpResponse = await axios.get(`${apiUrl}/users/me`, { headers });
+      const data = httpResponse.data as { success: boolean; id?: string; username?: string; address?: string };
       
-      return {
+      const response: WildduckAuthStatusResponse = {
         success: data.success,
-        user: data.success ? {
-          id: data.id || '',
-          username: data.username || '',
-          address: data.address,
-        } : undefined,
         authenticated: data.success,
       };
+
+      if (data.success && (data.id || data.username)) {
+        const user: { id: string; username: string; address?: string } = {
+          id: data.id || '',
+          username: data.username || '',
+        };
+        if (data.address) {
+          user.address = data.address;
+        }
+        response.user = user;
+      }
+
+      return response;
     },
     staleTime: STALE_TIMES.USER_PROFILE,
     enabled: !!token || !!config.apiToken,

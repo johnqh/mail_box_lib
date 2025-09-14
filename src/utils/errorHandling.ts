@@ -18,7 +18,7 @@ class AppError extends Error {
     super(message);
     this.name = 'AppError';
     this.code = code;
-    this.statusCode = statusCode;
+    this.statusCode = statusCode ?? 500;
     this.details = details;
   }
 }

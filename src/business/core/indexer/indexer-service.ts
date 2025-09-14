@@ -20,11 +20,11 @@ interface IndexerLeaderboardResponse {
 }
 
 // Currently unused interfaces - kept for future API expansion
-interface _IndexerCampaignsResponse {
-  success: boolean;
-  campaigns?: any[];
-  message?: string;
-}
+// interface _IndexerCampaignsResponse {
+//   success: boolean;
+//   campaigns?: any[];
+//   message?: string;
+// }
 
 interface IndexerPointsSummaryResponse {
   success: boolean;
@@ -32,11 +32,11 @@ interface IndexerPointsSummaryResponse {
   message?: string;
 }
 
-interface _IndexerPointsHistoryResponse {
-  success: boolean;
-  history?: any[];
-  message?: string;
-}
+// interface _IndexerPointsHistoryResponse {
+//   success: boolean;
+//   history?: any[];
+//   message?: string;
+// }
 
 interface IndexerHowToEarnResponse {
   success: boolean;
@@ -50,32 +50,32 @@ interface IndexerPublicStatsResponse {
   message?: string;
 }
 
-interface _IndexerCampaignStatsResponse {
-  success: boolean;
-  stats?: any;
-  message?: string;
-}
+// interface _IndexerCampaignStatsResponse {
+//   success: boolean;
+//   stats?: any;
+//   message?: string;
+// }
 
-interface _IndexerPromoCodeResponse {
-  success: boolean;
-  message?: string;
-}
+// interface _IndexerPromoCodeResponse {
+//   success: boolean;
+//   message?: string;
+// }
 
-interface _IndexerPromoValidationResponse {
-  success: boolean;
-  valid?: boolean;
-  message?: string;
-}
+// interface _IndexerPromoValidationResponse {
+//   success: boolean;
+//   valid?: boolean;
+//   message?: string;
+// }
 
-interface _IndexerReferralResponse {
-  success: boolean;
-  message?: string;
-}
+// interface _IndexerReferralResponse {
+//   success: boolean;
+//   message?: string;
+// }
 
-interface _IndexerRefereeLoginResponse {
-  success: boolean;
-  message?: string;
-}
+// interface _IndexerRefereeLoginResponse {
+//   success: boolean;
+//   message?: string;
+// }
 
 /**
  * Business service for indexer operations

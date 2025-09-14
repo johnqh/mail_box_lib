@@ -29,9 +29,9 @@ type ParsedEmailAddress = {
 };
 
 // Extended EmailAddress interface for business logic
-interface _ExtendedEmailAddress extends EmailAddress {
-  main?: boolean;
-}
+// interface _ExtendedEmailAddress extends EmailAddress {
+//   main?: boolean;
+// }
 
 interface AuthBusinessLogic {
   /**

@@ -220,27 +220,30 @@ class AIWeb3ServiceImpl implements AIWeb3Service {
 
   async analyzeNFTMetadata(nftData: any): Promise<NFTAnalysis> {
     try {
-      return {
+      const analysis: NFTAnalysis = {
         collectionName: nftData.collection || 'Unknown Collection',
         floorPrice: nftData.floorPrice || 0.1,
-        rarity: nftData.rarity
-          ? {
-              rank: nftData.rarity.rank || Math.floor(Math.random() * 10000),
-              score: nftData.rarity.score || Math.random() * 100,
-              traits: nftData.rarity.traits || [],
-            }
-          : undefined,
         authenticity: {
           isAuthentic: true, // Mock - would check against known collections
-          confidence: 0.95,
-          verificationMethod: 'Collection metadata verification',
+          confidence: 0.9,
+          verificationMethod: 'metadata_analysis',
         },
         priceAnalysis: {
-          currentPrice: nftData.price || 0.5,
-          historicalAvg: 0.3,
+          currentPrice: nftData.price || 0.1,
+          historicalAvg: 0.08,
           priceChange24h: Math.random() * 20 - 10, // -10 to +10%
         },
       };
+
+      if (nftData.rarity) {
+        analysis.rarity = {
+          rank: nftData.rarity.rank || Math.floor(Math.random() * 10000),
+          score: nftData.rarity.score || Math.random() * 100,
+          traits: nftData.rarity.traits || [],
+        };
+      }
+
+      return analysis;
     } catch (error) {
       throw new Error(
         `Failed to analyze NFT: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -383,7 +386,7 @@ class AIWeb3ServiceImpl implements AIWeb3Service {
       'defi',
       'nft',
     ];
-    const type = types[txHash.charCodeAt(2) % types.length];
+    const type = types[txHash.charCodeAt(2) % types.length] || 'send';
 
     return {
       txHash,
@@ -414,7 +417,8 @@ class AIWeb3ServiceImpl implements AIWeb3Service {
       'dao',
       'multisig',
     ];
-    const type = types[contractAddress.charCodeAt(2) % types.length];
+    const type =
+      types[contractAddress.charCodeAt(2) % types.length] || 'unknown';
 
     return {
       name: `Contract ${contractAddress.slice(0, 8)}...`,

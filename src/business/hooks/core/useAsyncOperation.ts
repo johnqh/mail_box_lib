@@ -144,16 +144,21 @@ const useApiOperation = <T = any>(
 ): UseAsyncOperationReturn<T> => {
   const { mockService, ...baseOptions } = options;
 
-  return useAsyncOperation<T>({
+  const asyncOptions: UseAsyncOperationOptions<T> = {
     ...baseOptions,
-    fallbackOperation: mockService,
     retryAttempts: baseOptions.retryAttempts ?? 1,
     retryDelay: baseOptions.retryDelay ?? 1000,
     onError: error => {
       console.error('API operation failed:', error);
       baseOptions.onError?.(error);
     },
-  });
+  };
+
+  if (mockService) {
+    asyncOptions.fallbackOperation = mockService;
+  }
+
+  return useAsyncOperation<T>(asyncOptions);
 };
 
 /**

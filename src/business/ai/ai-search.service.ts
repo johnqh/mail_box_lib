@@ -655,7 +655,7 @@ class AISearchServiceImpl implements AISearchService {
     const suggestions: string[] = [];
 
     // Create combinations of frequent terms
-    if (topTerms.length >= 2) {
+    if (topTerms.length >= 2 && topTerms[0] && topTerms[1]) {
       suggestions.push(`${topTerms[0].term} AND ${topTerms[1].term}`);
     }
 
