@@ -79,6 +79,14 @@ export {
   ErrorType,
   Currency,
 
+  // Constants
+  ERROR_MESSAGES,
+
+  // Utility functions
+  formatWalletAddress,
+  getAddressType,
+  AddressType,
+
   // Business interfaces
   Email,
   User,
