@@ -16,7 +16,7 @@ import {
   subscribeToWalletStatus,
   WalletStatusChangeListener
 } from '../wallet-status-manager';
-import { WalletConnectionState } from '../../../../types/wallet-status';
+import { WalletConnectionState } from '@johnqh/types';
 
 describe('WalletStatusManager', () => {
   // Reset manager state before each test

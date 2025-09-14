@@ -4,10 +4,11 @@
  */
 
 import { useCallback, useState } from 'react';
+import { ChainType } from '@johnqh/types';
 
 interface WalletInfo {
   address: string;
-  chainType: 'evm' | 'solana';
+  chainType: ChainType;
   isValid: boolean;
 }
 
@@ -17,7 +18,7 @@ interface UseWalletDetectorReturn {
   error: string | null;
 
   // Operations
-  detectWalletType: (address: string) => Promise<'evm' | 'solana' | 'unknown'>;
+  detectWalletType: (address: string) => Promise<ChainType>;
   validateAddress: (address: string) => Promise<boolean>;
   getWalletInfo: (address: string) => Promise<WalletInfo | null>;
   isEVMAddress: (address: string) => boolean;
@@ -51,24 +52,24 @@ export const useWalletDetector = (): UseWalletDetectorReturn => {
   }, []);
 
   const detectWalletType = useCallback(
-    async (address: string): Promise<'evm' | 'solana' | 'unknown'> => {
+    async (address: string): Promise<ChainType> => {
       setIsLoading(true);
       setError(null);
 
       try {
         // Use built-in detection methods since detectChainType might not exist
         if (isEVMAddress(address)) {
-          return 'evm';
+          return ChainType.EVM;
         } else if (isSolanaAddress(address)) {
-          return 'solana';
+          return ChainType.SOLANA;
         } else {
-          return 'unknown';
+          return ChainType.UNKNOWN;
         }
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to detect wallet type';
         setError(errorMessage);
-        return 'unknown';
+        return ChainType.UNKNOWN;
       } finally {
         setIsLoading(false);
       }
@@ -84,7 +85,7 @@ export const useWalletDetector = (): UseWalletDetectorReturn => {
       try {
         // Try to detect chain type as a validation method
         const chainType = await detectWalletType(address);
-        return chainType !== 'unknown';
+        return chainType !== ChainType.UNKNOWN;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to validate address';
@@ -104,7 +105,7 @@ export const useWalletDetector = (): UseWalletDetectorReturn => {
 
       try {
         const chainType = await detectWalletType(address);
-        if (chainType === 'unknown') {
+        if (chainType === ChainType.UNKNOWN) {
           return null;
         }
 

@@ -9,6 +9,7 @@ import type {
   EVMConfig,
   SolanaConfig,
 } from '@johnqh/mail_box_contracts';
+import { ChainType } from '@johnqh/types';
 
 interface UseContractConfigReturn {
   // Current configurations
@@ -31,7 +32,7 @@ interface UseContractConfigReturn {
 
   // Utilities
   isConfigValid: () => boolean;
-  getActiveChains: () => ('evm' | 'solana')[];
+  getActiveChains: () => ChainType[];
   clearConfig: () => void;
 }
 
@@ -128,15 +129,15 @@ export const useContractConfig = (): UseContractConfigReturn => {
     return hasEVM || hasSolana;
   }, [config]);
 
-  const getActiveChains = useCallback((): ('evm' | 'solana')[] => {
-    const chains: ('evm' | 'solana')[] = [];
+  const getActiveChains = useCallback((): ChainType[] => {
+    const chains: ChainType[] = [];
 
     if (config?.evm) {
-      chains.push('evm');
+      chains.push(ChainType.EVM);
     }
 
     if (config?.solana) {
-      chains.push('solana');
+      chains.push(ChainType.SOLANA);
     }
 
     return chains;

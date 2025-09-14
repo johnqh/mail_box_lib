@@ -11,6 +11,7 @@ import {
   Web3Entity,
 } from './ai-types';
 import { Email } from '../../types/email';
+import { ChainType } from '@johnqh/types';
 
 interface AIEmailService {
   categorizeEmail(
@@ -572,7 +573,7 @@ class AIEmailServiceImpl implements AIEmailService {
         entities.push({
           type: 'wallet_address',
           value: address,
-          chainType: 'ethereum',
+          chainType: ChainType.ETHEREUM,
           confidence: 0.9,
         });
       });
@@ -585,7 +586,7 @@ class AIEmailServiceImpl implements AIEmailService {
         entities.push({
           type: 'ens_name',
           value: name,
-          chainType: 'ethereum',
+          chainType: ChainType.ETHEREUM,
           confidence: 0.95,
         });
       });

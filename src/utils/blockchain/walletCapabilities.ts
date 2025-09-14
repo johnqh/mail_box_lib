@@ -2,6 +2,8 @@
  * Utility to detect wallet capabilities and supported chains
  */
 
+import { ChainType } from '@johnqh/types';
+
 interface WalletCapability {
   name: string;
   supportsEVM: boolean;
@@ -83,13 +85,10 @@ function getWalletCapabilities(walletName: string): WalletCapability {
 /**
  * Check if a wallet is available for a specific chain
  */
-function isWalletAvailable(
-  walletName: string,
-  chainType: 'evm' | 'solana'
-): boolean {
+function isWalletAvailable(walletName: string, chainType: ChainType): boolean {
   const capabilities = getWalletCapabilities(walletName);
 
-  if (chainType === 'evm') {
+  if (chainType === ChainType.EVM) {
     return capabilities.supportsEVM;
   } else {
     return capabilities.supportsSolana;

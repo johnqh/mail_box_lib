@@ -10,7 +10,7 @@ import {
   useWalletConnectionState 
 } from '../useWalletStatus';
 import { walletStatusManager } from '../../../core/wallet/wallet-status-manager';
-import { WalletConnectionState } from '../../../../types/wallet-status';
+import { WalletConnectionState } from '@johnqh/types';
 
 describe('useWalletStatus', () => {
   // Reset manager state before each test

@@ -4,6 +4,7 @@
  */
 
 import { Email } from '../../types/email';
+import { ChainType } from '@johnqh/types';
 
 interface EmailCategory {
   primary:
@@ -38,7 +39,7 @@ interface Web3Entity {
     | 'token_symbol'
     | 'nft_collection';
   value: string;
-  chainType?: 'ethereum' | 'solana' | 'polygon' | 'arbitrum' | 'optimism';
+  chainType?: ChainType;
   confidence: number;
   context?: string;
 }
@@ -62,7 +63,7 @@ interface EmailEntities {
 
 interface TransactionAnalysis {
   txHash: string;
-  chainType: string;
+  chainType: ChainType;
   type:
     | 'send'
     | 'receive'

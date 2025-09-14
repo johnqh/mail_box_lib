@@ -2,7 +2,7 @@
  * Platform-agnostic authentication business logic
  */
 
-import { AuthStatus, ChainType } from '../enums';
+import { AuthStatus, ChainType } from '@johnqh/types';
 import { EmailAddress } from '../../../types/email';
 
 /**

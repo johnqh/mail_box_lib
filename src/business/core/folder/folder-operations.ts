@@ -2,7 +2,11 @@
  * Business logic for email folder operations
  */
 
-import { EmailFolder, EmailFolderUtils, StandardEmailFolder } from '../enums';
+import {
+  EmailFolder,
+  EmailFolderUtils,
+  StandardEmailFolder,
+} from '@johnqh/types';
 
 interface FolderInfo {
   name: EmailFolder;

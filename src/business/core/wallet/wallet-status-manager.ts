@@ -7,7 +7,7 @@ import {
   getWalletConnectionState,
   WalletConnectionState,
   WalletStatus,
-} from '../../../types/wallet-status';
+} from '@johnqh/types';
 
 /**
  * Callback function type for wallet status change notifications

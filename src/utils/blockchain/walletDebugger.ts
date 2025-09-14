@@ -2,7 +2,7 @@
  * Wallet debugging utilities to help diagnose signing issues
  */
 
-import { ChainType } from './addressDetection';
+import { ChainType } from '@johnqh/types';
 
 interface WalletDebugInfo {
   chainType: ChainType;
@@ -37,7 +37,7 @@ const generateWalletDiagnostics = (
   }
 
   // Chain-specific diagnostics
-  if (chainType === 'solana') {
+  if (chainType === ChainType.SOLANA) {
     const windowObj = window as any;
 
     // Check for Solana providers
@@ -57,7 +57,7 @@ const generateWalletDiagnostics = (
     if (hasPhantom && windowObj.phantom?.solana?.isConnected === false) {
       recommendations.push('Connect your Phantom wallet to this site');
     }
-  } else if (chainType === 'evm') {
+  } else if (chainType === ChainType.EVM) {
     const windowObj = window as any;
 
     // Check for Ethereum providers
@@ -118,12 +118,12 @@ const generateWalletDiagnostics = (
 
   // Detect wallet provider
   let walletProvider = 'Unknown';
-  if (chainType === 'solana') {
+  if (chainType === ChainType.SOLANA) {
     const windowObj = window as any;
     if (windowObj.phantom?.solana) walletProvider = 'Phantom';
     else if (windowObj.solflare) walletProvider = 'Solflare';
     else if (windowObj.sollet) walletProvider = 'Sollet';
-  } else if (chainType === 'evm') {
+  } else if (chainType === ChainType.EVM) {
     const windowObj = window as any;
     if (windowObj.ethereum?.isMetaMask) walletProvider = 'MetaMask';
     else if (windowObj.ethereum?.isCoinbaseWallet)

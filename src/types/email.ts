@@ -36,17 +36,12 @@ interface User {
   emailAddresses: EmailAddress[];
 }
 
-import {
-  ChainType as _ChainType,
-  EmailFolder,
-  FontSize,
-  Theme,
-} from '../business/core/enums';
+import { ChainType, EmailFolder, FontSize, Theme } from '@johnqh/types';
 
 // WalletUserData interface for wallet-based user information
 export interface WalletUserData {
   walletAddress: string;
-  chainType: string;
+  chainType: ChainType;
   walletType?: string;
   displayName?: string;
   avatar?: string;

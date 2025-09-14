@@ -9,7 +9,7 @@ import {
   EmailAction,
   EmailFolder,
   SubscriptionAction,
-} from '../enums';
+} from '@johnqh/types';
 import { WalletType } from '../../../di';
 
 interface AnalyticsEventData {

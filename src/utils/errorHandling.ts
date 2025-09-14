@@ -1,6 +1,5 @@
-import { ERROR_MESSAGES } from './constants';
+import { ERROR_MESSAGES, logger } from '@johnqh/types';
 // import { EnvUtils } from '../../di'; // TODO: Implement proper DI setup
-import { logger } from './logger';
 
 // Platform-specific global
 declare const fetch: typeof globalThis.fetch; // eslint-disable-line @typescript-eslint/no-unused-vars

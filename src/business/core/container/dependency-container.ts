@@ -14,7 +14,7 @@ import {
   DefaultEmailOperations,
   EmailOperations,
 } from '../email/email-operations';
-import { PlatformType } from '../enums';
+import { PlatformType } from '@johnqh/types';
 import { DefaultFolderOperations } from '../folder/folder-operations';
 import {
   DefaultMailboxOperations,

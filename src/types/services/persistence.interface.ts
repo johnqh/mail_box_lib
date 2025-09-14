@@ -3,7 +3,7 @@
  * Handles data persistence across different storage mechanisms
  */
 
-import { RequestStatus } from '../../business/core/enums';
+import { RequestStatus } from '@johnqh/types';
 import { StorageType } from '../../di';
 
 interface PersistenceOptions {

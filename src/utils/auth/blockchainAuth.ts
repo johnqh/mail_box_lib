@@ -3,14 +3,10 @@
  * Compatible with WildDuck's blockchain authentication system
  */
 
-import { ChainType } from '../blockchain/addressDetection';
-import {
-  AddressHelper,
-  AddressType,
-} from '../../business/core/auth/auth-business-logic';
+import { AddressType, ChainType, getAddressType } from '@johnqh/types';
 
 // Re-export for convenience
-export { detectAddressType } from '../blockchain/addressDetection';
+export { getAddressType as detectAddressType } from '@johnqh/types';
 
 interface SigninMessage {
   domain: string;
@@ -110,7 +106,7 @@ const _createAuthMessage = (
   const authIssuedAt = issuedAt || new Date();
   let message: string;
 
-  if (chainType === 'solana') {
+  if (chainType === ChainType.SOLANA) {
     message = createSolanaSignMessage(domain, address, authNonce, authIssuedAt);
   } else {
     // Default to SIWE for EVM chains
@@ -136,7 +132,7 @@ const formatSignatureForWildDuck = (
     throw new Error('Signature is null or undefined');
   }
 
-  if (chainType === 'solana') {
+  if (chainType === ChainType.SOLANA) {
     // For Solana, keep signature in base58 format (NOT base64)
     if (signature instanceof Uint8Array) {
       // Validate signature length for Solana (should be 64 bytes)
@@ -198,8 +194,8 @@ const isValidBlockchainUsername = (username: string): boolean => {
 
   const cleanUsername = username.trim().toLowerCase();
 
-  // Use AddressHelper for standardized address detection
-  const addressType = AddressHelper.getAddressType(cleanUsername);
+  // Use getAddressType for standardized address detection
+  const addressType = getAddressType(cleanUsername);
 
   // Valid if it's any known address type (not Unknown)
   if (addressType !== AddressType.Unknown) {
@@ -226,7 +222,7 @@ const isBase64EVMAddress = (encoded: string): boolean => {
       return false;
     }
     const address = `0x${decoded}`;
-    return AddressHelper.getAddressType(address) === AddressType.EVMAddress;
+    return getAddressType(address) === AddressType.EVMAddress;
   } catch {
     return false;
   }

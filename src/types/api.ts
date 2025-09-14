@@ -10,6 +10,8 @@
  * - Compatible with both REST and GraphQL APIs
  */
 
+import { ChainType } from '@johnqh/types';
+
 // =============================================================================
 // INDEXER API TYPES (v2.0.0+)
 // =============================================================================
@@ -60,7 +62,7 @@ interface SignatureProtectedRequest {
 }
 
 /**
- * Note: ChainType is defined later in this file with 'evm' | 'solana' | 'unknown'
+ * Note: ChainType is imported from @johnqh/types
  */
 
 /**
@@ -930,7 +932,6 @@ interface PaginationResponse {
 /**
  * Chain and Address Types
  */
-type ChainType = 'evm' | 'solana' | 'unknown';
 
 interface ChainInfo {
   chainId: number;

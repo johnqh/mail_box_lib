@@ -9,7 +9,7 @@ import {
   isWalletVerified as checkWalletVerified,
   WalletConnectionState,
   WalletStatus,
-} from '../../../types/wallet-status';
+} from '@johnqh/types';
 import {
   connectWallet as connectWalletAction,
   disconnectWallet as disconnectWalletAction,

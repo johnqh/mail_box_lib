@@ -10,7 +10,7 @@ import {
   isBoolean,
   isObject,
   isString,
-} from '../../utils/type-validation';
+} from '@johnqh/types';
 
 /**
  * Base API response interface

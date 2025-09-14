@@ -3,7 +3,7 @@
  * Reduces boilerplate code for common async operations
  */
 
-import { logger } from './logger';
+import { logger } from '@johnqh/types';
 
 type AsyncResult<T> = {
   data?: T;

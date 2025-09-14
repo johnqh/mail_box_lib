@@ -2,7 +2,7 @@
  * Platform-agnostic navigation and UI state business logic
  */
 
-import { MediumView, MobileView } from '../enums';
+import { MediumView, MobileView } from '@johnqh/types';
 
 interface NavigationState {
   // Mobile navigation

@@ -13,6 +13,7 @@ import {
   type UnifiedTransaction,
   type UnifiedWallet,
 } from '@johnqh/mail_box_contracts';
+import { ChainType } from '@johnqh/types';
 
 interface UseMailerClientOptions {
   wallet?: UnifiedWallet;
@@ -41,7 +42,7 @@ interface UseMailerClientReturn {
   claimRevenue: () => Promise<UnifiedTransaction>;
 
   // Utility
-  getChainType: () => 'evm' | 'solana' | null;
+  getChainType: () => ChainType | null;
   getWalletAddress: () => string | null;
   clearError: () => void;
 
@@ -190,7 +191,7 @@ export const useMailerClient = (
     }
   }, [client]);
 
-  const getChainType = useCallback((): 'evm' | 'solana' | null => {
+  const getChainType = useCallback((): ChainType | null => {
     return client ? client.getChainType() : null;
   }, [client]);
 

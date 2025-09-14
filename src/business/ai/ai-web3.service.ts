@@ -4,7 +4,7 @@
  */
 
 import { TransactionAnalysis } from './ai-types';
-import { ChainType } from '../../utils/blockchain';
+import { ChainType } from '@johnqh/types';
 
 interface AIWeb3Service {
   analyzeTransaction(
@@ -394,7 +394,7 @@ class AIWeb3ServiceImpl implements AIWeb3Service {
         from: `0x${'a'.repeat(40)}`,
         to: `0x${'b'.repeat(40)}`,
         amount: (Math.random() * 10).toFixed(4),
-        token: chainType === 'evm' ? 'ETH' : 'SOL',
+        token: chainType === ChainType.EVM ? 'ETH' : 'SOL',
         gasUsed: Math.floor(Math.random() * 100000).toString(),
         status: 'success',
       },

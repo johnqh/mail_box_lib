@@ -30,10 +30,7 @@ export * from './indexer';
 export * from './url-params';
 export * from './document-helpers';
 export * from './errorHandling';
-export * from './constants';
 export * from './formatters';
 export * from './async-helpers';
-export * from './logger';
 
-// Type validation utilities
-export * from './type-validation';
+// Type validation utilities now in @johnqh/types

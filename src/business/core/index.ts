@@ -6,8 +6,7 @@
  * dependencies and focus purely on business rules and data transformations.
  */
 
-// Core enums and types
-export * from './enums';
+// Note: Core enums now exported from @johnqh/types
 
 // Analytics operations
 export * from './analytics';

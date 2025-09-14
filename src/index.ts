@@ -49,6 +49,45 @@ export type {
 // Re-export enums from local di module
 export { AnalyticsEvent, WalletType, StorageType, NetworkError } from './di';
 
+// Re-export common enums and types from @johnqh/types
+export {
+  // Business enums
+  AuthStatus,
+  ChainType,
+  Theme,
+  FontSize,
+  StandardEmailFolder,
+  EmailFolder,
+  EmailComposeType,
+  MobileView,
+  RequestStatus,
+  NotificationType,
+  EmailFolderUtils,
+  AppAnalyticsEvent,
+  EmailAction,
+  SubscriptionAction,
+  EmailAddressType,
+  SortOrder,
+  EmailSortCriteria,
+  MailboxType,
+  PlatformType,
+  ConnectionType,
+  ConnectionState,
+  NetworkStatus,
+  EmailValidationState,
+  FeatureFlag,
+  ErrorType,
+  Currency,
+
+  // Business interfaces
+  Email,
+  User,
+  EmailAddress,
+  Folder,
+  MailBox,
+  WalletUserData,
+} from '@johnqh/types';
+
 // Infrastructure - Network clients only
 export * from './network';
 
@@ -68,13 +107,9 @@ export {
   ChainInfo,
   // UI types
   DocSection,
-  Email,
-  EmailAddress,
   EmailListOptions,
   // Service interface types (email and persistence only)
   EmailService,
-  Folder,
-  FontSize,
   GraphQLPaginationInput,
   GraphQLResponse,
   GraphQLWhereInput,
@@ -120,13 +155,10 @@ export {
   PersistenceResult,
   PersistenceService,
   StorageInfo,
-  Theme,
-  User,
   validateEmailAddress,
   validateObjectId,
   validateWalletAddress,
   ValidationError,
-  WalletUserData,
   WildDuckAddress,
   WildDuckAddressResponse,
   // API types

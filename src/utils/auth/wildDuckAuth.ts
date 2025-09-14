@@ -4,8 +4,8 @@
  */
 
 import { formatSignatureForWildDuck } from './blockchainAuth';
-import { ChainType } from '../../business/core/enums';
-import { authLogger } from '../logger';
+import { ChainType } from '@johnqh/types';
+import { authLogger } from '@johnqh/types';
 
 // Platform-specific globals
 declare const _fetch: typeof globalThis.fetch;
