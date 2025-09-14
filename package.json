@@ -59,7 +59,17 @@
     "docs:site": "node scripts/docs/generate-docs-site.js",
     "optimize": "node scripts/optimization/intelligent-optimizer.js",
     "optimize:watch": "node scripts/optimization/intelligent-optimizer.js --watch",
-    "ai:help": "echo 'AI Development Help:' && echo '- npm run quick-check: Fast validation' && echo '- npm run create:type: Generate interface' && echo '- npm run create:hook: Generate new hook' && echo '- npm run create:test: Generate test file' && echo '- npm run test:coverage: Run tests with coverage' && echo '- npm run types:check: Validate types' && echo '- npm run analyze:code: Project analysis' && echo '- npm run health:monitor: Health monitoring' && echo '- npm run analyze:deps: Check dependencies' && echo '- npm run ecosystem:sync: Cross-project sync' && echo '- npm run production:monitor: Production monitoring' && echo '- npm run docs:site: Generate documentation' && echo '- npm run optimize: Intelligent optimization' && echo 'See CLAUDE.md for full guide'"
+    "intelligence:self-healing": "node scripts/intelligence/self-healing-monitor.js",
+    "intelligence:ai-assistant": "node scripts/intelligence/ai-code-assistant.js",
+    "intelligence:ai-generate": "node scripts/intelligence/ai-code-assistant.js generate",
+    "intelligence:ai-refactor": "node scripts/intelligence/ai-code-assistant.js refactor",
+    "learning:pattern-recognition": "node scripts/learning/pattern-recognition-engine.js",
+    "learning:predict": "node scripts/learning/pattern-recognition-engine.js predict",
+    "automation:orchestrator": "node scripts/automation/dynamic-orchestrator.js",
+    "automation:predictive": "node scripts/automation/predictive-optimizer.js",
+    "automation:cross-platform": "node scripts/automation/cross-platform-orchestrator.js",
+    "phase5:all": "concurrently \"npm run intelligence:self-healing\" \"npm run learning:pattern-recognition\" \"npm run automation:orchestrator\"",
+    "ai:help": "echo 'AI Development Help - Phase 5 Intelligent Automation:' && echo '- npm run quick-check: Fast validation' && echo '- npm run create:type: Generate interface' && echo '- npm run create:hook: Generate new hook' && echo '- npm run create:test: Generate test file' && echo '- npm run test:coverage: Run tests with coverage' && echo '- npm run types:check: Validate types' && echo '- npm run analyze:code: Project analysis' && echo '- npm run health:monitor: Health monitoring' && echo '- npm run analyze:deps: Check dependencies' && echo '- npm run ecosystem:sync: Cross-project sync' && echo '- npm run production:monitor: Production monitoring' && echo '- npm run docs:site: Generate documentation' && echo '- npm run optimize: Intelligent optimization' && echo '- npm run intelligence:self-healing: Self-healing infrastructure' && echo '- npm run intelligence:ai-assistant: AI code assistance' && echo '- npm run learning:pattern-recognition: Machine learning models' && echo '- npm run automation:predictive: Predictive maintenance' && echo '- npm run automation:cross-platform: Multi-platform orchestration' && echo '- npm run phase5:all: Start all Phase 5 systems' && echo 'See CLAUDE.md for full guide'"
   },
   "keywords": [
     "web3",
