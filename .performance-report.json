@@ -1,0 +1,30 @@
+{
+  "timestamp": "2025-09-14T15:05:10.346Z",
+  "version": "3.1.4",
+  "build": {
+    "buildTime": 3.9,
+    "bundleSize": "2.5M",
+    "timestamp": "2025-09-14T15:05:10.345Z"
+  },
+  "tests": {
+    "testTime": 2.4,
+    "testFiles": 12,
+    "totalTests": 0,
+    "passedTests": 0,
+    "passRate": 0
+  },
+  "complexity": {
+    "totalFiles": 135,
+    "totalLines": 21649,
+    "totalFunctions": 265,
+    "totalClasses": 50,
+    "totalInterfaces": 325,
+    "avgLinesPerFile": 160,
+    "avgFunctionsPerFile": 2
+  },
+  "score": 80,
+  "recommendations": [
+    "Fix failing tests to improve reliability",
+    "Optimize bundle size: tree-shaking, code splitting, dependency analysis"
+  ]
+}

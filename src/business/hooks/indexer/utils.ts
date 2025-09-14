@@ -10,9 +10,9 @@ import type { ServiceContainerConfig } from '../../core/container/dependency-con
  */
 function convertToAppConfig(config: ServiceContainerConfig): AppConfig {
   return {
-    wildDuckApiToken: '',
-    wildDuckBackendUrl: 'https://0xmail.box',
-    indexerBackendUrl: config.apiBaseUrl || 'https://api.0xmail.box',
+    wildDuckApiToken: config.wildduckApiToken || '',
+    wildDuckBackendUrl: config.wildduckBaseUrl || 'https://0xmail.box',
+    indexerBackendUrl: config.indexerBackendUrl || 'https://api.0xmail.box',
     revenueCatApiKey: config.revenueCatApiKey || '',
     walletConnectProjectId: '',
     privyAppId: '',
