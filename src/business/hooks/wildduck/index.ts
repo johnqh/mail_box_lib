@@ -29,17 +29,21 @@ export {
   useWildduckSearchMessages as useWildduckSearchMessagesQuery
 } from './useWildduckQueries';
 
-// Export types from TanStack Query hooks
+// Export types from TanStack Query hooks  
 export type {
   WildduckHealthResponse,
-  WildduckUser,
-  WildduckUsersListResponse,
-  WildduckAddress,
-  WildduckMessage,
-  WildduckMessagesResponse,
   WildduckUserSettings,
   WildduckFilter,
-  WildduckMailbox,
-  WildduckMailboxesResponse,
   WildduckAuthStatusResponse
 } from './useWildduckQueries';
+
+// Export WildDuck API response types
+export type {
+  WildDuckUserData as WildduckUser,
+  GetUsersResponse as WildduckUsersListResponse,
+  AddressData as WildduckAddress,
+  MessageData as WildduckMessage,
+  GetMessagesResponse as WildduckMessagesResponse,
+  MailboxData as WildduckMailbox,
+  GetMailboxesResponse as WildduckMailboxesResponse
+} from '../../../types/api/wildduck-responses';

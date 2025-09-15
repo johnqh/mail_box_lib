@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
 import axios from 'axios';
-import {
-  WildDuckConfig,
-  WildDuckMailbox,
-  WildDuckMailboxResponse,
-} from '../../../network/clients/wildduck';
+import { WildDuckConfig } from '../../../network/clients/wildduck';
+import type {
+  GetMailboxesResponse,
+  MailboxData,
+} from '../../../types/api/wildduck-responses';
 
 interface CreateMailboxParams {
   path: string;
@@ -22,7 +22,7 @@ interface UpdateMailboxParams {
 interface UseWildduckMailboxesReturn {
   isLoading: boolean;
   error: string | null;
-  mailboxes: WildDuckMailbox[];
+  mailboxes: MailboxData[];
   getMailboxes: (
     userId: string,
     options?: {
@@ -31,7 +31,7 @@ interface UseWildduckMailboxesReturn {
       counters?: boolean;
       sizes?: boolean;
     }
-  ) => Promise<WildDuckMailbox[]>;
+  ) => Promise<MailboxData[]>;
   createMailbox: (
     userId: string,
     params: CreateMailboxParams
@@ -55,7 +55,7 @@ interface UseWildduckMailboxesReturn {
 const useWildduckMailboxes = (config: WildDuckConfig): UseWildduckMailboxesReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mailboxes, setMailboxes] = useState<WildDuckMailbox[]>([]);
+  const [mailboxes, setMailboxes] = useState<MailboxData[]>([]);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -67,7 +67,7 @@ const useWildduckMailboxes = (config: WildDuckConfig): UseWildduckMailboxesRetur
       showHidden?: boolean;
       counters?: boolean;
       sizes?: boolean;
-    } = {}): Promise<WildDuckMailbox[]> => {
+    } = {}): Promise<MailboxData[]> => {
       setIsLoading(true);
       setError(null);
 
@@ -96,7 +96,7 @@ const useWildduckMailboxes = (config: WildDuckConfig): UseWildduckMailboxesRetur
         const endpoint = `/users/${userId}/mailboxes${query ? `?${query}` : ''}`;
 
         const response = await axios.get(`${apiUrl}${endpoint}`, { headers });
-        const mailboxData = response.data as WildDuckMailboxResponse;
+        const mailboxData = response.data as GetMailboxesResponse;
         const mailboxList = mailboxData.results || [];
         setMailboxes(mailboxList);
         return mailboxList;

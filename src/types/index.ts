@@ -117,3 +117,6 @@ export * from './common';
 
 // IndexerClient API response types
 export * from './api/indexer-responses';
+
+// WildDuckAPI response types
+export * from './api/wildduck-responses';

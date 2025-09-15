@@ -1,6 +1,16 @@
 import { NetworkClient } from '../../di';
 import { getWildDuckStorageKeys } from '../../utils/auth/wildDuckAuth';
 import { createURLSearchParams } from '../../utils/url-params';
+import type {
+  AuthenticationResponse,
+  CreateMailboxResponse,
+  GetAddressesResponse,
+  GetMailboxesResponse,
+  GetMessageResponse,
+  GetMessagesResponse,
+  GetUserResponse,
+  PreAuthResponse,
+} from '../../types/api/wildduck-responses';
 
 // Platform-specific globals
 declare const sessionStorage: Storage;
@@ -147,23 +157,8 @@ class WildDuckAPI {
   }
 
   // Pre-authenticate user to check if username exists
-  async preAuth(
-    username: string,
-    scope?: string
-  ): Promise<{
-    success: boolean;
-    id?: string;
-    username?: string;
-    address?: string;
-    scope?: string;
-  }> {
-    const response = await this.request<{
-      success: boolean;
-      id?: string;
-      username?: string;
-      address?: string;
-      scope?: string;
-    }>('/preauth', {
+  async preAuth(username: string, scope?: string): Promise<PreAuthResponse> {
+    const response = await this.request<PreAuthResponse>('/preauth', {
       method: 'POST',
       body: {
         username,
@@ -182,35 +177,24 @@ class WildDuckAPI {
     signature: string,
     nonce: string,
     scope?: string
-  ): Promise<{
-    success: boolean;
-    token?: string;
-    id?: string;
-    username?: string;
-    address?: string;
-    scope?: string;
-  }> {
-    const response = await this.request<{
-      success: boolean;
-      token?: string;
-      id?: string;
-      username?: string;
-      address?: string;
-      scope?: string;
-    }>('/authenticate', {
-      method: 'POST',
-      body: {
-        username,
-        signature, // Signature that was created by signing the nonce
-        nonce, // The nonce that was signed
-        // WildDuck handles ENS/SNS resolution internally
-        scope: scope || 'master', // master scope for full access
-        token: true, // Request a token to get access token in response
-        protocol: 'API', // Application identifier for security logs
-        sess: 'api-session', // Session identifier
-        ip: '127.0.0.1', // IP address for logging
-      },
-    });
+  ): Promise<AuthenticationResponse> {
+    const response = await this.request<AuthenticationResponse>(
+      '/authenticate',
+      {
+        method: 'POST',
+        body: {
+          username,
+          signature, // Signature that was created by signing the nonce
+          nonce, // The nonce that was signed
+          // WildDuck handles ENS/SNS resolution internally
+          scope: scope || 'master', // master scope for full access
+          token: true, // Request a token to get access token in response
+          protocol: 'API', // Application identifier for security logs
+          sess: 'api-session', // Session identifier
+          ip: '127.0.0.1', // IP address for logging
+        },
+      }
+    );
 
     // Store the user ID in session storage if authentication is successful
     if (response.success && response.id) {
@@ -241,33 +225,22 @@ class WildDuckAPI {
     username: string,
     password: string,
     scope?: string
-  ): Promise<{
-    success: boolean;
-    token?: string;
-    id?: string;
-    username?: string;
-    address?: string;
-    scope?: string;
-  }> {
-    const response = await this.request<{
-      success: boolean;
-      token?: string;
-      id?: string;
-      username?: string;
-      address?: string;
-      scope?: string;
-    }>('/authenticate', {
-      method: 'POST',
-      body: {
-        username,
-        password, // This might not work with current WildDuck - blockchain auth is preferred
-        scope: scope || 'master', // master scope for full access
-        token: true, // Request a token
-        protocol: 'API',
-        sess: 'api-session',
-        ip: '127.0.0.1',
-      },
-    });
+  ): Promise<AuthenticationResponse> {
+    const response = await this.request<AuthenticationResponse>(
+      '/authenticate',
+      {
+        method: 'POST',
+        body: {
+          username,
+          password, // This might not work with current WildDuck - blockchain auth is preferred
+          scope: scope || 'master', // master scope for full access
+          token: true, // Request a token
+          protocol: 'API',
+          sess: 'api-session',
+          ip: '127.0.0.1',
+        },
+      }
+    );
 
     // Store the user ID in session storage if authentication is successful
     if (response.success && response.id) {
@@ -283,21 +256,11 @@ class WildDuckAPI {
   }
 
   // Get user info
-  async getUser(userId: string): Promise<{
-    success: boolean;
-    id: string;
-    username: string;
-    address?: string;
-  }> {
+  async getUser(userId: string): Promise<GetUserResponse> {
     // Validate user ID format
     const validatedUserId = validateUserId(userId);
 
-    return this.request<{
-      success: boolean;
-      id: string;
-      username: string;
-      address?: string;
-    }>(`/users/${validatedUserId}`);
+    return this.request<GetUserResponse>(`/users/${validatedUserId}`);
   }
 
   // Get mailboxes for a user
@@ -309,7 +272,7 @@ class WildDuckAPI {
       counters?: boolean;
       sizes?: boolean;
     } = {}
-  ): Promise<WildDuckMailboxResponse> {
+  ): Promise<GetMailboxesResponse> {
     // Validate user ID format
     const validatedUserId = validateUserId(userId);
 
@@ -323,7 +286,7 @@ class WildDuckAPI {
     const query = queryParams.toString();
     const endpoint = `/users/${validatedUserId}/mailboxes${query ? `?${query}` : ''}`;
 
-    return this.request<WildDuckMailboxResponse>(endpoint);
+    return this.request<GetMailboxesResponse>(endpoint);
   }
 
   // Get messages from a mailbox
@@ -335,7 +298,7 @@ class WildDuckAPI {
       page?: number;
       order?: 'asc' | 'desc';
     } = {}
-  ): Promise<WildDuckMessagesResponse> {
+  ): Promise<GetMessagesResponse> {
     // Validate user ID format
     const validatedUserId = validateUserId(userId);
 
@@ -355,14 +318,14 @@ class WildDuckAPI {
     const query = queryParams.toString();
     const endpoint = `/users/${validatedUserId}/mailboxes/${mailboxId}/messages${query ? `?${query}` : ''}`;
 
-    return this.request<WildDuckMessagesResponse>(endpoint);
+    return this.request<GetMessagesResponse>(endpoint);
   }
 
   // Get a specific message by ID
   async getMessage(
     userId: string,
     messageId: string
-  ): Promise<WildDuckMessageResponse> {
+  ): Promise<GetMessageResponse> {
     // Validate user ID format
     const validatedUserId = validateUserId(userId);
 
@@ -375,23 +338,17 @@ class WildDuckAPI {
 
     const endpoint = `/users/${validatedUserId}/messages/${messageId}`;
 
-    return this.request<WildDuckMessageResponse>(endpoint);
+    return this.request<GetMessageResponse>(endpoint);
   }
 
   // Get user addresses (email addresses)
-  async getAddresses(userId: string): Promise<{
-    success: boolean;
-    results: Array<{ id: string; address: string; main: boolean }>;
-  }> {
+  async getAddresses(userId: string): Promise<GetAddressesResponse> {
     // Validate user ID format
     const validatedUserId = validateUserId(userId);
 
     const endpoint = `/users/${validatedUserId}/addresses`;
 
-    return this.request<{
-      success: boolean;
-      results: Array<{ id: string; address: string; main: boolean }>;
-    }>(endpoint);
+    return this.request<GetAddressesResponse>(endpoint);
   }
 
   // Create a new mailbox
@@ -402,94 +359,12 @@ class WildDuckAPI {
       hidden?: boolean;
       retention?: number;
     }
-  ): Promise<{ success: boolean; id: string }> {
-    return this.request<{ success: boolean; id: string }>(
-      `/users/${userId}/mailboxes`,
-      {
-        method: 'POST',
-        body: { path, ...options },
-      }
-    );
+  ): Promise<CreateMailboxResponse> {
+    return this.request<CreateMailboxResponse>(`/users/${userId}/mailboxes`, {
+      method: 'POST',
+      body: { path, ...options },
+    });
   }
-}
-
-// WildDuck API response types based on the source code analysis
-interface WildDuckMailbox {
-  id: string;
-  name: string;
-  path: string;
-  specialUse?: string;
-  modifyIndex: number;
-  subscribed: boolean;
-  hidden: boolean;
-  total?: number;
-  unseen?: number;
-  size?: number;
-}
-
-interface WildDuckMailboxResponse {
-  success: boolean;
-  results: WildDuckMailbox[];
-}
-
-interface WildDuckMessage {
-  id: string;
-  mailbox: string;
-  thread: string;
-  from?: {
-    name?: string;
-    address: string;
-  };
-  to: Array<{
-    name?: string;
-    address: string;
-  }>;
-  subject: string;
-  date: string;
-  intro: string;
-  attachments: boolean;
-  seen: boolean;
-  deleted: boolean;
-  flagged: boolean;
-  size: number;
-  ha: boolean; // has attachments
-}
-
-interface WildDuckMessagesResponse {
-  success: boolean;
-  total: number;
-  page: number;
-  previousCursor?: string;
-  nextCursor?: string;
-  results: WildDuckMessage[];
-}
-
-interface WildDuckMessageResponse {
-  success: boolean;
-  id: string;
-  mailbox: string;
-  user: string;
-  from?: {
-    name?: string;
-    address: string;
-  };
-  to: Array<{
-    name?: string;
-    address: string;
-  }>;
-  subject: string;
-  date: string;
-  html?: string;
-  text?: string;
-  attachments: Array<{
-    id: string;
-    filename: string;
-    contentType: string;
-    size: number;
-  }>;
-  seen: boolean;
-  deleted: boolean;
-  flagged: boolean;
 }
 
 // Factory function to create WildDuck API client with dependencies
@@ -589,14 +464,4 @@ const validateUserId = (userId: string): string => {
   return userId;
 };
 
-export {
-  type WildDuckMailbox,
-  type WildDuckMailboxResponse,
-  type WildDuckMessage,
-  type WildDuckMessageResponse,
-  type WildDuckMessagesResponse,
-  createWildDuckAPI,
-  emailToUserId,
-  validateUserId,
-  isValidObjectId,
-};
+export { createWildDuckAPI, emailToUserId, validateUserId, isValidObjectId };

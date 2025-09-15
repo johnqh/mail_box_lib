@@ -1,11 +1,11 @@
 import { useCallback, useState } from 'react';
 import axios from 'axios';
-import {
-  WildDuckConfig,
-  WildDuckMessage,
-  WildDuckMessageResponse,
-  WildDuckMessagesResponse,
-} from '../../../network/clients/wildduck';
+import { WildDuckConfig } from '../../../network/clients/wildduck';
+import type {
+  GetMessageResponse,
+  GetMessagesResponse,
+  MessageData,
+} from '../../../types/api/wildduck-responses';
 
 interface GetMessagesOptions {
   limit?: number;
@@ -42,18 +42,18 @@ interface UpdateMessageParams {
 interface UseWildduckMessagesReturn {
   isLoading: boolean;
   error: string | null;
-  messages: WildDuckMessage[];
+  messages: MessageData[];
   totalMessages: number;
   currentPage: number;
   getMessages: (
     userId: string,
     mailboxId: string,
     options?: GetMessagesOptions
-  ) => Promise<WildDuckMessage[]>;
+  ) => Promise<MessageData[]>;
   getMessage: (
     userId: string,
     messageId: string
-  ) => Promise<WildDuckMessageResponse>;
+  ) => Promise<GetMessageResponse>;
   sendMessage: (
     userId: string,
     params: SendMessageParams
@@ -76,7 +76,7 @@ interface UseWildduckMessagesReturn {
     userId: string,
     query: string,
     options?: GetMessagesOptions
-  ) => Promise<WildDuckMessage[]>;
+  ) => Promise<MessageData[]>;
   clearError: () => void;
   refresh: () => Promise<void>;
 }
@@ -87,7 +87,7 @@ interface UseWildduckMessagesReturn {
 const useWildduckMessages = (config: WildDuckConfig): UseWildduckMessagesReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [messages, setMessages] = useState<WildDuckMessage[]>([]);
+  const [messages, setMessages] = useState<MessageData[]>([]);
   const [totalMessages, setTotalMessages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [lastFetchParams, setLastFetchParams] = useState<{
@@ -105,7 +105,7 @@ const useWildduckMessages = (config: WildDuckConfig): UseWildduckMessagesReturn 
       userId: string,
       mailboxId: string,
       options: GetMessagesOptions = {}
-    ): Promise<WildDuckMessage[]> => {
+    ): Promise<MessageData[]> => {
       setIsLoading(true);
       setError(null);
       setLastFetchParams({ userId, mailboxId, options });
@@ -134,7 +134,7 @@ const useWildduckMessages = (config: WildDuckConfig): UseWildduckMessagesReturn 
         const endpoint = `/users/${userId}/mailboxes/${mailboxId}/messages${query ? `?${query}` : ''}`;
 
         const response = await axios.get(`${apiUrl}${endpoint}`, { headers });
-        const messageData = response.data as WildDuckMessagesResponse;
+        const messageData = response.data as GetMessagesResponse;
         const messageList = messageData.results || [];
         setMessages(messageList);
         setTotalMessages(messageData.total || 0);
@@ -158,7 +158,7 @@ const useWildduckMessages = (config: WildDuckConfig): UseWildduckMessagesReturn 
     async (
       userId: string,
       messageId: string
-    ): Promise<WildDuckMessageResponse> => {
+    ): Promise<GetMessageResponse> => {
       setIsLoading(true);
       setError(null);
 
@@ -182,7 +182,7 @@ const useWildduckMessages = (config: WildDuckConfig): UseWildduckMessagesReturn 
           { headers }
         );
 
-        return response.data as WildDuckMessageResponse;
+        return response.data as GetMessageResponse;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to get message';
@@ -369,7 +369,7 @@ const useWildduckMessages = (config: WildDuckConfig): UseWildduckMessagesReturn 
       userId: string,
       query: string,
       options: GetMessagesOptions = {}
-    ): Promise<WildDuckMessage[]> => {
+    ): Promise<MessageData[]> => {
       setIsLoading(true);
       setError(null);
 
@@ -393,7 +393,7 @@ const useWildduckMessages = (config: WildDuckConfig): UseWildduckMessagesReturn 
           { headers }
         );
 
-        const searchResponse = response.data as { results?: WildDuckMessage[], total?: number, page?: number };
+        const searchResponse = response.data as { results?: MessageData[], total?: number, page?: number };
         const messageList = searchResponse.results || [];
         setMessages(messageList);
         setTotalMessages(searchResponse.total || 0);

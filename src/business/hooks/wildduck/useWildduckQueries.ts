@@ -7,6 +7,14 @@
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { queryKeys, STALE_TIMES } from '../../core/query';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
+import type {
+  AddressData,
+  GetMailboxesResponse,
+  GetMessagesResponse,
+  GetUsersResponse,
+  MessageData,
+  WildDuckUserData,
+} from '../../../types/api/wildduck-responses';
 import axios from 'axios';
 
 // Define response types based on WildDuck API
@@ -17,68 +25,13 @@ interface WildduckHealthResponse {
   // Add other health response fields as needed
 }
 
-interface WildduckUser {
-  id: string;
-  username: string;
-  name: string;
-  address: string;
-  quota: {
-    allowed: number;
-    used: number;
-  };
-  storageUsed: number;
-  enabled: boolean;
-  suspended: boolean;
-  created: string;
-  updated: string;
-  // Add other user fields as needed
-}
+// Using WildDuckUserData from wildduck-responses.ts
 
-interface WildduckUsersListResponse {
-  success: boolean;
-  results: WildduckUser[];
-  query: string;
-  total: number;
-  page: number;
-  pages: number;
-}
+// Using GetUsersResponse from wildduck-responses.ts
 
-interface WildduckAddress {
-  id: string;
-  address: string;
-  name: string;
-  user: string;
-  created: string;
-  main: boolean;
-  // Add other address fields
-}
-
-interface WildduckMessage {
-  id: string;
-  mailbox: string;
-  thread: string;
-  from: {
-    name: string;
-    address: string;
-  };
-  to: Array<{
-    name: string;
-    address: string;
-  }>;
-  subject: string;
-  date: string;
-  size: number;
-  flags: string[];
-  // Add other message fields
-}
-
-interface WildduckMessagesResponse {
-  success: boolean;
-  results: WildduckMessage[];
-  total: number;
-  page: number;
-  pages: number;
-}
+// Using AddressData from wildduck-responses.ts
+// Using MessageData from wildduck-responses.ts  
+// Using GetMessagesResponse from wildduck-responses.ts
 
 interface WildduckUserSettings {
   // Define based on actual API response
@@ -95,22 +48,8 @@ interface WildduckFilter {
   // Add other filter fields
 }
 
-interface WildduckMailbox {
-  id: string;
-  name: string;
-  path: string;
-  specialUse: boolean;
-  modifyIndex: number;
-  subscribed: boolean;
-  hidden: boolean;
-  total: number;
-  unseen: number;
-}
-
-interface WildduckMailboxesResponse {
-  success: boolean;
-  results: WildduckMailbox[];
-}
+// Using MailboxData from wildduck-responses.ts
+// Using GetMailboxesResponse from wildduck-responses.ts
 
 interface WildduckAuthStatusResponse {
   success: boolean;
@@ -160,12 +99,12 @@ const useWildduckHealth = (
 const useWildduckUsersList = (
   config: WildDuckConfig,
   filters?: Record<string, unknown>,
-  options?: UseQueryOptions<WildduckUsersListResponse>
-): UseQueryResult<WildduckUsersListResponse> => {
+  options?: UseQueryOptions<GetUsersResponse>
+): UseQueryResult<GetUsersResponse> => {
   
   return useQuery({
     queryKey: queryKeys.wildduck.usersList(filters),
-    queryFn: async (): Promise<WildduckUsersListResponse> => {
+    queryFn: async (): Promise<GetUsersResponse> => {
       const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -191,7 +130,7 @@ const useWildduckUsersList = (
         `${apiUrl}/users?${params}`,
         { headers }
       );
-      return response.data as WildduckUsersListResponse;
+      return response.data as GetUsersResponse;
     },
     staleTime: STALE_TIMES.USER_PROFILE,
     ...options,
@@ -204,12 +143,12 @@ const useWildduckUsersList = (
 const useWildduckUser = (
   config: WildDuckConfig,
   userId: string,
-  options?: UseQueryOptions<WildduckUser>
-): UseQueryResult<WildduckUser> => {
+  options?: UseQueryOptions<WildDuckUserData>
+): UseQueryResult<WildDuckUserData> => {
   
   return useQuery({
     queryKey: queryKeys.wildduck.user(userId),
-    queryFn: async (): Promise<WildduckUser> => {
+    queryFn: async (): Promise<WildDuckUserData> => {
       const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -229,16 +168,21 @@ const useWildduckUser = (
         id: userData.id,
         username: userData.username,
         name: userData.address || userData.username,
-        address: userData.address || '',
+        tags: [],
+        targets: [],
+        autoreply: false,
+        encryptMessages: false,
+        encryptForwarded: false,
         quota: {
           allowed: 0,
           used: 0,
         },
-        storageUsed: 0,
-        enabled: userData.success || false,
+        metaData: {},
+        internalData: {},
+        hasBlockchainAuth: true,
+        activated: userData.success || false,
+        disabled: false,
         suspended: false,
-        created: new Date().toISOString(),
-        updated: new Date().toISOString(),
       };
     },
     staleTime: STALE_TIMES.USER_PROFILE,
@@ -253,12 +197,12 @@ const useWildduckUser = (
 const useWildduckUserAddresses = (
   config: WildDuckConfig,
   userId: string,
-  options?: UseQueryOptions<WildduckAddress[]>
-): UseQueryResult<WildduckAddress[]> => {
+  options?: UseQueryOptions<AddressData[]>
+): UseQueryResult<AddressData[]> => {
   
   return useQuery({
     queryKey: queryKeys.wildduck.userAddresses(userId),
-    queryFn: async (): Promise<WildduckAddress[]> => {
+    queryFn: async (): Promise<AddressData[]> => {
       const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -297,12 +241,12 @@ const useWildduckUserMessages = (
   userId: string,
   mailboxId: string,
   filters?: Record<string, unknown>,
-  options?: UseQueryOptions<WildduckMessagesResponse>
-): UseQueryResult<WildduckMessagesResponse> => {
+  options?: UseQueryOptions<GetMessagesResponse>
+): UseQueryResult<GetMessagesResponse> => {
   
   return useQuery({
     queryKey: queryKeys.wildduck.userMessages(userId, mailboxId, filters),
-    queryFn: async (): Promise<WildduckMessagesResponse> => {
+    queryFn: async (): Promise<GetMessagesResponse> => {
       const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -319,27 +263,35 @@ const useWildduckUserMessages = (
       const response = await axios.get(`${apiUrl}/users/${userId}/mailboxes/${mailboxId}/messages`, { headers });
       const messagesData = response.data as { success: boolean; results: any[]; total: number; page: number };
       return {
-        success: messagesData.success,
+        success: messagesData.success as true,
+        total: messagesData.total,
+        page: messagesData.page,
+        previousCursor: false,
+        nextCursor: false,
         results: messagesData.results.map(msg => ({
           id: msg.id,
           mailbox: msg.mailbox,
           thread: msg.thread || '',
-          from: {
-            name: msg.from?.name || '',
-            address: msg.from?.address || ''
+          envelope: {
+            date: msg.date || '',
+            subject: msg.subject || '',
+            from: msg.from ? [{ name: msg.from.name || '', address: msg.from.address || '' }] : [],
+            to: msg.to?.map((addr: any) => ({ name: addr.name || '', address: addr.address || '' })) || [],
+            messageId: msg.id || '',
           },
-          to: msg.to?.map((addr: any) => ({
-            name: addr.name || '',
-            address: addr.address || ''
-          })) || [],
-          subject: msg.subject,
-          date: msg.date,
-          size: msg.size,
-          flags: [],
-        })),
-        total: messagesData.total,
-        page: messagesData.page,
-        pages: Math.ceil(messagesData.total / (messagesData.results?.length || 1)),
+          date: msg.date || '',
+          idate: msg.date || '',
+          size: msg.size || 0,
+          intro: msg.intro || '',
+          attachments: msg.attachments || false,
+          seen: msg.seen || false,
+          deleted: msg.deleted || false,
+          flagged: msg.flagged || false,
+          draft: msg.draft || false,
+          answered: msg.answered || false,
+          forwarded: msg.forwarded || false,
+          references: msg.references || [],
+        })) as MessageData[],
       };
     },
     staleTime: STALE_TIMES.MESSAGES,
@@ -355,12 +307,12 @@ const useWildduckMessage = (
   config: WildDuckConfig,
   userId: string,
   messageId: string,
-  options?: UseQueryOptions<WildduckMessage>
-): UseQueryResult<WildduckMessage> => {
+  options?: UseQueryOptions<MessageData>
+): UseQueryResult<MessageData> => {
   
   return useQuery({
     queryKey: queryKeys.wildduck.message(userId, messageId),
-    queryFn: async (): Promise<WildduckMessage> => {
+    queryFn: async (): Promise<MessageData> => {
       const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -379,19 +331,26 @@ const useWildduckMessage = (
       return {
         id: messageData.id,
         mailbox: messageData.mailbox,
-        thread: '',
-        from: {
-          name: messageData.from?.name || '',
-          address: messageData.from?.address || ''
+        thread: messageData.thread || '',
+        envelope: {
+          date: messageData.date || '',
+          subject: messageData.subject || '',
+          from: messageData.from ? [{ name: messageData.from.name || '', address: messageData.from.address || '' }] : [],
+          to: messageData.to?.map((addr: any) => ({ name: addr.name || '', address: addr.address || '' })) || [],
+          messageId: messageData.id || '',
         },
-        to: messageData.to?.map((addr: any) => ({
-          name: addr.name || '',
-          address: addr.address || ''
-        })) || [],
-        subject: messageData.subject,
-        date: messageData.date,
-        size: 0,
-        flags: [],
+        date: messageData.date || '',
+        idate: messageData.date || '',
+        size: messageData.size || 0,
+        intro: messageData.intro || '',
+        attachments: messageData.attachments || false,
+        seen: messageData.seen || false,
+        deleted: messageData.deleted || false,
+        flagged: messageData.flagged || false,
+        draft: messageData.draft || false,
+        answered: messageData.answered || false,
+        forwarded: messageData.forwarded || false,
+        references: messageData.references || [],
       };
     },
     staleTime: STALE_TIMES.MESSAGE_CONTENT,
@@ -489,12 +448,12 @@ const useWildduckUserMailboxes = (
     counters?: boolean;
     sizes?: boolean;
   },
-  queryOptions?: UseQueryOptions<WildduckMailboxesResponse>
-): UseQueryResult<WildduckMailboxesResponse> => {
+  queryOptions?: UseQueryOptions<GetMailboxesResponse>
+): UseQueryResult<GetMailboxesResponse> => {
   
   return useQuery({
     queryKey: queryKeys.wildduck.userMailboxes(userId, options),
-    queryFn: async (): Promise<WildduckMailboxesResponse> => {
+    queryFn: async (): Promise<GetMailboxesResponse> => {
       const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -518,7 +477,7 @@ const useWildduckUserMailboxes = (
       const endpoint = `${apiUrl}/users/${userId}/mailboxes${queryString ? `?${queryString}` : ''}`;
 
       const response = await axios.get(endpoint, { headers });
-      return response.data as WildduckMailboxesResponse;
+      return response.data as GetMailboxesResponse;
     },
     staleTime: STALE_TIMES.MAILBOXES,
     enabled: !!userId,
@@ -587,12 +546,12 @@ const useWildduckSearchMessages = (
   mailboxId: string,
   query: string,
   searchOptions?: Record<string, unknown>,
-  queryOptions?: UseQueryOptions<WildduckMessagesResponse>
-): UseQueryResult<WildduckMessagesResponse> => {
+  queryOptions?: UseQueryOptions<GetMessagesResponse>
+): UseQueryResult<GetMessagesResponse> => {
   
   return useQuery({
     queryKey: queryKeys.wildduck.searchMessages(userId, mailboxId, query, searchOptions),
-    queryFn: async (): Promise<WildduckMessagesResponse> => {
+    queryFn: async (): Promise<GetMessagesResponse> => {
       const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -620,7 +579,7 @@ const useWildduckSearchMessages = (
         `${apiUrl}/users/${userId}/mailboxes/${mailboxId}/messages?${params}`,
         { headers }
       );
-      return response.data as WildduckMessagesResponse;
+      return response.data as GetMessagesResponse;
     },
     staleTime: STALE_TIMES.MESSAGES,
     enabled: !!(userId && mailboxId && query),
@@ -641,14 +600,7 @@ export {
   useWildduckAuthStatus,
   useWildduckSearchMessages,
   type WildduckHealthResponse,
-  type WildduckUser,
-  type WildduckUsersListResponse,
-  type WildduckAddress,
-  type WildduckMessage,
-  type WildduckMessagesResponse,
   type WildduckUserSettings,
   type WildduckFilter,
-  type WildduckMailbox,
-  type WildduckMailboxesResponse,
   type WildduckAuthStatusResponse
 };
