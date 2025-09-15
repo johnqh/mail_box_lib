@@ -5,19 +5,11 @@ import type {
   GetMailboxesResponse,
   MailboxData,
 } from '../../../types/api/wildduck-responses';
-
-interface CreateMailboxParams {
-  path: string;
-  hidden?: boolean;
-  retention?: number;
-}
-
-interface UpdateMailboxParams {
-  path?: string;
-  retention?: number;
-  subscribed?: boolean;
-  hidden?: boolean;
-}
+import type {
+  CreateMailboxRequest,
+  GetMailboxesRequest,
+  UpdateMailboxRequest,
+} from '@johnqh/types';
 
 interface UseWildduckMailboxesReturn {
   isLoading: boolean;
@@ -25,21 +17,16 @@ interface UseWildduckMailboxesReturn {
   mailboxes: MailboxData[];
   getMailboxes: (
     userId: string,
-    options?: {
-      specialUse?: boolean;
-      showHidden?: boolean;
-      counters?: boolean;
-      sizes?: boolean;
-    }
+    options?: Omit<GetMailboxesRequest, 'sess' | 'ip'>
   ) => Promise<MailboxData[]>;
   createMailbox: (
     userId: string,
-    params: CreateMailboxParams
+    params: Omit<CreateMailboxRequest, 'sess' | 'ip'>
   ) => Promise<{ success: boolean; id: string }>;
   updateMailbox: (
     userId: string,
     mailboxId: string,
-    params: UpdateMailboxParams
+    params: Omit<UpdateMailboxRequest, 'sess' | 'ip'>
   ) => Promise<{ success: boolean }>;
   deleteMailbox: (
     userId: string,
@@ -116,7 +103,7 @@ const useWildduckMailboxes = (config: WildDuckConfig): UseWildduckMailboxesRetur
   const createMailbox = useCallback(
     async (
       userId: string,
-      params: CreateMailboxParams
+      params: Omit<CreateMailboxRequest, 'sess' | 'ip'>
     ): Promise<{ success: boolean; id: string }> => {
       setIsLoading(true);
       setError(null);
@@ -163,7 +150,7 @@ const useWildduckMailboxes = (config: WildDuckConfig): UseWildduckMailboxesRetur
     async (
       userId: string,
       mailboxId: string,
-      params: UpdateMailboxParams
+      params: Omit<UpdateMailboxRequest, 'sess' | 'ip'>
     ): Promise<{ success: boolean }> => {
       setIsLoading(true);
       setError(null);
@@ -265,7 +252,5 @@ const useWildduckMailboxes = (config: WildDuckConfig): UseWildduckMailboxesRetur
 
 export {
   useWildduckMailboxes,
-  type CreateMailboxParams,
-  type UpdateMailboxParams,
-  type UseWildduckMailboxesReturn
+  type UseWildduckMailboxesReturn,
 };

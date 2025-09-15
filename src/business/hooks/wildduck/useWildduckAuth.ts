@@ -2,52 +2,25 @@ import { useCallback, useState } from 'react';
 import axios from 'axios';
 import { useStorageService } from '../core/useServices';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
-
-interface PreAuthParams {
-  username: string;
-  scope?: string;
-}
-
-interface AuthenticateParams {
-  username: string;
-  signature: string;
-  nonce?: string;
-  message?: string;
-  scope?: string;
-  protocol?: string;
-  sess?: string;
-  ip?: string;
-}
-
-interface AuthResponse {
-  success: boolean;
-  token?: string;
-  id?: string;
-  username?: string;
-  address?: string;
-  scope?: string[];
-  require2fa?: string[];
-  requirePasswordChange?: boolean;
-}
-
-interface PreAuthResponse {
-  success: boolean;
-  id?: string;
-  username?: string;
-  address?: string;
-  scope?: string[];
-  require2fa?: string[];
-  requirePasswordChange?: boolean;
-  message?: string;
-  nonce?: string;
-}
+import type {
+  AuthenticateRequest,
+  PreAuthRequest,
+} from '@johnqh/types';
+import {
+  createAuthenticateRequest,
+  createPreAuthRequest,
+} from '@johnqh/types';
+import type {
+  AuthenticationResponse,
+  PreAuthResponse,
+} from '../../../types/api/wildduck-responses';
 
 interface UseWildduckAuthReturn {
   isLoading: boolean;
   error: string | null;
   getAuthStatus: () => Promise<{ authenticated: boolean; user?: any }>;
-  preAuth: (params: PreAuthParams) => Promise<PreAuthResponse>;
-  authenticate: (params: AuthenticateParams) => Promise<AuthResponse>;
+  preAuth: (params: Omit<PreAuthRequest, 'sess' | 'ip'>) => Promise<PreAuthResponse>;
+  authenticate: (params: Omit<AuthenticateRequest, 'sess' | 'ip'>) => Promise<AuthenticationResponse>;
   logout: (token?: string) => Promise<{ success: boolean }>;
   clearError: () => void;
 }
@@ -112,13 +85,19 @@ const useWildduckAuth = (config: WildDuckConfig): UseWildduckAuthReturn => {
     }
   }, [config, storageService]);
 
-  const preAuth = useCallback(async (params: PreAuthParams): Promise<PreAuthResponse> => {
+  const preAuth = useCallback(async (params: Omit<PreAuthRequest, 'sess' | 'ip'>): Promise<PreAuthResponse> => {
     setIsLoading(true);
     setError(null);
 
     try {
       const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-      const response = await axios.post(`${apiUrl}/preauth`, params, {
+      const requestBody = createPreAuthRequest(params.username, {
+        ...(params.scope && { scope: params.scope }),
+        sess: 'api-session',
+        ip: '127.0.0.1',
+      });
+
+      const response = await axios.post(`${apiUrl}/preauth`, requestBody, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -136,19 +115,34 @@ const useWildduckAuth = (config: WildDuckConfig): UseWildduckAuthReturn => {
     }
   }, [config]);
 
-  const authenticate = useCallback(async (params: AuthenticateParams): Promise<AuthResponse> => {
+  const authenticate = useCallback(async (params: Omit<AuthenticateRequest, 'sess' | 'ip'>): Promise<AuthenticationResponse> => {
     setIsLoading(true);
     setError(null);
 
     try {
       const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-      const response = await axios.post(`${apiUrl}/authenticate`, params, {
+      const requestBody = createAuthenticateRequest(
+        params.username,
+        params.signature,
+        params.nonce,
+        params.message,
+        {
+          ...(params.scope && { scope: params.scope }),
+          ...(params.protocol && { protocol: params.protocol }),
+          ...(params.token !== undefined && { token: params.token }),
+          ...(params.appId && { appId: params.appId }),
+          sess: 'api-session',
+          ip: '127.0.0.1',
+        }
+      );
+
+      const response = await axios.post(`${apiUrl}/authenticate`, requestBody, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
-      const result = response.data as AuthResponse;
+      const result = response.data as AuthenticationResponse;
 
       // Store token if authentication was successful
       if (result.success && result.token) {
@@ -222,9 +216,5 @@ const useWildduckAuth = (config: WildDuckConfig): UseWildduckAuthReturn => {
 
 export {
   useWildduckAuth,
-  type AuthResponse,
-  type PreAuthResponse,
-  type PreAuthParams,
-  type AuthenticateParams,
-  type UseWildduckAuthReturn
+  type UseWildduckAuthReturn,
 };

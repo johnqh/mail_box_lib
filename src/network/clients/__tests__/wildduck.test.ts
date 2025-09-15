@@ -105,7 +105,12 @@ describe('WildDuckAPI', () => {
         data: mockResponse,
       });
 
-      const result = await api.authenticate('testuser@example.com', 'signature123', 'nonce456');
+      const result = await api.authenticate({
+        username: 'testuser@example.com',
+        signature: 'signature123',
+        nonce: 'nonce456',
+        message: 'Test message'
+      });
       
       expect(result.success).toBe(true);
       expect(mockNetworkClient.request).toHaveBeenCalled();

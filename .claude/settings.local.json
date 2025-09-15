@@ -87,7 +87,8 @@
       "Read(//Users/qianghuang/wildduck/**)",
       "Bash(cp:*)",
       "Bash(ln:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Read(//Users/qianghuang/types/**)"
     ],
     "deny": [],
     "ask": []

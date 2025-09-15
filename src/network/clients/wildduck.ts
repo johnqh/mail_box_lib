@@ -11,6 +11,13 @@ import type {
   GetUserResponse,
   PreAuthResponse,
 } from '../../types/api/wildduck-responses';
+import type {
+  AuthenticateRequest,
+  CreateMailboxRequest,
+  GetMailboxesRequest,
+  GetMessagesRequest,
+  PreAuthRequest,
+} from '@johnqh/types';
 
 // Platform-specific globals
 declare const sessionStorage: Storage;
@@ -157,15 +164,17 @@ class WildDuckAPI {
   }
 
   // Pre-authenticate user to check if username exists
-  async preAuth(username: string, scope?: string): Promise<PreAuthResponse> {
+  async preAuth(request: PreAuthRequest): Promise<PreAuthResponse> {
+    const requestBody: PreAuthRequest = {
+      username: request.username,
+      scope: request.scope || 'master',
+      sess: request.sess || 'api-session',
+      ip: request.ip || '127.0.0.1',
+    };
+
     const response = await this.request<PreAuthResponse>('/preauth', {
       method: 'POST',
-      body: {
-        username,
-        scope: scope || 'master',
-        sess: 'api-session',
-        ip: '127.0.0.1',
-      },
+      body: JSON.stringify(requestBody),
     });
 
     return response;
@@ -173,33 +182,34 @@ class WildDuckAPI {
 
   // Authenticate user with WildDuck using blockchain signature
   async authenticate(
-    username: string,
-    signature: string,
-    nonce: string,
-    scope?: string
+    request: AuthenticateRequest
   ): Promise<AuthenticationResponse> {
+    const requestBody: AuthenticateRequest = {
+      username: request.username,
+      signature: request.signature, // Signature that was created by signing the nonce
+      nonce: request.nonce, // The nonce that was signed
+      message: request.message, // SIWE/SIWS message that was signed
+      // WildDuck handles ENS/SNS resolution internally
+      scope: request.scope || 'master', // master scope for full access
+      token: request.token !== undefined ? request.token : true, // Request a token to get access token in response
+      protocol: request.protocol || 'API', // Application identifier for security logs
+      sess: request.sess || 'api-session', // Session identifier
+      ip: request.ip || '127.0.0.1', // IP address for logging
+      ...(request.appId && { appId: request.appId }),
+    };
+
     const response = await this.request<AuthenticationResponse>(
       '/authenticate',
       {
         method: 'POST',
-        body: {
-          username,
-          signature, // Signature that was created by signing the nonce
-          nonce, // The nonce that was signed
-          // WildDuck handles ENS/SNS resolution internally
-          scope: scope || 'master', // master scope for full access
-          token: true, // Request a token to get access token in response
-          protocol: 'API', // Application identifier for security logs
-          sess: 'api-session', // Session identifier
-          ip: '127.0.0.1', // IP address for logging
-        },
+        body: JSON.stringify(requestBody),
       }
     );
 
     // Store the user ID in session storage if authentication is successful
     if (response.success && response.id) {
       try {
-        const keys = getWildDuckStorageKeys(username);
+        const keys = getWildDuckStorageKeys(request.username);
         sessionStorage.setItem(keys.userId, response.id);
       } catch (e) {
         console.warn('Failed to store user ID in session storage:', e);
@@ -266,22 +276,21 @@ class WildDuckAPI {
   // Get mailboxes for a user
   async getMailboxes(
     userId: string,
-    options: {
-      specialUse?: boolean;
-      showHidden?: boolean;
-      counters?: boolean;
-      sizes?: boolean;
-    } = {}
+    options?: Omit<GetMailboxesRequest, 'sess' | 'ip'>
   ): Promise<GetMailboxesResponse> {
     // Validate user ID format
     const validatedUserId = validateUserId(userId);
 
     const queryParams = createURLSearchParams();
 
-    if (options.specialUse) queryParams.append('specialUse', 'true');
-    if (options.showHidden) queryParams.append('showHidden', 'true');
-    if (options.counters) queryParams.append('counters', 'true');
-    if (options.sizes) queryParams.append('sizes', 'true');
+    if (options?.specialUse) queryParams.append('specialUse', 'true');
+    if (options?.showHidden) queryParams.append('showHidden', 'true');
+    if (options?.counters) queryParams.append('counters', 'true');
+    if (options?.sizes) queryParams.append('sizes', 'true');
+    if (options?.limit) queryParams.append('limit', options.limit.toString());
+    if (options?.page) queryParams.append('page', options.page.toString());
+    if (options?.next) queryParams.append('next', options.next);
+    if (options?.previous) queryParams.append('previous', options.previous);
 
     const query = queryParams.toString();
     const endpoint = `/users/${validatedUserId}/mailboxes${query ? `?${query}` : ''}`;
@@ -293,11 +302,7 @@ class WildDuckAPI {
   async getMessages(
     userId: string,
     mailboxId: string,
-    options: {
-      limit?: number;
-      page?: number;
-      order?: 'asc' | 'desc';
-    } = {}
+    options?: Omit<GetMessagesRequest, 'sess' | 'ip'>
   ): Promise<GetMessagesResponse> {
     // Validate user ID format
     const validatedUserId = validateUserId(userId);
@@ -311,9 +316,23 @@ class WildDuckAPI {
 
     const queryParams = createURLSearchParams();
 
-    if (options.limit) queryParams.append('limit', options.limit.toString());
-    if (options.page) queryParams.append('page', options.page.toString());
-    if (options.order) queryParams.append('order', options.order);
+    if (options?.limit) queryParams.append('limit', options.limit.toString());
+    if (options?.page) queryParams.append('page', options.page.toString());
+    if (options?.order) queryParams.append('order', options.order);
+    if (options?.next) queryParams.append('next', options.next);
+    if (options?.previous) queryParams.append('previous', options.previous);
+    if (options?.unseen !== undefined)
+      queryParams.append('unseen', String(options.unseen));
+    if (options?.flagged !== undefined)
+      queryParams.append('flagged', String(options.flagged));
+    if (options?.thread) queryParams.append('thread', options.thread);
+    if (options?.uid !== undefined)
+      queryParams.append('uid', String(options.uid));
+    if (options?.includeHeaders) {
+      options.includeHeaders.forEach((header: string) =>
+        queryParams.append('includeHeaders', header)
+      );
+    }
 
     const query = queryParams.toString();
     const endpoint = `/users/${validatedUserId}/mailboxes/${mailboxId}/messages${query ? `?${query}` : ''}`;
@@ -354,16 +373,29 @@ class WildDuckAPI {
   // Create a new mailbox
   async createMailbox(
     userId: string,
-    path: string,
-    options?: {
-      hidden?: boolean;
-      retention?: number;
-    }
+    request: CreateMailboxRequest
   ): Promise<CreateMailboxResponse> {
-    return this.request<CreateMailboxResponse>(`/users/${userId}/mailboxes`, {
-      method: 'POST',
-      body: { path, ...options },
-    });
+    const validatedUserId = validateUserId(userId);
+
+    const requestBody: Record<string, any> = {
+      path: request.path,
+    };
+
+    if (request.hidden !== undefined) requestBody.hidden = request.hidden;
+    if (request.retention !== undefined)
+      requestBody.retention = request.retention;
+    if (request.encryptMessages !== undefined)
+      requestBody.encryptMessages = request.encryptMessages;
+    if (request.sess !== undefined) requestBody.sess = request.sess;
+    if (request.ip !== undefined) requestBody.ip = request.ip;
+
+    return this.request<CreateMailboxResponse>(
+      `/users/${validatedUserId}/mailboxes`,
+      {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+      }
+    );
   }
 }
 
