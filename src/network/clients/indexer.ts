@@ -4,7 +4,22 @@ import {
   NetworkResponse,
 } from '../../di';
 import type { AppConfig } from '../../types/environment';
-// Note: TypeScript types are available in ../../types/api but not currently used in implementation
+import type {
+  AddressValidationResponse,
+  DelegatedToResponse,
+  DelegationResponse,
+  EmailAddressesResponse,
+  EntitlementResponse,
+  MessageGenerationResponse,
+  NonceResponse,
+  PointsLeaderboardResponse,
+  SignatureVerificationResponse,
+  SiteStatsResponse,
+  SolanaStatusResponse,
+  SolanaWebhooksResponse,
+  TestTransactionResponse,
+  UserPointsResponse,
+} from '../../types/api/indexer-responses';
 
 // Platform-specific global
 declare const fetch: typeof globalThis.fetch;
@@ -169,8 +184,8 @@ class IndexerClient implements NetworkClient {
    * Validate address format (public endpoint)
    * GET /api/addresses/:address/validate
    */
-  async validateAddress(address: string) {
-    const response = await this.get(
+  async validateAddress(address: string): Promise<AddressValidationResponse> {
+    const response = await this.get<AddressValidationResponse>(
       `/api/addresses/${encodeURIComponent(address)}/validate`
     );
 
@@ -180,7 +195,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data;
+    return response.data as AddressValidationResponse;
   }
 
   /**
@@ -191,8 +206,8 @@ class IndexerClient implements NetworkClient {
     walletAddress: string,
     signature: string,
     message: string
-  ) {
-    const response = await this.get(
+  ): Promise<EmailAddressesResponse> {
+    const response = await this.get<EmailAddressesResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}`,
       {
         headers: {
@@ -208,7 +223,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data;
+    return response.data as EmailAddressesResponse;
   }
 
   /**
@@ -219,8 +234,8 @@ class IndexerClient implements NetworkClient {
     walletAddress: string,
     signature: string,
     message: string
-  ) {
-    const response = await this.get(
+  ): Promise<DelegationResponse> {
+    const response = await this.get<DelegationResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}/delegated`,
       {
         headers: {
@@ -236,7 +251,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data;
+    return response.data as DelegationResponse;
   }
 
   /**
@@ -247,8 +262,8 @@ class IndexerClient implements NetworkClient {
     walletAddress: string,
     signature: string,
     message: string
-  ) {
-    const response = await this.get(
+  ): Promise<DelegatedToResponse> {
+    const response = await this.get<DelegatedToResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}/delegated/to`,
       {
         headers: {
@@ -264,7 +279,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data;
+    return response.data as DelegatedToResponse;
   }
 
   /**
@@ -276,8 +291,8 @@ class IndexerClient implements NetworkClient {
     walletAddress: string,
     domain: string,
     url: string
-  ) {
-    const response = await this.get(
+  ): Promise<MessageGenerationResponse> {
+    const response = await this.get<MessageGenerationResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}/message/${chainId}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`
     );
 
@@ -287,15 +302,19 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data;
+    return response.data as MessageGenerationResponse;
   }
 
   /**
    * Create/update nonce for wallet address
    * POST /api/addresses/:walletAddress/nonce
    */
-  async createNonce(walletAddress: string, signature: string, message: string) {
-    const response = await this.post(
+  async createNonce(
+    walletAddress: string,
+    signature: string,
+    message: string
+  ): Promise<NonceResponse> {
+    const response = await this.post<NonceResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}/nonce`,
       {
         walletAddress,
@@ -310,15 +329,19 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data;
+    return response.data as NonceResponse;
   }
 
   /**
    * Retrieve nonce for wallet address
    * GET /api/addresses/:walletAddress/nonce
    */
-  async getNonce(walletAddress: string, signature: string, message: string) {
-    const response = await this.get(
+  async getNonce(
+    walletAddress: string,
+    signature: string,
+    message: string
+  ): Promise<NonceResponse> {
+    const response = await this.get<NonceResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}/nonce`,
       {
         headers: {
@@ -334,7 +357,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data;
+    return response.data as NonceResponse;
   }
 
   /**
@@ -345,8 +368,8 @@ class IndexerClient implements NetworkClient {
     walletAddress: string,
     signature: string,
     message: string
-  ) {
-    const response = await this.post(
+  ): Promise<SignatureVerificationResponse> {
+    const response = await this.post<SignatureVerificationResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}/verify`,
       {
         walletAddress,
@@ -361,7 +384,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data;
+    return response.data as SignatureVerificationResponse;
   }
 
   /**
@@ -372,8 +395,8 @@ class IndexerClient implements NetworkClient {
     walletAddress: string,
     signature: string,
     message: string
-  ) {
-    const response = await this.get(
+  ): Promise<EntitlementResponse> {
+    const response = await this.get<EntitlementResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}/entitlements/`,
       {
         headers: {
@@ -389,7 +412,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data;
+    return response.data as EntitlementResponse;
   }
 
   // =============================================================================
@@ -404,8 +427,8 @@ class IndexerClient implements NetworkClient {
     walletAddress: string,
     signature: string,
     message: string
-  ) {
-    const response = await this.get(
+  ): Promise<UserPointsResponse> {
+    const response = await this.get<UserPointsResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}/points`,
       {
         headers: {
@@ -421,15 +444,19 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data;
+    return response.data as UserPointsResponse;
   }
 
   /**
    * Get points leaderboard (public)
    * GET /api/points/leaderboard/:count
    */
-  async getPointsLeaderboard(count: number = 10) {
-    const response = await this.get(`/api/points/leaderboard/${count}`);
+  async getPointsLeaderboard(
+    count: number = 10
+  ): Promise<PointsLeaderboardResponse> {
+    const response = await this.get<PointsLeaderboardResponse>(
+      `/api/points/leaderboard/${count}`
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -437,15 +464,17 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data;
+    return response.data as PointsLeaderboardResponse;
   }
 
   /**
    * Get site-wide statistics (public)
    * GET /api/points/site-stats
    */
-  async getPointsSiteStats() {
-    const response = await this.get('/api/points/site-stats');
+  async getPointsSiteStats(): Promise<SiteStatsResponse> {
+    const response = await this.get<SiteStatsResponse>(
+      '/api/points/site-stats'
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -453,7 +482,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data;
+    return response.data as SiteStatsResponse;
   }
 
   // =============================================================================
@@ -464,8 +493,8 @@ class IndexerClient implements NetworkClient {
    * Get Solana indexer status (public)
    * GET /api/solana/status
    */
-  async getSolanaStatus() {
-    const response = await this.get('/api/solana/status');
+  async getSolanaStatus(): Promise<SolanaStatusResponse> {
+    const response = await this.get<SolanaStatusResponse>('/api/solana/status');
 
     if (!response.ok) {
       throw new Error(
@@ -473,15 +502,18 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data;
+    return response.data as SolanaStatusResponse;
   }
 
   /**
    * Setup Solana webhooks (internal)
    * POST /api/solana/setup-webhooks
    */
-  async setupSolanaWebhooks() {
-    const response = await this.post('/api/solana/setup-webhooks', {});
+  async setupSolanaWebhooks(): Promise<SolanaWebhooksResponse> {
+    const response = await this.post<SolanaWebhooksResponse>(
+      '/api/solana/setup-webhooks',
+      {}
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -489,18 +521,24 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data;
+    return response.data as SolanaWebhooksResponse;
   }
 
   /**
    * Process test Solana transaction (development only)
    * POST /api/solana/test-transaction
    */
-  async processSolanaTestTransaction(chainId: number, transaction: any) {
-    const response = await this.post('/api/solana/test-transaction', {
-      chainId,
-      transaction,
-    });
+  async processSolanaTestTransaction(
+    chainId: number,
+    transaction: any
+  ): Promise<TestTransactionResponse> {
+    const response = await this.post<TestTransactionResponse>(
+      '/api/solana/test-transaction',
+      {
+        chainId,
+        transaction,
+      }
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -508,7 +546,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data;
+    return response.data as TestTransactionResponse;
   }
 }
 

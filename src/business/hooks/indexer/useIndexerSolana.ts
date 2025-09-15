@@ -1,44 +1,20 @@
 import { useCallback, useState } from 'react';
 import { IndexerClient } from '../../../network/clients/indexer';
-
-interface IndexerSolanaIndexer {
-  chainId: number;
-  initialized: boolean;
-  networkName: string;
-}
-
-interface IndexerSolanaStatus {
-  solanaIndexers: IndexerSolanaIndexer[];
-  totalIndexers: number;
-  configured: boolean;
-}
-
-interface IndexerSolanaWebhookResponse {
-  success: boolean;
-  processed: number;
-  total: number;
-}
-
-interface IndexerSolanaSetupResult {
-  chainId: string;
-  status: 'success' | 'error';
-  error?: string;
-}
-
-interface IndexerSolanaSetupResponse {
-  success: boolean;
-  results: IndexerSolanaSetupResult[];
-}
+import type {
+  SolanaStatusResponse,
+  SolanaWebhooksResponse,
+  TestTransactionResponse,
+} from '../../../types/api/indexer-responses';
 
 interface UseIndexerSolanaReturn {
   isLoading: boolean;
   error: string | null;
-  getSolanaStatus: () => Promise<IndexerSolanaStatus>;
-  setupWebhooks: () => Promise<IndexerSolanaSetupResponse>;
+  getSolanaStatus: () => Promise<SolanaStatusResponse>;
+  setupWebhooks: () => Promise<SolanaWebhooksResponse>;
   processTestTransaction: (
     chainId: number,
     transaction: any
-  ) => Promise<{ success: boolean; message: string }>;
+  ) => Promise<TestTransactionResponse>;
   clearError: () => void;
 }
 
@@ -55,7 +31,7 @@ const useIndexerSolana = (endpointUrl: string, dev: boolean = false): UseIndexer
   }, []);
 
   const getSolanaStatus =
-    useCallback(async (): Promise<IndexerSolanaStatus> => {
+    useCallback(async (): Promise<SolanaStatusResponse> => {
       setIsLoading(true);
       setError(null);
 
@@ -73,7 +49,7 @@ const useIndexerSolana = (endpointUrl: string, dev: boolean = false): UseIndexer
     }, [indexerClient]);
 
   const setupWebhooks =
-    useCallback(async (): Promise<IndexerSolanaSetupResponse> => {
+    useCallback(async (): Promise<SolanaWebhooksResponse> => {
       setIsLoading(true);
       setError(null);
 
@@ -94,7 +70,7 @@ const useIndexerSolana = (endpointUrl: string, dev: boolean = false): UseIndexer
     async (
       chainId: number,
       transaction: any
-    ): Promise<{ success: boolean; message: string }> => {
+    ): Promise<TestTransactionResponse> => {
       setIsLoading(true);
       setError(null);
 
@@ -130,10 +106,5 @@ const useIndexerSolana = (endpointUrl: string, dev: boolean = false): UseIndexer
 
 export {
   useIndexerSolana,
-  type IndexerSolanaIndexer,
-  type IndexerSolanaStatus,
-  type IndexerSolanaWebhookResponse,
-  type IndexerSolanaSetupResult,
-  type IndexerSolanaSetupResponse,
   type UseIndexerSolanaReturn
 };

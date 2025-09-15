@@ -46,6 +46,7 @@ export interface WalletUserData {
   displayName?: string;
   avatar?: string;
   metadata?: Record<string, any>;
+  emailAddresses?: EmailAddress[];
 }
 
 // Re-export types from enums for backward compatibility

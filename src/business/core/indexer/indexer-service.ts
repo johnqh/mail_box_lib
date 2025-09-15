@@ -5,8 +5,14 @@
 
 import { IndexerClient } from '../../../network/clients/indexer';
 import type { AppConfig } from '../../../types/environment';
+import type {
+  EmailAddressesResponse,
+  PointsLeaderboardResponse,
+  SiteStatsResponse,
+  UserPointsResponse,
+} from '../../../types/api/indexer-responses';
 
-// Response types for indexer operations
+// Legacy response types for backward compatibility - these will be mapped from the new types
 interface IndexerEmailResponse {
   success: boolean;
   emails?: any[];
@@ -19,24 +25,11 @@ interface IndexerLeaderboardResponse {
   message?: string;
 }
 
-// Currently unused interfaces - kept for future API expansion
-// interface _IndexerCampaignsResponse {
-//   success: boolean;
-//   campaigns?: any[];
-//   message?: string;
-// }
-
 interface IndexerPointsSummaryResponse {
   success: boolean;
   points?: number;
   message?: string;
 }
-
-// interface _IndexerPointsHistoryResponse {
-//   success: boolean;
-//   history?: any[];
-//   message?: string;
-// }
 
 interface IndexerHowToEarnResponse {
   success: boolean;
@@ -137,12 +130,12 @@ class IndexerService {
   // =============================================================================
 
   /**
-   * Get email addresses for a wallet with caching
+   * Get email addresses for a wallet with caching (requires signature verification)
    */
   public async getEmailAddresses(
     walletAddress: string,
-    limit?: string,
-    offset?: string
+    signature: string,
+    message: string
   ): Promise<IndexerEmailResponse> {
     const cacheKey = this.getCacheKey('getEmailAddresses', { walletAddress });
     const cached = this.getFromCache<IndexerEmailResponse>(cacheKey);
@@ -152,15 +145,15 @@ class IndexerService {
     }
 
     try {
-      const response = await this.indexerClient.getEmailAddresses(
+      const response: EmailAddressesResponse = await this.indexerClient.getEmailAddresses(
         walletAddress,
-        limit || '10',
-        offset || '0'
+        signature,
+        message
       );
 
       const result = {
         success: true,
-        emails: response.emails || [],
+        emails: response.addresses || [],
       };
 
       this.setCache(cacheKey, result);
@@ -180,14 +173,14 @@ class IndexerService {
     message: string
   ): Promise<IndexerPointsSummaryResponse> {
     try {
-      const response = await this.indexerClient.getPointsBalance(
+      const response: UserPointsResponse = await this.indexerClient.getPointsBalance(
         walletAddress,
         signature,
         message
       );
       
       return {
-        success: response.success || true,
+        success: true,
         points: parseInt(response.data?.pointsEarned || '0'),
       };
     } catch (error) {
@@ -211,7 +204,7 @@ class IndexerService {
     }
 
     try {
-      const response = await this.indexerClient.getPointsLeaderboard(limit || 10);
+      const response: PointsLeaderboardResponse = await this.indexerClient.getPointsLeaderboard(limit || 10);
       
       const result = {
         success: response.success || true,
@@ -264,7 +257,7 @@ class IndexerService {
     }
 
     try {
-      const response = await this.indexerClient.getPointsSiteStats();
+      const response: SiteStatsResponse = await this.indexerClient.getPointsSiteStats();
       
       const result = {
         success: response.success || true,

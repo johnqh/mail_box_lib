@@ -114,3 +114,6 @@ export * from './wildduck';
 
 // Common types and validation utilities
 export * from './common';
+
+// IndexerClient API response types
+export * from './api/indexer-responses';
