@@ -10,10 +10,10 @@ import type {
   EmailAddressesResponse,
   EntitlementResponse,
   LeaderboardResponse,
-  MessageGenerationResponse,
   NonceResponse,
   PointsResponse,
   SignatureVerificationResponse,
+  SimpleMessageResponse,
   SiteStatsResponse,
   SolanaSetupResponse,
   SolanaStatusResponse,
@@ -291,8 +291,8 @@ class IndexerClient implements NetworkClient {
     walletAddress: string,
     domain: string,
     url: string
-  ): Promise<MessageGenerationResponse> {
-    const response = await this.get<MessageGenerationResponse>(
+  ): Promise<SimpleMessageResponse> {
+    const response = await this.get<SimpleMessageResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}/message/${chainId}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`
     );
 
@@ -302,7 +302,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data as MessageGenerationResponse;
+    return response.data as SimpleMessageResponse;
   }
 
   /**

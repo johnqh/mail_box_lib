@@ -6,9 +6,9 @@ import type {
   DelegatorsResponse,
   EmailAddressesResponse,
   EntitlementResponse,
-  MessageGenerationResponse,
   NonceResponse,
   SignatureVerificationResponse,
+  SimpleMessageResponse,
   ValidationResponse,
 } from '@johnqh/types';
 
@@ -48,7 +48,7 @@ interface UseIndexerMailReturn {
     chainId: number,
     domain: string,
     url: string
-  ) => Promise<MessageGenerationResponse | undefined>;
+  ) => Promise<SimpleMessageResponse | undefined>;
   getNonce: (
     walletAddress: string,
     signature: string,
