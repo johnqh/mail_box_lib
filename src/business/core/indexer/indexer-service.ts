@@ -7,10 +7,10 @@ import { IndexerClient } from '../../../network/clients/indexer';
 import type { AppConfig } from '../../../types/environment';
 import type {
   EmailAddressesResponse,
-  PointsLeaderboardResponse,
+  LeaderboardResponse,
+  PointsResponse,
   SiteStatsResponse,
-  UserPointsResponse,
-} from '../../../types/api/indexer-responses';
+} from '@johnqh/types';
 
 // Legacy response types for backward compatibility - these will be mapped from the new types
 interface IndexerEmailResponse {
@@ -153,7 +153,7 @@ class IndexerService {
 
       const result = {
         success: true,
-        emails: response.addresses || [],
+        emails: response.walletEmails || [],
       };
 
       this.setCache(cacheKey, result);
@@ -173,7 +173,7 @@ class IndexerService {
     message: string
   ): Promise<IndexerPointsSummaryResponse> {
     try {
-      const response: UserPointsResponse = await this.indexerClient.getPointsBalance(
+      const response: PointsResponse = await this.indexerClient.getPointsBalance(
         walletAddress,
         signature,
         message
@@ -204,7 +204,7 @@ class IndexerService {
     }
 
     try {
-      const response: PointsLeaderboardResponse = await this.indexerClient.getPointsLeaderboard(limit || 10);
+      const response: LeaderboardResponse = await this.indexerClient.getPointsLeaderboard(limit || 10);
       
       const result = {
         success: response.success || true,

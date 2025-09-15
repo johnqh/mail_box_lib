@@ -6,10 +6,10 @@
 import { useCallback, useState } from 'react';
 import { IndexerClient } from '../../../network/clients/indexer';
 import type {
-  PointsLeaderboardResponse,
+  LeaderboardResponse,
+  PointsResponse,
   SiteStatsResponse,
-  UserPointsResponse,
-} from '../../../types/api/indexer-responses';
+} from '@johnqh/types';
 
 /**
  * React hook for Indexer Points API operations using actual API endpoints
@@ -24,7 +24,7 @@ function useIndexerPoints(endpointUrl: string, dev: boolean = false) {
   }, []);
 
   const getPointsBalance = useCallback(
-    async (walletAddress: string, signature: string, message: string): Promise<UserPointsResponse> => {
+    async (walletAddress: string, signature: string, message: string): Promise<PointsResponse> => {
       setIsLoading(true);
       setError(null);
 
@@ -48,7 +48,7 @@ function useIndexerPoints(endpointUrl: string, dev: boolean = false) {
   );
 
   const getPointsLeaderboard = useCallback(
-    async (count: number = 10): Promise<PointsLeaderboardResponse> => {
+    async (count: number = 10): Promise<LeaderboardResponse> => {
       setIsLoading(true);
       setError(null);
 

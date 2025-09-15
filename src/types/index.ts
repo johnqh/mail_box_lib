@@ -115,8 +115,7 @@ export * from './wildduck';
 // Common types and validation utilities
 export * from './common';
 
-// IndexerClient API response types
-export * from './api/indexer-responses';
+// IndexerClient API response types are now in @johnqh/types
 
 // WildDuckAPI response types
 export * from './api/wildduck-responses';

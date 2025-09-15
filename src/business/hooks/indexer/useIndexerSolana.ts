@@ -1,20 +1,20 @@
 import { useCallback, useState } from 'react';
 import { IndexerClient } from '../../../network/clients/indexer';
 import type {
+  SolanaSetupResponse,
   SolanaStatusResponse,
-  SolanaWebhooksResponse,
-  TestTransactionResponse,
-} from '../../../types/api/indexer-responses';
+  SolanaTestTransactionResponse,
+} from '@johnqh/types';
 
 interface UseIndexerSolanaReturn {
   isLoading: boolean;
   error: string | null;
   getSolanaStatus: () => Promise<SolanaStatusResponse>;
-  setupWebhooks: () => Promise<SolanaWebhooksResponse>;
+  setupWebhooks: () => Promise<SolanaSetupResponse>;
   processTestTransaction: (
     chainId: number,
     transaction: any
-  ) => Promise<TestTransactionResponse>;
+  ) => Promise<SolanaTestTransactionResponse>;
   clearError: () => void;
 }
 
@@ -49,7 +49,7 @@ const useIndexerSolana = (endpointUrl: string, dev: boolean = false): UseIndexer
     }, [indexerClient]);
 
   const setupWebhooks =
-    useCallback(async (): Promise<SolanaWebhooksResponse> => {
+    useCallback(async (): Promise<SolanaSetupResponse> => {
       setIsLoading(true);
       setError(null);
 
@@ -70,7 +70,7 @@ const useIndexerSolana = (endpointUrl: string, dev: boolean = false): UseIndexer
     async (
       chainId: number,
       transaction: any
-    ): Promise<TestTransactionResponse> => {
+    ): Promise<SolanaTestTransactionResponse> => {
       setIsLoading(true);
       setError(null);
 

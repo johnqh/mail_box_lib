@@ -89,11 +89,8 @@ export {
 
   // Business interfaces
   Email,
-  User,
-  EmailAddress,
   Folder,
   MailBox,
-  WalletUserData,
 } from '@johnqh/types';
 
 // Infrastructure - Network clients only
@@ -185,3 +182,7 @@ export {
   WildDuckUser,
   WildDuckUserResponse,
 } from './types';
+
+// Local business types with extensions
+export { WalletUserData, User, EmailAddress } from './types/email';
+export { WalletEmailAddresses } from '@johnqh/types';

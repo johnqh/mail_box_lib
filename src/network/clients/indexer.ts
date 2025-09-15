@@ -5,21 +5,21 @@ import {
 } from '../../di';
 import type { AppConfig } from '../../types/environment';
 import type {
-  AddressValidationResponse,
-  DelegatedToResponse,
   DelegationResponse,
+  DelegatorsResponse,
   EmailAddressesResponse,
   EntitlementResponse,
+  LeaderboardResponse,
   MessageGenerationResponse,
   NonceResponse,
-  PointsLeaderboardResponse,
+  PointsResponse,
   SignatureVerificationResponse,
   SiteStatsResponse,
+  SolanaSetupResponse,
   SolanaStatusResponse,
-  SolanaWebhooksResponse,
-  TestTransactionResponse,
-  UserPointsResponse,
-} from '../../types/api/indexer-responses';
+  SolanaTestTransactionResponse,
+  ValidationResponse,
+} from '@johnqh/types';
 
 // Platform-specific global
 declare const fetch: typeof globalThis.fetch;
@@ -184,8 +184,8 @@ class IndexerClient implements NetworkClient {
    * Validate address format (public endpoint)
    * GET /api/addresses/:address/validate
    */
-  async validateAddress(address: string): Promise<AddressValidationResponse> {
-    const response = await this.get<AddressValidationResponse>(
+  async validateAddress(address: string): Promise<ValidationResponse> {
+    const response = await this.get<ValidationResponse>(
       `/api/addresses/${encodeURIComponent(address)}/validate`
     );
 
@@ -195,7 +195,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data as AddressValidationResponse;
+    return response.data as ValidationResponse;
   }
 
   /**
@@ -262,8 +262,8 @@ class IndexerClient implements NetworkClient {
     walletAddress: string,
     signature: string,
     message: string
-  ): Promise<DelegatedToResponse> {
-    const response = await this.get<DelegatedToResponse>(
+  ): Promise<DelegatorsResponse> {
+    const response = await this.get<DelegatorsResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}/delegated/to`,
       {
         headers: {
@@ -279,7 +279,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data as DelegatedToResponse;
+    return response.data as DelegatorsResponse;
   }
 
   /**
@@ -427,8 +427,8 @@ class IndexerClient implements NetworkClient {
     walletAddress: string,
     signature: string,
     message: string
-  ): Promise<UserPointsResponse> {
-    const response = await this.get<UserPointsResponse>(
+  ): Promise<PointsResponse> {
+    const response = await this.get<PointsResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}/points`,
       {
         headers: {
@@ -444,17 +444,15 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data as UserPointsResponse;
+    return response.data as PointsResponse;
   }
 
   /**
    * Get points leaderboard (public)
    * GET /api/points/leaderboard/:count
    */
-  async getPointsLeaderboard(
-    count: number = 10
-  ): Promise<PointsLeaderboardResponse> {
-    const response = await this.get<PointsLeaderboardResponse>(
+  async getPointsLeaderboard(count: number = 10): Promise<LeaderboardResponse> {
+    const response = await this.get<LeaderboardResponse>(
       `/api/points/leaderboard/${count}`
     );
 
@@ -464,7 +462,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data as PointsLeaderboardResponse;
+    return response.data as LeaderboardResponse;
   }
 
   /**
@@ -509,8 +507,8 @@ class IndexerClient implements NetworkClient {
    * Setup Solana webhooks (internal)
    * POST /api/solana/setup-webhooks
    */
-  async setupSolanaWebhooks(): Promise<SolanaWebhooksResponse> {
-    const response = await this.post<SolanaWebhooksResponse>(
+  async setupSolanaWebhooks(): Promise<SolanaSetupResponse> {
+    const response = await this.post<SolanaSetupResponse>(
       '/api/solana/setup-webhooks',
       {}
     );
@@ -521,7 +519,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data as SolanaWebhooksResponse;
+    return response.data as SolanaSetupResponse;
   }
 
   /**
@@ -531,8 +529,8 @@ class IndexerClient implements NetworkClient {
   async processSolanaTestTransaction(
     chainId: number,
     transaction: any
-  ): Promise<TestTransactionResponse> {
-    const response = await this.post<TestTransactionResponse>(
+  ): Promise<SolanaTestTransactionResponse> {
+    const response = await this.post<SolanaTestTransactionResponse>(
       '/api/solana/test-transaction',
       {
         chainId,
@@ -546,7 +544,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data as TestTransactionResponse;
+    return response.data as SolanaTestTransactionResponse;
   }
 }
 

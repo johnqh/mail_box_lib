@@ -50,8 +50,10 @@ describe('IndexerClient', () => {
         ok: true,
         data: {
           isValid: true,
-          addressType: 'ethereum',
+          address: '0x123...',
+          addressType: 'evm',
           normalizedAddress: '0x123...',
+          timestamp: new Date().toISOString(),
         },
       };
       mockFetch.mockResolvedValueOnce({
@@ -92,9 +94,22 @@ describe('IndexerClient', () => {
       const mockResponse = {
         ok: true,
         data: {
-          addresses: [
-            { address: 'test@example.com', verified: true },
+          requestedWallet: '0x123...',
+          addressType: 'evm',
+          walletEmails: [
+            {
+              walletAddress: '0x123...',
+              addressType: 'evm',
+              isPrimary: true,
+              primaryEmail: '0x123...@0xmail.box',
+              domainEmails: [],
+              totalEmails: 1,
+            },
           ],
+          totalWallets: 1,
+          totalEmails: 1,
+          verified: true,
+          timestamp: new Date().toISOString(),
         },
       };
       mockFetch.mockResolvedValueOnce({

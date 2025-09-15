@@ -2,15 +2,15 @@ import { useCallback } from 'react';
 import { IndexerClient } from '../../../network/clients/indexer';
 import { useApiCall } from '../useApiCall';
 import type {
-  AddressValidationResponse,
-  DelegatedToResponse,
   DelegationResponse,
+  DelegatorsResponse,
   EmailAddressesResponse,
   EntitlementResponse,
   MessageGenerationResponse,
   NonceResponse,
   SignatureVerificationResponse,
-} from '../../../types/api/indexer-responses';
+  ValidationResponse,
+} from '@johnqh/types';
 
 interface IndexerEmailAddress {
   email: string;
@@ -22,7 +22,7 @@ interface IndexerEmailAddress {
 interface UseIndexerMailReturn {
   isLoading: boolean;
   error: string | null;
-  validateAddress: (address: string) => Promise<AddressValidationResponse | undefined>;
+  validateAddress: (address: string) => Promise<ValidationResponse | undefined>;
   getEmailAddresses: (
     walletAddress: string,
     signature: string,
@@ -37,7 +37,7 @@ interface UseIndexerMailReturn {
     walletAddress: string,
     signature: string,
     message: string
-  ) => Promise<DelegatedToResponse | undefined>;
+  ) => Promise<DelegatorsResponse | undefined>;
   verifySignature: (
     walletAddress: string,
     signature: string,
