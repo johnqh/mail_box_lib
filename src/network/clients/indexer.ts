@@ -177,6 +177,23 @@ class IndexerClient implements NetworkClient {
   }
 
   // =============================================================================
+  // HELPER METHODS
+  // =============================================================================
+
+  /**
+   * Create authentication headers for signed requests
+   */
+  private createAuthHeaders(
+    signature: string,
+    message: string
+  ): Record<string, string> {
+    return {
+      'x-signature': signature,
+      'x-message': encodeURIComponent(message),
+    };
+  }
+
+  // =============================================================================
   // MAIL API ENDPOINTS
   // =============================================================================
 
@@ -210,10 +227,7 @@ class IndexerClient implements NetworkClient {
     const response = await this.get<EmailAddressesResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}`,
       {
-        headers: {
-          'x-signature': signature,
-          'x-message': message,
-        },
+        headers: this.createAuthHeaders(signature, message),
       }
     );
 
@@ -238,10 +252,7 @@ class IndexerClient implements NetworkClient {
     const response = await this.get<DelegationResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}/delegated`,
       {
-        headers: {
-          'x-signature': signature,
-          'x-message': message,
-        },
+        headers: this.createAuthHeaders(signature, message),
       }
     );
 
@@ -266,10 +277,7 @@ class IndexerClient implements NetworkClient {
     const response = await this.get<DelegatorsResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}/delegated/to`,
       {
-        headers: {
-          'x-signature': signature,
-          'x-message': message,
-        },
+        headers: this.createAuthHeaders(signature, message),
       }
     );
 
@@ -320,6 +328,9 @@ class IndexerClient implements NetworkClient {
         walletAddress,
         signature,
         message,
+      },
+      {
+        headers: this.createAuthHeaders(signature, message),
       }
     );
 
@@ -344,10 +355,7 @@ class IndexerClient implements NetworkClient {
     const response = await this.get<NonceResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}/nonce`,
       {
-        headers: {
-          'x-signature': signature,
-          'x-message': message,
-        },
+        headers: this.createAuthHeaders(signature, message),
       }
     );
 
@@ -375,6 +383,9 @@ class IndexerClient implements NetworkClient {
         walletAddress,
         signature,
         message,
+      },
+      {
+        headers: this.createAuthHeaders(signature, message),
       }
     );
 
@@ -399,10 +410,7 @@ class IndexerClient implements NetworkClient {
     const response = await this.get<EntitlementResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}/entitlements/`,
       {
-        headers: {
-          'x-signature': signature,
-          'x-message': message,
-        },
+        headers: this.createAuthHeaders(signature, message),
       }
     );
 
@@ -431,10 +439,7 @@ class IndexerClient implements NetworkClient {
     const response = await this.get<PointsResponse>(
       `/api/addresses/${encodeURIComponent(walletAddress)}/points`,
       {
-        headers: {
-          'x-signature': signature,
-          'x-message': message,
-        },
+        headers: this.createAuthHeaders(signature, message),
       }
     );
 
