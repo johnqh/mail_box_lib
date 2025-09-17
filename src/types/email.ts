@@ -33,7 +33,7 @@ interface User {
   name: string;
   email: string;
   avatar?: string;
-  emailAddresses: WalletEmailAddresses[];
+  emailAddresses: WalletEmailAccounts[];
 }
 
 import {
@@ -41,7 +41,7 @@ import {
   EmailFolder,
   FontSize,
   Theme,
-  WalletEmailAddresses,
+  WalletEmailAccounts,
 } from '@johnqh/types';
 
 // WalletUserData interface for wallet-based user information
@@ -52,7 +52,7 @@ export interface WalletUserData {
   displayName?: string;
   avatar?: string;
   metadata?: Record<string, any>;
-  emailAddresses?: WalletEmailAddresses[];
+  emailAddresses?: WalletEmailAccounts[];
 }
 
 // Re-export types from enums for backward compatibility

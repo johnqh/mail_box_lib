@@ -6,7 +6,7 @@
 import { IndexerClient } from '../../../network/clients/indexer';
 import type { AppConfig } from '../../../types/environment';
 import type {
-  EmailAddressesResponse,
+  EmailAccountsResponse,
   LeaderboardResponse,
   PointsResponse,
   SiteStatsResponse,
@@ -145,7 +145,7 @@ class IndexerService {
     }
 
     try {
-      const response: EmailAddressesResponse = await this.indexerClient.getEmailAddresses(
+      const response: EmailAccountsResponse = await this.indexerClient.getEmailAccounts(
         walletAddress,
         signature,
         message
@@ -153,7 +153,7 @@ class IndexerService {
 
       const result = {
         success: true,
-        emails: response.walletEmails || [],
+        emails: response.walletAccounts?.[0]?.domainAccounts || [],
       };
 
       this.setCache(cacheKey, result);

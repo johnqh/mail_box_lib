@@ -6,7 +6,7 @@ import type {
   ChainType,
   DelegationResponse,
   DelegatorsResponse,
-  EmailAddressesResponse,
+  EmailAccountsResponse,
   EntitlementResponse,
   LeaderboardResponse,
   NonceResponse,
@@ -110,17 +110,33 @@ export class IndexerMockData {
     } as ValidationResponse;
   }
 
-  static getEmailAddresses(): EmailAddressesResponse {
+  static getEmailAccounts(): EmailAccountsResponse {
     return {
-      success: true,
-      data: {
-        addresses: [
-          { address: 'test@0xmail.box', primary: true, verified: true },
-          { address: 'secondary@example.com', primary: false, verified: false }
-        ]
-      },
+      requestedWallet: '0x1234...5678',
+      addressType: 'EVM' as any,
+      walletAccounts: [
+        {
+          walletAddress: '0x1234...5678',
+          addressType: 'EVM' as any,
+          isPrimary: true,
+          primaryAccount: '0x1234...5678',
+          domainAccounts: [
+            { account: 'test', type: 'ens', domain: 'test.eth', verified: true },
+            { account: 'secondary', type: 'sns', domain: 'secondary.sol', verified: false }
+          ],
+          totalAccounts: 3
+        }
+      ],
+      totalWallets: 1,
+      totalAccounts: 3,
+      verified: true,
       timestamp: new Date().toISOString()
-    } as unknown as EmailAddressesResponse;
+    } as EmailAccountsResponse;
+  }
+
+  // Backward compatibility
+  static getEmailAddresses(): EmailAccountsResponse {
+    return this.getEmailAccounts();
   }
 
   static getDelegation(): DelegationResponse {

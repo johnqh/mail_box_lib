@@ -7,7 +7,7 @@ import type { AppConfig } from '../../types/environment';
 import type {
   DelegationResponse,
   DelegatorsResponse,
-  EmailAddressesResponse,
+  EmailAccountsResponse,
   EntitlementResponse,
   LeaderboardResponse,
   NonceResponse,
@@ -216,16 +216,16 @@ class IndexerClient implements NetworkClient {
   }
 
   /**
-   * Get email addresses for a wallet address (requires signature verification)
-   * GET /api/addresses/:walletAddress
+   * Get email accounts for a wallet address (requires signature verification)
+   * GET /api/addresses/:walletAddress/accounts
    */
-  async getEmailAddresses(
+  async getEmailAccounts(
     walletAddress: string,
     signature: string,
     message: string
-  ): Promise<EmailAddressesResponse> {
-    const response = await this.get<EmailAddressesResponse>(
-      `/api/addresses/${encodeURIComponent(walletAddress)}`,
+  ): Promise<EmailAccountsResponse> {
+    const response = await this.get<EmailAccountsResponse>(
+      `/api/addresses/${encodeURIComponent(walletAddress)}/accounts`,
       {
         headers: this.createAuthHeaders(signature, message),
       }
@@ -233,11 +233,24 @@ class IndexerClient implements NetworkClient {
 
     if (!response.ok) {
       throw new Error(
-        `Failed to get email addresses: ${(response.data as any)?.error || 'Unknown error'}`
+        `Failed to get email accounts: ${(response.data as any)?.error || 'Unknown error'}`
       );
     }
 
-    return response.data as EmailAddressesResponse;
+    return response.data as EmailAccountsResponse;
+  }
+
+  /**
+   * @deprecated Use getEmailAccounts instead. This method will be removed in future versions.
+   * Get email addresses for a wallet address (requires signature verification)
+   * GET /api/addresses/:walletAddress/accounts
+   */
+  async getEmailAddresses(
+    walletAddress: string,
+    signature: string,
+    message: string
+  ): Promise<EmailAccountsResponse> {
+    return this.getEmailAccounts(walletAddress, signature, message);
   }
 
   /**
@@ -573,8 +586,8 @@ const createIndexerApiConfig = (config: AppConfig) => ({
     // Mail endpoints
     ADDRESSES_VALIDATE: (address: string) =>
       `/api/addresses/${encodeURIComponent(address)}/validate`,
-    ADDRESSES: (walletAddress: string) =>
-      `/api/addresses/${encodeURIComponent(walletAddress)}`,
+    ADDRESSES_ACCOUNTS: (walletAddress: string) =>
+      `/api/addresses/${encodeURIComponent(walletAddress)}/accounts`,
     ADDRESSES_DELEGATED: (walletAddress: string) =>
       `/api/addresses/${encodeURIComponent(walletAddress)}/delegated`,
     ADDRESSES_DELEGATED_TO: (walletAddress: string) =>

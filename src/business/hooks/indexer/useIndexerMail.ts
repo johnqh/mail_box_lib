@@ -4,7 +4,7 @@ import { useApiCall } from '../useApiCall';
 import type {
   DelegationResponse,
   DelegatorsResponse,
-  EmailAddressesResponse,
+  EmailAccountsResponse,
   EntitlementResponse,
   NonceResponse,
   SignatureVerificationResponse,
@@ -24,11 +24,16 @@ interface UseIndexerMailReturn {
   isLoading: boolean;
   error: string | null;
   validateAddress: (address: string) => Promise<ValidationResponse | undefined>;
+  getEmailAccounts: (
+    walletAddress: string,
+    signature: string,
+    message: string
+  ) => Promise<EmailAccountsResponse | undefined>;
   getEmailAddresses: (
     walletAddress: string,
     signature: string,
     message: string
-  ) => Promise<EmailAddressesResponse | undefined>;
+  ) => Promise<EmailAccountsResponse | undefined>;
   getDelegatedAddress: (
     walletAddress: string,
     signature: string,
@@ -92,6 +97,22 @@ const useIndexerMail = (endpointUrl: string, dev: boolean = false, devMode: bool
     [execute, indexerClient, devMode]
   );
 
+  const getEmailAccounts = useCallback(
+    execute(async (walletAddress: string, signature: string, message: string) => {
+      try {
+        return await indexerClient.getEmailAccounts(walletAddress, signature, message);
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] getEmailAccounts failed, returning mock data:', err);
+          return IndexerMockData.getEmailAccounts();
+        }
+        throw err;
+      }
+    }),
+    [execute, indexerClient, devMode]
+  );
+
+  // Backward compatibility - deprecated
   const getEmailAddresses = useCallback(
     execute(async (walletAddress: string, signature: string, message: string) => {
       try {
@@ -223,6 +244,7 @@ const useIndexerMail = (endpointUrl: string, dev: boolean = false, devMode: bool
     isLoading,
     error,
     validateAddress,
+    getEmailAccounts,
     getEmailAddresses,
     getDelegatedAddress,
     getDelegatorsToAddress,

@@ -185,4 +185,4 @@ export {
 
 // Local business types with extensions
 export { WalletUserData, User, EmailAddress } from './types/email';
-export { WalletEmailAddresses } from '@johnqh/types';
+export { WalletEmailAccounts } from '@johnqh/types';
