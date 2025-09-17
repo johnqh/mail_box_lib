@@ -47,3 +47,6 @@ export type {
   MailboxData as WildduckMailbox,
   GetMailboxesResponse as WildduckMailboxesResponse
 } from '../../../types/api/wildduck-responses';
+
+// Export mock data helper
+export { WildDuckMockData } from './mocks';

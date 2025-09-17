@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import axios from 'axios';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
+import { WildDuckMockData } from './mocks';
 
 interface WildduckFilter {
   id: string;
@@ -96,7 +97,7 @@ interface UseWildduckFiltersReturn {
 /**
  * Hook for WildDuck filter management operations
  */
-const useWildduckFilters = (config: WildDuckConfig): UseWildduckFiltersReturn => {
+const useWildduckFilters = (config: WildDuckConfig, devMode: boolean = false): UseWildduckFiltersReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<WildduckFilter[]>([]);
@@ -134,6 +135,14 @@ const useWildduckFilters = (config: WildDuckConfig): UseWildduckFiltersReturn =>
         setFilters(filterList);
         return filterList;
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Get filters failed, returning mock data:', err);
+          const mockData = WildDuckMockData.getFilters();
+          const mockFilters = mockData.data.filters as unknown as WildduckFilter[];
+          setFilters(mockFilters);
+          return mockFilters;
+        }
+
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to get filters';
         setError(errorMessage);
@@ -173,6 +182,12 @@ const useWildduckFilters = (config: WildDuckConfig): UseWildduckFiltersReturn =>
 
         return response.data as WildduckFilter;
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Get filter failed, returning mock data:', err);
+          const mockData = WildDuckMockData.getFilter(filterId);
+          return mockData.data.filter as unknown as WildduckFilter;
+        }
+
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to get filter';
         setError(errorMessage);
@@ -215,6 +230,11 @@ const useWildduckFilters = (config: WildDuckConfig): UseWildduckFiltersReturn =>
 
         return response.data as { success: boolean; id: string };
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Create filter failed, returning mock success:', err);
+          return WildDuckMockData.getCreateFilter();
+        }
+
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to create filter';
         setError(errorMessage);
@@ -258,6 +278,11 @@ const useWildduckFilters = (config: WildDuckConfig): UseWildduckFiltersReturn =>
 
         return response.data as { success: boolean };
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Update filter failed, returning mock success:', err);
+          return WildDuckMockData.getUpdateFilter();
+        }
+
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to update filter';
         setError(errorMessage);
@@ -296,6 +321,11 @@ const useWildduckFilters = (config: WildDuckConfig): UseWildduckFiltersReturn =>
 
         return response.data as { success: boolean };
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Delete filter failed, returning mock success:', err);
+          return WildDuckMockData.getDeleteFilter();
+        }
+
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to delete filter';
         setError(errorMessage);

@@ -14,6 +14,7 @@ import type {
   AuthenticationResponse,
   PreAuthResponse,
 } from '../../../types/api/wildduck-responses';
+import { WildDuckMockData } from './mocks';
 
 interface UseWildduckAuthReturn {
   isLoading: boolean;
@@ -28,7 +29,7 @@ interface UseWildduckAuthReturn {
 /**
  * Hook for WildDuck authentication operations
  */
-const useWildduckAuth = (config: WildDuckConfig): UseWildduckAuthReturn => {
+const useWildduckAuth = (config: WildDuckConfig, devMode: boolean = false): UseWildduckAuthReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const storageService = useStorageService();
@@ -79,6 +80,13 @@ const useWildduckAuth = (config: WildDuckConfig): UseWildduckAuthReturn => {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to check auth status';
       setError(errorMessage);
+      
+      // Return mock data in devMode when API fails
+      if (devMode) {
+        console.warn('[DevMode] getAuthStatus failed, returning mock data:', errorMessage);
+        return WildDuckMockData.getAuthStatus();
+      }
+      
       return { authenticated: false };
     } finally {
       setIsLoading(false);
@@ -109,6 +117,13 @@ const useWildduckAuth = (config: WildDuckConfig): UseWildduckAuthReturn => {
                           (err instanceof Error ? err.message : 'Pre-authentication failed');
       
       setError(errorMessage);
+      
+      // Return mock data in devMode when API fails
+      if (devMode) {
+        console.warn('[DevMode] preAuth failed, returning mock data:', errorMessage);
+        return WildDuckMockData.getPreAuth();
+      }
+      
       throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -155,6 +170,19 @@ const useWildduckAuth = (config: WildDuckConfig): UseWildduckAuthReturn => {
                           (err instanceof Error ? err.message : 'Authentication failed');
       
       setError(errorMessage);
+      
+      // Return mock data in devMode when API fails
+      if (devMode) {
+        console.warn('[DevMode] authenticate failed, returning mock data:', errorMessage);
+        const mockResult = WildDuckMockData.getAuthentication(params.username);
+        
+        // Store mock token
+        if (mockResult.token) {
+          await storageService.setItem('wildduck_token', mockResult.token);
+        }
+        return mockResult;
+      }
+      
       throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -197,6 +225,14 @@ const useWildduckAuth = (config: WildDuckConfig): UseWildduckAuthReturn => {
                           (err instanceof Error ? err.message : 'Logout failed');
       
       setError(errorMessage);
+      
+      // Return mock data in devMode when API fails
+      if (devMode) {
+        console.warn('[DevMode] logout failed, returning mock data:', errorMessage);
+        await storageService.removeItem('wildduck_token');
+        return WildDuckMockData.getLogout();
+      }
+      
       throw new Error(errorMessage);
     } finally {
       setIsLoading(false);

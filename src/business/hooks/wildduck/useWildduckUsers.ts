@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import axios from 'axios';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
+import { WildDuckMockData } from './mocks';
 
 interface WildduckUser {
   success: boolean;
@@ -33,7 +34,7 @@ interface UseWildduckUsersReturn {
 /**
  * Hook for WildDuck user management operations
  */
-const useWildduckUsers = (config: WildDuckConfig): UseWildduckUsersReturn => {
+const useWildduckUsers = (config: WildDuckConfig, devMode: boolean = false): UseWildduckUsersReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,6 +65,12 @@ const useWildduckUsers = (config: WildDuckConfig): UseWildduckUsersReturn => {
       const response = await axios.get(`${apiUrl}/users/${userId}`, { headers });
       return response.data as WildduckUser;
     } catch (err) {
+      if (devMode) {
+        console.warn('[DevMode] Get user failed, returning mock data:', err);
+        const mockData = WildDuckMockData.getUser(userId);
+        return mockData.data.user as unknown as WildduckUser;
+      }
+
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to get user';
       setError(errorMessage);
@@ -112,6 +119,15 @@ const useWildduckUsers = (config: WildDuckConfig): UseWildduckUsersReturn => {
           total: usersData.total || 0,
         };
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Get users failed, returning mock data:', err);
+          const mockData = WildDuckMockData.getUsers();
+          return {
+            users: mockData.data.users as unknown as WildduckUser[],
+            total: mockData.data.total
+          };
+        }
+
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to get users';
         setError(errorMessage);

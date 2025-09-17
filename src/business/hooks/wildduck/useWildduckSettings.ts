@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import axios from 'axios';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
+import { WildDuckMockData } from './mocks';
 
 interface WildduckSettings {
   [key: string]: any;
@@ -20,7 +21,7 @@ interface UseWildduckSettingsReturn {
 /**
  * Hook for WildDuck settings management operations
  */
-const useWildduckSettings = (config: WildDuckConfig): UseWildduckSettingsReturn => {
+const useWildduckSettings = (config: WildDuckConfig, devMode: boolean = false): UseWildduckSettingsReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [settings, setSettings] = useState<WildduckSettings>({});
@@ -54,6 +55,17 @@ const useWildduckSettings = (config: WildDuckConfig): UseWildduckSettingsReturn 
       setSettings(settingsData);
       return settingsData;
     } catch (err) {
+      if (devMode) {
+        console.warn('[DevMode] Get settings failed, returning mock data:', err);
+        const mockData = WildDuckMockData.getSettings();
+        const mockSettings = mockData.data.settings.reduce((acc: WildduckSettings, setting: any) => {
+          acc[setting.key] = setting.value;
+          return acc;
+        }, {});
+        setSettings(mockSettings);
+        return mockSettings;
+      }
+
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to get settings';
       setError(errorMessage);
@@ -95,6 +107,12 @@ const useWildduckSettings = (config: WildDuckConfig): UseWildduckSettingsReturn 
 
         return response.data as { success: boolean };
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Update setting failed, returning mock success:', err);
+          setSettings(prev => ({ ...prev, [key]: value }));
+          return WildDuckMockData.getUpdateSetting();
+        }
+
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to update setting';
         setError(errorMessage);
@@ -139,6 +157,15 @@ const useWildduckSettings = (config: WildDuckConfig): UseWildduckSettingsReturn 
 
         return response.data as { success: boolean };
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Delete setting failed, returning mock success:', err);
+          setSettings(prev => {
+            const { [key]: _removed, ...rest } = prev;
+            return rest;
+          });
+          return WildDuckMockData.getDeleteSetting();
+        }
+
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to delete setting';
         setError(errorMessage);

@@ -16,6 +16,7 @@ import type {
   WildDuckUserData,
 } from '../../../types/api/wildduck-responses';
 import axios from 'axios';
+import { WildDuckMockData } from './mocks';
 
 // Define response types based on WildDuck API
 interface WildduckHealthResponse {
@@ -66,6 +67,7 @@ interface WildduckAuthStatusResponse {
  */
 const useWildduckHealth = (
   config: WildDuckConfig,
+  devMode: boolean = false,
   options?: UseQueryOptions<WildduckHealthResponse>
 ): UseQueryResult<WildduckHealthResponse> => {
   
@@ -85,8 +87,16 @@ const useWildduckHealth = (
         headers['X-Access-Token'] = config.apiToken;
       }
 
-      const response = await axios.get(`${apiUrl}/health`, { headers });
-      return response.data as WildduckHealthResponse;
+      try {
+        const response = await axios.get(`${apiUrl}/health`, { headers });
+        return response.data as WildduckHealthResponse;
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Health check failed, returning mock data:', err);
+          return WildDuckMockData.getHealthQuery();
+        }
+        throw err;
+      }
     },
     staleTime: STALE_TIMES.HEALTH_STATUS,
     ...options,
@@ -98,6 +108,7 @@ const useWildduckHealth = (
  */
 const useWildduckUsersList = (
   config: WildDuckConfig,
+  devMode: boolean = false,
   filters?: Record<string, unknown>,
   options?: UseQueryOptions<GetUsersResponse>
 ): UseQueryResult<GetUsersResponse> => {
@@ -126,11 +137,19 @@ const useWildduckUsersList = (
           }
         });
       }
-      const response = await axios.get(
-        `${apiUrl}/users?${params}`,
-        { headers }
-      );
-      return response.data as GetUsersResponse;
+      try {
+        const response = await axios.get(
+          `${apiUrl}/users?${params}`,
+          { headers }
+        );
+        return response.data as GetUsersResponse;
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Get users list failed, returning mock data:', err);
+          return WildDuckMockData.getUsersListQuery() as unknown as GetUsersResponse;
+        }
+        throw err;
+      }
     },
     staleTime: STALE_TIMES.USER_PROFILE,
     ...options,
@@ -143,6 +162,7 @@ const useWildduckUsersList = (
 const useWildduckUser = (
   config: WildDuckConfig,
   userId: string,
+  devMode: boolean = false,
   options?: UseQueryOptions<WildDuckUserData>
 ): UseQueryResult<WildDuckUserData> => {
   
@@ -162,28 +182,36 @@ const useWildduckUser = (
         headers['X-Access-Token'] = config.apiToken;
       }
 
-      const response = await axios.get(`${apiUrl}/users/${userId}`, { headers });
-      const userData = response.data as { success: boolean; id: string; username: string; address?: string };
-      return {
-        id: userData.id,
-        username: userData.username,
-        name: userData.address || userData.username,
-        tags: [],
-        targets: [],
-        autoreply: false,
-        encryptMessages: false,
-        encryptForwarded: false,
-        quota: {
-          allowed: 0,
-          used: 0,
-        },
-        metaData: {},
-        internalData: {},
-        hasBlockchainAuth: true,
-        activated: userData.success || false,
-        disabled: false,
-        suspended: false,
-      };
+      try {
+        const response = await axios.get(`${apiUrl}/users/${userId}`, { headers });
+        const userData = response.data as { success: boolean; id: string; username: string; address?: string };
+        return {
+          id: userData.id,
+          username: userData.username,
+          name: userData.address || userData.username,
+          tags: [],
+          targets: [],
+          autoreply: false,
+          encryptMessages: false,
+          encryptForwarded: false,
+          quota: {
+            allowed: 0,
+            used: 0,
+          },
+          metaData: {},
+          internalData: {},
+          hasBlockchainAuth: true,
+          activated: userData.success || false,
+          disabled: false,
+          suspended: false,
+        };
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Get user failed, returning mock data:', err);
+          return WildDuckMockData.getUserQuery(userId) as WildDuckUserData;
+        }
+        throw err;
+      }
     },
     staleTime: STALE_TIMES.USER_PROFILE,
     enabled: !!userId,
@@ -197,6 +225,7 @@ const useWildduckUser = (
 const useWildduckUserAddresses = (
   config: WildDuckConfig,
   userId: string,
+  devMode: boolean = false,
   options?: UseQueryOptions<AddressData[]>
 ): UseQueryResult<AddressData[]> => {
   
@@ -216,16 +245,25 @@ const useWildduckUserAddresses = (
         headers['X-Access-Token'] = config.apiToken;
       }
 
-      const response = await axios.get(`${apiUrl}/users/${userId}/addresses`, { headers });
-      const addressData = response.data as { success: boolean; results: Array<{ id: string; address: string; main: boolean }> };
-      return addressData.results?.map(addr => ({
-        id: addr.id,
-        address: addr.address,
-        name: addr.address,
-        user: userId,
-        created: new Date().toISOString(),
-        main: addr.main,
-      })) || [];
+      try {
+        const response = await axios.get(`${apiUrl}/users/${userId}/addresses`, { headers });
+        const addressData = response.data as { success: boolean; results: Array<{ id: string; address: string; main: boolean }> };
+        return addressData.results?.map(addr => ({
+          id: addr.id,
+          address: addr.address,
+          name: addr.address,
+          user: userId,
+          created: new Date().toISOString(),
+          main: addr.main,
+        })) || [];
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Get user addresses failed, returning mock data:', err);
+          const mockData = WildDuckMockData.getUserAddressesQuery();
+          return mockData.addresses as AddressData[];
+        }
+        throw err;
+      }
     },
     staleTime: STALE_TIMES.EMAIL_ADDRESSES,
     enabled: !!userId,
@@ -240,6 +278,7 @@ const useWildduckUserMessages = (
   config: WildDuckConfig,
   userId: string,
   mailboxId: string,
+  devMode: boolean = false,
   filters?: Record<string, unknown>,
   options?: UseQueryOptions<GetMessagesResponse>
 ): UseQueryResult<GetMessagesResponse> => {
@@ -260,39 +299,47 @@ const useWildduckUserMessages = (
         headers['X-Access-Token'] = config.apiToken;
       }
 
-      const response = await axios.get(`${apiUrl}/users/${userId}/mailboxes/${mailboxId}/messages`, { headers });
-      const messagesData = response.data as { success: boolean; results: any[]; total: number; page: number };
-      return {
-        success: messagesData.success as true,
-        total: messagesData.total,
-        page: messagesData.page,
-        previousCursor: false,
-        nextCursor: false,
-        results: messagesData.results.map(msg => ({
-          id: msg.id,
-          mailbox: msg.mailbox,
-          thread: msg.thread || '',
-          envelope: {
+      try {
+        const response = await axios.get(`${apiUrl}/users/${userId}/mailboxes/${mailboxId}/messages`, { headers });
+        const messagesData = response.data as { success: boolean; results: any[]; total: number; page: number };
+        return {
+          success: messagesData.success as true,
+          total: messagesData.total,
+          page: messagesData.page,
+          previousCursor: false,
+          nextCursor: false,
+          results: messagesData.results.map(msg => ({
+            id: msg.id,
+            mailbox: msg.mailbox,
+            thread: msg.thread || '',
+            envelope: {
+              date: msg.date || '',
+              subject: msg.subject || '',
+              from: msg.from ? [{ name: msg.from.name || '', address: msg.from.address || '' }] : [],
+              to: msg.to?.map((addr: any) => ({ name: addr.name || '', address: addr.address || '' })) || [],
+              messageId: msg.id || '',
+            },
             date: msg.date || '',
-            subject: msg.subject || '',
-            from: msg.from ? [{ name: msg.from.name || '', address: msg.from.address || '' }] : [],
-            to: msg.to?.map((addr: any) => ({ name: addr.name || '', address: addr.address || '' })) || [],
-            messageId: msg.id || '',
-          },
-          date: msg.date || '',
-          idate: msg.date || '',
-          size: msg.size || 0,
-          intro: msg.intro || '',
-          attachments: msg.attachments || false,
-          seen: msg.seen || false,
-          deleted: msg.deleted || false,
-          flagged: msg.flagged || false,
-          draft: msg.draft || false,
-          answered: msg.answered || false,
-          forwarded: msg.forwarded || false,
-          references: msg.references || [],
-        })) as MessageData[],
-      };
+            idate: msg.date || '',
+            size: msg.size || 0,
+            intro: msg.intro || '',
+            attachments: msg.attachments || false,
+            seen: msg.seen || false,
+            deleted: msg.deleted || false,
+            flagged: msg.flagged || false,
+            draft: msg.draft || false,
+            answered: msg.answered || false,
+            forwarded: msg.forwarded || false,
+            references: msg.references || [],
+          })) as MessageData[],
+        };
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Get user messages failed, returning mock data:', err);
+          return WildDuckMockData.getUserMessagesQuery() as unknown as GetMessagesResponse;
+        }
+        throw err;
+      }
     },
     staleTime: STALE_TIMES.MESSAGES,
     enabled: !!(userId && mailboxId),
@@ -307,6 +354,7 @@ const useWildduckMessage = (
   config: WildDuckConfig,
   userId: string,
   messageId: string,
+  devMode: boolean = false,
   options?: UseQueryOptions<MessageData>
 ): UseQueryResult<MessageData> => {
   
@@ -326,32 +374,40 @@ const useWildduckMessage = (
         headers['X-Access-Token'] = config.apiToken;
       }
 
-      const response = await axios.get(`${apiUrl}/users/${userId}/messages/${messageId}`, { headers });
-      const messageData = response.data as any;
-      return {
-        id: messageData.id,
-        mailbox: messageData.mailbox,
-        thread: messageData.thread || '',
-        envelope: {
+      try {
+        const response = await axios.get(`${apiUrl}/users/${userId}/messages/${messageId}`, { headers });
+        const messageData = response.data as any;
+        return {
+          id: messageData.id,
+          mailbox: messageData.mailbox,
+          thread: messageData.thread || '',
+          envelope: {
+            date: messageData.date || '',
+            subject: messageData.subject || '',
+            from: messageData.from ? [{ name: messageData.from.name || '', address: messageData.from.address || '' }] : [],
+            to: messageData.to?.map((addr: any) => ({ name: addr.name || '', address: addr.address || '' })) || [],
+            messageId: messageData.id || '',
+          },
           date: messageData.date || '',
-          subject: messageData.subject || '',
-          from: messageData.from ? [{ name: messageData.from.name || '', address: messageData.from.address || '' }] : [],
-          to: messageData.to?.map((addr: any) => ({ name: addr.name || '', address: addr.address || '' })) || [],
-          messageId: messageData.id || '',
-        },
-        date: messageData.date || '',
-        idate: messageData.date || '',
-        size: messageData.size || 0,
-        intro: messageData.intro || '',
-        attachments: messageData.attachments || false,
-        seen: messageData.seen || false,
-        deleted: messageData.deleted || false,
-        flagged: messageData.flagged || false,
-        draft: messageData.draft || false,
-        answered: messageData.answered || false,
-        forwarded: messageData.forwarded || false,
-        references: messageData.references || [],
-      };
+          idate: messageData.date || '',
+          size: messageData.size || 0,
+          intro: messageData.intro || '',
+          attachments: messageData.attachments || false,
+          seen: messageData.seen || false,
+          deleted: messageData.deleted || false,
+          flagged: messageData.flagged || false,
+          draft: messageData.draft || false,
+          answered: messageData.answered || false,
+          forwarded: messageData.forwarded || false,
+          references: messageData.references || [],
+        };
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Get message failed, returning mock data:', err);
+          return WildDuckMockData.getMessageQuery(messageId, userId) as MessageData;
+        }
+        throw err;
+      }
     },
     staleTime: STALE_TIMES.MESSAGE_CONTENT,
     enabled: !!(userId && messageId),
@@ -366,6 +422,7 @@ const useWildduckMessage = (
 const useWildduckUserFilters = (
   config: WildDuckConfig,
   userId: string,
+  devMode: boolean = false,
   options?: UseQueryOptions<WildduckFilter[]>
 ): UseQueryResult<WildduckFilter[]> => {
   return useQuery({
@@ -384,16 +441,25 @@ const useWildduckUserFilters = (
         headers['X-Access-Token'] = config.apiToken;
       }
 
-      const response = await axios.get(`${apiUrl}/users/${userId}/filters`, { headers });
-      const data = response.data as { results?: any[] };
-      return data.results?.map(filter => ({
-        id: filter.id || '',
-        name: filter.name || '',
-        query: filter.query || {},
-        action: filter.action || {},
-        disabled: filter.disabled || false,
-        created: filter.created || new Date().toISOString(),
-      })) || [];
+      try {
+        const response = await axios.get(`${apiUrl}/users/${userId}/filters`, { headers });
+        const data = response.data as { results?: any[] };
+        return data.results?.map(filter => ({
+          id: filter.id || '',
+          name: filter.name || '',
+          query: filter.query || {},
+          action: filter.action || {},
+          disabled: filter.disabled || false,
+          created: filter.created || new Date().toISOString(),
+        })) || [];
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Get user filters failed, returning mock data:', err);
+          const mockData = WildDuckMockData.getUserFiltersQuery();
+          return mockData.filters as WildduckFilter[];
+        }
+        throw err;
+      }
     },
     staleTime: STALE_TIMES.USER_PROFILE, // Filters are part of user profile data
     enabled: !!userId,
@@ -408,6 +474,7 @@ const useWildduckUserFilters = (
 const useWildduckUserSettings = (
   config: WildDuckConfig,
   userId: string,
+  devMode: boolean = false,
   options?: UseQueryOptions<WildduckUserSettings>
 ): UseQueryResult<WildduckUserSettings> => {
   return useQuery({
@@ -426,9 +493,18 @@ const useWildduckUserSettings = (
         headers['X-Access-Token'] = config.apiToken;
       }
 
-      const response = await axios.get(`${apiUrl}/users/${userId}/settings`, { headers });
-      const data = response.data as Record<string, unknown>;
-      return data || {};
+      try {
+        const response = await axios.get(`${apiUrl}/users/${userId}/settings`, { headers });
+        const data = response.data as Record<string, unknown>;
+        return data || {};
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Get user settings failed, returning mock data:', err);
+          const mockData = WildDuckMockData.getUserSettingsQuery();
+          return mockData.settings as WildduckUserSettings;
+        }
+        throw err;
+      }
     },
     staleTime: STALE_TIMES.USER_PROFILE, // Settings are part of user profile data
     enabled: !!userId,
@@ -442,6 +518,7 @@ const useWildduckUserSettings = (
 const useWildduckUserMailboxes = (
   config: WildDuckConfig,
   userId: string,
+  devMode: boolean = false,
   options?: {
     specialUse?: boolean;
     showHidden?: boolean;
@@ -476,8 +553,17 @@ const useWildduckUserMailboxes = (
       const queryString = params.toString();
       const endpoint = `${apiUrl}/users/${userId}/mailboxes${queryString ? `?${queryString}` : ''}`;
 
-      const response = await axios.get(endpoint, { headers });
-      return response.data as GetMailboxesResponse;
+      try {
+        const response = await axios.get(endpoint, { headers });
+        return response.data as GetMailboxesResponse;
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Get user mailboxes failed, returning mock data:', err);
+          const mockData = WildDuckMockData.getUserMailboxesQuery();
+          return { success: true, results: mockData.mailboxes } as unknown as GetMailboxesResponse;
+        }
+        throw err;
+      }
     },
     staleTime: STALE_TIMES.MAILBOXES,
     enabled: !!userId,
@@ -491,6 +577,7 @@ const useWildduckUserMailboxes = (
 const useWildduckAuthStatus = (
   config: WildDuckConfig,
   token?: string,
+  devMode: boolean = false,
   queryOptions?: UseQueryOptions<WildduckAuthStatusResponse>
 ): UseQueryResult<WildduckAuthStatusResponse> => {
   
@@ -510,26 +597,34 @@ const useWildduckAuthStatus = (
         headers['X-Access-Token'] = token || config.apiToken;
       }
 
-      const httpResponse = await axios.get(`${apiUrl}/users/me`, { headers });
-      const data = httpResponse.data as { success: boolean; id?: string; username?: string; address?: string };
-      
-      const response: WildduckAuthStatusResponse = {
-        success: data.success,
-        authenticated: data.success,
-      };
-
-      if (data.success && (data.id || data.username)) {
-        const user: { id: string; username: string; address?: string } = {
-          id: data.id || '',
-          username: data.username || '',
+      try {
+        const httpResponse = await axios.get(`${apiUrl}/users/me`, { headers });
+        const data = httpResponse.data as { success: boolean; id?: string; username?: string; address?: string };
+        
+        const response: WildduckAuthStatusResponse = {
+          success: data.success,
+          authenticated: data.success,
         };
-        if (data.address) {
-          user.address = data.address;
-        }
-        response.user = user;
-      }
 
-      return response;
+        if (data.success && (data.id || data.username)) {
+          const user: { id: string; username: string; address?: string } = {
+            id: data.id || '',
+            username: data.username || '',
+          };
+          if (data.address) {
+            user.address = data.address;
+          }
+          response.user = user;
+        }
+
+        return response;
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Auth status check failed, returning mock data:', err);
+          return WildDuckMockData.getAuthStatusQuery() as WildduckAuthStatusResponse;
+        }
+        throw err;
+      }
     },
     staleTime: STALE_TIMES.USER_PROFILE,
     enabled: !!token || !!config.apiToken,
@@ -545,6 +640,7 @@ const useWildduckSearchMessages = (
   userId: string,
   mailboxId: string,
   query: string,
+  devMode: boolean = false,
   searchOptions?: Record<string, unknown>,
   queryOptions?: UseQueryOptions<GetMessagesResponse>
 ): UseQueryResult<GetMessagesResponse> => {
@@ -575,11 +671,19 @@ const useWildduckSearchMessages = (
         });
       }
 
-      const response = await axios.get(
-        `${apiUrl}/users/${userId}/mailboxes/${mailboxId}/messages?${params}`,
-        { headers }
-      );
-      return response.data as GetMessagesResponse;
+      try {
+        const response = await axios.get(
+          `${apiUrl}/users/${userId}/mailboxes/${mailboxId}/messages?${params}`,
+          { headers }
+        );
+        return response.data as GetMessagesResponse;
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Search messages failed, returning mock data:', err);
+          return WildDuckMockData.getSearchMessagesQuery() as unknown as GetMessagesResponse;
+        }
+        throw err;
+      }
     },
     staleTime: STALE_TIMES.MESSAGES,
     enabled: !!(userId && mailboxId && query),

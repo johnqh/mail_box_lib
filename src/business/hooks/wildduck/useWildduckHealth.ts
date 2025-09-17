@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
+import { WildDuckMockData } from './mocks';
 
 interface WildduckHealthStatus {
   success: boolean;
@@ -47,7 +48,7 @@ interface UseWildduckHealthReturn {
 /**
  * Hook for WildDuck health monitoring and status operations
  */
-const useWildduckHealth = (config: WildDuckConfig): UseWildduckHealthReturn => {
+const useWildduckHealth = (config: WildDuckConfig, devMode: boolean = false): UseWildduckHealthReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [healthStatus, setHealthStatus] = useState<WildduckHealthStatus | null>(
@@ -92,6 +93,13 @@ const useWildduckHealth = (config: WildDuckConfig): UseWildduckHealthReturn => {
       setHealthStatus(healthData);
       return healthData;
     } catch (err) {
+      if (devMode) {
+        console.warn('[DevMode] Health check failed, returning mock data:', err);
+        const mockHealthData = WildDuckMockData.getHealth() as WildduckHealthStatus;
+        setHealthStatus(mockHealthData);
+        return mockHealthData;
+      }
+
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to check health';
       setError(errorMessage);

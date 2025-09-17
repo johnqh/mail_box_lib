@@ -11,6 +11,7 @@ import type {
   SimpleMessageResponse,
   ValidationResponse,
 } from '@johnqh/types';
+import { IndexerMockData } from './mocks';
 
 interface IndexerEmailAddress {
   email: string;
@@ -70,71 +71,152 @@ interface UseIndexerMailReturn {
 /**
  * React hook for Indexer Mail API operations
  */
-const useIndexerMail = (endpointUrl: string, dev: boolean = false): UseIndexerMailReturn => {
+const useIndexerMail = (endpointUrl: string, dev: boolean = false, devMode: boolean = false): UseIndexerMailReturn => {
   const indexerClient = new IndexerClient(endpointUrl, dev);
   const { isLoading, error, clearError, execute } = useApiCall({
     context: 'IndexerMail',
   });
 
   const validateAddress = useCallback(
-    execute((address: string) => indexerClient.validateAddress(address)),
-    [execute, indexerClient]
+    execute(async (address: string) => {
+      try {
+        return await indexerClient.validateAddress(address);
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] validateAddress failed, returning mock data:', err);
+          return IndexerMockData.getValidation(address);
+        }
+        throw err;
+      }
+    }),
+    [execute, indexerClient, devMode]
   );
 
   const getEmailAddresses = useCallback(
-    execute((walletAddress: string, signature: string, message: string) =>
-      indexerClient.getEmailAddresses(walletAddress, signature, message)
-    ),
-    [execute, indexerClient]
+    execute(async (walletAddress: string, signature: string, message: string) => {
+      try {
+        return await indexerClient.getEmailAddresses(walletAddress, signature, message);
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] getEmailAddresses failed, returning mock data:', err);
+          return IndexerMockData.getEmailAddresses();
+        }
+        throw err;
+      }
+    }),
+    [execute, indexerClient, devMode]
   );
 
   const getDelegatedAddress = useCallback(
-    execute((walletAddress: string, signature: string, message: string) =>
-      indexerClient.getDelegated(walletAddress, signature, message)
-    ),
-    [execute, indexerClient]
+    execute(async (walletAddress: string, signature: string, message: string) => {
+      try {
+        return await indexerClient.getDelegated(walletAddress, signature, message);
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] getDelegatedAddress failed, returning mock data:', err);
+          return IndexerMockData.getDelegation();
+        }
+        throw err;
+      }
+    }),
+    [execute, indexerClient, devMode]
   );
 
   const getDelegatorsToAddress = useCallback(
-    execute((walletAddress: string, signature: string, message: string) =>
-      indexerClient.getDelegatedTo(walletAddress, signature, message)
-    ),
-    [execute, indexerClient]
+    execute(async (walletAddress: string, signature: string, message: string) => {
+      try {
+        return await indexerClient.getDelegatedTo(walletAddress, signature, message);
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] getDelegatorsToAddress failed, returning mock data:', err);
+          return IndexerMockData.getDelegators();
+        }
+        throw err;
+      }
+    }),
+    [execute, indexerClient, devMode]
   );
 
   const verifySignature = useCallback(
-    execute((walletAddress: string, signature: string, message: string) =>
-      indexerClient.verifySignature(walletAddress, signature, message || '')
-    ),
-    [execute, indexerClient]
+    execute(async (walletAddress: string, signature: string, message: string) => {
+      try {
+        return await indexerClient.verifySignature(walletAddress, signature, message || '');
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] verifySignature failed, returning mock data:', err);
+          return IndexerMockData.getSignatureVerification(walletAddress, signature, message);
+        }
+        throw err;
+      }
+    }),
+    [execute, indexerClient, devMode]
   );
 
   const getSigningMessage = useCallback(
-    execute((walletAddress: string, chainId: number, domain: string, url: string) =>
-      indexerClient.getMessage(chainId, walletAddress, domain, url)
-    ),
-    [execute, indexerClient]
+    execute(async (walletAddress: string, chainId: number, domain: string, url: string) => {
+      try {
+        return await indexerClient.getMessage(chainId, walletAddress, domain, url);
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] getSigningMessage failed, returning mock data:', err);
+          return IndexerMockData.getSigningMessage(walletAddress, chainId, domain);
+        }
+        throw err;
+      }
+    }),
+    [execute, indexerClient, devMode]
   );
 
   const getNonce = useCallback(
-    execute((walletAddress: string, signature: string, message?: string) =>
-      indexerClient.getNonce(walletAddress, signature, message || '')
-    ),
-    [execute, indexerClient]
+    execute(async (walletAddress: string, signature: string, message?: string) => {
+      try {
+        return await indexerClient.getNonce(walletAddress, signature, message || '');
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] getNonce failed, returning mock data:', err);
+          return IndexerMockData.getNonce();
+        }
+        throw err;
+      }
+    }),
+    [execute, indexerClient, devMode]
   );
 
   const createNonce = useCallback(
-    execute((walletAddress: string, signature: string, message?: string) =>
-      indexerClient.createNonce(walletAddress, signature, message || '')
-    ),
-    [execute, indexerClient]
+    execute(async (walletAddress: string, signature: string, message?: string) => {
+      try {
+        return await indexerClient.createNonce(walletAddress, signature, message || '');
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] createNonce failed, returning mock data:', err);
+          return {
+            success: true,
+            data: {
+              nonce: Math.floor(Math.random() * 1000000).toString(),
+              expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString()
+            },
+            timestamp: new Date().toISOString()
+          } as unknown as NonceResponse;
+        }
+        throw err;
+      }
+    }),
+    [execute, indexerClient, devMode]
   );
 
   const getNameServiceEntitlement = useCallback(
-    execute((walletAddress: string, signature: string, message: string) =>
-      indexerClient.checkNameServiceEntitlement(walletAddress, signature, message)
-    ),
-    [execute, indexerClient]
+    execute(async (walletAddress: string, signature: string, message: string) => {
+      try {
+        return await indexerClient.checkNameServiceEntitlement(walletAddress, signature, message);
+      } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] getNameServiceEntitlement failed, returning mock data:', err);
+          return IndexerMockData.getEntitlement();
+        }
+        throw err;
+      }
+    }),
+    [execute, indexerClient, devMode]
   );
 
   return {

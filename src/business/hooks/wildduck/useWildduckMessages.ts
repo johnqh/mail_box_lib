@@ -84,7 +84,7 @@ interface UseWildduckMessagesReturn {
 /**
  * Hook for WildDuck message operations
  */
-const useWildduckMessages = (config: WildDuckConfig): UseWildduckMessagesReturn => {
+const useWildduckMessages = (config: WildDuckConfig, _devMode: boolean = false): UseWildduckMessagesReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [messages, setMessages] = useState<MessageData[]>([]);

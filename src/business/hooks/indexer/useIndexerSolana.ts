@@ -5,6 +5,7 @@ import type {
   SolanaStatusResponse,
   SolanaTestTransactionResponse,
 } from '@johnqh/types';
+import { IndexerMockData } from './mocks';
 
 interface UseIndexerSolanaReturn {
   isLoading: boolean;
@@ -21,7 +22,7 @@ interface UseIndexerSolanaReturn {
 /**
  * React hook for Indexer Solana API operations
  */
-const useIndexerSolana = (endpointUrl: string, dev: boolean = false): UseIndexerSolanaReturn => {
+const useIndexerSolana = (endpointUrl: string, dev: boolean = false, devMode: boolean = false): UseIndexerSolanaReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const indexerClient = new IndexerClient(endpointUrl, dev);
@@ -42,11 +43,18 @@ const useIndexerSolana = (endpointUrl: string, dev: boolean = false): UseIndexer
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to get Solana status';
         setError(errorMessage);
+        
+        // Return mock data in devMode when API fails
+        if (devMode) {
+          console.warn('[DevMode] getSolanaStatus failed, returning mock data:', errorMessage);
+          return IndexerMockData.getSolanaStatus();
+        }
+        
         throw err;
       } finally {
         setIsLoading(false);
       }
-    }, [indexerClient]);
+    }, [indexerClient, devMode]);
 
   const setupWebhooks =
     useCallback(async (): Promise<SolanaSetupResponse> => {
@@ -60,11 +68,18 @@ const useIndexerSolana = (endpointUrl: string, dev: boolean = false): UseIndexer
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to setup webhooks';
         setError(errorMessage);
+        
+        // Return mock data in devMode when API fails
+        if (devMode) {
+          console.warn('[DevMode] setupWebhooks failed, returning mock data:', errorMessage);
+          return IndexerMockData.getSolanaSetup();
+        }
+        
         throw err;
       } finally {
         setIsLoading(false);
       }
-    }, [indexerClient]);
+    }, [indexerClient, devMode]);
 
   const processTestTransaction = useCallback(
     async (
@@ -86,12 +101,19 @@ const useIndexerSolana = (endpointUrl: string, dev: boolean = false): UseIndexer
             ? err.message
             : 'Failed to process test transaction';
         setError(errorMessage);
+        
+        // Return mock data in devMode when API fails
+        if (devMode) {
+          console.warn('[DevMode] processTestTransaction failed, returning mock data:', errorMessage);
+          return IndexerMockData.getSolanaTestTransaction();
+        }
+        
         throw err;
       } finally {
         setIsLoading(false);
       }
     },
-    [indexerClient]
+    [indexerClient, devMode]
   );
 
   return {

@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import axios from 'axios';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
+import { WildDuckMockData } from './mocks';
 
 interface WildduckAddress {
   id: string;
@@ -66,7 +67,7 @@ interface UseWildduckAddressesReturn {
 /**
  * Hook for WildDuck address management operations
  */
-const useWildduckAddresses = (config: WildDuckConfig): UseWildduckAddressesReturn => {
+const useWildduckAddresses = (config: WildDuckConfig, devMode: boolean = false): UseWildduckAddressesReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [addresses, setAddresses] = useState<WildduckAddress[]>([]);
@@ -112,6 +113,14 @@ const useWildduckAddresses = (config: WildDuckConfig): UseWildduckAddressesRetur
         setAddresses(addressList);
         return addressList;
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Get user addresses failed, returning mock data:', err);
+          const mockData = WildDuckMockData.getUserAddresses();
+          const mockAddresses = mockData.data.addresses as WildduckAddress[];
+          setAddresses(mockAddresses);
+          return mockAddresses;
+        }
+
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to get addresses';
         setError(errorMessage);
@@ -155,6 +164,11 @@ const useWildduckAddresses = (config: WildDuckConfig): UseWildduckAddressesRetur
 
         return response.data as { success: boolean; id: string };
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Create address failed, returning mock success:', err);
+          return WildDuckMockData.getCreateAddress();
+        }
+
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to create address';
         setError(errorMessage);
@@ -198,6 +212,11 @@ const useWildduckAddresses = (config: WildDuckConfig): UseWildduckAddressesRetur
 
         return response.data as { success: boolean };
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Update address failed, returning mock success:', err);
+          return WildDuckMockData.getUpdateAddress();
+        }
+
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to update address';
         setError(errorMessage);
@@ -239,6 +258,11 @@ const useWildduckAddresses = (config: WildDuckConfig): UseWildduckAddressesRetur
 
         return response.data as { success: boolean };
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Delete address failed, returning mock success:', err);
+          return WildDuckMockData.getDeleteAddress();
+        }
+
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to delete address';
         setError(errorMessage);
@@ -278,6 +302,12 @@ const useWildduckAddresses = (config: WildDuckConfig): UseWildduckAddressesRetur
 
       return (response.data as { results?: ForwardedAddress[] }).results || [];
     } catch (err) {
+      if (devMode) {
+        console.warn('[DevMode] Get forwarded addresses failed, returning mock data:', err);
+        const mockData = WildDuckMockData.getForwardedAddresses();
+        return mockData.data.addresses as ForwardedAddress[];
+      }
+
       const errorMessage =
         err instanceof Error
           ? err.message
@@ -320,6 +350,11 @@ const useWildduckAddresses = (config: WildDuckConfig): UseWildduckAddressesRetur
 
         return response.data as { success: boolean; id: string };
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Create forwarded address failed, returning mock success:', err);
+          return WildDuckMockData.getCreateForwardedAddress();
+        }
+
         const errorMessage =
           err instanceof Error
             ? err.message
@@ -360,6 +395,11 @@ const useWildduckAddresses = (config: WildDuckConfig): UseWildduckAddressesRetur
 
         return response.data as { success: boolean };
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Delete forwarded address failed, returning mock success:', err);
+          return WildDuckMockData.getDeleteForwardedAddress();
+        }
+
         const errorMessage =
           err instanceof Error
             ? err.message
@@ -400,6 +440,11 @@ const useWildduckAddresses = (config: WildDuckConfig): UseWildduckAddressesRetur
 
         return response.data as { success: boolean; user?: string };
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Resolve address failed, returning mock success:', err);
+          return WildDuckMockData.getResolveAddress(address);
+        }
+
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to resolve address';
         setError(errorMessage);

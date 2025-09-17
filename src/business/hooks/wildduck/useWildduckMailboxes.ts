@@ -10,6 +10,7 @@ import type {
   GetMailboxesRequest,
   UpdateMailboxRequest,
 } from '@johnqh/types';
+import { WildDuckMockData } from './mocks';
 
 interface UseWildduckMailboxesReturn {
   isLoading: boolean;
@@ -39,7 +40,7 @@ interface UseWildduckMailboxesReturn {
 /**
  * Hook for WildDuck mailbox operations
  */
-const useWildduckMailboxes = (config: WildDuckConfig): UseWildduckMailboxesReturn => {
+const useWildduckMailboxes = (config: WildDuckConfig, devMode: boolean = false): UseWildduckMailboxesReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mailboxes, setMailboxes] = useState<MailboxData[]>([]);
@@ -88,6 +89,14 @@ const useWildduckMailboxes = (config: WildDuckConfig): UseWildduckMailboxesRetur
         setMailboxes(mailboxList);
         return mailboxList;
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Get mailboxes failed, returning mock data:', err);
+          const mockData = WildDuckMockData.getMailboxes();
+          const mockMailboxes = mockData.data.mailboxes as unknown as MailboxData[];
+          setMailboxes(mockMailboxes);
+          return mockMailboxes;
+        }
+
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to get mailboxes';
         setError(errorMessage);
@@ -135,6 +144,11 @@ const useWildduckMailboxes = (config: WildDuckConfig): UseWildduckMailboxesRetur
 
         return response.data as { success: boolean; id: string };
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Create mailbox failed, returning mock success:', err);
+          return WildDuckMockData.getCreateMailbox();
+        }
+
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to create mailbox';
         setError(errorMessage);
@@ -178,6 +192,11 @@ const useWildduckMailboxes = (config: WildDuckConfig): UseWildduckMailboxesRetur
 
         return response.data as { success: boolean };
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Update mailbox failed, returning mock success:', err);
+          return WildDuckMockData.getUpdateMailbox();
+        }
+
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to update mailbox';
         setError(errorMessage);
@@ -219,6 +238,11 @@ const useWildduckMailboxes = (config: WildDuckConfig): UseWildduckMailboxesRetur
 
         return response.data as { success: boolean };
       } catch (err) {
+        if (devMode) {
+          console.warn('[DevMode] Delete mailbox failed, returning mock success:', err);
+          return WildDuckMockData.getDeleteMailbox();
+        }
+
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to delete mailbox';
         setError(errorMessage);
