@@ -573,7 +573,7 @@ class AIEmailServiceImpl implements AIEmailService {
         entities.push({
           type: 'wallet_address',
           value: address,
-          chainType: ChainType.ETHEREUM,
+          chainType: ChainType.EVM,
           confidence: 0.9,
         });
       });
@@ -586,7 +586,7 @@ class AIEmailServiceImpl implements AIEmailService {
         entities.push({
           type: 'ens_name',
           value: name,
-          chainType: ChainType.ETHEREUM,
+          chainType: ChainType.EVM,
           confidence: 0.95,
         });
       });
