@@ -198,17 +198,17 @@ class IndexerClient implements NetworkClient {
   // =============================================================================
 
   /**
-   * Validate address format (public endpoint)
-   * GET /api/addresses/:address/validate
+   * Validate username format (public endpoint)
+   * GET /api/users/:username/validate
    */
-  async validateAddress(address: string): Promise<ValidationResponse> {
+  async validateUsername(username: string): Promise<ValidationResponse> {
     const response = await this.get<ValidationResponse>(
-      `/api/addresses/${encodeURIComponent(address)}/validate`
+      `/api/users/${encodeURIComponent(username)}/validate`
     );
 
     if (!response.ok) {
       throw new Error(
-        `Failed to validate address: ${(response.data as any)?.error || 'Unknown error'}`
+        `Failed to validate username: ${(response.data as any)?.error || 'Unknown error'}`
       );
     }
 
@@ -217,7 +217,7 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get email accounts for a wallet address (requires signature verification)
-   * GET /api/addresses/:walletAddress/accounts
+   * GET /api/wallets/:walletAddress/accounts
    */
   async getEmailAccounts(
     walletAddress: string,
@@ -225,7 +225,7 @@ class IndexerClient implements NetworkClient {
     message: string
   ): Promise<EmailAccountsResponse> {
     const response = await this.get<EmailAccountsResponse>(
-      `/api/addresses/${encodeURIComponent(walletAddress)}/accounts`,
+      `/api/wallets/${encodeURIComponent(walletAddress)}/accounts`,
       {
         headers: this.createAuthHeaders(signature, message),
       }
@@ -243,7 +243,7 @@ class IndexerClient implements NetworkClient {
   /**
    * @deprecated Use getEmailAccounts instead. This method will be removed in future versions.
    * Get email addresses for a wallet address (requires signature verification)
-   * GET /api/addresses/:walletAddress/accounts
+   * GET /api/wallets/:walletAddress/accounts
    */
   async getEmailAddresses(
     walletAddress: string,
@@ -255,7 +255,7 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get delegation information for a wallet (requires signature verification)
-   * GET /api/addresses/:walletAddress/delegated
+   * GET /api/delegations/from/:walletAddress
    */
   async getDelegated(
     walletAddress: string,
@@ -263,7 +263,7 @@ class IndexerClient implements NetworkClient {
     message: string
   ): Promise<DelegationResponse> {
     const response = await this.get<DelegationResponse>(
-      `/api/addresses/${encodeURIComponent(walletAddress)}/delegated`,
+      `/api/delegations/from/${encodeURIComponent(walletAddress)}`,
       {
         headers: this.createAuthHeaders(signature, message),
       }
@@ -280,7 +280,7 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get all addresses that have delegated TO a specific wallet address (requires signature verification)
-   * GET /api/addresses/:walletAddress/delegated/to
+   * GET /api/delegations/to/:walletAddress
    */
   async getDelegatedTo(
     walletAddress: string,
@@ -288,7 +288,7 @@ class IndexerClient implements NetworkClient {
     message: string
   ): Promise<DelegatorsResponse> {
     const response = await this.get<DelegatorsResponse>(
-      `/api/addresses/${encodeURIComponent(walletAddress)}/delegated/to`,
+      `/api/delegations/to/${encodeURIComponent(walletAddress)}`,
       {
         headers: this.createAuthHeaders(signature, message),
       }
@@ -305,7 +305,7 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get deterministic message for signing
-   * GET /api/addresses/:walletAddress/message/:chainId/:domain/:url
+   * GET /api/wallets/:walletAddress/message/:chainId/:domain/:url
    */
   async getMessage(
     chainId: number,
@@ -314,7 +314,7 @@ class IndexerClient implements NetworkClient {
     url: string
   ): Promise<SimpleMessageResponse> {
     const response = await this.get<SimpleMessageResponse>(
-      `/api/addresses/${encodeURIComponent(walletAddress)}/message/${chainId}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`
+      `/api/wallets/${encodeURIComponent(walletAddress)}/message/${chainId}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`
     );
 
     if (!response.ok) {
@@ -328,7 +328,7 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Create/update nonce for wallet address
-   * POST /api/addresses/:walletAddress/nonce
+   * POST /api/wallets/:walletAddress/nonce
    */
   async createNonce(
     walletAddress: string,
@@ -336,7 +336,7 @@ class IndexerClient implements NetworkClient {
     message: string
   ): Promise<NonceResponse> {
     const response = await this.post<NonceResponse>(
-      `/api/addresses/${encodeURIComponent(walletAddress)}/nonce`,
+      `/api/wallets/${encodeURIComponent(walletAddress)}/nonce`,
       {
         walletAddress,
         signature,
@@ -358,7 +358,7 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Retrieve nonce for wallet address
-   * GET /api/addresses/:walletAddress/nonce
+   * GET /api/wallets/:walletAddress/nonce
    */
   async getNonce(
     walletAddress: string,
@@ -366,7 +366,7 @@ class IndexerClient implements NetworkClient {
     message: string
   ): Promise<NonceResponse> {
     const response = await this.get<NonceResponse>(
-      `/api/addresses/${encodeURIComponent(walletAddress)}/nonce`,
+      `/api/wallets/${encodeURIComponent(walletAddress)}/nonce`,
       {
         headers: this.createAuthHeaders(signature, message),
       }
@@ -383,17 +383,17 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Verify wallet signature
-   * POST /api/addresses/:address/verify
+   * POST /api/users/:username/verify
    */
   async verifySignature(
-    walletAddress: string,
+    username: string,
     signature: string,
     message: string
   ): Promise<SignatureVerificationResponse> {
     const response = await this.post<SignatureVerificationResponse>(
-      `/api/addresses/${encodeURIComponent(walletAddress)}/verify`,
+      `/api/users/${encodeURIComponent(username)}/verify`,
       {
-        walletAddress,
+        walletAddress: username,
         signature,
         message,
       },
@@ -413,7 +413,7 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Check nameservice entitlement for a wallet address (requires signature verification)
-   * GET /api/addresses/:walletAddress/entitlements/
+   * GET /api/wallets/:walletAddress/entitlements/
    */
   async checkNameServiceEntitlement(
     walletAddress: string,
@@ -421,7 +421,7 @@ class IndexerClient implements NetworkClient {
     message: string
   ): Promise<EntitlementResponse> {
     const response = await this.get<EntitlementResponse>(
-      `/api/addresses/${encodeURIComponent(walletAddress)}/entitlements/`,
+      `/api/wallets/${encodeURIComponent(walletAddress)}/entitlements/`,
       {
         headers: this.createAuthHeaders(signature, message),
       }
@@ -442,7 +442,7 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get user points balance (requires signature verification)
-   * GET /api/addresses/:walletAddress/points
+   * GET /api/wallets/:walletAddress/points
    */
   async getPointsBalance(
     walletAddress: string,
@@ -450,7 +450,7 @@ class IndexerClient implements NetworkClient {
     message: string
   ): Promise<PointsResponse> {
     const response = await this.get<PointsResponse>(
-      `/api/addresses/${encodeURIComponent(walletAddress)}/points`,
+      `/api/wallets/${encodeURIComponent(walletAddress)}/points`,
       {
         headers: this.createAuthHeaders(signature, message),
       }
@@ -584,33 +584,33 @@ const createIndexerApiConfig = (config: AppConfig) => ({
   VERSION: '2.2.0',
   ENDPOINTS: {
     // Mail endpoints
-    ADDRESSES_VALIDATE: (address: string) =>
-      `/api/addresses/${encodeURIComponent(address)}/validate`,
-    ADDRESSES_ACCOUNTS: (walletAddress: string) =>
-      `/api/addresses/${encodeURIComponent(walletAddress)}/accounts`,
-    ADDRESSES_DELEGATED: (walletAddress: string) =>
-      `/api/addresses/${encodeURIComponent(walletAddress)}/delegated`,
-    ADDRESSES_DELEGATED_TO: (walletAddress: string) =>
-      `/api/addresses/${encodeURIComponent(walletAddress)}/delegated/to`,
+    USERS_VALIDATE: (username: string) =>
+      `/api/users/${encodeURIComponent(username)}/validate`,
+    WALLETS_ACCOUNTS: (walletAddress: string) =>
+      `/api/wallets/${encodeURIComponent(walletAddress)}/accounts`,
+    DELEGATIONS_FROM: (walletAddress: string) =>
+      `/api/delegations/from/${encodeURIComponent(walletAddress)}`,
+    DELEGATIONS_TO: (walletAddress: string) =>
+      `/api/delegations/to/${encodeURIComponent(walletAddress)}`,
     MESSAGE: (
       walletAddress: string,
       chainId: number,
       domain: string,
       url: string
     ) =>
-      `/api/addresses/${encodeURIComponent(walletAddress)}/message/${chainId}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`,
+      `/api/wallets/${encodeURIComponent(walletAddress)}/message/${chainId}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`,
     NONCE_CREATE: (walletAddress: string) =>
-      `/api/addresses/${encodeURIComponent(walletAddress)}/nonce`,
+      `/api/wallets/${encodeURIComponent(walletAddress)}/nonce`,
     NONCE_GET: (walletAddress: string) =>
-      `/api/addresses/${encodeURIComponent(walletAddress)}/nonce`,
-    SIGNATURE_VERIFY: (address: string) =>
-      `/api/addresses/${encodeURIComponent(address)}/verify`,
+      `/api/wallets/${encodeURIComponent(walletAddress)}/nonce`,
+    SIGNATURE_VERIFY: (username: string) =>
+      `/api/users/${encodeURIComponent(username)}/verify`,
     ENTITLEMENTS_NAMESERVICE: (walletAddress: string) =>
-      `/api/addresses/${encodeURIComponent(walletAddress)}/entitlements/`,
+      `/api/wallets/${encodeURIComponent(walletAddress)}/entitlements/`,
 
     // Points endpoints (actual available endpoints)
     POINTS_BALANCE: (walletAddress: string) =>
-      `/api/addresses/${encodeURIComponent(walletAddress)}/points`,
+      `/api/wallets/${encodeURIComponent(walletAddress)}/points`,
     POINTS_LEADERBOARD: (count: number) => `/api/points/leaderboard/${count}`,
     POINTS_SITE_STATS: '/api/points/site-stats',
 

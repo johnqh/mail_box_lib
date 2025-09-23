@@ -61,10 +61,10 @@ describe('IndexerClient', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      const result = await client.validateAddress('0x123...');
+      const result = await client.validateUsername('0x123...');
       expect(result.ok).toBe(true);
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/addresses/0x123.../validate'),
+        expect.stringContaining('/api/users/0x123.../validate'),
         expect.objectContaining({
           method: 'GET',
           headers: expect.objectContaining({
@@ -82,8 +82,8 @@ describe('IndexerClient', () => {
         json: () => Promise.resolve({ error: 'Invalid address format' }),
       });
 
-      await expect(client.validateAddress('invalid-address'))
-        .rejects.toThrow('Failed to validate address');
+      await expect(client.validateUsername('invalid-address'))
+        .rejects.toThrow('Failed to validate username');
       
       expect(mockFetch).toHaveBeenCalled();
     });
@@ -125,7 +125,7 @@ describe('IndexerClient', () => {
       
       expect(result.ok).toBe(true);
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/addresses/0x123...'),
+        expect.stringContaining('/api/wallets/0x123...'),
         expect.objectContaining({
           method: 'GET',
           headers: expect.objectContaining({
@@ -141,7 +141,7 @@ describe('IndexerClient', () => {
     it('should handle network errors', async () => {
       mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
-      await expect(client.validateAddress('0x123...'))
+      await expect(client.validateUsername('0x123...'))
         .rejects.toThrow('Indexer API request failed');
     });
 
@@ -151,7 +151,7 @@ describe('IndexerClient', () => {
         new Promise(resolve => setTimeout(resolve, 100))
       );
 
-      await expect(timeoutClient.validateAddress('0x123...'))
+      await expect(timeoutClient.validateUsername('0x123...'))
         .rejects.toThrow();
     });
   });

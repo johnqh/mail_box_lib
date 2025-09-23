@@ -23,7 +23,7 @@ interface IndexerEmailAddress {
 interface UseIndexerMailReturn {
   isLoading: boolean;
   error: string | null;
-  validateAddress: (address: string) => Promise<ValidationResponse | undefined>;
+  validateUsername: (username: string) => Promise<ValidationResponse | undefined>;
   getEmailAccounts: (
     walletAddress: string,
     signature: string,
@@ -45,7 +45,7 @@ interface UseIndexerMailReturn {
     message: string
   ) => Promise<DelegatorsResponse | undefined>;
   verifySignature: (
-    walletAddress: string,
+    username: string,
     signature: string,
     message: string
   ) => Promise<SignatureVerificationResponse | undefined>;
@@ -82,14 +82,14 @@ const useIndexerMail = (endpointUrl: string, dev: boolean = false, devMode: bool
     context: 'IndexerMail',
   });
 
-  const validateAddress = useCallback(
-    execute(async (address: string) => {
+  const validateUsername = useCallback(
+    execute(async (username: string) => {
       try {
-        return await indexerClient.validateAddress(address);
+        return await indexerClient.validateUsername(username);
       } catch (err) {
         if (devMode) {
-          console.warn('[DevMode] validateAddress failed, returning mock data:', err);
-          return IndexerMockData.getValidation(address);
+          console.warn('[DevMode] validateUsername failed, returning mock data:', err);
+          return IndexerMockData.getValidation(username);
         }
         throw err;
       }
@@ -159,13 +159,13 @@ const useIndexerMail = (endpointUrl: string, dev: boolean = false, devMode: bool
   );
 
   const verifySignature = useCallback(
-    execute(async (walletAddress: string, signature: string, message: string) => {
+    execute(async (username: string, signature: string, message: string) => {
       try {
-        return await indexerClient.verifySignature(walletAddress, signature, message || '');
+        return await indexerClient.verifySignature(username, signature, message || '');
       } catch (err) {
         if (devMode) {
           console.warn('[DevMode] verifySignature failed, returning mock data:', err);
-          return IndexerMockData.getSignatureVerification(walletAddress, signature, message);
+          return IndexerMockData.getSignatureVerification(username, signature, message);
         }
         throw err;
       }
@@ -243,7 +243,7 @@ const useIndexerMail = (endpointUrl: string, dev: boolean = false, devMode: bool
   return {
     isLoading,
     error,
-    validateAddress,
+    validateUsername,
     getEmailAccounts,
     getEmailAddresses,
     getDelegatedAddress,

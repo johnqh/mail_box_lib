@@ -109,7 +109,7 @@ interface GetDelegatedResponse {
 
 /**
  * Get addresses delegated TO a wallet - API request
- * POST /api/addresses/delegated/to
+ * POST /api/delegations/to
  */
 type GetDelegatedToRequest = SignatureProtectedRequest;
 
@@ -130,8 +130,8 @@ interface GetDelegatedToResponse {
 }
 
 /**
- * Validate address format endpoint
- * GET /api/addresses/validate/:address
+ * Validate username format endpoint
+ * GET /api/users/:username/validate
  */
 interface ValidateAddressResponse {
   isValid: boolean;

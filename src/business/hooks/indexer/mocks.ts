@@ -99,13 +99,13 @@ export class IndexerMockData {
     } as unknown as SolanaTestTransactionResponse;
   }
 
-  static getValidation(address: string): ValidationResponse {
+  static getValidation(username: string): ValidationResponse {
     return {
       success: true,
       isValid: true,
-      address,
+      address: username,
       addressType: 'EVM' as any,
-      normalizedAddress: address.toLowerCase(),
+      normalizedAddress: username.toLowerCase(),
       timestamp: new Date().toISOString()
     } as ValidationResponse;
   }
@@ -161,12 +161,12 @@ export class IndexerMockData {
     } as unknown as DelegatorsResponse;
   }
 
-  static getSignatureVerification(walletAddress: string, signature: string, message: string): SignatureVerificationResponse {
+  static getSignatureVerification(username: string, signature: string, message: string): SignatureVerificationResponse {
     return {
       success: true,
       data: {
         isValid: true,
-        walletAddress,
+        walletAddress: username,
         signature,
         message
       },

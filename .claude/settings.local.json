@@ -88,7 +88,9 @@
       "Bash(cp:*)",
       "Bash(ln:*)",
       "Bash(npx tsc:*)",
-      "Read(//Users/qianghuang/types/**)"
+      "Read(//Users/qianghuang/types/**)",
+      "Bash(xargs:*)",
+      "Read(//Users/johnhuang/0xmail/mail_box_indexer/**)"
     ],
     "deny": [],
     "ask": []

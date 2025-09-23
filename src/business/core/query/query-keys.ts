@@ -19,10 +19,10 @@ const queryKeys = {
   indexer: {
     all: indexerBase,
 
-    // Address validation
-    addresses: () => [...indexerBase(), 'addresses'] as const,
-    validateAddress: (address: string) =>
-      [...indexerBase(), 'addresses', 'validate', address] as const,
+    // Username validation
+    users: () => [...indexerBase(), 'users'] as const,
+    validateUsername: (username: string) =>
+      [...indexerBase(), 'users', 'validate', username] as const,
 
     // Message signing
     messages: () => [...indexerBase(), 'messages'] as const,
