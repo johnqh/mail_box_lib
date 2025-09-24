@@ -2,7 +2,7 @@
  * Platform-agnostic authentication business logic
  */
 
-import { AuthStatus, ChainType } from '@johnqh/types';
+import { AuthStatus, ChainType, Optional } from '@johnqh/types';
 import { EmailAddress } from '../../../types/email';
 
 /**
@@ -222,10 +222,8 @@ class DefaultAuthBusinessLogic implements AuthBusinessLogic {
         return 'EVM Chain';
       case ChainType.SOLANA:
         return 'Solana';
-      case ChainType.UNKNOWN:
-        return 'Unknown Chain';
       default:
-        return 'Blockchain';
+        return 'Unknown Chain';
     }
   }
 
@@ -280,7 +278,7 @@ interface EmailAddressBusinessLogic {
   /**
    * Parse email address string
    */
-  parseEmailAddress(email: string): ParsedEmailAddress | undefined;
+  parseEmailAddress(email: string): Optional<ParsedEmailAddress>;
 }
 
 class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLogic {
@@ -359,7 +357,7 @@ class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLogic {
     return emailAddress.address.split('@')[0] || emailAddress.address;
   }
 
-  parseEmailAddress(email: string): ParsedEmailAddress | undefined {
+  parseEmailAddress(email: string): Optional<ParsedEmailAddress> {
     return EmailAddressHelper.parse(email);
   }
 
@@ -704,7 +702,7 @@ class AddressHelper {
           // Handle different return types from getAllDomains
           if (Array.isArray(allDomains)) {
             for (const domainInfo of allDomains) {
-              let domainName: string | null = null;
+              let domainName: Optional<string> = null;
 
               // Handle different possible return formats
               if (typeof domainInfo === 'string') {
@@ -823,7 +821,7 @@ class EmailAddressHelper {
    * Parse an email address into its components
    * Returns undefined if the email address is invalid (doesn't contain exactly one @)
    */
-  static parse(emailAddress: string): ParsedEmailAddress | undefined {
+  static parse(emailAddress: string): Optional<ParsedEmailAddress> {
     if (!emailAddress || typeof emailAddress !== 'string') {
       return undefined;
     }

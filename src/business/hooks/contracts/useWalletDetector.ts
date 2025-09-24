@@ -18,7 +18,7 @@ interface UseWalletDetectorReturn {
   error: string | null;
 
   // Operations
-  detectWalletType: (address: string) => Promise<ChainType>;
+  detectWalletType: (address: string) => Promise<ChainType | null>;
   validateAddress: (address: string) => Promise<boolean>;
   getWalletInfo: (address: string) => Promise<WalletInfo | null>;
   isEVMAddress: (address: string) => boolean;
@@ -52,7 +52,7 @@ export const useWalletDetector = (): UseWalletDetectorReturn => {
   }, []);
 
   const detectWalletType = useCallback(
-    async (address: string): Promise<ChainType> => {
+    async (address: string): Promise<ChainType | null> => {
       setIsLoading(true);
       setError(null);
 
@@ -63,13 +63,13 @@ export const useWalletDetector = (): UseWalletDetectorReturn => {
         } else if (isSolanaAddress(address)) {
           return ChainType.SOLANA;
         } else {
-          return ChainType.UNKNOWN;
+          return null;
         }
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to detect wallet type';
         setError(errorMessage);
-        return ChainType.UNKNOWN;
+        return null;
       } finally {
         setIsLoading(false);
       }
@@ -85,7 +85,7 @@ export const useWalletDetector = (): UseWalletDetectorReturn => {
       try {
         // Try to detect chain type as a validation method
         const chainType = await detectWalletType(address);
-        return chainType !== ChainType.UNKNOWN;
+        return chainType !== null;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to validate address';
@@ -105,7 +105,7 @@ export const useWalletDetector = (): UseWalletDetectorReturn => {
 
       try {
         const chainType = await detectWalletType(address);
-        if (chainType === ChainType.UNKNOWN) {
+        if (chainType === null) {
           return null;
         }
 

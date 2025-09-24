@@ -4,6 +4,7 @@
  */
 
 import { useCallback, useState } from 'react';
+import { Optional } from '@johnqh/types';
 import { withLoadingState } from '../../utils/async-helpers';
 
 interface UseApiCallOptions {
@@ -13,12 +14,12 @@ interface UseApiCallOptions {
 
 interface UseApiCallReturn {
   isLoading: boolean;
-  error: string | null;
+  error: Optional<string>;
   clearError: () => void;
-  executeAsync: <T>(operation: () => Promise<T>) => Promise<T | undefined>;
+  executeAsync: <T>(operation: () => Promise<T>) => Promise<Optional<T>>;
   execute: <T, TArgs extends any[]>(
     operation: (...args: TArgs) => Promise<T>
-  ) => (...args: TArgs) => Promise<T | undefined>;
+  ) => (...args: TArgs) => Promise<Optional<T>>;
 }
 
 /**
@@ -26,14 +27,14 @@ interface UseApiCallReturn {
  */
 const useApiCall = (options: UseApiCallOptions = {}): UseApiCallReturn => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Optional<string>>(null);
 
   const clearError = useCallback(() => {
     setError(null);
   }, []);
 
   const executeAsync = useCallback(
-    async <T>(operation: () => Promise<T>): Promise<T | undefined> => {
+    async <T>(operation: () => Promise<T>): Promise<Optional<T>> => {
       return withLoadingState(
         operation,
         setIsLoading,
@@ -46,7 +47,7 @@ const useApiCall = (options: UseApiCallOptions = {}): UseApiCallReturn => {
 
   const execute = useCallback(
     <T, TArgs extends any[]>(operation: (...args: TArgs) => Promise<T>) => {
-      return async (...args: TArgs): Promise<T | undefined> => {
+      return async (...args: TArgs): Promise<Optional<T>> => {
         return executeAsync(() => operation(...args));
       };
     },
@@ -67,7 +68,7 @@ const useApiCall = (options: UseApiCallOptions = {}): UseApiCallReturn => {
  */
 const useApiCallStrict = (options: UseApiCallOptions = {}) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Optional<string>>(null);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -121,7 +122,7 @@ const useApiCallStrict = (options: UseApiCallOptions = {}) => {
  */
 const useApiGroup = (options: UseApiCallOptions = {}) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Optional<string>>(null);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -132,7 +133,7 @@ const useApiGroup = (options: UseApiCallOptions = {}) => {
       operation: (...args: TArgs) => Promise<T>,
       throwOnError: boolean = true
     ) => {
-      return async (...args: TArgs): Promise<T | undefined> => {
+      return async (...args: TArgs): Promise<Optional<T>> => {
         if (throwOnError) {
           setIsLoading(true);
           setError(null);

@@ -7,6 +7,7 @@ import type {
   EmailAccountsResponse,
   EntitlementResponse,
   NonceResponse,
+  Optional,
   SignatureVerificationResponse,
   SimpleMessageResponse,
   ValidationResponse,
@@ -22,54 +23,54 @@ interface IndexerEmailAddress {
 
 interface UseIndexerMailReturn {
   isLoading: boolean;
-  error: string | null;
-  validateUsername: (username: string) => Promise<ValidationResponse | undefined>;
+  error: Optional<string>;
+  validateUsername: (username: string) => Promise<Optional<ValidationResponse>>;
   getEmailAccounts: (
     walletAddress: string,
     signature: string,
     message: string
-  ) => Promise<EmailAccountsResponse | undefined>;
+  ) => Promise<Optional<EmailAccountsResponse>>;
   getEmailAddresses: (
     walletAddress: string,
     signature: string,
     message: string
-  ) => Promise<EmailAccountsResponse | undefined>;
+  ) => Promise<Optional<EmailAccountsResponse>>;
   getDelegatedAddress: (
     walletAddress: string,
     signature: string,
     message: string
-  ) => Promise<DelegationResponse | undefined>;
+  ) => Promise<Optional<DelegationResponse>>;
   getDelegatorsToAddress: (
     walletAddress: string,
     signature: string,
     message: string
-  ) => Promise<DelegatorsResponse | undefined>;
+  ) => Promise<Optional<DelegatorsResponse>>;
   verifySignature: (
     username: string,
     signature: string,
     message: string
-  ) => Promise<SignatureVerificationResponse | undefined>;
+  ) => Promise<Optional<SignatureVerificationResponse>>;
   getSigningMessage: (
     walletAddress: string,
     chainId: number,
     domain: string,
     url: string
-  ) => Promise<SimpleMessageResponse | undefined>;
+  ) => Promise<Optional<SimpleMessageResponse>>;
   getNonce: (
-    walletAddress: string,
+    username: string,
     signature: string,
     message?: string
-  ) => Promise<NonceResponse | undefined>;
+  ) => Promise<Optional<NonceResponse>>;
   createNonce: (
-    walletAddress: string,
+    username: string,
     signature: string,
     message?: string
-  ) => Promise<NonceResponse | undefined>;
+  ) => Promise<Optional<NonceResponse>>;
   getNameServiceEntitlement: (
     walletAddress: string,
     signature: string,
     message: string
-  ) => Promise<EntitlementResponse | undefined>;
+  ) => Promise<Optional<EntitlementResponse>>;
   clearError: () => void;
 }
 
@@ -189,9 +190,9 @@ const useIndexerMail = (endpointUrl: string, dev: boolean = false, devMode: bool
   );
 
   const getNonce = useCallback(
-    execute(async (walletAddress: string, signature: string, message?: string) => {
+    execute(async (username: string, signature: string, message?: string) => {
       try {
-        return await indexerClient.getNonce(walletAddress, signature, message || '');
+        return await indexerClient.getNonce(username, signature, message || '');
       } catch (err) {
         if (devMode) {
           console.warn('[DevMode] getNonce failed, returning mock data:', err);
@@ -204,9 +205,9 @@ const useIndexerMail = (endpointUrl: string, dev: boolean = false, devMode: bool
   );
 
   const createNonce = useCallback(
-    execute(async (walletAddress: string, signature: string, message?: string) => {
+    execute(async (username: string, signature: string, message?: string) => {
       try {
-        return await indexerClient.createNonce(walletAddress, signature, message || '');
+        return await indexerClient.createNonce(username, signature, message || '');
       } catch (err) {
         if (devMode) {
           console.warn('[DevMode] createNonce failed, returning mock data:', err);

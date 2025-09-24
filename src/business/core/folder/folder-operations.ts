@@ -5,7 +5,8 @@
 import {
   EmailFolder,
   EmailFolderUtils,
-  StandardEmailFolder,
+  MailboxType,
+  Optional,
 } from '@johnqh/types';
 
 interface FolderInfo {
@@ -22,7 +23,7 @@ interface FolderOperations {
   deleteCustomFolder(name: string): Promise<boolean>;
   renameCustomFolder(oldName: string, newName: string): Promise<boolean>;
   getAllFolders(): Promise<FolderInfo[]>;
-  getFolderInfo(folder: EmailFolder): Promise<FolderInfo | null>;
+  getFolderInfo(folder: EmailFolder): Promise<Optional<FolderInfo>>;
   validateFolderName(name: string): { isValid: boolean; error?: string };
   getStandardFolders(): FolderInfo[];
   getCustomFolders(): Promise<FolderInfo[]>;
@@ -76,7 +77,7 @@ class DefaultFolderOperations implements FolderOperations {
     return [...standardFolders, ...customFolders];
   }
 
-  async getFolderInfo(folder: EmailFolder): Promise<FolderInfo | null> {
+  async getFolderInfo(folder: EmailFolder): Promise<Optional<FolderInfo>> {
     // In a real implementation, this would query the email service
     return {
       name: folder,
@@ -162,36 +163,36 @@ class DefaultFolderOperations implements FolderOperations {
   /**
    * Get default folder for new emails
    */
-  getDefaultFolder(): StandardEmailFolder {
-    return StandardEmailFolder.INBOX;
+  getDefaultFolder(): MailboxType {
+    return MailboxType.INBOX;
   }
 
   /**
    * Get folder for sent emails
    */
-  getSentFolder(): StandardEmailFolder {
-    return StandardEmailFolder.SENT;
+  getSentFolder(): MailboxType {
+    return MailboxType.SENT;
   }
 
   /**
    * Get folder for drafts
    */
-  getDraftsFolder(): StandardEmailFolder {
-    return StandardEmailFolder.DRAFTS;
+  getDraftsFolder(): MailboxType {
+    return MailboxType.DRAFTS;
   }
 
   /**
    * Get folder for spam/junk
    */
-  getSpamFolder(): StandardEmailFolder {
-    return StandardEmailFolder.SPAM;
+  getSpamFolder(): MailboxType {
+    return MailboxType.SPAM;
   }
 
   /**
    * Get folder for trash/deleted items
    */
-  getTrashFolder(): StandardEmailFolder {
-    return StandardEmailFolder.TRASH;
+  getTrashFolder(): MailboxType {
+    return MailboxType.TRASH;
   }
 }
 

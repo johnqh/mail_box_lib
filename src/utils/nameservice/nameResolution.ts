@@ -6,6 +6,7 @@
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
 import { isAddress } from 'viem';
+import { Optional } from '@johnqh/types';
 import {
   AddressHelper,
   AddressType,
@@ -69,7 +70,7 @@ function isValidAddress(input: string): boolean {
 /**
  * Resolve ENS name to address
  */
-export async function resolveENSName(name: string): Promise<string | null> {
+export async function resolveENSName(name: string): Promise<Optional<string>> {
   try {
     // Check cache first
     const cached = resolverCache.get(name.toLowerCase());
@@ -103,7 +104,7 @@ export async function resolveENSName(name: string): Promise<string | null> {
  * Resolve SNS name to address
  * Note: This is a placeholder implementation
  */
-export async function resolveSNSName(name: string): Promise<string | null> {
+export async function resolveSNSName(name: string): Promise<Optional<string>> {
   try {
     // Check cache first
     const cached = resolverCache.get(name.toLowerCase());
@@ -153,7 +154,7 @@ export async function resolveSNSName(name: string): Promise<string | null> {
  */
 export async function resolveNameOrAddress(
   input: string
-): Promise<NameResolutionResult | null> {
+): Promise<Optional<NameResolutionResult>> {
   const trimmedInput = input.trim();
 
   if (!trimmedInput) {

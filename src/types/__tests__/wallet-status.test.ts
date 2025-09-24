@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   WalletStatus,
-  WalletConnectionState,
+  ConnectionState,
   isWalletConnected,
   isWalletVerified,
   getWalletConnectionState
@@ -97,17 +97,17 @@ describe('Wallet Status Types and Utilities', () => {
 
   describe('getWalletConnectionState', () => {
     it('should return DISCONNECTED for undefined status', () => {
-      expect(getWalletConnectionState(undefined)).toBe(WalletConnectionState.DISCONNECTED);
+      expect(getWalletConnectionState(undefined)).toBe(ConnectionState.DISCONNECTED);
     });
 
     it('should return DISCONNECTED for empty wallet address', () => {
       const status: WalletStatus = { walletAddress: '' };
-      expect(getWalletConnectionState(status)).toBe(WalletConnectionState.DISCONNECTED);
+      expect(getWalletConnectionState(status)).toBe(ConnectionState.DISCONNECTED);
     });
 
     it('should return CONNECTED for wallet with address only', () => {
       const status: WalletStatus = { walletAddress: testAddress };
-      expect(getWalletConnectionState(status)).toBe(WalletConnectionState.CONNECTED);
+      expect(getWalletConnectionState(status)).toBe(ConnectionState.CONNECTED);
     });
 
     it('should return CONNECTED for wallet with address and message only', () => {
@@ -115,7 +115,7 @@ describe('Wallet Status Types and Utilities', () => {
         walletAddress: testAddress,
         message: testMessage
       };
-      expect(getWalletConnectionState(status)).toBe(WalletConnectionState.CONNECTED);
+      expect(getWalletConnectionState(status)).toBe(ConnectionState.CONNECTED);
     });
 
     it('should return CONNECTED for wallet with address and signature only', () => {
@@ -123,7 +123,7 @@ describe('Wallet Status Types and Utilities', () => {
         walletAddress: testAddress,
         signature: testSignature
       };
-      expect(getWalletConnectionState(status)).toBe(WalletConnectionState.CONNECTED);
+      expect(getWalletConnectionState(status)).toBe(ConnectionState.CONNECTED);
     });
 
     it('should return VERIFIED for fully verified wallet', () => {
@@ -132,15 +132,15 @@ describe('Wallet Status Types and Utilities', () => {
         message: testMessage,
         signature: testSignature
       };
-      expect(getWalletConnectionState(status)).toBe(WalletConnectionState.VERIFIED);
+      expect(getWalletConnectionState(status)).toBe(ConnectionState.VERIFIED);
     });
   });
 
-  describe('WalletConnectionState enum', () => {
+  describe('ConnectionState enum', () => {
     it('should have correct string values', () => {
-      expect(WalletConnectionState.DISCONNECTED).toBe('disconnected');
-      expect(WalletConnectionState.CONNECTED).toBe('connected');
-      expect(WalletConnectionState.VERIFIED).toBe('verified');
+      expect(ConnectionState.DISCONNECTED).toBe('disconnected');
+      expect(ConnectionState.CONNECTED).toBe('connected');
+      expect(ConnectionState.VERIFIED).toBe('verified');
     });
   });
 

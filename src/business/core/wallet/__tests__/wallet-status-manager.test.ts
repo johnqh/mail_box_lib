@@ -16,7 +16,7 @@ import {
   subscribeToWalletStatus,
   WalletStatusChangeListener
 } from '../wallet-status-manager';
-import { WalletConnectionState } from '@johnqh/types';
+import { ConnectionState } from '@johnqh/types';
 
 describe('WalletStatusManager', () => {
   // Reset manager state before each test
@@ -39,7 +39,7 @@ describe('WalletStatusManager', () => {
       expect(getWalletAddress()).toBeUndefined();
       expect(isWalletConnected()).toBe(false);
       expect(isWalletVerified()).toBe(false);
-      expect(walletStatusManager.getConnectionState()).toBe(WalletConnectionState.DISCONNECTED);
+      expect(walletStatusManager.getConnectionState()).toBe(ConnectionState.DISCONNECTED);
     });
   });
 
@@ -58,7 +58,7 @@ describe('WalletStatusManager', () => {
       expect(getWalletAddress()).toBe(testAddress);
       expect(isWalletConnected()).toBe(true);
       expect(isWalletVerified()).toBe(false);
-      expect(walletStatusManager.getConnectionState()).toBe(WalletConnectionState.CONNECTED);
+      expect(walletStatusManager.getConnectionState()).toBe(ConnectionState.CONNECTED);
     });
 
     it('should throw error for empty wallet address', () => {
@@ -90,7 +90,7 @@ describe('WalletStatusManager', () => {
       
       expect(isWalletConnected()).toBe(true);
       expect(isWalletVerified()).toBe(true);
-      expect(walletStatusManager.getConnectionState()).toBe(WalletConnectionState.VERIFIED);
+      expect(walletStatusManager.getConnectionState()).toBe(ConnectionState.VERIFIED);
     });
 
     it('should throw error for missing verification data', () => {
@@ -130,7 +130,7 @@ describe('WalletStatusManager', () => {
       expect(getWalletAddress()).toBeUndefined();
       expect(isWalletConnected()).toBe(false);
       expect(isWalletVerified()).toBe(false);
-      expect(walletStatusManager.getConnectionState()).toBe(WalletConnectionState.DISCONNECTED);
+      expect(walletStatusManager.getConnectionState()).toBe(ConnectionState.DISCONNECTED);
     });
   });
 
@@ -277,29 +277,29 @@ describe('WalletStatusManager', () => {
 
     it('should handle complete workflow: disconnect -> connect -> verify -> disconnect', () => {
       // Initial state
-      expect(walletStatusManager.getConnectionState()).toBe(WalletConnectionState.DISCONNECTED);
+      expect(walletStatusManager.getConnectionState()).toBe(ConnectionState.DISCONNECTED);
       
       // Connect
       connectWallet(testAddress);
-      expect(walletStatusManager.getConnectionState()).toBe(WalletConnectionState.CONNECTED);
+      expect(walletStatusManager.getConnectionState()).toBe(ConnectionState.CONNECTED);
       
       // Verify
       verifyWallet(testAddress, 'message', 'signature');
-      expect(walletStatusManager.getConnectionState()).toBe(WalletConnectionState.VERIFIED);
+      expect(walletStatusManager.getConnectionState()).toBe(ConnectionState.VERIFIED);
       
       // Disconnect
       disconnectWallet();
-      expect(walletStatusManager.getConnectionState()).toBe(WalletConnectionState.DISCONNECTED);
+      expect(walletStatusManager.getConnectionState()).toBe(ConnectionState.DISCONNECTED);
     });
 
     it('should handle direct verification (skip connect step)', () => {
       // Direct verify
       verifyWallet(testAddress, 'message', 'signature');
-      expect(walletStatusManager.getConnectionState()).toBe(WalletConnectionState.VERIFIED);
+      expect(walletStatusManager.getConnectionState()).toBe(ConnectionState.VERIFIED);
       
       // Clear verification (back to connected)
       walletStatusManager.clearVerification();
-      expect(walletStatusManager.getConnectionState()).toBe(WalletConnectionState.CONNECTED);
+      expect(walletStatusManager.getConnectionState()).toBe(ConnectionState.CONNECTED);
     });
   });
 });

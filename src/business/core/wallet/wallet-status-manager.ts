@@ -4,8 +4,9 @@
  */
 
 import {
+  ConnectionState,
   getWalletConnectionState,
-  WalletConnectionState,
+  Optional,
   WalletStatus,
 } from '@johnqh/types';
 
@@ -13,7 +14,7 @@ import {
  * Callback function type for wallet status change notifications
  */
 export type WalletStatusChangeListener = (
-  status: WalletStatus | undefined
+  status: Optional<WalletStatus>
 ) => void;
 
 /**
@@ -26,7 +27,7 @@ export type WalletStatusChangeListener = (
  */
 class WalletStatusManager {
   private static instance: WalletStatusManager;
-  private _status: WalletStatus | undefined = undefined;
+  private _status: Optional<WalletStatus> = undefined;
   private listeners: Set<WalletStatusChangeListener> = new Set();
 
   private constructor() {
@@ -46,14 +47,14 @@ class WalletStatusManager {
   /**
    * Get current wallet status
    */
-  public getStatus(): WalletStatus | undefined {
+  public getStatus(): Optional<WalletStatus> {
     return this._status;
   }
 
   /**
    * Get current wallet connection state
    */
-  public getConnectionState(): WalletConnectionState {
+  public getConnectionState(): ConnectionState {
     return getWalletConnectionState(this._status);
   }
 
@@ -207,14 +208,14 @@ export const walletStatusManager = WalletStatusManager.getInstance();
 /**
  * Get current wallet status
  */
-export const getWalletStatus = (): WalletStatus | undefined => {
+export const getWalletStatus = (): Optional<WalletStatus> => {
   return walletStatusManager.getStatus();
 };
 
 /**
  * Get current wallet address (if connected)
  */
-export const getWalletAddress = (): string | undefined => {
+export const getWalletAddress = (): Optional<string> => {
   return walletStatusManager.getStatus()?.walletAddress;
 };
 
@@ -223,8 +224,7 @@ export const getWalletAddress = (): string | undefined => {
  */
 export const isWalletConnected = (): boolean => {
   return (
-    walletStatusManager.getConnectionState() !==
-    WalletConnectionState.DISCONNECTED
+    walletStatusManager.getConnectionState() !== ConnectionState.DISCONNECTED
   );
 };
 
@@ -232,9 +232,7 @@ export const isWalletConnected = (): boolean => {
  * Check if wallet is verified
  */
 export const isWalletVerified = (): boolean => {
-  return (
-    walletStatusManager.getConnectionState() === WalletConnectionState.VERIFIED
-  );
+  return walletStatusManager.getConnectionState() === ConnectionState.VERIFIED;
 };
 
 /**

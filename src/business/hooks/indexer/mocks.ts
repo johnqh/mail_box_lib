@@ -24,14 +24,16 @@ export class IndexerMockData {
   static getPointsBalance(walletAddress: string): PointsResponse {
     return {
       success: true,
-      walletAddress,
-      addressType: 'Solana' as ChainType,
       data: {
         walletAddress,
-        pointsEarned: '1000',
-        lastActivityDate: new Date().toISOString()
+        chainType: 'solana' as ChainType,
+        data: {
+          walletAddress,
+          pointsEarned: '1000',
+          lastActivityDate: new Date().toISOString()
+        },
+        verified: true
       },
-      verified: true,
       timestamp: new Date().toISOString()
     } as PointsResponse;
   }
@@ -112,24 +114,28 @@ export class IndexerMockData {
 
   static getEmailAccounts(): EmailAccountsResponse {
     return {
-      requestedWallet: '0x1234...5678',
-      addressType: 'EVM' as any,
-      walletAccounts: [
-        {
-          walletAddress: '0x1234...5678',
-          addressType: 'EVM' as any,
-          isPrimary: true,
-          primaryAccount: '0x1234...5678',
-          domainAccounts: [
-            { account: 'test', type: 'ens', domain: 'test.eth', verified: true },
-            { account: 'secondary', type: 'sns', domain: 'secondary.sol', verified: false }
-          ],
-          totalAccounts: 3
-        }
-      ],
-      totalWallets: 1,
-      totalAccounts: 3,
-      verified: true,
+      success: true,
+      data: {
+        walletAddress: '0x1234...5678',
+        chainType: 'evm' as ChainType,
+        requestedWallet: '0x1234...5678',
+        walletAccounts: [
+          {
+            walletAddress: '0x1234...5678',
+            chainType: 'evm' as ChainType,
+            isPrimary: true,
+            primaryAccount: '0x1234...5678',
+            domainAccounts: [
+              { account: 'test', type: 'ens', domain: 'test.eth', verified: true },
+              { account: 'secondary', type: 'sns', domain: 'secondary.sol', verified: false }
+            ],
+            totalAccounts: 3
+          }
+        ],
+        totalWallets: 1,
+        totalAccounts: 3,
+        verified: true
+      },
       timestamp: new Date().toISOString()
     } as EmailAccountsResponse;
   }

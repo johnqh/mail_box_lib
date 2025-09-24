@@ -4,7 +4,7 @@
  */
 
 import {
-  AppAnalyticsEvent,
+  AnalyticsEvent,
   ChainType,
   EmailAction,
   EmailFolder,
@@ -13,7 +13,7 @@ import {
 import { WalletType } from '../../../di';
 
 interface AnalyticsEventData {
-  name: AppAnalyticsEvent | string;
+  name: AnalyticsEvent | string;
   properties: Record<string, any>;
   timestamp: number;
 }
@@ -150,7 +150,7 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
     chainType?: ChainType
   ): AnalyticsEventData {
     return {
-      name: AppAnalyticsEvent.USER_LOGIN,
+      name: AnalyticsEvent.USER_LOGIN,
       properties: {
         method,
         wallet_type: walletType,
@@ -165,15 +165,15 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
     emailId: string,
     folder?: EmailFolder
   ): AnalyticsEventData {
-    const eventMap: Record<EmailAction, AppAnalyticsEvent> = {
-      [EmailAction.OPEN]: AppAnalyticsEvent.EMAIL_OPEN,
-      [EmailAction.REPLY]: AppAnalyticsEvent.EMAIL_REPLY,
-      [EmailAction.FORWARD]: AppAnalyticsEvent.EMAIL_FORWARD,
-      [EmailAction.DELETE]: AppAnalyticsEvent.EMAIL_DELETE,
-      [EmailAction.STAR]: AppAnalyticsEvent.EMAIL_STAR,
-      [EmailAction.UNSTAR]: AppAnalyticsEvent.EMAIL_STAR,
-      [EmailAction.MARK_READ]: AppAnalyticsEvent.EMAIL_OPEN,
-      [EmailAction.MARK_UNREAD]: AppAnalyticsEvent.EMAIL_OPEN,
+    const eventMap: Record<EmailAction, AnalyticsEvent> = {
+      [EmailAction.OPEN]: AnalyticsEvent.EMAIL_OPENED,
+      [EmailAction.REPLY]: AnalyticsEvent.EMAIL_REPLY,
+      [EmailAction.FORWARD]: AnalyticsEvent.EMAIL_FORWARD,
+      [EmailAction.DELETE]: AnalyticsEvent.EMAIL_DELETE,
+      [EmailAction.STAR]: AnalyticsEvent.EMAIL_STAR,
+      [EmailAction.UNSTAR]: AnalyticsEvent.EMAIL_STAR,
+      [EmailAction.MARK_READ]: AnalyticsEvent.EMAIL_OPENED,
+      [EmailAction.MARK_UNREAD]: AnalyticsEvent.EMAIL_OPENED,
     };
 
     return {
@@ -190,7 +190,7 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
 
   createPageViewEvent(pageName: string, pagePath: string): AnalyticsEventData {
     return {
-      name: AppAnalyticsEvent.PAGE_VIEW,
+      name: AnalyticsEvent.PAGE_VIEW,
       properties: {
         page_name: pageName,
         page_path: pagePath,
@@ -205,11 +205,11 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
     amount?: number,
     currency?: string
   ): AnalyticsEventData {
-    const eventMap: Record<SubscriptionAction, AppAnalyticsEvent> = {
-      [SubscriptionAction.VIEW]: AppAnalyticsEvent.SUBSCRIPTION_VIEW,
-      [SubscriptionAction.PURCHASE]: AppAnalyticsEvent.SUBSCRIPTION_PURCHASE,
-      [SubscriptionAction.CANCEL]: AppAnalyticsEvent.SUBSCRIPTION_CANCEL,
-      [SubscriptionAction.RESTORE]: AppAnalyticsEvent.SUBSCRIPTION_VIEW,
+    const eventMap: Record<SubscriptionAction, AnalyticsEvent> = {
+      [SubscriptionAction.VIEW]: AnalyticsEvent.SUBSCRIPTION_VIEW,
+      [SubscriptionAction.PURCHASE]: AnalyticsEvent.SUBSCRIPTION_PURCHASE,
+      [SubscriptionAction.CANCEL]: AnalyticsEvent.SUBSCRIPTION_CANCEL,
+      [SubscriptionAction.RESTORE]: AnalyticsEvent.SUBSCRIPTION_VIEW,
     };
 
     return {
@@ -226,7 +226,7 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
 
   createSearchEvent(query: string, resultsCount: number): AnalyticsEventData {
     return {
-      name: AppAnalyticsEvent.SEARCH_PERFORMED,
+      name: AnalyticsEvent.SEARCH_PERFORMED,
       properties: {
         query: this.sanitizeString(query),
         results_count: resultsCount,
@@ -242,7 +242,7 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
     pageName?: string
   ): AnalyticsEventData {
     return {
-      name: AppAnalyticsEvent.ERROR_OCCURRED,
+      name: AnalyticsEvent.ERROR_OCCURRED,
       properties: {
         error_type: errorType,
         error_message: this.sanitizeString(errorMessage),
@@ -260,8 +260,8 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
   ): AnalyticsEventData {
     const eventName =
       action === 'viewed'
-        ? AppAnalyticsEvent.AB_TEST_VIEWED
-        : AppAnalyticsEvent.AB_TEST_CONVERTED;
+        ? AnalyticsEvent.AB_TEST_VIEWED
+        : AnalyticsEvent.AB_TEST_CONVERTED;
 
     return {
       name: eventName,
@@ -276,7 +276,7 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
 
   createNavigationEvent(fromPage: string, toPage: string): AnalyticsEventData {
     return {
-      name: AppAnalyticsEvent.PAGE_VIEW,
+      name: AnalyticsEvent.PAGE_VIEW,
       properties: {
         from_page: fromPage,
         to_page: toPage,
@@ -291,7 +291,7 @@ class DefaultAnalyticsOperations implements AnalyticsOperations {
     toFolder: EmailFolder
   ): AnalyticsEventData {
     return {
-      name: AppAnalyticsEvent.FOLDER_SWITCH,
+      name: AnalyticsEvent.FOLDER_SWITCH,
       properties: {
         from_folder: fromFolder,
         to_folder: toFolder,

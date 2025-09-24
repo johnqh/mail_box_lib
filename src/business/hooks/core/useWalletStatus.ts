@@ -7,7 +7,8 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   isWalletConnected as checkWalletConnected,
   isWalletVerified as checkWalletVerified,
-  WalletConnectionState,
+  ConnectionState,
+  Optional,
   WalletStatus,
 } from '@johnqh/types';
 import {
@@ -25,11 +26,11 @@ import {
  */
 export interface UseWalletStatusReturn {
   /** Current wallet status (undefined if not connected) */
-  status: WalletStatus | undefined;
+  status: Optional<WalletStatus>;
   /** Current wallet address (undefined if not connected) */
-  walletAddress?: string;
+  walletAddress: Optional<string>;
   /** Current connection state */
-  connectionState: WalletConnectionState;
+  connectionState: ConnectionState;
   /** Whether wallet is connected */
   isConnected: boolean;
   /** Whether wallet is verified */
@@ -97,7 +98,7 @@ export interface UseWalletStatusReturn {
  */
 export const useWalletStatus = (): UseWalletStatusReturn => {
   // Initialize state with current status
-  const [status, setStatus] = useState<WalletStatus | undefined>(() =>
+  const [status, setStatus] = useState<Optional<WalletStatus>>(() =>
     getWalletStatus()
   );
 
@@ -144,6 +145,7 @@ export const useWalletStatus = (): UseWalletStatusReturn => {
 
   const result: UseWalletStatusReturn = {
     status,
+    walletAddress: status?.walletAddress,
     connectionState,
     isConnected,
     isVerified,
@@ -167,8 +169,8 @@ export const useWalletStatus = (): UseWalletStatusReturn => {
  *
  * @returns Current wallet address or undefined
  */
-export const useWalletAddress = (): string | undefined => {
-  const [address, setAddress] = useState<string | undefined>(() =>
+export const useWalletAddress = (): Optional<string> => {
+  const [address, setAddress] = useState<Optional<string>>(() =>
     getWalletAddress()
   );
 
@@ -189,9 +191,9 @@ export const useWalletAddress = (): string | undefined => {
  *
  * @returns Current wallet connection state
  */
-export const useWalletConnectionState = (): WalletConnectionState => {
-  const [connectionState, setConnectionState] = useState<WalletConnectionState>(
-    () => walletStatusManager.getConnectionState()
+export const useWalletConnectionState = (): ConnectionState => {
+  const [connectionState, setConnectionState] = useState<ConnectionState>(() =>
+    walletStatusManager.getConnectionState()
   );
 
   useEffect(() => {

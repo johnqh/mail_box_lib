@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Optional } from '@johnqh/types';
 import { getErrorMessage } from '../../../utils/errorHandling';
 
 interface UseAsyncState<T> {
-  data: T | null;
-  error: string | null;
+  data: Optional<T>;
+  error: Optional<string>;
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;

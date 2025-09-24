@@ -95,10 +95,12 @@ class IndexerClient implements NetworkClient {
       const responseData = await response.json();
 
       return {
+        success: response.ok,
         ok: response.ok,
         status: response.status,
         statusText: response.statusText,
         data: responseData,
+        timestamp: new Date().toISOString(),
         headers: response.headers
           ? (() => {
               const headerObj: Record<string, string> = {};
@@ -327,18 +329,18 @@ class IndexerClient implements NetworkClient {
   }
 
   /**
-   * Create/update nonce for wallet address
-   * POST /api/wallets/:walletAddress/nonce
+   * Create/update nonce for username
+   * POST /api/users/:username/nonce
    */
   async createNonce(
-    walletAddress: string,
+    username: string,
     signature: string,
     message: string
   ): Promise<NonceResponse> {
     const response = await this.post<NonceResponse>(
-      `/api/wallets/${encodeURIComponent(walletAddress)}/nonce`,
+      `/api/users/${encodeURIComponent(username)}/nonce`,
       {
-        walletAddress,
+        walletAddress: username,
         signature,
         message,
       },
@@ -357,16 +359,16 @@ class IndexerClient implements NetworkClient {
   }
 
   /**
-   * Retrieve nonce for wallet address
-   * GET /api/wallets/:walletAddress/nonce
+   * Retrieve nonce for username
+   * GET /api/users/:username/nonce
    */
   async getNonce(
-    walletAddress: string,
+    username: string,
     signature: string,
     message: string
   ): Promise<NonceResponse> {
     const response = await this.get<NonceResponse>(
-      `/api/wallets/${encodeURIComponent(walletAddress)}/nonce`,
+      `/api/users/${encodeURIComponent(username)}/nonce`,
       {
         headers: this.createAuthHeaders(signature, message),
       }
@@ -599,10 +601,10 @@ const createIndexerApiConfig = (config: AppConfig) => ({
       url: string
     ) =>
       `/api/wallets/${encodeURIComponent(walletAddress)}/message/${chainId}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`,
-    NONCE_CREATE: (walletAddress: string) =>
-      `/api/wallets/${encodeURIComponent(walletAddress)}/nonce`,
-    NONCE_GET: (walletAddress: string) =>
-      `/api/wallets/${encodeURIComponent(walletAddress)}/nonce`,
+    NONCE_CREATE: (username: string) =>
+      `/api/users/${encodeURIComponent(username)}/nonce`,
+    NONCE_GET: (username: string) =>
+      `/api/users/${encodeURIComponent(username)}/nonce`,
     SIGNATURE_VERIFY: (username: string) =>
       `/api/users/${encodeURIComponent(username)}/verify`,
     ENTITLEMENTS_NAMESERVICE: (walletAddress: string) =>

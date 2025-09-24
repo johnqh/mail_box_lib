@@ -10,7 +10,7 @@
  * - Compatible with both REST and GraphQL APIs
  */
 
-import { ChainType } from '@johnqh/types';
+import { ChainType, Optional } from '@johnqh/types';
 
 // =============================================================================
 // INDEXER API TYPES (v2.0.0+)
@@ -101,8 +101,8 @@ type GetDelegatedRequest = SignatureProtectedRequest;
 interface GetDelegatedResponse {
   walletAddress: string;
   addressType: ChainType;
-  delegatedTo: string | null;
-  chainId: number | null;
+  delegatedTo: Optional<string>;
+  chainId: Optional<number>;
   verified: boolean;
   timestamp: string;
 }
@@ -640,10 +640,10 @@ interface IndexerPointsSummary {
   lifetimeEarned: string;
   currentStreak: number;
   longestStreak: number;
-  lastActivityDate: number | null;
-  rank: number | null;
+  lastActivityDate: Optional<number>;
+  rank: Optional<number>;
   tier: string;
-  nextTierThreshold: string | null;
+  nextTierThreshold: Optional<string>;
   recentActivities: Array<{
     id: string;
     activityType: string;
@@ -772,7 +772,7 @@ interface IndexerLeaderboardEntry {
   totalPoints: string;
   currentStreak: number;
   longestStreak: number;
-  lastActivityDate: number | null;
+  lastActivityDate: Optional<number>;
   tier: string;
 }
 
@@ -780,7 +780,7 @@ interface IndexerLeaderboardResponse {
   success: boolean;
   data: {
     leaderboard: IndexerLeaderboardEntry[];
-    userRank: number | null;
+    userRank: Optional<number>;
     pagination: {
       total: number;
       limit: number;

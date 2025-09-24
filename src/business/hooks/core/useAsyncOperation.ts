@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { Optional } from '@johnqh/types';
 
 /**
  * Generic async operation hook with loading, error, and data states
@@ -15,12 +16,12 @@ interface UseAsyncOperationOptions<T> {
 }
 
 interface UseAsyncOperationReturn<T> {
-  data: T | null;
+  data: Optional<T>;
   loading: boolean;
-  error: string | null;
-  execute: (operation: () => Promise<T>) => Promise<T | null>;
+  error: Optional<string>;
+  execute: (operation: () => Promise<T>) => Promise<Optional<T>>;
   reset: () => void;
-  retry: () => Promise<T | null>;
+  retry: () => Promise<Optional<T>>;
 }
 
 const useAsyncOperation = <T = any>(
@@ -35,15 +36,15 @@ const useAsyncOperation = <T = any>(
     retryDelay = 1000,
   } = options;
 
-  const [data, setData] = useState<T | null>(initialData);
+  const [data, setData] = useState<Optional<T>>(initialData);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Optional<string>>(null);
   const [lastOperation, setLastOperation] = useState<(() => Promise<T>) | null>(
     null
   );
 
   const execute = useCallback(
-    async (operation: () => Promise<T>): Promise<T | null> => {
+    async (operation: () => Promise<T>): Promise<Optional<T>> => {
       setLastOperation(() => operation);
       setLoading(true);
       setError(null);
@@ -115,7 +116,7 @@ const useAsyncOperation = <T = any>(
     setLastOperation(null);
   }, [initialData]);
 
-  const retry = useCallback(async (): Promise<T | null> => {
+  const retry = useCallback(async (): Promise<Optional<T>> => {
     if (lastOperation) {
       return execute(lastOperation);
     }
@@ -171,7 +172,7 @@ const useAuthenticatedOperation = <T = any>(
   const asyncOp = useAsyncOperation<T>(options);
 
   const execute = useCallback(
-    async (operation: () => Promise<T>): Promise<T | null> => {
+    async (operation: () => Promise<T>): Promise<Optional<T>> => {
       if (!isAuthenticated) {
         asyncOp.reset();
         return null;

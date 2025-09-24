@@ -156,7 +156,11 @@ class WildDuckAPI {
 
       const response = await this.networkClient.request<T>(url, requestOptions);
 
-      return response.data;
+      if (response.data === undefined) {
+        throw new Error('No data received from server');
+      }
+
+      return response.data as T;
     } catch (error) {
       console.error('❌ API Request failed:', error);
       throw error;

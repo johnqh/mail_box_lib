@@ -3,7 +3,7 @@
  * Reduces boilerplate code for common async operations
  */
 
-import { logger } from '@johnqh/types';
+import { logger, Optional } from '@johnqh/types';
 
 type AsyncResult<T> = {
   data?: T;
@@ -35,9 +35,9 @@ const safeAsync = async <T>(
 const withLoadingState = async <T>(
   operation: () => Promise<T>,
   setLoading: (loading: boolean) => void,
-  setError: (error: string | null) => void,
+  setError: (error: Optional<string>) => void,
   context?: string
-): Promise<T | undefined> => {
+): Promise<Optional<T>> => {
   setLoading(true);
   setError(null);
 
@@ -141,8 +141,8 @@ const debounceAsync = <T extends any[], R>(
   fn: (...args: T) => Promise<R>,
   delay: number,
   key: string
-): ((...args: T) => Promise<R | undefined>) => {
-  return (...args: T): Promise<R | undefined> => {
+): ((...args: T) => Promise<Optional<R>>) => {
+  return (...args: T): Promise<Optional<R>> => {
     return new Promise(resolve => {
       const existingTimeout = debounceMap.get(key);
       if (existingTimeout) {

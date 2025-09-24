@@ -47,7 +47,7 @@ export type {
 } from './di';
 
 // Re-export enums from local di module
-export { AnalyticsEvent, WalletType, StorageType, NetworkError } from './di';
+export { WalletType, StorageType, NetworkError } from './di';
 
 // Re-export common enums and types from @johnqh/types
 export {
@@ -56,14 +56,13 @@ export {
   ChainType,
   Theme,
   FontSize,
-  StandardEmailFolder,
   EmailFolder,
   EmailComposeType,
   MobileView,
   RequestStatus,
   NotificationType,
   EmailFolderUtils,
-  AppAnalyticsEvent,
+  AnalyticsEvent,
   EmailAction,
   SubscriptionAction,
   EmailAddressType,
@@ -73,7 +72,6 @@ export {
   PlatformType,
   ConnectionType,
   ConnectionState,
-  NetworkStatus,
   EmailValidationState,
   FeatureFlag,
   ErrorType,
@@ -81,6 +79,9 @@ export {
 
   // Constants
   ERROR_MESSAGES,
+
+  // Utility types
+  Optional,
 
   // Utility functions
   formatWalletAddress,
