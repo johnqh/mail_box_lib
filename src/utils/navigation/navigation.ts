@@ -10,6 +10,7 @@ import {
   NavigationOptions,
   NavigationService,
 } from '../../di';
+import { Optional } from '@johnqh/types';
 
 let navigationService: NavigationService;
 
@@ -55,13 +56,13 @@ function useNavigation(): NavigationHook {
   const currentState = service.getCurrentState();
 
   return {
-    navigate: (path: string, options?: NavigationOptions) => {
+    navigate: (path: string, options?: Optional<NavigationOptions>) => {
       service.navigate(path, options);
     },
-    goBack: (fallbackPath?: string) => {
+    goBack: (fallbackPath?: Optional<string>) => {
       service.goBack(fallbackPath);
     },
-    replace: (path: string, options?: NavigationOptions) => {
+    replace: (path: string, options?: Optional<NavigationOptions>) => {
       service.replace(path, options);
     },
     currentPath: currentState.currentPath,
