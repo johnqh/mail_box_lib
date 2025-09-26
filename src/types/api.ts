@@ -21,8 +21,8 @@ import { ChainType, Optional } from '@johnqh/types';
  */
 interface IndexerApiResponse<T = any> {
   success: boolean;
-  data?: T;
-  error?: string;
+  data: Optional<T>;
+  error: Optional<string>;
   timestamp: string;
 }
 
@@ -43,9 +43,9 @@ interface WalletSignature {
  */
 interface WalletAuth {
   /** The wallet address (optional) */
-  walletAddress?: string;
+  walletAddress: Optional<string>;
   /** The wallet signature (optional) */
-  signature?: WalletSignature;
+  signature: Optional<WalletSignature>;
 }
 
 /**
@@ -78,11 +78,13 @@ interface GetEmailsResponse {
   walletAddress: string;
   addressType: ChainType;
   emailAddresses: string[];
-  detailedAddresses?: {
-    email: string;
-    source: string;
-    verified?: boolean;
-  }[];
+  detailedAddresses: Optional<
+    {
+      email: string;
+      source: string;
+      verified: Optional<boolean>;
+    }[]
+  >;
   totalCount: number;
   hasNameService: boolean;
   verified: boolean;
@@ -137,13 +139,13 @@ interface ValidateAddressResponse {
   isValid: boolean;
   addressType: ChainType;
   normalizedAddress: string;
-  formats?: {
+  formats: Optional<{
     standard: string;
-    checksummed?: string;
-    compressed?: string;
-  };
-  message?: string;
-  error?: string;
+    checksummed: Optional<string>;
+    compressed: Optional<string>;
+  }>;
+  message: Optional<string>;
+  error: Optional<string>;
   timestamp: string;
 }
 
@@ -158,8 +160,8 @@ type GetPointsSummaryRequest = SignatureProtectedRequest;
  * POST /points/history
  */
 interface GetPointsHistoryRequest extends SignatureProtectedRequest {
-  limit?: number;
-  offset?: number;
+  limit: Optional<number>;
+  offset: Optional<number>;
 }
 
 /**
@@ -190,24 +192,24 @@ interface WildDuckAuthRequest {
   username: string;
   signature: string;
   nonce: string;
-  scope?: string;
-  token?: boolean;
-  protocol?: string;
-  sess?: string;
-  ip?: string;
+  scope: Optional<string>;
+  token: Optional<boolean>;
+  protocol: Optional<string>;
+  sess: Optional<string>;
+  ip: Optional<string>;
 }
 
 interface WildDuckAuthResponse {
   success: boolean;
-  id?: string;
-  username?: string;
-  address?: string;
-  scope?: string[];
-  token?: string;
-  require2fa?: string[];
-  requirePasswordChange?: boolean;
-  message?: string;
-  error?: string;
+  id: Optional<string>;
+  username: Optional<string>;
+  address: Optional<string>;
+  scope: Optional<string[]>;
+  token: Optional<string>;
+  require2fa: Optional<string[]>;
+  requirePasswordChange: Optional<boolean>;
+  message: Optional<string>;
+  error: Optional<string>;
 }
 
 interface WildDuckPreAuthRequest {
@@ -219,14 +221,14 @@ interface WildDuckPreAuthRequest {
 
 interface WildDuckPreAuthResponse {
   success: boolean;
-  id?: string;
-  username?: string;
-  address?: string;
-  scope?: string[];
-  require2fa?: string[];
-  requirePasswordChange?: boolean;
-  message?: string;
-  nonce?: string;
+  id: Optional<string>;
+  username: Optional<string>;
+  address: Optional<string>;
+  scope: Optional<string[]>;
+  require2fa: Optional<string[]>;
+  requirePasswordChange: Optional<boolean>;
+  message: Optional<string>;
+  nonce: Optional<string>;
 }
 
 /**
@@ -236,47 +238,47 @@ interface WildDuckPreAuthResponse {
 interface WildDuckUser {
   id: string;
   username: string;
-  name?: string;
-  address?: string;
-  language?: string;
-  retention?: number;
-  quota?: {
+  name: Optional<string>;
+  address: Optional<string>;
+  language: Optional<string>;
+  retention: Optional<number>;
+  quota: Optional<{
     allowed: number;
     used: number;
-  };
+  }>;
   disabled: boolean;
   suspended: boolean;
-  tags?: string[];
-  hasPasswordSet?: boolean;
-  activated?: boolean;
-  created?: string;
+  tags: Optional<string[]>;
+  hasPasswordSet: Optional<boolean>;
+  activated: Optional<boolean>;
+  created: Optional<string>;
 }
 
 interface WildDuckCreateUserRequest {
   username: string;
-  password?: string;
-  address?: string;
-  name?: string;
-  quota?: number;
-  language?: string;
-  retention?: number;
-  tags?: string[];
+  password: Optional<string>;
+  address: Optional<string>;
+  name: Optional<string>;
+  quota: Optional<number>;
+  language: Optional<string>;
+  retention: Optional<number>;
+  tags: Optional<string[]>;
 }
 
 interface WildDuckUpdateUserRequest {
-  name?: string;
-  quota?: number;
-  language?: string;
-  retention?: number;
-  disabled?: boolean;
-  suspended?: boolean;
-  tags?: string[];
+  name: Optional<string>;
+  quota: Optional<number>;
+  language: Optional<string>;
+  retention: Optional<number>;
+  disabled: Optional<boolean>;
+  suspended: Optional<boolean>;
+  tags: Optional<string[]>;
 }
 
 interface WildDuckUserResponse {
   success: boolean;
-  id?: string;
-  error?: string;
+  id: Optional<string>;
+  error: Optional<string>;
 }
 
 /**
@@ -287,25 +289,27 @@ interface WildDuckMailbox {
   id: string;
   name: string;
   path: string;
-  specialUse?: 'Inbox' | 'Sent' | 'Trash' | 'Drafts' | 'Junk' | 'Archive';
+  specialUse: Optional<
+    'Inbox' | 'Sent' | 'Trash' | 'Drafts' | 'Junk' | 'Archive'
+  >;
   modifyIndex: number;
   subscribed: boolean;
   hidden: boolean;
-  total?: number;
-  unseen?: number;
-  size?: number;
+  total: Optional<number>;
+  unseen: Optional<number>;
+  size: Optional<number>;
 }
 
 interface WildDuckMailboxResponse {
   success: boolean;
   results: WildDuckMailbox[];
-  error?: string;
+  error: Optional<string>;
 }
 
 interface WildDuckCreateMailboxRequest {
   path: string;
-  hidden?: boolean;
-  retention?: number;
+  hidden: Optional<boolean>;
+  retention: Optional<number>;
 }
 
 /**
@@ -313,7 +317,7 @@ interface WildDuckCreateMailboxRequest {
  * For email message handling and operations
  */
 interface WildDuckMessageAddress {
-  name?: string;
+  name: Optional<string>;
   address: string;
 }
 
@@ -322,17 +326,17 @@ interface WildDuckMessageAttachment {
   filename: string;
   contentType: string;
   size: number;
-  hash?: string;
+  hash: Optional<string>;
 }
 
 interface WildDuckMessageBase {
   id: string;
   mailbox: string;
   thread: string;
-  from?: WildDuckMessageAddress;
+  from: Optional<WildDuckMessageAddress>;
   to: WildDuckMessageAddress[];
-  cc?: WildDuckMessageAddress[];
-  bcc?: WildDuckMessageAddress[];
+  cc: Optional<WildDuckMessageAddress[]>;
+  bcc: Optional<WildDuckMessageAddress[]>;
   subject: string;
   date: string;
   intro: string;
@@ -351,45 +355,47 @@ interface WildDuckMessage extends WildDuckMessageBase {
 
 interface WildDuckMessageDetail extends WildDuckMessageBase {
   user: string;
-  html?: string;
-  text?: string;
-  headers?: Record<string, string | string[]>;
+  html: Optional<string>;
+  text: Optional<string>;
+  headers: Optional<Record<string, string | string[]>>;
   attachments: WildDuckMessageAttachment[];
-  references?: string[];
-  inReplyTo?: string;
+  references: Optional<string[]>;
+  inReplyTo: Optional<string>;
 }
 
 interface WildDuckMessagesResponse {
   success: boolean;
   total: number;
   page: number;
-  previousCursor?: string;
-  nextCursor?: string;
+  previousCursor: Optional<string>;
+  nextCursor: Optional<string>;
   results: WildDuckMessage[];
   error?: string;
 }
 
 interface WildDuckMessageResponse {
   success: boolean;
-  data?: WildDuckMessageDetail;
-  error?: string;
+  data: Optional<WildDuckMessageDetail>;
+  error: Optional<string>;
 }
 
 interface WildDuckSendMessageRequest {
-  from?: string;
+  from: Optional<string>;
   to: WildDuckMessageAddress[];
-  cc?: WildDuckMessageAddress[];
-  bcc?: WildDuckMessageAddress[];
+  cc: Optional<WildDuckMessageAddress[]>;
+  bcc: Optional<WildDuckMessageAddress[]>;
   subject: string;
-  text?: string;
-  html?: string;
-  attachments?: Array<{
-    filename: string;
-    content: string | Buffer;
-    contentType?: string;
-  }>;
-  inReplyTo?: string;
-  references?: string[];
+  text: Optional<string>;
+  html: Optional<string>;
+  attachments: Optional<
+    Array<{
+      filename: string;
+      content: string | Buffer;
+      contentType: Optional<string>;
+    }>
+  >;
+  inReplyTo: Optional<string>;
+  references: Optional<string[]>;
 }
 
 /**
@@ -399,17 +405,17 @@ interface WildDuckSendMessageRequest {
 interface WildDuckAddress {
   id: string;
   address: string;
-  name?: string;
+  name: Optional<string>;
   main: boolean;
-  created?: string;
-  metaData?: any;
-  tags?: string[];
+  created: Optional<string>;
+  metaData: Optional<any>;
+  tags: Optional<string[]>;
 }
 
 interface WildDuckAddressResponse {
   success: boolean;
-  results?: WildDuckAddress[];
-  error?: string;
+  results: Optional<WildDuckAddress[]>;
+  error: Optional<string>;
 }
 
 // =============================================================================
@@ -422,8 +428,8 @@ interface WildDuckAddressResponse {
 interface IndexerEmailAddress {
   email: string;
   type: 'primary' | 'domain' | 'delegated' | 'nameservice';
-  source?: string;
-  isVerified?: boolean;
+  source: Optional<string>;
+  isVerified: Optional<boolean>;
 }
 
 interface IndexerEmailResponse {
@@ -455,9 +461,9 @@ interface IndexerDelegationResponse {
   walletAddress: string;
   addressType: string;
   hasDelegation: boolean;
-  delegatedTo?: string;
-  delegationType?: string;
-  isActive?: boolean;
+  delegatedTo: Optional<string>;
+  delegationType: Optional<string>;
+  isActive: Optional<boolean>;
   verified: boolean;
   timestamp: string;
 }
@@ -542,8 +548,8 @@ interface IndexerMail {
   blockNumber: string;
   transactionHash: string;
   logIndex: number;
-  gasUsed?: string;
-  gasPrice?: string;
+  gasUsed: Optional<string>;
+  gasPrice: Optional<string>;
 }
 
 interface IndexerPreparedMail {
@@ -557,8 +563,8 @@ interface IndexerPreparedMail {
   blockNumber: string;
   transactionHash: string;
   logIndex: number;
-  gasUsed?: string;
-  gasPrice?: string;
+  gasUsed: Optional<string>;
+  gasPrice: Optional<string>;
 }
 
 interface IndexerDelegation {
@@ -649,7 +655,7 @@ interface IndexerPointsSummary {
     activityType: string;
     pointsAmount: string;
     createdAt: number;
-    metadata?: Record<string, any>;
+    metadata: Optional<Record<string, any>>;
   }>;
   achievements: Array<{
     id: string;
@@ -680,13 +686,13 @@ interface IndexerPointsHistoryEntry {
   transactionType: 'AWARD' | 'DEDUCT' | 'ADJUST' | 'CLAIM';
   pointsAmount: string;
   activityType: string;
-  activityReference?: string;
+  activityReference: Optional<string>;
   description: string;
   createdAt: number;
-  metadata?: Record<string, any>;
-  chainId?: number;
-  transactionHash?: string;
-  blockNumber?: string;
+  metadata: Optional<Record<string, any>>;
+  chainId: Optional<number>;
+  transactionHash: Optional<string>;
+  blockNumber: Optional<string>;
 }
 
 interface IndexerPointsHistoryResponse {
@@ -801,14 +807,14 @@ interface IndexerCampaign {
     | 'achievement_unlock'
     | 'seasonal_event';
   isActive: boolean;
-  description?: string;
+  description: Optional<string>;
   startTime: number;
   endTime: number;
   pointsPerClaim: number;
   maxClaimsPerUser: number;
-  totalClaimsLimit?: number;
+  totalClaimsLimit: Optional<number>;
   currentClaims: number;
-  createdBy?: string;
+  createdBy: Optional<string>;
   createdAt: number;
 }
 
@@ -866,34 +872,36 @@ interface IndexerWebhookLoginRequest {
  */
 interface GraphQLResponse<T = any> {
   data?: T;
-  errors?: Array<{
-    message: string;
-    locations?: Array<{ line: number; column: number }>;
-    path?: (string | number)[];
-  }>;
+  errors: Optional<
+    Array<{
+      message: string;
+      locations: Optional<Array<{ line: number; column: number }>>;
+      path: Optional<(string | number)[]>;
+    }>
+  >;
 }
 
 interface GraphQLPaginationInput {
-  first?: number;
-  skip?: number;
-  orderBy?: string;
-  orderDirection?: 'asc' | 'desc';
+  first: Optional<number>;
+  skip: Optional<number>;
+  orderBy: Optional<string>;
+  orderDirection: Optional<'asc' | 'desc'>;
 }
 
 interface GraphQLWhereInput {
-  id?: string;
-  id_in?: string[];
-  chainId?: number;
-  chainId_in?: number[];
-  from?: string;
-  from_in?: string[];
-  to?: string;
-  to_in?: string[];
-  timestamp_gte?: string;
-  timestamp_lte?: string;
-  blockNumber_gte?: string;
-  blockNumber_lte?: string;
-  isActive?: boolean;
+  id: Optional<string>;
+  id_in: Optional<string[]>;
+  chainId: Optional<number>;
+  chainId_in: Optional<number[]>;
+  from: Optional<string>;
+  from_in: Optional<string[]>;
+  to: Optional<string>;
+  to_in: Optional<string[]>;
+  timestamp_gte: Optional<string>;
+  timestamp_lte: Optional<string>;
+  blockNumber_gte: Optional<string>;
+  blockNumber_lte: Optional<string>;
+  isActive: Optional<boolean>;
 }
 
 // =============================================================================
@@ -905,19 +913,19 @@ interface GraphQLWhereInput {
  */
 interface ApiResponse<T = any> {
   success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-  timestamp?: string;
+  data: Optional<T>;
+  error: Optional<string>;
+  message: Optional<string>;
+  timestamp: Optional<string>;
 }
 
 /**
  * Pagination Types
  */
 interface PaginationParams {
-  page?: number;
-  limit?: number;
-  offset?: number;
+  page: Optional<number>;
+  limit: Optional<number>;
+  offset: Optional<number>;
 }
 
 interface PaginationResponse {
@@ -937,8 +945,8 @@ interface ChainInfo {
   chainId: number;
   name: string;
   type: ChainType;
-  rpcUrl?: string;
-  explorerUrl?: string;
+  rpcUrl: Optional<string>;
+  explorerUrl: Optional<string>;
 }
 
 /**
@@ -955,7 +963,7 @@ interface Email {
   read: boolean;
   starred: boolean;
   folder: 'inbox' | 'sent' | 'drafts' | 'trash' | 'archive' | string;
-  attachments?: string[];
+  attachments: Optional<string[]>;
 }
 
 /**
@@ -977,7 +985,7 @@ interface Mailbox {
   name: string;
   count: number;
   unreadCount: number;
-  icon?: string;
+  icon: Optional<string>;
 }
 
 // =============================================================================
@@ -1068,10 +1076,10 @@ type ApiInterceptor<T = any> = (data: T) => T | Promise<T>;
 
 interface ApiClientConfig {
   baseUrl: string;
-  timeout?: number;
-  headers?: Record<string, string>;
-  requestInterceptors?: ApiInterceptor[];
-  responseInterceptors?: ApiInterceptor[];
+  timeout: Optional<number>;
+  headers: Optional<Record<string, string>>;
+  requestInterceptors: Optional<ApiInterceptor[]>;
+  responseInterceptors: Optional<ApiInterceptor[]>;
 }
 
 export {

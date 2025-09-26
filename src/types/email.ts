@@ -1,3 +1,5 @@
+import { Optional } from '@johnqh/types';
+
 interface Email {
   id: string;
   from: string;
@@ -7,10 +9,10 @@ interface Email {
   date: Date;
   read: boolean;
   starred: boolean;
-  important?: boolean;
+  important?: Optional<boolean>;
   folder: EmailFolder;
-  labels?: string[];
-  attachments?: string[];
+  labels?: Optional<string[]>;
+  attachments?: Optional<string[]>;
 }
 
 interface Folder {
@@ -23,16 +25,16 @@ interface EmailAddress {
   id: string;
   address: string;
   verified: boolean;
-  primary?: boolean;
+  primary?: Optional<boolean>;
   createdAt: Date;
-  updatedAt?: Date;
+  updatedAt?: Optional<Date>;
 }
 
 interface User {
   id: string;
   name: string;
   email: string;
-  avatar?: string;
+  avatar?: Optional<string>;
   emailAddresses: WalletEmailAccounts[];
 }
 
@@ -48,11 +50,11 @@ import {
 export interface WalletUserData {
   walletAddress: string;
   chainType: ChainType;
-  walletType?: string;
-  displayName?: string;
-  avatar?: string;
-  metadata?: Record<string, any>;
-  emailAddresses?: WalletEmailAccounts[];
+  walletType?: Optional<string>;
+  displayName?: Optional<string>;
+  avatar?: Optional<string>;
+  metadata?: Optional<Record<string, any>>;
+  emailAddresses?: Optional<WalletEmailAccounts[]>;
 }
 
 // Re-export types from enums for backward compatibility

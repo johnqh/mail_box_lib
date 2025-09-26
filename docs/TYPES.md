@@ -1,9 +1,10 @@
 # Type Documentation
 
-Complete TypeScript type definitions for @johnqh/lib.
+Complete TypeScript type definitions for @johnqh/lib v3.3.3.
 
 ## Table of Contents
 
+- [Optional Pattern](#optional-pattern)
 - [Core Types](#core-types)
 - [Service Interfaces](#service-interfaces)
 - [Business Logic Types](#business-logic-types)
@@ -11,6 +12,43 @@ Complete TypeScript type definitions for @johnqh/lib.
 - [Platform Types](#platform-types)
 - [Utility Types](#utility-types)
 - [Enum Types](#enum-types)
+- [API Response Types](#api-response-types)
+- [Type Guards](#type-guards)
+- [AI Assistant Examples](#ai-assistant-examples)
+
+## Optional Pattern
+
+**IMPORTANT**: This project uses `Optional<T>` from @johnqh/types for all nullable/optional values:
+
+```typescript
+import { Optional } from '@johnqh/types';
+
+// ✅ CORRECT: Use Optional<T> for nullable values
+interface User {
+  id: string;
+  name: string;
+  email: Optional<string>; // T | undefined | null
+  avatar: Optional<string>;
+}
+
+// ❌ WRONG: Don't use manual nullable patterns
+interface User {
+  email?: string | null; // Don't do this
+  avatar: string | undefined; // Don't do this
+}
+```
+
+### When to Use Optional<T>
+
+- API responses that may contain null/undefined values
+- User input fields that are not required
+- Configuration options that have defaults
+- Database fields that allow NULL
+- React hook states that start as undefined
+
+### AI Development Note
+
+When creating new interfaces or updating existing ones, ALWAYS use `Optional<T>` instead of manual nullable patterns (`T | undefined | null`, `T?`, etc.).
 
 ## Core Types
 
@@ -45,16 +83,16 @@ interface Email {
   starred: boolean;
 
   /** Whether the email is marked as important */
-  important?: boolean;
+  important: Optional<boolean>;
 
   /** Email folder/mailbox */
   folder: EmailFolder;
 
   /** Email labels/tags */
-  labels?: string[];
+  labels: Optional<string[]>;
 
   /** Attachment file names */
-  attachments?: string[];
+  attachments: Optional<string[]>;
 }
 ```
 
@@ -74,33 +112,41 @@ interface User {
   email: string;
 
   /** User avatar URL */
-  avatar?: string;
+  avatar: Optional<string>;
 
   /** All associated email addresses */
   emailAddresses: EmailAddress[];
+
+  /** Wallet connection information */
+  wallet: Optional<WalletConnection>;
 }
 ```
 
 ### EmailAddress
 
-Individual email address with metadata.
+Individual email address with metadata (updated for indexer v2.2.0).
 
 ```typescript
-interface EmailAddress {
-  /** Unique address identifier */
-  id: string;
+import { Optional } from '@johnqh/types';
 
+interface EmailAddress {
   /** The email address */
-  email: string;
+  address: string;
 
   /** Display name for this address */
-  name: string;
+  name: Optional<string>;
 
   /** Whether this is the primary address */
-  isPrimary: boolean;
+  primary: Optional<boolean>;
 
-  /** Whether this address is active */
-  isActive: boolean;
+  /** Whether this address is verified */
+  verified: boolean;
+
+  /** Chain type for blockchain addresses */
+  chainType: Optional<ChainType>;
+
+  /** Wallet address associated with this email */
+  walletAddress: Optional<string>;
 }
 ```
 
@@ -120,7 +166,7 @@ interface Mailbox {
   path: string;
 
   /** Special use designation (INBOX, SENT, etc.) */
-  specialUse?: string;
+  specialUse: Optional<string>;
 
   /** Whether user is subscribed to this mailbox */
   subscribed: boolean;
@@ -129,10 +175,10 @@ interface Mailbox {
   hidden: boolean;
 
   /** Total number of emails */
-  total?: number;
+  total: Optional<number>;
 
   /** Number of unread emails */
-  unseen?: number;
+  unseen: Optional<number>;
 }
 ```
 
@@ -404,22 +450,45 @@ interface AppConfig {
 ### API Response Types
 
 ```typescript
-interface ApiResponse<T> {
-  data: T;
+// BaseResponse from @johnqh/types
+import { BaseResponse, Optional } from '@johnqh/types';
+
+interface BaseResponse<T = unknown> {
+  /** Operation success status */
   success: boolean;
-  error?: string;
-  meta?: {
-    total?: number;
-    page?: number;
-    limit?: number;
-  };
+  /** Response data */
+  data: Optional<T>;
+  /** Error message if operation failed */
+  error: Optional<string>;
+  /** Response timestamp */
+  timestamp: string;
+}
+
+// NetworkResponse extends BaseResponse with HTTP metadata
+interface NetworkResponse<T = unknown> extends BaseResponse<T> {
+  ok: boolean;
+  status: number;
+  statusText: string;
+  headers: Record<string, string>;
 }
 
 interface PaginatedResponse<T> {
   items: T[];
   totalCount: number;
   hasMore: boolean;
-  nextCursor?: string;
+  nextCursor: Optional<string>;
+}
+
+// Indexer API specific response types
+interface IndexerResponse<T> extends NetworkResponse<T> {
+  // Indexer responses follow NetworkResponse pattern
+}
+
+interface WildDuckResponse<T> {
+  success: boolean;
+  data: Optional<T>;
+  error: Optional<string>;
+  // WildDuck has different response structure
 }
 ```
 
@@ -453,6 +522,9 @@ interface SearchFilter {
 ### Blockchain Types
 
 ```typescript
+import { Optional, ChainType, ConnectionState } from '@johnqh/types';
+
+// Local WalletUserData interface (not in @johnqh/di)
 interface WalletUserData {
   id: string;
   name: string;
@@ -464,7 +536,7 @@ interface WalletUserData {
 
 interface WalletInfo {
   name: string;
-  icon?: string;
+  icon: Optional<string>;
   installed: boolean;
   supported: boolean;
 }
@@ -473,8 +545,23 @@ interface WalletConnection {
   address: string;
   chainId: string;
   chainType: ChainType;
-  balance?: string;
+  balance: Optional<string>;
 }
+
+// Wallet status management
+interface WalletStatus {
+  walletAddress: string;
+  chainType: ChainType;
+  isVerified: boolean;
+  verificationData: Optional<{
+    message: string;
+    signature: string;
+    timestamp: string;
+  }>;
+}
+
+// Connection states
+type WalletConnectionState = ConnectionState; // Imported from @johnqh/types
 ```
 
 ### AI Types
@@ -505,31 +592,43 @@ interface ExtractedEntity {
 
 ### ChainType
 
-Supported blockchain networks.
+Supported blockchain networks (imported from @johnqh/types, with local extension).
 
 ```typescript
-enum ChainType {
+// Import from @johnqh/types
+import { ChainType as BaseChainType } from '@johnqh/types';
+
+// Local ChainType with additional 'unknown' value
+export enum ChainType {
   ETHEREUM = 'ethereum',
   SOLANA = 'solana',
-  POLYGON = 'polygon',
-  BITCOIN = 'bitcoin',
+  UNKNOWN = 'unknown', // Local addition not in @johnqh/types
 }
+
+// Use BaseChainType when working with @johnqh/types interfaces
+// Use local ChainType when unknown values are needed
 ```
 
-### EmailFolder
+### MailboxType (EmailFolder)
 
-Standard email folder types.
+Standard mailbox/folder types (consolidated to MailboxType from @johnqh/types).
 
 ```typescript
-enum EmailFolder {
-  INBOX = 'inbox',
-  SENT = 'sent',
-  DRAFTS = 'drafts',
-  TRASH = 'trash',
-  SPAM = 'spam',
-  ARCHIVE = 'archive',
-  CUSTOM = 'custom',
+// Import from @johnqh/types
+import { MailboxType } from '@johnqh/types';
+
+// Standard mailbox types
+enum MailboxType {
+  INBOX = 'INBOX',
+  SENT = 'Sent',
+  DRAFTS = 'Drafts',
+  TRASH = 'Trash',
+  SPAM = 'Junk',
+  ARCHIVE = 'Archive'
 }
+
+// EmailFolder is now an alias for MailboxType
+type EmailFolder = MailboxType;
 ```
 
 ### Theme
@@ -630,16 +729,154 @@ type PlatformConfig<P extends Platform> = P extends 'web'
   : ReactNativeConfig;
 ```
 
+## AI Assistant Examples
+
+Common patterns and examples for AI-assisted development.
+
+### Hook Return Types
+
+```typescript
+import { Optional } from '@johnqh/types';
+
+// Standard hook return pattern
+interface UseDataReturn<T> {
+  data: Optional<T>;
+  isLoading: boolean;
+  error: Optional<string>;
+  refetch: () => Promise<void>;
+  clearError: () => void;
+}
+
+// TanStack Query hook return (extends UseQueryResult)
+interface UseQueryReturn<T> extends UseQueryResult<T> {
+  // Inherits data, isLoading, error, refetch from TanStack Query
+}
+
+// Indexer hook pattern
+interface UseIndexerReturn<T> {
+  data: Optional<T>;
+  isLoading: boolean;
+  error: Optional<string>;
+  execute: (...args: any[]) => Promise<T>;
+  clearError: () => void;
+}
+```
+
+### Configuration Patterns
+
+```typescript
+// WildDuck configuration
+interface WildDuckConfig {
+  apiToken: string;
+  backendUrl: Optional<string>;
+  cloudflareWorkerUrl: Optional<string>;
+  useMockFallback: Optional<boolean>;
+}
+
+// Indexer configuration (passed as parameters)
+// endpointUrl: string, dev: boolean
+
+// Service factory pattern
+type CreateService<T> = (config: ServiceConfig) => T;
+```
+
+### API Client Response Handling
+
+```typescript
+// Indexer client response pattern
+async function handleIndexerResponse<T>(response: NetworkResponse<T>): Promise<T> {
+  if (!response.ok) {
+    throw new Error(
+      `API call failed: ${(response.data as any)?.error || 'Unknown error'}`
+    );
+  }
+
+  return response.data as T; // Type assertion needed for NetworkResponse
+}
+
+// WildDuck response pattern
+async function handleWildDuckResponse<T>(response: WildDuckResponse<T>): Promise<T> {
+  if (!response.success || response.data === undefined) {
+    throw new Error(response.error || 'Operation failed');
+  }
+
+  return response.data;
+}
+```
+
+### Error Handling Patterns
+
+```typescript
+// Custom error types
+class IndexerError extends Error {
+  constructor(message: string, public code?: string) {
+    super(message);
+    this.name = 'IndexerError';
+  }
+}
+
+class WildDuckError extends Error {
+  constructor(message: string, public code?: string) {
+    super(message);
+    this.name = 'WildDuckError';
+  }
+}
+
+// Hook error handling
+const useServiceWithError = () => {
+  const [error, setError] = useState<Optional<string>>(null);
+
+  const handleError = useCallback((err: unknown) => {
+    const errorMessage = err instanceof Error ? err.message : 'Operation failed';
+    setError(errorMessage);
+  }, []);
+
+  return { error, handleError, clearError: () => setError(null) };
+};
+```
+
+### Type Migration Examples
+
+```typescript
+// BEFORE: Manual nullable patterns (❌ Don't do this)
+interface OldInterface {
+  id: string;
+  name?: string;
+  email: string | null | undefined;
+  settings: UserSettings | null;
+}
+
+// AFTER: Using Optional<T> (✅ Correct pattern)
+interface NewInterface {
+  id: string;
+  name: Optional<string>;
+  email: Optional<string>;
+  settings: Optional<UserSettings>;
+}
+
+// Import consolidation examples
+// BEFORE: Local duplicates (❌ Don't do this)
+enum LocalChainType { ETHEREUM = 'ethereum' }
+enum LocalLoginMethod { WALLET = 'wallet' }
+
+// AFTER: Import from @johnqh/types (✅ Correct)
+import { ChainType, AnalyticsEvent } from '@johnqh/types';
+// Use string literals instead of LoginMethod (removed)
+type LoginMethod = 'wallet' | 'email' | 'google' | 'apple';
+```
+
 ## Generic Types
 
 Reusable generic type definitions.
 
 ```typescript
+import { Optional } from '@johnqh/types';
+
 /**
- * Generic service interface
+ * Generic service interface with Optional support
  */
 interface Service<T, K = string> {
-  get(id: K): Promise<T>;
+  get(id: K): Promise<Optional<T>>;
   create(data: Omit<T, 'id'>): Promise<T>;
   update(id: K, updates: Partial<T>): Promise<T>;
   delete(id: K): Promise<void>;
@@ -647,12 +884,12 @@ interface Service<T, K = string> {
 }
 
 /**
- * Generic hook return type
+ * Generic hook return type with Optional support
  */
 interface UseServiceReturn<T, E = Error> {
-  data: T | null;
+  data: Optional<T>;
   loading: boolean;
-  error: E | null;
+  error: Optional<E>;
   refetch: () => Promise<void>;
 }
 

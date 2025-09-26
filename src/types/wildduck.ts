@@ -5,24 +5,26 @@
  * defined in individual hook files.
  */
 
+import { Optional } from '@johnqh/types';
+
 // Message-related types
 export interface UpdateMessageParams {
-  seen?: boolean;
-  flagged?: boolean;
-  deleted?: boolean;
-  mailbox?: string;
+  seen: Optional<boolean>;
+  flagged: Optional<boolean>;
+  deleted: Optional<boolean>;
+  mailbox: Optional<string>;
 }
 
 // Address-related types
 export interface CreateAddressParams {
   address: string;
-  name?: string;
-  main?: boolean;
-  tags?: string[];
+  name: Optional<string>;
+  main: Optional<boolean>;
+  tags: Optional<string[]>;
 }
 
 export interface UpdateAddressParams {
-  name?: string;
-  main?: boolean;
-  tags?: string[];
+  name: Optional<string>;
+  main: Optional<boolean>;
+  tags: Optional<string[]>;
 }

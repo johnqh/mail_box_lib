@@ -1,36 +1,52 @@
 /**
- * Template for creating React hooks
- * 
+ * AI-Optimized Template for creating React hooks (v3.3.3)
+ *
  * INSTRUCTIONS:
  * 1. Replace {{HookName}} with your actual hook name (PascalCase)
  * 2. Replace {{hookName}} with camelCase version
  * 3. Update all type definitions to match your data
  * 4. Implement actual service calls
- * 5. Add proper error handling
- * 6. Write tests for the hook
+ * 5. Use Optional<T> for all nullable values
+ * 6. Follow Indexer/WildDuck patterns based on service type
+ * 7. Add proper error handling with clearError function
+ * 8. Write comprehensive tests for the hook
+ *
+ * AI NOTES:
+ * - ALWAYS use Optional<T> instead of T | null | undefined
+ * - For Indexer hooks: (endpointUrl: string, dev: boolean)
+ * - For WildDuck hooks: (config: WildDuckConfig)
+ * - Include clearError: () => void in return interface
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Optional } from '@johnqh/types';
 import { create{{ServiceName}}Service } from '../../../utils/{{service-name}}';
 import { {{ServiceName}}Operations } from '../../core/{{service-name}}/{{service-name}}-operations';
 
-// Define hook return type
+// For Indexer hooks, also import:
+// import { IndexerClient } from '../../../network/clients/indexer';
+
+// For WildDuck hooks, also import:
+// import { WildDuckConfig } from '../../../network/clients/wildduck';
+
+// Define hook return type with Optional<T> pattern
 interface Use{{HookName}}Return {
-  data: DataType | null;
-  loading: boolean;
-  error: Error | null;
+  data: Optional<DataType>;
+  isLoading: boolean; // Use isLoading for consistency with TanStack Query
+  error: Optional<string>; // Use string for error messages
   refetch: () => Promise<void>;
+  clearError: () => void; // Always include clearError
   // Add more specific methods as needed
   update: (updates: Partial<DataType>) => Promise<void>;
   reset: () => void;
 }
 
-// Define hook options
+// Define hook options with Optional<T>
 interface Use{{HookName}}Options {
-  enabled?: boolean;
-  refetchInterval?: number;
-  onSuccess?: (data: DataType) => void;
-  onError?: (error: Error) => void;
+  enabled: Optional<boolean>;
+  refetchInterval: Optional<number>;
+  onSuccess: Optional<(data: DataType) => void>;
+  onError: Optional<(error: string) => void>;
 }
 
 /**
@@ -59,30 +75,31 @@ export const use{{HookName}} = (
     onError,
   } = options;
 
-  // State management
-  const [data, setData] = useState<DataType | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  // State management with Optional<T>
+  const [data, setData] = useState<Optional<DataType>>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Optional<string>>(null);
 
   // Main fetch function
   const fetchData = useCallback(async () => {
     if (!enabled || !param1) return;
 
     try {
-      setLoading(true);
+      setIsLoading(true);
       setError(null);
-      
+
       // Use your service/operations here
       const result = await yourService.fetchData(param1);
       
       setData(result);
       onSuccess?.(result);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Unknown error');
-      setError(error);
-      onError?.(error);
+      const errorMessage = err instanceof Error ? err.message : 'Operation failed';
+      setError(errorMessage);
+      onError?.(errorMessage);
+      throw err; // Re-throw for caller handling
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }, [param1, enabled, onSuccess, onError]);
 

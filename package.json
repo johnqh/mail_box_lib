@@ -1,7 +1,7 @@
 {
   "name": "@johnqh/lib",
   "version": "3.3.3",
-  "description": "React Native-compatible shared utilities and common functions for 0xmail.box projects",
+  "description": "React Native-compatible shared utilities library for 0xmail.box projects with Optional<T> type safety patterns and comprehensive blockchain integration",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -77,7 +77,14 @@
     "blockchain",
     "typescript",
     "utilities",
-    "react-native"
+    "react-native",
+    "optional-types",
+    "type-safety",
+    "ai-development",
+    "cross-platform",
+    "solana",
+    "ethereum",
+    "dependency-injection"
   ],
   "author": "0xmail.box team",
   "license": "MIT",
@@ -110,8 +117,8 @@
   "dependencies": {
     "@bonfida/spl-name-service": "^3.0.16",
     "@johnqh/di": "^1.3.9",
-    "@johnqh/mail_box_contracts": "^1.6.3",
-    "@johnqh/types": "^1.6.2",
+    "@johnqh/mail_box_contracts": "^1.7.1",
+    "@johnqh/types": "^1.6.3",
     "@solana/web3.js": "^1.98.4",
     "@tanstack/react-query": "^5.90.1",
     "axios": "^1.12.1",

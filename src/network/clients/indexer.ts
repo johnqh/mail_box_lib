@@ -100,6 +100,7 @@ class IndexerClient implements NetworkClient {
         status: response.status,
         statusText: response.statusText,
         data: responseData,
+        error: response.ok ? null : responseData?.error || response.statusText,
         timestamp: new Date().toISOString(),
         headers: response.headers
           ? (() => {
@@ -125,7 +126,14 @@ class IndexerClient implements NetworkClient {
     url: string,
     options?: Omit<NetworkRequestOptions, 'method' | 'body'>
   ): Promise<NetworkResponse<T>> {
-    return this.request<T>(url, { ...options, method: 'GET' });
+    const requestOptions: NetworkRequestOptions = {
+      method: 'GET',
+      headers: options?.headers || null,
+      body: null,
+      signal: options?.signal || null,
+      timeout: options?.timeout || null,
+    };
+    return this.request<T>(url, requestOptions);
   }
 
   /**
@@ -137,13 +145,12 @@ class IndexerClient implements NetworkClient {
     options?: Omit<NetworkRequestOptions, 'method'>
   ): Promise<NetworkResponse<T>> {
     const requestOptions: NetworkRequestOptions = {
-      ...options,
       method: 'POST',
+      headers: options?.headers || null,
+      body: body ? JSON.stringify(body) : null,
+      signal: options?.signal || null,
+      timeout: options?.timeout || null,
     };
-
-    if (body) {
-      requestOptions.body = JSON.stringify(body);
-    }
 
     return this.request<T>(url, requestOptions);
   }
@@ -157,13 +164,12 @@ class IndexerClient implements NetworkClient {
     options?: Omit<NetworkRequestOptions, 'method'>
   ): Promise<NetworkResponse<T>> {
     const requestOptions: NetworkRequestOptions = {
-      ...options,
       method: 'PUT',
+      headers: options?.headers || null,
+      body: body ? JSON.stringify(body) : null,
+      signal: options?.signal || null,
+      timeout: options?.timeout || null,
     };
-
-    if (body) {
-      requestOptions.body = JSON.stringify(body);
-    }
 
     return this.request<T>(url, requestOptions);
   }
@@ -175,7 +181,14 @@ class IndexerClient implements NetworkClient {
     url: string,
     options?: Omit<NetworkRequestOptions, 'method' | 'body'>
   ): Promise<NetworkResponse<T>> {
-    return this.request<T>(url, { ...options, method: 'DELETE' });
+    const requestOptions: NetworkRequestOptions = {
+      method: 'DELETE',
+      headers: options?.headers || null,
+      body: null,
+      signal: options?.signal || null,
+      timeout: options?.timeout || null,
+    };
+    return this.request<T>(url, requestOptions);
   }
 
   // =============================================================================
@@ -230,6 +243,8 @@ class IndexerClient implements NetworkClient {
       `/api/wallets/${encodeURIComponent(walletAddress)}/accounts`,
       {
         headers: this.createAuthHeaders(signature, message),
+        signal: null,
+        timeout: null,
       }
     );
 
@@ -268,6 +283,8 @@ class IndexerClient implements NetworkClient {
       `/api/delegations/from/${encodeURIComponent(walletAddress)}`,
       {
         headers: this.createAuthHeaders(signature, message),
+        signal: null,
+        timeout: null,
       }
     );
 
@@ -293,6 +310,8 @@ class IndexerClient implements NetworkClient {
       `/api/delegations/to/${encodeURIComponent(walletAddress)}`,
       {
         headers: this.createAuthHeaders(signature, message),
+        signal: null,
+        timeout: null,
       }
     );
 
@@ -346,6 +365,8 @@ class IndexerClient implements NetworkClient {
       },
       {
         headers: this.createAuthHeaders(signature, message),
+        signal: null,
+        timeout: null,
       }
     );
 
@@ -371,6 +392,8 @@ class IndexerClient implements NetworkClient {
       `/api/users/${encodeURIComponent(username)}/nonce`,
       {
         headers: this.createAuthHeaders(signature, message),
+        signal: null,
+        timeout: null,
       }
     );
 
@@ -401,6 +424,8 @@ class IndexerClient implements NetworkClient {
       },
       {
         headers: this.createAuthHeaders(signature, message),
+        signal: null,
+        timeout: null,
       }
     );
 
@@ -426,6 +451,8 @@ class IndexerClient implements NetworkClient {
       `/api/wallets/${encodeURIComponent(walletAddress)}/entitlements/`,
       {
         headers: this.createAuthHeaders(signature, message),
+        signal: null,
+        timeout: null,
       }
     );
 
@@ -455,6 +482,8 @@ class IndexerClient implements NetworkClient {
       `/api/wallets/${encodeURIComponent(walletAddress)}/points`,
       {
         headers: this.createAuthHeaders(signature, message),
+        signal: null,
+        timeout: null,
       }
     );
 

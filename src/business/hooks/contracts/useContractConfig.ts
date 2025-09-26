@@ -66,16 +66,12 @@ export const useContractConfig = (): UseContractConfigReturn => {
         rpc: 'https://ethereum-rpc.publicnode.com',
         chainId: 1,
         contracts: {
-          mailService:
-            contractAddresses?.mailService ||
-            '0x0000000000000000000000000000000000000000',
           mailer:
             contractAddresses?.mailer ||
             '0x0000000000000000000000000000000000000000',
           usdc:
             contractAddresses?.usdc ||
             '0xA0b86a33E6441c41A0B7F98fF6C99EDf6dE4E1D1', // Mainnet USDC
-          ...contractAddresses,
         },
       };
     },
@@ -88,14 +84,8 @@ export const useContractConfig = (): UseContractConfigReturn => {
         rpc: 'https://api.devnet.solana.com',
         usdcMint: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU', // Devnet USDC
         programs: {
-          mailService:
-            programAddresses?.mailService || '11111111111111111111111111111111',
           mailer:
             programAddresses?.mailer || '11111111111111111111111111111111',
-          mailBoxFactory:
-            programAddresses?.mailBoxFactory ||
-            '11111111111111111111111111111111',
-          ...programAddresses,
         },
       };
     },
@@ -111,7 +101,6 @@ export const useContractConfig = (): UseContractConfigReturn => {
       config.evm.rpc &&
       config.evm.chainId &&
       config.evm.contracts &&
-      config.evm.contracts.mailService &&
       config.evm.contracts.mailer &&
       config.evm.contracts.usdc
     );
@@ -121,9 +110,7 @@ export const useContractConfig = (): UseContractConfigReturn => {
       config.solana.rpc &&
       config.solana.usdcMint &&
       config.solana.programs &&
-      config.solana.programs.mailService &&
-      config.solana.programs.mailer &&
-      config.solana.programs.mailBoxFactory
+      config.solana.programs.mailer
     );
 
     return hasEVM || hasSolana;

@@ -11,9 +11,9 @@ interface UseAsyncState<T> {
 }
 
 interface UseAsyncOptions<T = unknown> {
-  immediate?: boolean;
-  onSuccess?: (data: T) => void;
-  onError?: (error: string) => void;
+  immediate?: Optional<boolean>;
+  onSuccess?: Optional<(data: T) => void>;
+  onError?: Optional<(error: string) => void>;
 }
 
 function useAsync<T = unknown>(

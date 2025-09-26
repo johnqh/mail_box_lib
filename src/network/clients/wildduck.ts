@@ -22,11 +22,13 @@ import type {
 // Platform-specific globals
 declare const sessionStorage: Storage;
 
+import { Optional } from '@johnqh/types';
+
 // WildDuck configuration interface
 export interface WildDuckConfig {
   backendUrl: string; // Required: WildDuck backend URL
   apiToken: string; // Required: API access token
-  cloudflareWorkerUrl?: string; // Optional: Cloudflare worker proxy URL
+  cloudflareWorkerUrl: Optional<string>; // Optional: Cloudflare worker proxy URL
 }
 
 // Determine API base URL based on Cloudflare worker configuration
@@ -115,9 +117,9 @@ class WildDuckAPI {
   private async request<T>(
     endpoint: string,
     options: {
-      method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
-      body?: Record<string, unknown> | string | FormData | Blob;
-      headers?: Record<string, string>;
+      method?: Optional<'GET' | 'POST' | 'PUT' | 'DELETE'>;
+      body?: Optional<Record<string, unknown> | string | FormData | Blob>;
+      headers?: Optional<Record<string, string>>;
     } = {}
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;

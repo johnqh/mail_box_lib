@@ -8,6 +8,7 @@ import type {
 import type {
   CreateMailboxRequest,
   GetMailboxesRequest,
+  Optional,
   UpdateMailboxRequest,
 } from '@johnqh/types';
 import { WildDuckMockData } from './mocks';
@@ -51,10 +52,10 @@ const useWildduckMailboxes = (config: WildDuckConfig, devMode: boolean = false):
 
   const getMailboxes = useCallback(
     async (userId: string, options: {
-      specialUse?: boolean;
-      showHidden?: boolean;
-      counters?: boolean;
-      sizes?: boolean;
+      specialUse?: Optional<boolean>;
+      showHidden?: Optional<boolean>;
+      counters?: Optional<boolean>;
+      sizes?: Optional<boolean>;
     } = {}): Promise<MailboxData[]> => {
       setIsLoading(true);
       setError(null);

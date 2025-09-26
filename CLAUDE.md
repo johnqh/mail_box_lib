@@ -11,7 +11,7 @@ npm run check-all  # Ensures build, tests, and lint all pass
 
 **Common tasks you might be asked to do:**
 1. Add new service → Start with interface definition in `src/types/services/`
-2. Fix type errors → Check @johnqh/di imports first
+2. Fix type errors → Check @johnqh/types imports first, use Optional<T> for nullable types
 3. Update dependencies → Use `npm install package@latest`
 4. Debug tests → Run `npm test -- --watch`
 5. Find code → Use Glob for files, Grep for content
@@ -22,23 +22,21 @@ npm run check-all  # Ensures build, tests, and lint all pass
 ```bash
 # Validation
 npm run check-all       # Run all checks (lint, typecheck, tests)
-npm run validate        # Full validation with coverage
+npm run validate        # Full validation with quality checks
 npm run quick-check     # Fast validation (no coverage)
 
 # Development
-npm run dev            # Watch mode for development
-npm run test:watch     # Watch tests
-npm run lint:watch     # Watch linting
-
-# Code Generation
-npm run create:service  # Create new service with template
-npm run create:hook     # Create new React hook
-npm run create:type     # Generate TypeScript definitions
+npm run build:watch     # Watch mode for building
+npm run test:watch      # Watch tests
+npm run lint:watch      # Watch linting
+npm run typecheck:watch # Watch TypeScript compilation
 
 # Analysis
 npm run analyze:deps    # Check dependency issues
-npm run analyze:size    # Bundle size analysis
+npm run analyze:health  # Run health analysis
 npm run analyze:types   # Type coverage report
+npm run quality-check   # Full quality analysis
+npm run performance-check # Performance monitoring
 ```
 
 ### AI-Friendly File Structure
@@ -47,7 +45,9 @@ src/
 ├── business/           # ✅ Core business logic (AI: modify here for features)
 │   ├── hooks/         # React hooks (AI: extend functionality here)
 │   │   ├── indexer/   # Indexer API hooks - (endpointUrl, dev) params
-│   │   └── wildduck/  # WildDuck hooks - (config: WildDuckConfig) params
+│   │   ├── wildduck/  # WildDuck hooks - (config: WildDuckConfig) params
+│   │   ├── contracts/ # Blockchain contract hooks
+│   │   └── core/      # Core utility hooks
 │   └── core/          # Domain operations (AI: business rules here)
 ├── network/           # ✅ API clients (AI: update endpoints here)
 │   └── clients/
@@ -80,6 +80,20 @@ const useWildduckFeature = (config: WildDuckConfig) => {
 export { useIndexerFeature } from './useIndexerFeature';
 ```
 
+#### 🎯 Optional<T> Pattern (REQUIRED)
+```typescript
+// Always use Optional<T> for nullable/undefined values
+import { Optional } from '@johnqh/types';
+
+// ❌ WRONG: Manual nullable patterns
+function getValue(): string | null | undefined { }
+const [error, setError] = useState<string | null>(null);
+
+// ✅ RIGHT: Use Optional<T>
+function getValue(): Optional<string> { }
+const [error, setError] = useState<Optional<string>>(null);
+```
+
 #### 🎯 Configuration Pattern
 ```typescript
 // Always require configuration from consumer
@@ -101,8 +115,8 @@ try {
   const result = await apiCall();
   return result;
 } catch (err) {
-  const errorMessage = err instanceof Error 
-    ? err.message 
+  const errorMessage = err instanceof Error
+    ? err.message
     : 'Operation failed';
   setError(errorMessage);
   throw err;
@@ -111,11 +125,11 @@ try {
 
 ## Quick Reference
 
-- **Version**: 3.1.4
+- **Version**: 3.3.3
 - **Package**: @johnqh/lib
 - **Type**: React Native-compatible shared library
 - **Primary Use**: 0xmail.box projects (web & mobile)
-- **Dependencies**: @johnqh/di (^1.1.0), @johnqh/mail_box_contracts (^1.5.3)
+- **Dependencies**: @johnqh/types (^1.6.2), @johnqh/mail_box_contracts (^1.5.3)
 
 ## Project Context
 
@@ -137,54 +151,75 @@ A React Native-compatible shared utilities library for 0xmail.box projects, prov
 2. **Interface-First Design**: ALWAYS define interfaces before implementations
 3. **Business Logic Separation**: Pure domain logic separate from platform code
 4. **Comprehensive Testing**: All business logic MUST be tested
-5. **Type Safety**: Everything is strictly typed with TypeScript
+5. **Type Safety**: Everything is strictly typed with TypeScript + Optional<T>
 6. **No Direct Platform Imports**: Never import React Native or web-specific modules in business logic
 
-### Recent Updates (v3.1.4)
+### Recent Updates (v3.3.3)
 
-- **Indexer API Endpoint Updates**: Updated all indexer client endpoints to match new mail_box_indexer v2.2.0 structure
-  - Address validation: `GET /api/addresses/:address/validate`
-  - Email addresses: `GET /api/addresses/:walletAddress` (with signature headers)
-  - Delegation endpoints: `GET /api/addresses/:walletAddress/delegated[/to]`
-  - Signing messages: `GET /api/addresses/:walletAddress/message/:chainId/:domain/:url`
-  - Nonce operations: `GET/POST /api/addresses/:walletAddress/nonce`
-  - Points balance: `GET /api/addresses/:walletAddress/points`
-  - Authentication via `x-signature` and `x-message` headers for GET requests
-- **AuthStatus enum refactoring**: Updated enum values to CONNECTED/DISCONNECTED/VERIFIED
-- **LoginMethod removal**: Completely removed LoginMethod enum - use string literals instead
-- **Dependency Updates**: @johnqh/di updated to v1.1.0 for improved type safety
-- **Type Deduplication**: Removed duplicate types that exist in @johnqh/di (WalletType, AnalyticsEvent, etc.)
-- **Local Type Definitions**: Added WalletUserData interface locally (not in @johnqh/di)
-- **Interface Alignment**: EmailAddress interface updated to match new structure
-- **Type Assertions**: Added for indexer utilities to handle stricter NetworkResponse typing
-- **AI Development Optimization**: Enhanced documentation with comprehensive troubleshooting guides
+- **@johnqh/types v1.6.2**: Updated to latest types with Optional<T> pattern
+- **Optional<T> Migration**: All nullable types now use Optional<T> from @johnqh/types
+- **Type Consolidation**:
+  - `AppAnalyticsEvent` → `AnalyticsEvent`
+  - `StandardEmailFolder` → `MailboxType`
+  - `WalletConnectionState` → `ConnectionState`
+  - `NetworkStatus` → removed (consolidated into `ConnectionState`)
+- **Indexer API v2.2.0**: Updated all endpoints to match new structure
+- **Enhanced NetworkResponse**: Added BaseResponse fields (success, timestamp)
+- **Improved Type Safety**: Stricter typing with better error handling
 
 ### Type Migration Notes
 
-**Removed Types (use alternatives):**
-- `LoginMethod` → Use string literals ('email', 'wallet', 'google', etc.)
-- Duplicate enums from @johnqh/di are now imported instead of locally defined
+**REQUIRED PATTERNS:**
+- Use `Optional<T>` instead of `T | undefined | null`
+- Import `Optional` from `@johnqh/types`
+- All hook error states should be `Optional<string>`
+- All nullable return types should use `Optional<T>`
 
-**Local Types (not in @johnqh/di):**
-- `WalletUserData` - wallet-based user information interface
-- `ChainType` - includes local 'unknown' value not in @johnqh/di
-- `AuthStatus` - authentication states (CONNECTED/DISCONNECTED/VERIFIED)
-- `AppAnalyticsEvent` - app-specific analytics events extending base AnalyticsEvent
+**Updated Type Mappings:**
+- `LoginMethod` → Use string literals ('email', 'wallet', 'google', etc.)
+- `AppAnalyticsEvent` → `AnalyticsEvent` (from @johnqh/types)
+- `StandardEmailFolder` → `MailboxType` (from @johnqh/types)
+- `WalletConnectionState` → `ConnectionState` (from @johnqh/types)
+- `ChainType.UNKNOWN` → No longer exists (use null or ConnectionState.UNKNOWN)
 
 ## Architecture Overview
 
 ```
 src/
 ├── business/           # Core business logic (platform-agnostic)
-│   ├── ai/            # AI-powered services
 │   ├── core/          # Domain operations
+│   │   ├── analytics/ # Analytics business logic
+│   │   ├── auth/      # Authentication logic
+│   │   ├── email/     # Email operations
+│   │   ├── folder/    # Folder management
+│   │   ├── indexer/   # Indexer service logic
+│   │   ├── mailbox/   # Mailbox operations
+│   │   ├── navigation/# Navigation state
+│   │   └── wallet/    # Wallet status management
 │   ├── hooks/         # React hooks
-│   └── points/        # Rewards system
+│   │   ├── contracts/ # Blockchain contract hooks
+│   │   ├── core/      # Core utility hooks
+│   │   ├── indexer/   # Indexer API hooks
+│   │   ├── nameservice/# Name resolution hooks
+│   │   └── wildduck/  # WildDuck API hooks
+│   └── context/       # React contexts
 ├── di/                # Dependency injection
 ├── network/           # HTTP clients
+│   └── clients/
+│       ├── indexer.ts # IndexerClient (dev mode aware)
+│       └── wildduck.ts# WildDuckAPI (config-based)
 ├── storage/           # Storage services
 ├── types/             # TypeScript definitions
+│   ├── api.ts         # API response types
+│   ├── email.ts       # Email interfaces
+│   └── services/      # Service interfaces
 └── utils/             # Platform-specific implementations
+    ├── async-helpers.ts
+    ├── auth/          # Authentication utilities
+    ├── blockchain/    # Blockchain utilities
+    ├── contracts/     # Smart contract utilities
+    ├── indexer/       # Indexer utilities
+    └── nameservice/   # Name resolution utilities
 ```
 
 ## Common Tasks & Patterns
@@ -194,6 +229,8 @@ src/
 1. **Define Interface** (`src/types/services/my-service.interface.ts`)
 
    ```typescript
+   import { Optional } from '@johnqh/types';
+
    export interface MyService {
      method(param: string): Promise<Result>;
    }
@@ -201,13 +238,14 @@ src/
    export interface Result {
      success: boolean;
      data?: any;
-     error?: string;
+     error?: Optional<string>;
    }
    ```
 
 2. **Create Business Operations** (`src/business/core/my-service/my-service-operations.ts`)
 
    ```typescript
+   import { Optional } from '@johnqh/types';
    import { MyService } from '../../../types/services/my-service.interface';
 
    export class MyServiceOperations {
@@ -236,65 +274,17 @@ src/
    }
    ```
 
-3. **Implement Platform Services**
-
-   Web Implementation (`src/utils/my-service/my-service.web.ts`):
-
-   ```typescript
-   import { MyService } from '../../types/services/my-service.interface';
-
-   export class WebMyService implements MyService {
-     async method(param: string): Promise<Result> {
-       // Web-specific implementation
-       const response = await fetch('/api/my-service', {
-         method: 'POST',
-         body: JSON.stringify({ param }),
-       });
-       return response.json();
-     }
-   }
-   ```
-
-   React Native Implementation (`src/utils/my-service/my-service.reactnative.ts`):
-
-   ```typescript
-   import { MyService } from '../../types/services/my-service.interface';
-
-   export class ReactNativeMyService implements MyService {
-     async method(param: string): Promise<Result> {
-       // React Native-specific implementation
-       // Can use React Native specific APIs here
-       return { success: true, data: param };
-     }
-   }
-   ```
-
-   Platform Detection (`src/utils/my-service/index.ts`):
-
-   ```typescript
-   import { Platform } from '../../types/environment';
-
-   export const createMyService = (): MyService => {
-     if (Platform.OS === 'web') {
-       const { WebMyService } = require('./my-service.web');
-       return new WebMyService();
-     } else {
-       const { ReactNativeMyService } = require('./my-service.reactnative');
-       return new ReactNativeMyService();
-     }
-   };
-   ```
-
-4. **Create React Hook** (`src/business/hooks/data/useMyService.ts`)
+3. **Create React Hook** (`src/business/hooks/data/useMyService.ts`)
 
    ```typescript
    import { useState, useCallback } from 'react';
+   import { Optional } from '@johnqh/types';
    import { MyServiceOperations } from '../../core/my-service/my-service-operations';
    import { createMyService } from '../../../utils/my-service';
 
    export const useMyService = () => {
      const [loading, setLoading] = useState(false);
-     const [error, setError] = useState<Error | null>(null);
+     const [error, setError] = useState<Optional<string>>(null);
 
      const operations = new MyServiceOperations(createMyService());
 
@@ -306,7 +296,8 @@ src/
          const result = await operations.businessMethod(data);
          return result;
        } catch (err) {
-         setError(err as Error);
+         const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+         setError(errorMsg);
          throw err;
        } finally {
          setLoading(false);
@@ -317,90 +308,10 @@ src/
        executeMethod,
        loading,
        error,
+       clearError: () => setError(null),
      };
    };
    ```
-
-5. **Write Tests** (`src/business/core/my-service/__tests__/my-service-operations.test.ts`)
-
-   ```typescript
-   import { describe, it, expect, vi } from 'vitest';
-   import { MyServiceOperations } from '../my-service-operations';
-
-   describe('MyServiceOperations', () => {
-     it('should process data successfully', async () => {
-       const mockService = {
-         method: vi.fn().mockResolvedValue({
-           success: true,
-           data: 'processed',
-         }),
-       };
-
-       const operations = new MyServiceOperations(mockService);
-       const result = await operations.businessMethod({ param: 'test' });
-
-       expect(result.processed).toBe(true);
-       expect(result.value).toBe('processed');
-       expect(mockService.method).toHaveBeenCalledWith('test');
-     });
-
-     it('should handle errors properly', async () => {
-       const mockService = {
-         method: vi.fn().mockResolvedValue({
-           success: false,
-           error: 'Failed',
-         }),
-       };
-
-       const operations = new MyServiceOperations(mockService);
-
-       await expect(
-         operations.businessMethod({ param: 'test' })
-       ).rejects.toThrow('Failed');
-     });
-   });
-   ```
-
-6. **Export from Index Files**
-
-   Add to `src/types/services/index.ts`:
-
-   ```typescript
-   export * from './my-service.interface';
-   ```
-
-   Add to `src/business/core/index.ts`:
-
-   ```typescript
-   export * from './my-service/my-service-operations';
-   ```
-
-   Add to `src/business/hooks/data/index.ts`:
-
-   ```typescript
-   export { useMyService } from './useMyService';
-   ```
-
-### File Naming Conventions
-
-- Interfaces: `*.interface.ts`
-- Web implementations: `*.web.ts`
-- React Native implementations: `*.reactnative.ts`
-- Business operations: `*-operations.ts`
-- Tests: `*.test.ts` or `*.spec.ts`
-
-### Import/Export Patterns
-
-```typescript
-// Always export interfaces and implementations separately
-export { MyService } from './my-service.interface';
-export { WebMyService } from './my-service.web';
-export { ReactNativeMyService } from './my-service.reactnative';
-
-// Use barrel exports in index.ts files
-export * from './service-a';
-export * from './service-b';
-```
 
 ## Development Commands
 
@@ -408,12 +319,16 @@ Essential commands to know:
 
 ```bash
 npm run build         # TypeScript compilation
+npm run build:watch   # Watch mode compilation
 npm test             # Run all tests
+npm run test:watch   # Watch test mode
 npm run lint         # ESLint checking
 npm run lint:fix     # Auto-fix lint issues
 npm run format       # Format code with Prettier
 npm run typecheck    # Type checking without build
 npm run check-all    # Run lint, typecheck, and tests
+npm run validate     # Full validation with quality checks
+npm run analyze:health # Health analysis
 ```
 
 ## AI Code Examples and Troubleshooting
@@ -424,17 +339,18 @@ npm run check-all    # Run lint, typecheck, and tests
 ```typescript
 // File: src/business/hooks/indexer/useIndexerNewFeature.ts
 import { useCallback, useState } from 'react';
+import { Optional } from '@johnqh/types';
 import { IndexerClient } from '../../../network/clients/indexer';
 
 export const useIndexerNewFeature = (endpointUrl: string, dev: boolean) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Optional<string>>(null);
   const client = new IndexerClient(endpointUrl, dev);
 
   const fetchData = useCallback(async (param: string) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const result = await client.newEndpoint(param);
       return result;
@@ -455,17 +371,18 @@ export const useIndexerNewFeature = (endpointUrl: string, dev: boolean) => {
 ```typescript
 // File: src/business/hooks/wildduck/useWildduckNewFeature.ts
 import { useCallback, useState } from 'react';
+import { Optional } from '@johnqh/types';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
 import axios from 'axios';
 
 export const useWildduckNewFeature = (config: WildDuckConfig) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Optional<string>>(null);
 
   const fetchData = useCallback(async (param: string) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
       const headers: Record<string, string> = {
@@ -493,24 +410,6 @@ export const useWildduckNewFeature = (config: WildDuckConfig) => {
 
   return { fetchData, isLoading, error, clearError: () => setError(null) };
 };
-```
-
-#### Adding New API Endpoint to Client
-```typescript
-// File: src/network/clients/indexer.ts
-// Add to IndexerClient class:
-
-async newEndpoint(param: string) {
-  const response = await this.get(`/api/new-endpoint/${encodeURIComponent(param)}`);
-  
-  if (!response.ok) {
-    throw new Error(
-      `Failed to call new endpoint: ${(response.data as any)?.error || 'Unknown error'}`
-    );
-  }
-  
-  return response.data;
-}
 ```
 
 ### 🎯 Common Patterns Recognition
@@ -573,13 +472,16 @@ Glob "**/*.test.ts"
 ### 🛠️ Troubleshooting Guide for AI
 
 #### Type Errors
-1. **Missing @johnqh/di imports**: Check if type exists in @johnqh/di first
-2. **Unknown type**: Look in src/types/ directory
-3. **NetworkResponse<T> issues**: Use type assertions for response.data
+1. **Missing Optional<T>**: Always use `Optional<T>` for nullable types
+2. **Unknown type**: Look in @johnqh/types first, then src/types/
+3. **NetworkResponse<T> issues**: Ensure BaseResponse fields (success, timestamp)
 
 ```typescript
-// Type assertion pattern
+// Type assertion pattern for legacy code
 const result = response.data as ExpectedType;
+
+// Preferred Optional<T> pattern
+const result: Optional<ExpectedType> = response.data;
 ```
 
 #### Hook Issues
@@ -592,133 +494,48 @@ const result = response.data as ExpectedType;
 2. **Authentication fails**: Verify header configuration (Bearer vs X-Access-Token)
 3. **CORS issues**: Check if using correct API URL
 
-## Legacy Troubleshooting Guide
+## External Dependencies
 
-### Common Type Issues
+### Project dependencies
 
-**NetworkResponse typing from @johnqh/di:**
-```typescript
-// response.data is typed as 'unknown', use type assertions:
-const result = response.data as MyExpectedType;
-// or
-const error = (response.data as any)?.error;
-```
+- `@johnqh/types` (v1.6.2) - Shared TypeScript types and interfaces
+  - Provides: Optional<T>, AnalyticsEvent, ConnectionState, MailboxType, etc.
+  - **CRITICAL**: Always use Optional<T> for nullable types
+- `@johnqh/mail_box_contracts` (v1.5.3) - Smart contract interfaces
 
-**Missing types from @johnqh/di:**
-```typescript
-// Import shared types from @johnqh/di:
-import { LoginMethod, WalletType, AnalyticsEvent } from '@johnqh/di';
-// Don't create local duplicates!
-```
+### Key Libraries
 
-**EmailAddress interface changes:**
-```typescript
-// Old structure (deprecated):
-{ email: string, isPrimary: boolean, isActive: boolean }
-// New structure (current):
-{ address: string, primary?: boolean, verified: boolean }
-```
+- **React/React Native**: UI framework compatibility
+- **Firebase**: Backend services
+- **Blockchain**: @solana/web3.js, viem for crypto operations
+- **Testing**: Vitest, @testing-library/react
+- **Crypto**: @noble/hashes, bs58
 
-**LoginMethod removed - use strings:**
-```typescript
-// Old (removed):
-import { LoginMethod } from './enums';
-method: LoginMethod.WALLET
+## Deployment & CI/CD
 
-// New (current):
-method: 'wallet' // or 'email', 'google', 'apple', 'github'
-```
+### Automated Processes
 
-**AuthStatus enum values updated:**
-```typescript
-// Current AuthStatus values:
-enum AuthStatus {
-  CONNECTED = 'connected',      // User wallet connected
-  DISCONNECTED = 'disconnected', // User wallet not connected  
-  VERIFIED = 'verified',        // User authenticated/verified
-}
+- **CI Pipeline**: Runs on every push/PR
+- **AI Code Review**: Automated analysis of changes
+- **Security Audits**: Vulnerability scanning
+- **Multi-platform Testing**: Tests on different OS/Node versions
+- **Auto-publishing**: Publishes to npm on version changes
 
-// Old values (no longer valid):
-// AUTHENTICATED, UNAUTHENTICATED, LOADING, ERROR
-```
+Remember: This is a foundational library used by multiple projects, so stability and backward compatibility are crucial!
 
-### Quick Fixes for Common Errors
-
-**"Module '@johnqh/di' has no exported member 'X'":**
-- Check if type exists in @johnqh/di's exports
-- If missing, define locally in appropriate types file
-- Types like WalletUserData are defined locally, not in @johnqh/di
-
-**Build errors after dependency updates:**
-```bash
-npm run check-all  # Run all checks
-npm run typecheck  # Check types only
-```
-
-**Import/export issues:**
-```bash
-# Find all uses of a type
-rg "TypeName" src/
-# Find where a type is defined
-rg "interface TypeName\|enum TypeName\|type TypeName" src/
-```
-
-## Code Quality Standards
-
-### TypeScript
-
-- Use strict typing throughout
-- Define interfaces for all data structures
-- Use generics for reusable components
-- Avoid `any` type unless absolutely necessary
-
-### Error Handling
-
-```typescript
-// Use custom error types
-export class MyServiceError extends Error {
-  constructor(
-    message: string,
-    public code: string
-  ) {
-    super(message);
-    this.name = 'MyServiceError';
-  }
-}
-
-// Handle errors consistently
-try {
-  await service.method();
-} catch (error) {
-  if (error instanceof MyServiceError) {
-    // Handle specific error
-  }
-  throw error; // Re-throw if not handled
-}
-```
-
-### Testing
-
-- Test all business logic
-- Mock external dependencies
-- Use descriptive test names
-- Group tests by functionality
-- Test both happy path and error cases
-
-## AI Assistant Guidelines
+# AI Assistant Guidelines
 
 ### Task Checklist for Common Operations
 
 #### Adding a New Feature
 
-- [ ] Define TypeScript interfaces first
+- [ ] Define TypeScript interfaces first (use Optional<T>)
 - [ ] Implement business logic in `src/business/core/`
 - [ ] Create platform implementations in `src/utils/`
 - [ ] Add React hooks in `src/business/hooks/`
 - [ ] Write comprehensive tests
 - [ ] Update index.ts exports
-- [ ] Run `npm run typecheck`
-- [ ] Run `npm test`
+- [ ] Run `npm run check-all`
 - [ ] Update API documentation if public
 
 #### Fixing a Bug
@@ -758,25 +575,24 @@ try {
 
 # Find tests
 **/__tests__/**/*.test.ts
-**/__tests__/**/*.spec.ts
 ```
 
 ### Common Import Patterns
 
 ```typescript
-// Importing interfaces (ALWAYS use interface imports)
+// Importing Optional and types (ALWAYS use Optional<T>)
+import { Optional, AnalyticsEvent, ConnectionState } from '@johnqh/types';
+
+// Importing interfaces
 import { MyService } from '../../types/services/my-service.interface';
 
-# Importing from barrel exports
+// Importing from barrel exports
 import { ServiceA, ServiceB } from '../services';
 
 // Platform-aware imports (use dynamic requires)
 const Service = Platform.OS === 'web'
   ? require('./service.web').WebService
   : require('./service.reactnative').ReactNativeService;
-
-// Business logic imports
-import { MyOperations } from '../../business/core/my-service/my-service-operations';
 ```
 
 ### API Integration Patterns
@@ -807,27 +623,23 @@ async protectedCall(walletAddress: string, signature: string, message: string) {
 ### Testing Patterns
 
 ```typescript
-// Mock platform detection
-vi.mock('../../types/environment', () => ({
-  Platform: { OS: 'web' },
-}));
-
-// Mock services
+// Mock Optional<T> values
 const mockService = {
   method: vi.fn().mockResolvedValue({ success: true }),
 };
 
-// Test async operations
+// Test Optional<T> return values
 await expect(promise).resolves.toBe(expected);
 await expect(promise).rejects.toThrow(ErrorType);
 
-// Test hooks
+// Test hooks with Optional<T>
 const { result } = renderHook(() => useMyHook());
 await waitFor(() => expect(result.current.loading).toBe(false));
 ```
 
 ### Common Pitfalls to Avoid
 
+- ❌ Don't use `T | undefined | null` - use `Optional<T>`
 - ❌ Don't import React Native modules in business logic
 - ❌ Don't skip interface definitions
 - ❌ Don't forget platform detection in index files
@@ -839,12 +651,21 @@ await waitFor(() => expect(result.current.loading).toBe(false));
 
 ### Quick Fixes for Common Issues
 
-**Platform Detection Not Working:**
+**Optional<T> Usage:**
 
 ```typescript
-// Check Platform import
-import { Platform } from '../../types/environment';
-// NOT from 'react-native'!
+// Import Optional
+import { Optional } from '@johnqh/types';
+
+// Use in interfaces
+interface MyInterface {
+  data: Optional<string>;
+  error: Optional<Error>;
+}
+
+// Use in functions
+function getValue(): Optional<string> { }
+const [state, setState] = useState<Optional<Data>>(null);
 ```
 
 **TypeScript Errors:**
@@ -868,48 +689,6 @@ npm run lint:fix  # Auto-fix most issues
 npm run format    # Format with Prettier
 ```
 
-## External Dependencies
-
-### Project dependencies
-
-- `@johnqh/di` (v1.1.0) - Dependency Injection interfaces and types
-  - Provides: NetworkClient, AnalyticsService, StorageService, NavigationService, etc.
-  - Enums: LoginMethod, WalletType, AnalyticsEvent
-  - DO NOT duplicate these types locally
-
-### Symbolic Links
-
-- `./indexer` → `~/mail_box_indexer` (Email indexing service)
-- `./wildduck` → `~/wildduck` (Email server)
-
-These are external projects linked for development but should not be modified directly.
-
-### Key Libraries
-
-- **React/React Native**: UI framework compatibility
-- **Firebase**: Backend services
-- **Blockchain**: @solana/web3.js, viem for crypto operations
-- **Testing**: Vitest, @testing-library/react
-- **Crypto**: @noble/hashes, bs58
-
-## Project Files Structure
-
-### Important Files
-
-- `.claude_context`: AI development context
-- `DEVELOPMENT.md`: Detailed development guide
-- `docs/API.md`: API documentation
-- `docs/TYPES.md`: TypeScript type documentation
-- `templates/`: Code templates for common patterns
-
-### Configuration Files
-
-- `tsconfig.json`: TypeScript configuration
-- `.eslintrc.js`: Linting rules
-- `.prettierrc`: Code formatting rules
-- `vitest.config.ts`: Test configuration
-- `package.json`: Dependencies and scripts
-
 ## Getting Help
 
 ### Resources
@@ -928,20 +707,4 @@ These are external projects linked for development but should not be modified di
 4. Run the tests to understand expected behavior
 5. Check the development guide for best practices
 
-## Deployment & CI/CD
-
-### Automated Processes
-
-- **CI Pipeline**: Runs on every push/PR
-- **AI Code Review**: Automated analysis of changes
-- **Security Audits**: Vulnerability scanning
-- **Multi-platform Testing**: Tests on different OS/Node versions
-- **Auto-publishing**: Publishes to npm on version changes
-
-### Manual Processes
-
-- **Version Updates**: Update package.json version manually
-- **Documentation Updates**: Keep docs in sync with code changes
-- **Breaking Changes**: Document in CHANGELOG.md
-
-Remember: This is a foundational library used by multiple projects, so stability and backward compatibility are crucial!
+Remember: Always use `Optional<T>` for nullable types - this is a REQUIRED pattern in this codebase!
