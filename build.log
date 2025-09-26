@@ -1,0 +1,4 @@
+
+> @johnqh/lib@3.3.3 build
+> tsc -p tsconfig.build.json
+

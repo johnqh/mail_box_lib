@@ -19,7 +19,7 @@ function useLocalStorage<T>(
       // Check if localStorage is available (web environment)
       if (typeof window !== 'undefined' && window.localStorage) {
         const item = window.localStorage.getItem(key);
-        if (item === null) {
+        if (!item) {
           return initialValue;
         }
         return deserialize(item);

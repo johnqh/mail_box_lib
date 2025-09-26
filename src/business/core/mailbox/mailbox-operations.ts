@@ -331,7 +331,7 @@ class DefaultMailboxOperations implements MailboxOperations {
       return [];
     } else {
       // New format: query as first param, use default folder
-      if (folderIdOrQuery === null || folderIdOrQuery === undefined) {
+      if (!folderIdOrQuery) {
         throw new Error('Query parameter cannot be null or undefined');
       }
       return [];

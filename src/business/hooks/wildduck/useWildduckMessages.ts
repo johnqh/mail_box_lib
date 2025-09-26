@@ -1,3 +1,4 @@
+import { Optional } from '@johnqh/types';
 import { useCallback, useState } from 'react';
 import axios from 'axios';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
@@ -41,7 +42,7 @@ interface UpdateMessageParams {
 
 interface UseWildduckMessagesReturn {
   isLoading: boolean;
-  error: string | null;
+  error: Optional<string>;
   messages: MessageData[];
   totalMessages: number;
   currentPage: number;
@@ -86,7 +87,7 @@ interface UseWildduckMessagesReturn {
  */
 const useWildduckMessages = (config: WildDuckConfig, _devMode: boolean = false): UseWildduckMessagesReturn => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Optional<string>>(null);
   const [messages, setMessages] = useState<MessageData[]>([]);
   const [totalMessages, setTotalMessages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);

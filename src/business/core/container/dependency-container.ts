@@ -1,3 +1,4 @@
+import { Optional } from '@johnqh/types';
 /**
  * Platform-agnostic dependency injection container
  * Manages all services and their dependencies
@@ -27,7 +28,7 @@ import {
 
 // Storage interface for platform abstraction
 interface PlatformStorage {
-  getItem(key: string): Promise<string | null> | string | null;
+  getItem(key: string): Promise<Optional<string>> | Optional<string>;
   setItem(key: string, value: string): Promise<void> | void;
   removeItem(key: string): Promise<void> | void;
   clear(): Promise<void> | void;

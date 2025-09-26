@@ -1,3 +1,4 @@
+import { Optional } from '@johnqh/types';
 /**
  * TanStack Query hooks for Name Service resolution (ENS/SNS)
  *
@@ -16,20 +17,20 @@ import { getSNSNames, resolveSNSDomain } from '../../../utils/nameservice/sns';
 // Types for name service resolution
 interface ENSResolutionResponse {
   address: string;
-  ensName: string | null;
+  ensName: Optional<string>;
   success: boolean;
 }
 
 interface SNSResolutionResponse {
   address: string;
-  snsName: string | null;
+  snsName: Optional<string>;
   success: boolean;
 }
 
 interface WalletResolutionResponse {
   nameService: 'ens' | 'sns';
   domain: string;
-  walletAddress: string | null;
+  walletAddress: Optional<string>;
   success: boolean;
 }
 

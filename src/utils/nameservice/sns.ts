@@ -1,3 +1,4 @@
+import { Optional } from '@johnqh/types';
 // import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
 
 // Create connection to Solana mainnet
@@ -147,7 +148,7 @@ async function querySOLDomains(ownerAddress: string): Promise<string[]> {
  */
 export async function resolveSNSDomain(
   _domain: string
-): Promise<string | null> {
+): Promise<Optional<string>> {
   // For now, this is a placeholder implementation
   // Real SNS resolution would involve:
   // 1. Computing the domain hash

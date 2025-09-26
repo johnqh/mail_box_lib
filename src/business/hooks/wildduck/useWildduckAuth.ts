@@ -4,6 +4,7 @@ import { useStorageService } from '../core/useServices';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
 import type {
   AuthenticateRequest,
+  Optional,
   PreAuthRequest,
 } from '@johnqh/types';
 import {
@@ -18,7 +19,7 @@ import { WildDuckMockData } from './mocks';
 
 interface UseWildduckAuthReturn {
   isLoading: boolean;
-  error: string | null;
+  error: Optional<string>;
   getAuthStatus: () => Promise<{ authenticated: boolean; user?: any }>;
   preAuth: (params: Omit<PreAuthRequest, 'sess' | 'ip'>) => Promise<PreAuthResponse>;
   authenticate: (params: Omit<AuthenticateRequest, 'sess' | 'ip'>) => Promise<AuthenticationResponse>;
@@ -31,7 +32,7 @@ interface UseWildduckAuthReturn {
  */
 const useWildduckAuth = (config: WildDuckConfig, devMode: boolean = false): UseWildduckAuthReturn => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Optional<string>>(null);
   const storageService = useStorageService();
 
   const clearError = useCallback(() => {

@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import { ChainType } from '@johnqh/types';
+import { ChainType, Optional } from '@johnqh/types';
 
 interface WalletInfo {
   address: string;
@@ -15,12 +15,12 @@ interface WalletInfo {
 interface UseWalletDetectorReturn {
   // State
   isLoading: boolean;
-  error: string | null;
+  error: Optional<string>;
 
   // Operations
-  detectWalletType: (address: string) => Promise<ChainType | null>;
+  detectWalletType: (address: string) => Promise<Optional<ChainType>>;
   validateAddress: (address: string) => Promise<boolean>;
-  getWalletInfo: (address: string) => Promise<WalletInfo | null>;
+  getWalletInfo: (address: string) => Promise<Optional<WalletInfo>>;
   isEVMAddress: (address: string) => boolean;
   isSolanaAddress: (address: string) => boolean;
 
@@ -33,7 +33,7 @@ interface UseWalletDetectorReturn {
  */
 export const useWalletDetector = (): UseWalletDetectorReturn => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Optional<string>>(null);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -52,7 +52,7 @@ export const useWalletDetector = (): UseWalletDetectorReturn => {
   }, []);
 
   const detectWalletType = useCallback(
-    async (address: string): Promise<ChainType | null> => {
+    async (address: string): Promise<Optional<ChainType>> => {
       setIsLoading(true);
       setError(null);
 
@@ -99,19 +99,19 @@ export const useWalletDetector = (): UseWalletDetectorReturn => {
   );
 
   const getWalletInfo = useCallback(
-    async (address: string): Promise<WalletInfo | null> => {
+    async (address: string): Promise<Optional<WalletInfo>> => {
       setIsLoading(true);
       setError(null);
 
       try {
         const chainType = await detectWalletType(address);
-        if (chainType === null) {
+        if (!chainType) {
           return null;
         }
 
         return {
           address,
-          chainType,
+          chainType: chainType as ChainType,
           isValid: true,
         };
       } catch (err) {

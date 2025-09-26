@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { Optional } from '@johnqh/types';
 import { IndexerClient } from '../../../network/clients/indexer';
 import type {
   SolanaSetupResponse,
@@ -9,7 +10,7 @@ import { IndexerMockData } from './mocks';
 
 interface UseIndexerSolanaReturn {
   isLoading: boolean;
-  error: string | null;
+  error: Optional<string>;
   getSolanaStatus: () => Promise<SolanaStatusResponse>;
   setupWebhooks: () => Promise<SolanaSetupResponse>;
   processTestTransaction: (
@@ -24,7 +25,7 @@ interface UseIndexerSolanaReturn {
  */
 const useIndexerSolana = (endpointUrl: string, dev: boolean = false, devMode: boolean = false): UseIndexerSolanaReturn => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Optional<string>>(null);
   const indexerClient = new IndexerClient(endpointUrl, dev);
 
   const clearError = useCallback(() => {

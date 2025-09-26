@@ -1,3 +1,4 @@
+import { Optional } from '@johnqh/types';
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
@@ -35,7 +36,7 @@ interface WildduckHealthStatus {
 
 interface UseWildduckHealthReturn {
   isLoading: boolean;
-  error: string | null;
+  error: Optional<string>;
   healthStatus: WildduckHealthStatus | null;
   isHealthy: boolean;
   checkHealth: () => Promise<WildduckHealthStatus>;
@@ -50,7 +51,7 @@ interface UseWildduckHealthReturn {
  */
 const useWildduckHealth = (config: WildDuckConfig, devMode: boolean = false): UseWildduckHealthReturn => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Optional<string>>(null);
   const [healthStatus, setHealthStatus] = useState<WildduckHealthStatus | null>(
     null
   );

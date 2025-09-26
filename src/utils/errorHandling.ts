@@ -1,3 +1,4 @@
+import { Optional } from '@johnqh/types';
 import { ERROR_MESSAGES, logger } from '@johnqh/types';
 // import { EnvUtils } from '../../di'; // TODO: Implement proper DI setup
 
@@ -120,7 +121,7 @@ const withErrorBoundary = async <T>(
   fn: () => Promise<T>,
   fallback?: T,
   context?: string
-): Promise<T | undefined> => {
+): Promise<Optional<T>> => {
   try {
     return await fn();
   } catch (error) {

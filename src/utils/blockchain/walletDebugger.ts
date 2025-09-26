@@ -2,13 +2,13 @@
  * Wallet debugging utilities to help diagnose signing issues
  */
 
-import { ChainType } from '@johnqh/types';
+import { ChainType, Optional } from '@johnqh/types';
 
 interface WalletDebugInfo {
   chainType: ChainType;
-  address: string | null;
+  address: Optional<string>;
   isConnected: boolean;
-  walletProvider: string | null;
+  walletProvider: Optional<string>;
   diagnostics: string[];
   recommendations: string[];
 }
@@ -18,7 +18,7 @@ interface WalletDebugInfo {
  */
 const generateWalletDiagnostics = (
   chainType: ChainType,
-  address: string | null,
+  address: Optional<string>,
   isConnected: boolean,
   error?: Error
 ): WalletDebugInfo => {
@@ -156,7 +156,7 @@ const generateWalletDiagnostics = (
  */
 const logWalletDiagnostics = (
   chainType: ChainType,
-  address: string | null,
+  address: Optional<string>,
   isConnected: boolean,
   error?: Error
 ): void => {

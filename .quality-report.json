@@ -1,105 +1,54 @@
 {
-  "timestamp": "2025-09-13T21:55:00.790Z",
+  "timestamp": "2025-09-26T20:32:23.697Z",
   "projectStats": {
-    "version": "3.1.4",
+    "version": "3.3.3",
     "name": "@johnqh/lib",
-    "sourceFiles": 135,
+    "sourceFiles": 132,
     "testFiles": 12,
     "testCoverage": 9
   },
-  "overallScore": 0,
+  "overallScore": 100,
   "checks": [
     {
       "name": "TypeScript Type Check",
-      "success": false,
+      "success": true,
       "weight": 0.3,
       "critical": true,
-      "score": 0,
-      "errors": [
-        "src/business/ai/ai-email.service.ts(42,20): error TS6133: 'SOLANA_ADDRESS_REGEX' is declared but its value is never read.",
-        "src/business/ai/ai-email.service.ts(637,27): error TS2532: Object is possibly 'undefined'.",
-        "src/business/ai/ai-email.service.ts(646,27): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
-        "src/business/ai/ai-email.service.ts(655,5): error TS6133: 'content' is declared but its value is never read.",
-        "src/business/ai/ai-email.service.ts(661,22): error TS2532: Object is possibly 'undefined'.",
-        "src/business/ai/ai-search.service.ts(659,27): error TS2532: Object is possibly 'undefined'.",
-        "src/business/ai/ai-search.service.ts(659,51): error TS2532: Object is possibly 'undefined'.",
-        "src/business/ai/ai-web3.service.ts(223,7): error TS2375: Type '{ collectionName: any; floorPrice: any; rarity: { rank: any; score: any; traits: any; } | undefined; authenticity: { isAuthentic: true; confidence: number; verificationMethod: string; }; priceAnalysis: { ...; }; }' is not assignable to type 'NFTAnalysis' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.",
-        "src/business/ai/ai-web3.service.ts(391,7): error TS2322: Type '\"receive\" | \"mint\" | \"send\" | \"swap\" | \"stake\" | \"defi\" | \"nft\" | \"contract_interaction\" | undefined' is not assignable to type '\"receive\" | \"mint\" | \"send\" | \"swap\" | \"stake\" | \"defi\" | \"nft\" | \"contract_interaction\"'.",
-        "src/business/ai/ai-web3.service.ts(392,19): error TS18048: 'type' is possibly 'undefined'."
-      ]
+      "score": 30,
+      "errors": []
     },
     {
       "name": "ESLint Code Quality",
-      "success": false,
+      "success": true,
       "weight": 0.25,
       "critical": true,
-      "score": 0,
-      "errors": [
-        "7:30  error  Member 'AnalyticsService' of the import declaration should be sorted alphabetically  sort-imports",
-        "331:1   error  Delete `······`                                                                      prettier/prettier",
-        "334:1   error  Delete `······`                                                                      prettier/prettier",
-        "361:36  error  Replace `·?·value.length·>·0` with `⏎··········?·value.length·>·0⏎·········`         prettier/prettier",
-        "297:1   error  Delete `····`                                                                                                                         prettier/prettier",
-        "302:14  error  Replace `·this.defaultFolderId.charAt(0).toUpperCase()·+` with `⏎··········this.defaultFolderId.charAt(0).toUpperCase()·+⏎·········`  prettier/prettier",
-        "309:1   error  Delete `····`                                                                                                                         prettier/prettier",
-        "313:21  error  Replace `folderIdOrQuery:·string·|·any,·query?:·any` with `⏎····folderIdOrQuery:·string·|·any,⏎····query?:·any⏎··`                    prettier/prettier",
-        "313:52  error  'query' is defined but never used. Allowed unused args must match /^_/u                                                               @typescript-eslint/no-unused-vars",
-        "✖ 9 problems (9 errors, 0 warnings)"
-      ]
+      "score": 25,
+      "errors": []
     },
     {
       "name": "Prettier Code Formatting",
-      "success": false,
+      "success": true,
       "weight": 0.15,
       "critical": false,
-      "score": 0,
-      "errors": [
-        "[error] No files matching the pattern were found: \"src/**/*.tsx\".",
-        "[error] No files matching the pattern were found: \"src/**/*.js\".",
-        "[error] No files matching the pattern were found: \"src/**/*.jsx\".",
-        "[error] No files matching the pattern were found: \"src/**/*.json\".",
-        "[error] No files matching the pattern were found: \"src/**/*.md\"."
-      ]
+      "score": 15,
+      "errors": []
     },
     {
       "name": "Test Suite",
-      "success": false,
+      "success": true,
       "weight": 0.2,
       "critical": true,
-      "score": 0,
-      "errors": [
-        "✓ DefaultEmailOperations > email processing > should handle email processing errors 1ms",
-        "→ expected [Function] to throw an error",
-        "× DefaultMailboxOperations > error handling > should handle invalid folder IDs 2ms",
-        "→ expected [Function] to throw an error",
-        "× DefaultMailboxOperations > error handling > should handle query errors gracefully 3ms",
-        "→ expected [Function] to throw an error",
-        "stderr | src/network/clients/__tests__/wildduck.test.ts > WildDuckAPI > error handling > should handle network errors gracefully",
-        "FAIL  src/business/core/email/__tests__/email-operations.test.ts > DefaultEmailOperations > edge cases > should validate required dependencies",
-        "AssertionError: expected [Function] to throw an error",
-        "FAIL  src/business/core/mailbox/__tests__/mailbox-operations.test.ts > DefaultMailboxOperations > mailbox management > should manage mailbox state"
-      ]
+      "score": 20,
+      "errors": []
     },
     {
       "name": "Build Process",
-      "success": false,
+      "success": true,
       "weight": 0.1,
       "critical": false,
-      "score": 0,
-      "errors": [
-        "src/business/core/container/dependency-container.ts(179,11): error TS2554: Expected 2 arguments, but got 0.",
-        "src/business/core/email/email-operations.ts(7,10): error TS2305: Module '\"../../../di\"' has no exported member 'PersistenceService'.",
-        "src/business/core/email/email-operations.ts(336,22): error TS2339: Property 'track' does not exist on type 'AnalyticsService'.",
-        "src/business/core/email/email-operations.ts(345,22): error TS2339: Property 'track' does not exist on type 'AnalyticsService'.",
-        "src/business/core/index.ts(56,15): error TS2554: Expected 2 arguments, but got 0.",
-        "src/business/core/index.ts(79,15): error TS2554: Expected 2 arguments, but got 0."
-      ]
+      "score": 10,
+      "errors": []
     }
   ],
-  "recommendations": [
-    "Fix TypeScript type errors to improve code safety and maintainability",
-    "Address ESLint issues to maintain code quality standards",
-    "Fix failing tests to ensure code reliability",
-    "Run `npm run format` to fix code formatting issues"
-  ]
+  "recommendations": []
 }

@@ -13,7 +13,7 @@ import {
   type UnifiedTransaction,
   type UnifiedWallet,
 } from '@johnqh/mail_box_contracts';
-import { ChainType } from '@johnqh/types';
+import { ChainType, Optional } from '@johnqh/types';
 
 interface UseMailerClientOptions {
   wallet?: UnifiedWallet;
@@ -26,7 +26,7 @@ interface UseMailerClientReturn {
 
   // State
   isLoading: boolean;
-  error: string | null;
+  error: Optional<string>;
 
   // Operations
   sendMessage: (
@@ -43,7 +43,7 @@ interface UseMailerClientReturn {
 
   // Utility
   getChainType: () => ChainType | null;
-  getWalletAddress: () => string | null;
+  getWalletAddress: () => Optional<string>;
   clearError: () => void;
 
   // Client management
@@ -69,7 +69,7 @@ export const useMailerClient = (
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Optional<string>>(null);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -200,7 +200,7 @@ export const useMailerClient = (
     return null;
   }, [client]);
 
-  const getWalletAddress = useCallback((): string | null => {
+  const getWalletAddress = useCallback((): Optional<string> => {
     return client ? client.getWalletAddress() : null;
   }, [client]);
 

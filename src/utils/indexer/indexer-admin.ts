@@ -1,3 +1,4 @@
+import { Optional } from '@johnqh/types';
 /**
  * Utility helper class for Indexer Admin API operations
  * These functions are designed for admin panel usage and require special permissions
@@ -66,7 +67,7 @@ export interface AdminFlaggedUser {
   totalPoints: string;
   lifetimeEarned: string;
   flagReason: string;
-  lastActivityDate: number | null;
+  lastActivityDate: Optional<number>;
   updatedAt: number;
 }
 
@@ -190,7 +191,7 @@ export class IndexerAdminHelper {
     message: string;
     targetAddress: string;
     flagged: boolean;
-    reason: string | null;
+    reason: Optional<string>;
   }> {
     const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/admin/points/flag-user`, {
       ...userFlag,

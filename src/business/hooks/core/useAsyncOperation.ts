@@ -39,9 +39,8 @@ const useAsyncOperation = <T = any>(
   const [data, setData] = useState<Optional<T>>(initialData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Optional<string>>(null);
-  const [lastOperation, setLastOperation] = useState<(() => Promise<T>) | null>(
-    null
-  );
+  const [lastOperation, setLastOperation] =
+    useState<Optional<() => Promise<T>>>(null);
 
   const execute = useCallback(
     async (operation: () => Promise<T>): Promise<Optional<T>> => {

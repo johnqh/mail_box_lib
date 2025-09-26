@@ -2,7 +2,7 @@
  * Platform-agnostic navigation and UI state business logic
  */
 
-import { MediumView, MobileView } from '@johnqh/types';
+import { MediumView, MobileView, Optional } from '@johnqh/types';
 
 interface NavigationState {
   // Mobile navigation
@@ -12,9 +12,9 @@ interface NavigationState {
   mediumView: MediumView;
 
   // Email selection
-  selectedEmailId: string | null;
-  selectedFolderId: string | null;
-  selectedEmailAddressId: string | null;
+  selectedEmailId: Optional<string>;
+  selectedFolderId: Optional<string>;
+  selectedEmailAddressId: Optional<string>;
 
   // UI states
   isSidebarOpen: boolean;

@@ -1,3 +1,4 @@
+import { Optional } from '@johnqh/types';
 /**
  * Platform-agnostic persistence service interface
  * Handles data persistence across different storage mechanisms
@@ -122,7 +123,7 @@ interface DatabaseService {
   /**
    * Get record by key
    */
-  get<T>(table: string, key: string): Promise<T | null>;
+  get<T>(table: string, key: string): Promise<Optional<T>>;
 
   /**
    * Query records by index

@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import axios from 'axios';
+import { Optional } from '@johnqh/types';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
 import { WildDuckMockData } from './mocks';
 
@@ -35,7 +36,7 @@ interface ForwardedAddress {
 
 interface UseWildduckAddressesReturn {
   isLoading: boolean;
-  error: string | null;
+  error: Optional<string>;
   addresses: WildduckAddress[];
   getUserAddresses: (userId: string) => Promise<WildduckAddress[]>;
   createAddress: (
@@ -69,7 +70,7 @@ interface UseWildduckAddressesReturn {
  */
 const useWildduckAddresses = (config: WildDuckConfig, devMode: boolean = false): UseWildduckAddressesReturn => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Optional<string>>(null);
   const [addresses, setAddresses] = useState<WildduckAddress[]>([]);
 
   const clearError = useCallback(() => {

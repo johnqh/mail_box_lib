@@ -1,3 +1,4 @@
+import { Optional } from '@johnqh/types';
 /**
  * WildDuck Authentication Manager
  * Handles user authentication and session management for WildDuck API
@@ -138,7 +139,7 @@ const getWildDuckUserId = async (
     signMessage?: (message: string) => Promise<string>;
     chainType?: ChainType;
   }
-): Promise<string | null> => {
+): Promise<Optional<string>> => {
   const normalizedUsername = username.toLowerCase();
 
   // Check if we need to force re-authentication

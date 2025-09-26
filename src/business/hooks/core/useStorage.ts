@@ -29,7 +29,7 @@ function useStorage<T>(
   const getStoredValue = useCallback(async (): Promise<T> => {
     try {
       const item = await storage.getItem(key);
-      if (item === null) {
+      if (!item) {
         return initialValue;
       }
       return deserialize(item);

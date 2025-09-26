@@ -1,3 +1,4 @@
+import { Optional } from '@johnqh/types';
 import { useCallback, useState } from 'react';
 import axios from 'axios';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
@@ -22,7 +23,7 @@ interface WildduckUser {
 
 interface UseWildduckUsersReturn {
   isLoading: boolean;
-  error: string | null;
+  error: Optional<string>;
   getUser: (userId: string) => Promise<WildduckUser>;
   getUsers: (
     query?: string,
@@ -36,7 +37,7 @@ interface UseWildduckUsersReturn {
  */
 const useWildduckUsers = (config: WildDuckConfig, devMode: boolean = false): UseWildduckUsersReturn => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Optional<string>>(null);
 
   const clearError = useCallback(() => {
     setError(null);

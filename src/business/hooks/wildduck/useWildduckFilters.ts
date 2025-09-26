@@ -1,3 +1,4 @@
+import { Optional } from '@johnqh/types';
 import { useCallback, useState } from 'react';
 import axios from 'axios';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
@@ -73,7 +74,7 @@ interface UpdateFilterParams {
 
 interface UseWildduckFiltersReturn {
   isLoading: boolean;
-  error: string | null;
+  error: Optional<string>;
   filters: WildduckFilter[];
   getFilters: (userId: string) => Promise<WildduckFilter[]>;
   getFilter: (userId: string, filterId: string) => Promise<WildduckFilter>;
@@ -99,7 +100,7 @@ interface UseWildduckFiltersReturn {
  */
 const useWildduckFilters = (config: WildDuckConfig, devMode: boolean = false): UseWildduckFiltersReturn => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Optional<string>>(null);
   const [filters, setFilters] = useState<WildduckFilter[]>([]);
 
   const clearError = useCallback(() => {
