@@ -2,15 +2,14 @@ import { useCallback } from 'react';
 import { IndexerClient } from '../../../network/clients/indexer';
 import { useApiCall } from '../useApiCall';
 import type {
-  DelegationResponse,
-  DelegatorsResponse,
+  AddressValidationResponse,
+  DelegatedFromResponse,
+  DelegatedToResponse,
   EmailAccountsResponse,
   EntitlementResponse,
   NonceResponse,
   Optional,
-  SignatureVerificationResponse,
-  SimpleMessageResponse,
-  ValidationResponse,
+  SignInMessageResponse,
 } from '@johnqh/types';
 import { IndexerMockData } from './mocks';
 
@@ -24,7 +23,7 @@ interface IndexerEmailAddress {
 interface UseIndexerMailReturn {
   isLoading: boolean;
   error: Optional<string>;
-  validateUsername: (username: string) => Promise<Optional<ValidationResponse>>;
+  validateUsername: (username: string) => Promise<Optional<AddressValidationResponse>>;
   getEmailAccounts: (
     walletAddress: string,
     signature: string,
@@ -39,23 +38,19 @@ interface UseIndexerMailReturn {
     walletAddress: string,
     signature: string,
     message: string
-  ) => Promise<Optional<DelegationResponse>>;
+  ) => Promise<Optional<DelegatedToResponse>>;
   getDelegatorsToAddress: (
     walletAddress: string,
     signature: string,
     message: string
-  ) => Promise<Optional<DelegatorsResponse>>;
-  verifySignature: (
-    username: string,
-    signature: string,
-    message: string
-  ) => Promise<Optional<SignatureVerificationResponse>>;
+  ) => Promise<Optional<DelegatedFromResponse>>;
+  // Signature verification functionality has been removed from the new types
   getSigningMessage: (
     walletAddress: string,
     chainId: number,
     domain: string,
     url: string
-  ) => Promise<Optional<SimpleMessageResponse>>;
+  ) => Promise<Optional<SignInMessageResponse>>;
   getNonce: (
     username: string,
     signature: string,
@@ -159,20 +154,8 @@ const useIndexerMail = (endpointUrl: string, dev: boolean = false, devMode: bool
     [execute, indexerClient, devMode]
   );
 
-  const verifySignature = useCallback(
-    execute(async (username: string, signature: string, message: string) => {
-      try {
-        return await indexerClient.verifySignature(username, signature, message || '');
-      } catch (err) {
-        if (devMode) {
-          console.warn('[DevMode] verifySignature failed, returning mock data:', err);
-          return IndexerMockData.getSignatureVerification(username, signature, message);
-        }
-        throw err;
-      }
-    }),
-    [execute, indexerClient, devMode]
-  );
+  // Signature verification functionality has been removed from the new types
+  // This may need to be handled differently now
 
   const getSigningMessage = useCallback(
     execute(async (walletAddress: string, chainId: number, domain: string, url: string) => {
@@ -249,7 +232,7 @@ const useIndexerMail = (endpointUrl: string, dev: boolean = false, devMode: bool
     getEmailAddresses,
     getDelegatedAddress,
     getDelegatorsToAddress,
-    verifySignature,
+    // verifySignature removed - not available in new types
     getSigningMessage,
     getNonce,
     createNonce,

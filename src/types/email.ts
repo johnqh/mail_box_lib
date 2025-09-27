@@ -1,4 +1,11 @@
-import { Optional } from '@johnqh/types';
+import {
+  ChainType,
+  EmailFolder,
+  FontSize,
+  Optional,
+  Theme,
+  WalletAccount,
+} from '@johnqh/types';
 
 interface Email {
   id: string;
@@ -35,16 +42,8 @@ interface User {
   name: string;
   email: string;
   avatar?: Optional<string>;
-  emailAddresses: WalletEmailAccounts[];
+  emailAddresses: WalletAccount[];
 }
-
-import {
-  ChainType,
-  EmailFolder,
-  FontSize,
-  Theme,
-  WalletEmailAccounts,
-} from '@johnqh/types';
 
 // WalletUserData interface for wallet-based user information
 export interface WalletUserData {
@@ -54,7 +53,7 @@ export interface WalletUserData {
   displayName?: Optional<string>;
   avatar?: Optional<string>;
   metadata?: Optional<Record<string, any>>;
-  emailAddresses?: Optional<WalletEmailAccounts[]>;
+  emailAddresses?: Optional<WalletAccount[]>;
 }
 
 // Re-export types from enums for backward compatibility

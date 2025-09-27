@@ -3,21 +3,17 @@
  */
 
 import type {
+  AddressValidationResponse,
   ChainType,
-  DelegationResponse,
-  DelegatorsResponse,
+  DelegatedFromResponse,
+  DelegatedToResponse,
   EmailAccountsResponse,
   EntitlementResponse,
   LeaderboardResponse,
   NonceResponse,
   PointsResponse,
-  SignatureVerificationResponse,
-  SimpleMessageResponse,
+  SignInMessageResponse,
   SiteStatsResponse,
-  SolanaSetupResponse,
-  SolanaStatusResponse,
-  SolanaTestTransactionResponse,
-  ValidationResponse,
 } from '@johnqh/types';
 
 export class IndexerMockData {
@@ -27,15 +23,12 @@ export class IndexerMockData {
       data: {
         walletAddress,
         chainType: 'solana' as ChainType,
-        data: {
-          walletAddress,
-          pointsEarned: '1000',
-          lastActivityDate: new Date().toISOString()
-        },
-        verified: true
+        pointsEarned: '1000',
+        lastActivityDate: new Date().toISOString(),
       },
+      error: null,
       timestamp: new Date().toISOString()
-    } as PointsResponse;
+    };
   }
 
   static getPointsLeaderboard(count: number): LeaderboardResponse {
@@ -43,14 +36,14 @@ export class IndexerMockData {
       success: true,
       data: {
         leaderboard: [
-          { walletAddress: '0x1234...5678', pointsEarned: '5000', lastActivityDate: new Date().toISOString() },
-          { walletAddress: '0x2345...6789', pointsEarned: '4500', lastActivityDate: new Date().toISOString() },
-          { walletAddress: '0x3456...7890', pointsEarned: '4000', lastActivityDate: new Date().toISOString() }
+          { walletAddress: '0x1234...5678', chainType: 'ethereum' as ChainType, pointsEarned: '5000', lastActivityDate: new Date().toISOString() },
+          { walletAddress: '0x2345...6789', chainType: 'ethereum' as ChainType, pointsEarned: '4500', lastActivityDate: new Date().toISOString() },
+          { walletAddress: '0x3456...7890', chainType: 'ethereum' as ChainType, pointsEarned: '4000', lastActivityDate: new Date().toISOString() }
         ].slice(0, count),
-        count: Math.min(3, count)
       },
+      error: null,
       timestamp: new Date().toISOString()
-    } as LeaderboardResponse;
+    };
   }
 
   static getSiteStats(): SiteStatsResponse {
@@ -61,83 +54,40 @@ export class IndexerMockData {
         totalPoints: '250000',
         lastUpdated: new Date().toISOString()
       },
+      error: null,
       timestamp: new Date().toISOString()
-    } as SiteStatsResponse;
+    };
   }
 
-  static getSolanaStatus(): SolanaStatusResponse {
+
+  static getValidation(username: string): AddressValidationResponse {
     return {
       success: true,
       data: {
-        status: 'connected',
-        cluster: 'mainnet-beta',
-        version: '1.16.0'
+        walletAddress: username.toLowerCase(),
+        chainType: 'ethereum' as ChainType,
+        name: null,
       },
-      timestamp: Date.now()
-    } as unknown as SolanaStatusResponse;
-  }
-
-  static getSolanaSetup(): SolanaSetupResponse {
-    return {
-      success: true,
-      data: {
-        webhookUrl: 'https://mock-webhook.example.com',
-        isSetup: true
-      },
-      timestamp: Date.now()
-    } as unknown as SolanaSetupResponse;
-  }
-
-  static getSolanaTestTransaction(): SolanaTestTransactionResponse {
-    return {
-      success: true,
-      data: {
-        transactionId: 'mock-tx-id-12345',
-        status: 'confirmed',
-        blockHash: 'mock-block-hash',
-        slot: 123456
-      },
-      timestamp: Date.now()
-    } as unknown as SolanaTestTransactionResponse;
-  }
-
-  static getValidation(username: string): ValidationResponse {
-    return {
-      success: true,
-      isValid: true,
-      address: username,
-      addressType: 'EVM' as any,
-      normalizedAddress: username.toLowerCase(),
+      error: null,
       timestamp: new Date().toISOString()
-    } as ValidationResponse;
+    };
   }
 
   static getEmailAccounts(): EmailAccountsResponse {
     return {
       success: true,
       data: {
-        walletAddress: '0x1234...5678',
-        chainType: 'evm' as ChainType,
-        requestedWallet: '0x1234...5678',
-        walletAccounts: [
+        accounts: [
           {
             walletAddress: '0x1234...5678',
-            chainType: 'evm' as ChainType,
-            isPrimary: true,
-            primaryAccount: '0x1234...5678',
-            domainAccounts: [
-              { account: 'test', type: 'ens', domain: 'test.eth', verified: true },
-              { account: 'secondary', type: 'sns', domain: 'secondary.sol', verified: false }
-            ],
-            totalAccounts: 3
+            chainType: 'ethereum' as ChainType,
+            names: ['test.eth', 'secondary.sol'],
           }
         ],
-        totalWallets: 1,
-        totalAccounts: 3,
-        verified: true
       },
+      error: null,
       timestamp: new Date().toISOString()
-    } as EmailAccountsResponse;
+    };
   }
 
   // Backward compatibility
@@ -145,50 +95,49 @@ export class IndexerMockData {
     return this.getEmailAccounts();
   }
 
-  static getDelegation(): DelegationResponse {
+  static getDelegation(): DelegatedToResponse {
     return {
       success: true,
       data: {
-        delegatedAddress: 'delegated@0xmail.box',
-        isDelegated: true
+        walletAddress: 'delegated@0xmail.box',
+        chainType: 'ethereum' as ChainType,
+        chainId: 1,
+        txHash: '0x123...',
       },
+      error: null,
       timestamp: new Date().toISOString()
-    } as unknown as DelegationResponse;
+    };
   }
 
-  static getDelegators(): DelegatorsResponse {
+  static getDelegators(): DelegatedFromResponse {
     return {
       success: true,
       data: {
-        delegators: ['0x1234...5678', '0x2345...6789'],
-        count: 2
+        from: [
+          { walletAddress: '0x1234...5678', chainType: 'ethereum' as ChainType },
+          { walletAddress: '0x2345...6789', chainType: 'ethereum' as ChainType },
+        ],
       },
+      error: null,
       timestamp: new Date().toISOString()
-    } as unknown as DelegatorsResponse;
+    };
   }
 
-  static getSignatureVerification(username: string, signature: string, message: string): SignatureVerificationResponse {
+  // Signature verification response has been removed from the new types
+  // This functionality may be handled differently now
+
+  static getSigningMessage(walletAddress: string, chainId: number, domain: string): SignInMessageResponse {
     return {
       success: true,
       data: {
-        isValid: true,
-        walletAddress: username,
-        signature,
-        message
+        walletAddress,
+        chainType: 'ethereum' as ChainType,
+        message: `Sign this message to authenticate with ${domain}`,
+        chainId: chainId || undefined,
       },
+      error: null,
       timestamp: new Date().toISOString()
-    } as unknown as SignatureVerificationResponse;
-  }
-
-  static getSigningMessage(walletAddress: string, chainId: number, domain: string): SimpleMessageResponse {
-    return {
-      success: true,
-      message: `Sign this message to authenticate with ${domain}`,
-      walletAddress,
-      chainType: 'EVM' as any,
-      chainId,
-      timestamp: new Date().toISOString()
-    } as SimpleMessageResponse;
+    };
   }
 
   static getNonce(): NonceResponse {
@@ -196,21 +145,31 @@ export class IndexerMockData {
       success: true,
       data: {
         nonce: Math.floor(Math.random() * 1000000).toString(),
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString()
       },
+      error: null,
       timestamp: new Date().toISOString()
-    } as unknown as NonceResponse;
+    };
   }
 
   static getEntitlement(): EntitlementResponse {
     return {
       success: true,
       data: {
-        hasEntitlement: true,
-        entitlementType: 'premium',
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        walletAddress: '0x1234...5678',
+        chainType: 'ethereum' as ChainType,
+        entitlement: {
+          type: 'nameservice',
+          hasEntitlement: true,
+          isActive: true,
+          productIdentifier: 'premium',
+          expiresDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          store: 'web',
+        },
+        message: 'Entitlement verified',
+        verified: true,
       },
+      error: null,
       timestamp: new Date().toISOString()
-    } as unknown as EntitlementResponse;
+    };
   }
 }

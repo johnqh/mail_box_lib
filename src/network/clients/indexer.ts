@@ -5,20 +5,16 @@ import {
 } from '../../di';
 import type { AppConfig } from '../../types/environment';
 import type {
-  DelegationResponse,
-  DelegatorsResponse,
+  AddressValidationResponse,
+  DelegatedFromResponse,
+  DelegatedToResponse,
   EmailAccountsResponse,
   EntitlementResponse,
   LeaderboardResponse,
   NonceResponse,
   PointsResponse,
-  SignatureVerificationResponse,
-  SimpleMessageResponse,
+  SignInMessageResponse,
   SiteStatsResponse,
-  SolanaSetupResponse,
-  SolanaStatusResponse,
-  SolanaTestTransactionResponse,
-  ValidationResponse,
 } from '@johnqh/types';
 
 // Platform-specific global
@@ -216,8 +212,8 @@ class IndexerClient implements NetworkClient {
    * Validate username format (public endpoint)
    * GET /api/users/:username/validate
    */
-  async validateUsername(username: string): Promise<ValidationResponse> {
-    const response = await this.get<ValidationResponse>(
+  async validateUsername(username: string): Promise<AddressValidationResponse> {
+    const response = await this.get<AddressValidationResponse>(
       `/api/users/${encodeURIComponent(username)}/validate`
     );
 
@@ -227,7 +223,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data as ValidationResponse;
+    return response.data as AddressValidationResponse;
   }
 
   /**
@@ -278,8 +274,8 @@ class IndexerClient implements NetworkClient {
     walletAddress: string,
     signature: string,
     message: string
-  ): Promise<DelegationResponse> {
-    const response = await this.get<DelegationResponse>(
+  ): Promise<DelegatedToResponse> {
+    const response = await this.get<DelegatedToResponse>(
       `/api/delegations/from/${encodeURIComponent(walletAddress)}`,
       {
         headers: this.createAuthHeaders(signature, message),
@@ -294,7 +290,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data as DelegationResponse;
+    return response.data as DelegatedToResponse;
   }
 
   /**
@@ -305,8 +301,8 @@ class IndexerClient implements NetworkClient {
     walletAddress: string,
     signature: string,
     message: string
-  ): Promise<DelegatorsResponse> {
-    const response = await this.get<DelegatorsResponse>(
+  ): Promise<DelegatedFromResponse> {
+    const response = await this.get<DelegatedFromResponse>(
       `/api/delegations/to/${encodeURIComponent(walletAddress)}`,
       {
         headers: this.createAuthHeaders(signature, message),
@@ -321,7 +317,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data as DelegatorsResponse;
+    return response.data as DelegatedFromResponse;
   }
 
   /**
@@ -333,8 +329,8 @@ class IndexerClient implements NetworkClient {
     walletAddress: string,
     domain: string,
     url: string
-  ): Promise<SimpleMessageResponse> {
-    const response = await this.get<SimpleMessageResponse>(
+  ): Promise<SignInMessageResponse> {
+    const response = await this.get<SignInMessageResponse>(
       `/api/wallets/${encodeURIComponent(walletAddress)}/message/${chainId}/${encodeURIComponent(domain)}/${encodeURIComponent(url)}`
     );
 
@@ -344,7 +340,7 @@ class IndexerClient implements NetworkClient {
       );
     }
 
-    return response.data as SimpleMessageResponse;
+    return response.data as SignInMessageResponse;
   }
 
   /**
@@ -406,37 +402,8 @@ class IndexerClient implements NetworkClient {
     return response.data as NonceResponse;
   }
 
-  /**
-   * Verify wallet signature
-   * POST /api/users/:username/verify
-   */
-  async verifySignature(
-    username: string,
-    signature: string,
-    message: string
-  ): Promise<SignatureVerificationResponse> {
-    const response = await this.post<SignatureVerificationResponse>(
-      `/api/users/${encodeURIComponent(username)}/verify`,
-      {
-        walletAddress: username,
-        signature,
-        message,
-      },
-      {
-        headers: this.createAuthHeaders(signature, message),
-        signal: null,
-        timeout: null,
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `Signature verification failed: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data as SignatureVerificationResponse;
-  }
+  // Signature verification has been removed from the new types
+  // This functionality may need to be handled differently
 
   /**
    * Check nameservice entitlement for a wallet address (requires signature verification)
@@ -532,69 +499,7 @@ class IndexerClient implements NetworkClient {
     return response.data as SiteStatsResponse;
   }
 
-  // =============================================================================
-  // SOLANA API ENDPOINTS
-  // =============================================================================
-
-  /**
-   * Get Solana indexer status (public)
-   * GET /api/solana/status
-   */
-  async getSolanaStatus(): Promise<SolanaStatusResponse> {
-    const response = await this.get<SolanaStatusResponse>('/api/solana/status');
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to get Solana status: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data as SolanaStatusResponse;
-  }
-
-  /**
-   * Setup Solana webhooks (internal)
-   * POST /api/solana/setup-webhooks
-   */
-  async setupSolanaWebhooks(): Promise<SolanaSetupResponse> {
-    const response = await this.post<SolanaSetupResponse>(
-      '/api/solana/setup-webhooks',
-      {}
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to setup Solana webhooks: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data as SolanaSetupResponse;
-  }
-
-  /**
-   * Process test Solana transaction (development only)
-   * POST /api/solana/test-transaction
-   */
-  async processSolanaTestTransaction(
-    chainId: number,
-    transaction: any
-  ): Promise<SolanaTestTransactionResponse> {
-    const response = await this.post<SolanaTestTransactionResponse>(
-      '/api/solana/test-transaction',
-      {
-        chainId,
-        transaction,
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to process test transaction: ${(response.data as any)?.error || 'Unknown error'}`
-      );
-    }
-
-    return response.data as SolanaTestTransactionResponse;
-  }
+  // Solana-specific endpoints have been removed as they are no longer needed
 }
 
 /**
@@ -644,12 +549,6 @@ const createIndexerApiConfig = (config: AppConfig) => ({
       `/api/wallets/${encodeURIComponent(walletAddress)}/points`,
     POINTS_LEADERBOARD: (count: number) => `/api/points/leaderboard/${count}`,
     POINTS_SITE_STATS: '/api/points/site-stats',
-
-    // Solana API endpoints
-    SOLANA_STATUS: '/api/solana/status',
-    SOLANA_WEBHOOK: '/api/solana/webhook',
-    SOLANA_SETUP_WEBHOOKS: '/api/solana/setup-webhooks',
-    SOLANA_TEST_TRANSACTION: '/api/solana/test-transaction',
   },
 });
 

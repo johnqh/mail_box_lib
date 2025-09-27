@@ -153,7 +153,7 @@ class IndexerService {
 
       const result = {
         success: true,
-        emails: response.data?.walletAccounts?.[0]?.domainAccounts || [],
+        emails: response.data?.accounts || [],
       };
 
       this.setCache(cacheKey, result);
@@ -181,7 +181,7 @@ class IndexerService {
       
       return {
         success: true,
-        points: parseInt(response.data?.data?.pointsEarned || '0'),
+        points: parseInt(response.data?.pointsEarned || '0'),
       };
     } catch (error) {
       console.error('Failed to get points summary:', error);
