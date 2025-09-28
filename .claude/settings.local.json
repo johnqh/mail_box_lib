@@ -7,7 +7,10 @@
       "Bash(npm install:*)",
       "Bash(npm run check-all:*)",
       "Read(//Users/johnhuang/0xmail/mail_box_indexer/**)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nchore: update dependencies and fix type compatibility\n\n- Update @johnqh/types to v1.7.3 with breaking changes:\n  - Rename DelegationResponse → DelegatedToResponse\n  - Rename DelegatorsResponse → DelegatedFromResponse  \n  - Rename SimpleMessageResponse → SignInMessageResponse\n  - Rename ValidationResponse → AddressValidationResponse\n  - Rename WalletEmailAccounts → WalletAccount\n  - Update EmailAccountsResult and PointsData structure\n- Update @johnqh/di to v1.3.15\n- Update @johnqh/mail_box_contracts to v1.8.2\n- Remove deprecated Solana-specific indexer endpoints\n- Remove useIndexerSolana hook (no longer needed)\n- Fix all type imports and usage throughout codebase\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(npm run typecheck:*)",
+      "Bash(npm test:*)"
     ],
     "deny": [],
     "ask": []
