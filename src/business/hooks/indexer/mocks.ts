@@ -1,36 +1,16 @@
 /**
- * Mock data helpers for Indexer API responses in development mode
+ * Mock data helpers for Indexer API responses in development mode (public endpoints only)
  */
 
 import type {
   AddressValidationResponse,
   ChainType,
-  DelegatedFromResponse,
-  DelegatedToResponse,
-  EmailAccountsResponse,
-  EntitlementResponse,
   LeaderboardResponse,
-  NonceResponse,
-  PointsResponse,
   SignInMessageResponse,
   SiteStatsResponse,
 } from '@johnqh/types';
 
 export class IndexerMockData {
-  static getPointsBalance(walletAddress: string): PointsResponse {
-    return {
-      success: true,
-      data: {
-        walletAddress,
-        chainType: 'solana' as ChainType,
-        pointsEarned: '1000',
-        lastActivityDate: new Date().toISOString(),
-      },
-      error: null,
-      timestamp: new Date().toISOString()
-    };
-  }
-
   static getPointsLeaderboard(count: number): LeaderboardResponse {
     return {
       success: true,
@@ -59,7 +39,6 @@ export class IndexerMockData {
     };
   }
 
-
   static getValidation(username: string): AddressValidationResponse {
     return {
       success: true,
@@ -72,59 +51,6 @@ export class IndexerMockData {
       timestamp: new Date().toISOString()
     };
   }
-
-  static getEmailAccounts(): EmailAccountsResponse {
-    return {
-      success: true,
-      data: {
-        accounts: [
-          {
-            walletAddress: '0x1234...5678',
-            chainType: 'ethereum' as ChainType,
-            names: ['test.eth', 'secondary.sol'],
-          }
-        ],
-      },
-      error: null,
-      timestamp: new Date().toISOString()
-    };
-  }
-
-  // Backward compatibility
-  static getEmailAddresses(): EmailAccountsResponse {
-    return this.getEmailAccounts();
-  }
-
-  static getDelegation(): DelegatedToResponse {
-    return {
-      success: true,
-      data: {
-        walletAddress: 'delegated@0xmail.box',
-        chainType: 'ethereum' as ChainType,
-        chainId: 1,
-        txHash: '0x123...',
-      },
-      error: null,
-      timestamp: new Date().toISOString()
-    };
-  }
-
-  static getDelegators(): DelegatedFromResponse {
-    return {
-      success: true,
-      data: {
-        from: [
-          { walletAddress: '0x1234...5678', chainType: 'ethereum' as ChainType },
-          { walletAddress: '0x2345...6789', chainType: 'ethereum' as ChainType },
-        ],
-      },
-      error: null,
-      timestamp: new Date().toISOString()
-    };
-  }
-
-  // Signature verification response has been removed from the new types
-  // This functionality may be handled differently now
 
   static getSigningMessage(walletAddress: string, chainId: number, domain: string): SignInMessageResponse {
     return {
@@ -140,36 +66,10 @@ export class IndexerMockData {
     };
   }
 
-  static getNonce(): NonceResponse {
-    return {
-      success: true,
-      data: {
-        nonce: Math.floor(Math.random() * 1000000).toString(),
-      },
-      error: null,
-      timestamp: new Date().toISOString()
-    };
-  }
-
-  static getEntitlement(): EntitlementResponse {
-    return {
-      success: true,
-      data: {
-        walletAddress: '0x1234...5678',
-        chainType: 'ethereum' as ChainType,
-        entitlement: {
-          type: 'nameservice',
-          hasEntitlement: true,
-          isActive: true,
-          productIdentifier: 'premium',
-          expiresDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          store: 'web',
-        },
-        message: 'Entitlement verified',
-        verified: true,
-      },
-      error: null,
-      timestamp: new Date().toISOString()
-    };
-  }
+  // Note: The following methods have been removed as they're for signature-protected endpoints:
+  // - getPointsBalance (requires signature verification)
+  // - getEmailAccounts (requires signature verification)
+  // - getDelegation/getDelegators (requires signature verification)
+  // - getNonce (requires signature verification)
+  // - getEntitlement (requires signature verification)
 }

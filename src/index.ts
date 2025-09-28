@@ -63,7 +63,6 @@ export {
   DefaultAnalyticsOperations,
   AnalyticsOperations,
   IndexerService,
-  createIndexerService,
 
   // Wallet Status Management
   walletStatusManager,

@@ -89,49 +89,37 @@ describe('IndexerClient', () => {
     });
   });
 
-  describe('getEmailAddresses', () => {
-    it('should get email addresses with authentication', async () => {
+  describe('getMessage', () => {
+    it('should get signing message', async () => {
       const mockResponse = {
-        ok: true,
+        success: true,
         data: {
-          requestedWallet: '0x123...',
-          addressType: 'evm',
-          walletEmails: [
-            {
-              walletAddress: '0x123...',
-              addressType: 'evm',
-              isPrimary: true,
-              primaryEmail: '0x123...@0xmail.box',
-              domainEmails: [],
-              totalEmails: 1,
-            },
-          ],
-          totalWallets: 1,
-          totalEmails: 1,
-          verified: true,
-          timestamp: new Date().toISOString(),
+          message: 'Sign in with Ethereum to the app.',
+          walletAddress: '0x123...',
+          chainType: 'evm',
+          chainId: 1,
         },
+        timestamp: '2025-09-28T18:58:15.155Z',
       };
+
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockResponse),
       });
 
-      const result = await client.getEmailAddresses(
+      const result = await client.getMessage(
+        1,
         '0x123...',
-        'signature',
-        'message'
+        'example.com',
+        'https://example.com'
       );
-      
-      expect(result.ok).toBe(true);
+
+      expect(result.success).toBe(true);
+      expect(result.data?.message).toBeDefined();
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/wallets/0x123...'),
+        expect.stringContaining('/api/wallets/0x123.../message?'),
         expect.objectContaining({
           method: 'GET',
-          headers: expect.objectContaining({
-            'x-signature': 'signature',
-            'x-message': 'message',
-          }),
         })
       );
     });
@@ -156,15 +144,52 @@ describe('IndexerClient', () => {
     });
   });
 
-  describe('edge cases', () => {
-    it('should handle empty wallet address', async () => {
-      await expect(client.getEmailAddresses('', 'sig', 'msg'))
-        .rejects.toThrow();
+  describe('points endpoints', () => {
+    it('should get points leaderboard', async () => {
+      const mockResponse = {
+        success: true,
+        data: {
+          leaderboard: [
+            {
+              walletAddress: '0x123...',
+              chainType: 'evm',
+              pointsEarned: '100',
+              lastActivityDate: '2025-09-28T18:58:15.155Z',
+            },
+          ],
+        },
+        timestamp: '2025-09-28T18:58:15.155Z',
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.getPointsLeaderboard(10);
+      expect(result.success).toBe(true);
+      expect(result.data?.leaderboard).toBeDefined();
     });
 
-    it('should handle missing signature parameters', async () => {
-      await expect(client.getEmailAddresses('0x123...', '', ''))
-        .rejects.toThrow();
+    it('should get site stats', async () => {
+      const mockResponse = {
+        success: true,
+        data: {
+          totalPoints: '1000',
+          totalUsers: 50,
+          lastUpdated: '2025-09-28T18:58:15.155Z',
+        },
+        timestamp: '2025-09-28T18:58:15.155Z',
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.getPointsSiteStats();
+      expect(result.success).toBe(true);
+      expect(result.data?.totalPoints).toBeDefined();
     });
   });
 });
