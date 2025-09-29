@@ -54,7 +54,7 @@ function useIndexerPoints(endpointUrl: string, dev: boolean = false, devMode: bo
             err instanceof Error ? err.message : 'Failed to get leaderboard';
           console.warn('[DevMode] getPointsLeaderboard failed quickly, returning mock data:', errorMessage);
           setError(null); // Don't show error in devMode
-          return IndexerMockData.getPointsLeaderboard(count);
+          return IndexerMockData.getLeaderboard(count);
         } finally {
           setIsLoading(false);
         }

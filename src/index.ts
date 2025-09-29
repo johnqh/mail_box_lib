@@ -183,6 +183,7 @@ export {
   WildduckAddress,
   WildduckSettings,
   WildDuckMockData,
+  WildduckMailbox,
 
   // Utility Hooks
   useArrayState,

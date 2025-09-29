@@ -1,17 +1,24 @@
 /**
- * Mock data helpers for Indexer API responses in development mode (public endpoints only)
+ * Mock data helpers for Indexer API responses in development mode
+ * Includes both public and signature-protected endpoints (excludes IP-restricted endpoints)
  */
 
 import type {
   AddressValidationResponse,
   ChainType,
+  DelegatedFromResponse,
+  DelegatedToResponse,
+  EmailAccountsResponse,
+  EntitlementResponse,
   LeaderboardResponse,
+  NonceResponse,
+  PointsResponse,
   SignInMessageResponse,
   SiteStatsResponse,
 } from '@johnqh/types';
 
 export class IndexerMockData {
-  static getPointsLeaderboard(count: number): LeaderboardResponse {
+  static getLeaderboard(count: number = 10): LeaderboardResponse {
     return {
       success: true,
       data: {
@@ -66,10 +73,102 @@ export class IndexerMockData {
     };
   }
 
-  // Note: The following methods have been removed as they're for signature-protected endpoints:
-  // - getPointsBalance (requires signature verification)
-  // - getEmailAccounts (requires signature verification)
-  // - getDelegation/getDelegators (requires signature verification)
-  // - getNonce (requires signature verification)
-  // - getEntitlement (requires signature verification)
+  static getWalletAccounts(walletAddress: string): EmailAccountsResponse {
+    return {
+      success: true,
+      data: {
+        accounts: [{
+          walletAddress,
+          chainType: 'ethereum' as ChainType,
+          names: ['user@0xmail.box'],
+        }],
+      },
+      error: null,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  static getDelegatedTo(walletAddress: string): DelegatedToResponse {
+    return {
+      success: true,
+      data: {
+        walletAddress,
+        chainType: 'ethereum' as ChainType,
+        chainId: null,
+        txHash: null,
+      },
+      error: null,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  static getDelegatedFrom(_walletAddress: string): DelegatedFromResponse {
+    return {
+      success: true,
+      data: {
+        from: [],
+      },
+      error: null,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  static createNonce(_username: string): NonceResponse {
+    return {
+      success: true,
+      data: {
+        nonce: Math.random().toString(36).substring(2, 15),
+      },
+      error: null,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  static getNonce(_username: string): NonceResponse {
+    return {
+      success: true,
+      data: {
+        nonce: 'mock-nonce-12345',
+      },
+      error: null,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  static getEntitlement(walletAddress: string): EntitlementResponse {
+    return {
+      success: true,
+      data: {
+        walletAddress,
+        chainType: 'ethereum' as ChainType,
+        entitlement: {
+          type: 'nameservice',
+          hasEntitlement: true,
+          isActive: true,
+          productIdentifier: null,
+          store: null,
+        },
+        message: 'User has premium entitlement',
+        verified: true,
+      },
+      error: null,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  static getPointsBalance(walletAddress: string): PointsResponse {
+    return {
+      success: true,
+      data: {
+        walletAddress,
+        chainType: 'ethereum' as ChainType,
+        pointsEarned: '1000',
+        lastActivityDate: new Date().toISOString(),
+        createdAt: null,
+        updatedAt: null,
+      },
+      error: null,
+      timestamp: new Date().toISOString()
+    };
+  }
 }

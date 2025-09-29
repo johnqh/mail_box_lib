@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { IndexerClient } from '../indexer';
 import type { AppConfig } from '../../../types/environment';
+import axios from 'axios';
 
-// Mock global fetch
-const mockFetch = vi.fn();
-global.fetch = mockFetch;
+// Mock axios
+vi.mock('axios');
+const mockAxios = vi.mocked(axios, true);
 
 describe('IndexerClient', () => {
   let client: IndexerClient;
@@ -56,16 +57,18 @@ describe('IndexerClient', () => {
           timestamp: new Date().toISOString(),
         },
       };
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
+      mockAxios.mockResolvedValueOnce({
+        status: 200,
+        statusText: 'OK',
+        data: mockResponse,
+        headers: {},
       });
 
       const result = await client.validateUsername('0x123...');
       expect(result.ok).toBe(true);
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/users/0x123.../validate'),
+      expect(mockAxios).toHaveBeenCalledWith(
         expect.objectContaining({
+          url: expect.stringContaining('/api/users/0x123.../validate'),
           method: 'GET',
           headers: expect.objectContaining({
             'Content-Type': 'application/json',
@@ -75,17 +78,17 @@ describe('IndexerClient', () => {
     });
 
     it('should handle validation errors', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
+      mockAxios.mockResolvedValueOnce({
         status: 400,
         statusText: 'Bad Request',
-        json: () => Promise.resolve({ error: 'Invalid address format' }),
+        data: { error: 'Invalid address format' },
+        headers: {},
       });
 
       await expect(client.validateUsername('invalid-address'))
         .rejects.toThrow('Failed to validate username');
       
-      expect(mockFetch).toHaveBeenCalled();
+      expect(mockAxios).toHaveBeenCalled();
     });
   });
 
@@ -102,9 +105,11 @@ describe('IndexerClient', () => {
         timestamp: '2025-09-28T18:58:15.155Z',
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
+      mockAxios.mockResolvedValueOnce({
+        status: 200,
+        statusText: 'OK',
+        data: mockResponse,
+        headers: {},
       });
 
       const result = await client.getMessage(
@@ -116,9 +121,9 @@ describe('IndexerClient', () => {
 
       expect(result.success).toBe(true);
       expect(result.data?.message).toBeDefined();
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/wallets/0x123.../message?'),
+      expect(mockAxios).toHaveBeenCalledWith(
         expect.objectContaining({
+          url: expect.stringContaining('/api/wallets/0x123.../message?'),
           method: 'GET',
         })
       );
@@ -127,7 +132,7 @@ describe('IndexerClient', () => {
 
   describe('error handling', () => {
     it('should handle network errors', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+      mockAxios.mockRejectedValueOnce(new Error('Network error'));
 
       await expect(client.validateUsername('0x123...'))
         .rejects.toThrow('Indexer API request failed');
@@ -135,9 +140,7 @@ describe('IndexerClient', () => {
 
     it('should handle timeout errors', async () => {
       const timeoutClient = new IndexerClient(mockEndpointUrl, false, 1);
-      mockFetch.mockImplementationOnce(() => 
-        new Promise(resolve => setTimeout(resolve, 100))
-      );
+      mockAxios.mockRejectedValueOnce(new Error('timeout of 1ms exceeded'));
 
       await expect(timeoutClient.validateUsername('0x123...'))
         .rejects.toThrow();
@@ -161,9 +164,11 @@ describe('IndexerClient', () => {
         timestamp: '2025-09-28T18:58:15.155Z',
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
+      mockAxios.mockResolvedValueOnce({
+        status: 200,
+        statusText: 'OK',
+        data: mockResponse,
+        headers: {},
       });
 
       const result = await client.getPointsLeaderboard(10);
@@ -182,9 +187,11 @@ describe('IndexerClient', () => {
         timestamp: '2025-09-28T18:58:15.155Z',
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
+      mockAxios.mockResolvedValueOnce({
+        status: 200,
+        statusText: 'OK',
+        data: mockResponse,
+        headers: {},
       });
 
       const result = await client.getPointsSiteStats();

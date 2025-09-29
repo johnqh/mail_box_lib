@@ -1,3 +1,4 @@
+import axios from 'axios';
 import {
   NetworkClient,
   NetworkRequestOptions,
@@ -6,13 +7,16 @@ import {
 import type { AppConfig } from '../../types/environment';
 import type {
   AddressValidationResponse,
+  DelegatedFromResponse,
+  DelegatedToResponse,
+  EmailAccountsResponse,
+  EntitlementResponse,
   LeaderboardResponse,
+  NonceResponse,
+  PointsResponse,
   SignInMessageResponse,
   SiteStatsResponse,
 } from '@johnqh/types';
-
-// Platform-specific global
-declare const fetch: typeof globalThis.fetch;
 
 /**
  * Indexer API client for public endpoints only
@@ -59,7 +63,7 @@ class IndexerClient implements NetworkClient {
     return this.request<T>(url, {
       ...options,
       method: 'POST',
-      body: body ? JSON.stringify(body) : undefined,
+      body,
     });
   }
 
@@ -71,7 +75,7 @@ class IndexerClient implements NetworkClient {
     return this.request<T>(url, {
       ...options,
       method: 'PUT',
-      body: body ? JSON.stringify(body) : undefined,
+      body,
     });
   }
 
@@ -87,48 +91,77 @@ class IndexerClient implements NetworkClient {
     options?: NetworkRequestOptions
   ): Promise<NetworkResponse<T>> {
     const fullUrl = `${this.baseUrl}${url}`;
-    const requestOptions: RequestInit = {
+
+    const axiosConfig: any = {
       method: options?.method || 'GET',
+      url: fullUrl,
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
         ...(this.dev && { 'x-dev': 'true' }),
         ...options?.headers,
       },
-      signal: options?.signal || null,
+      timeout: this.timeout,
+      signal: options?.signal,
+      withCredentials: false, // Ensure CORS doesn't require credentials
     };
+
+    console.log('[IndexerClient] Making request:', {
+      url: fullUrl,
+      method: axiosConfig.method,
+      headers: axiosConfig.headers,
+    });
 
     if (options?.body) {
       if (typeof options.body === 'string') {
-        requestOptions.body = options.body;
+        try {
+          axiosConfig.data = JSON.parse(options.body);
+        } catch {
+          axiosConfig.data = options.body;
+        }
       } else {
-        requestOptions.body = JSON.stringify(options.body);
+        axiosConfig.data = options.body;
       }
     }
 
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
-
-      const response = await fetch(fullUrl, {
-        ...requestOptions,
-        signal: options?.signal || controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      const responseData = await response.json().catch(() => null);
+      const response = await axios(axiosConfig);
 
       return {
-        ok: response.ok,
+        ok: response.status >= 200 && response.status < 300,
         status: response.status,
         statusText: response.statusText,
-        data: responseData,
-        headers: {} as Record<string, string>,
-        success: response.ok,
+        data: response.data as T,
+        headers: response.headers as Record<string, string>,
+        success: response.status >= 200 && response.status < 300,
         timestamp: new Date().toISOString(),
       };
-    } catch (error) {
+    } catch (error: any) {
+      // Check if it's an axios error by checking for response property
+      if (error.response || error.request) {
+        // If we got a response, return it even if it's an error status
+        if (error.response) {
+          return {
+            ok: false,
+            status: error.response.status,
+            statusText: error.response.statusText,
+            data: error.response.data as T,
+            headers: error.response.headers as Record<string, string>,
+            success: false,
+            timestamp: new Date().toISOString(),
+          };
+        }
+
+        // Network or other error without a response
+        console.error('[IndexerClient] Network error details:', {
+          message: error.message,
+          code: error.code,
+          url: fullUrl,
+          method: axiosConfig.method
+        });
+        throw new Error(`Indexer API request failed: ${error.message}`);
+      }
+
       throw new Error(
         `Indexer API request failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -222,10 +255,231 @@ class IndexerClient implements NetworkClient {
     return response.data as SiteStatsResponse;
   }
 
-  // Note: All other endpoints require either:
-  // 1. Signature verification (RequestValidator.verify) - clients can't generate proper signatures
-  // 2. IP restriction (IPHelper.validate) - only accessible from WildDuck server
-  // These have been removed as they're not usable by client applications
+  // =============================================================================
+  // SIGNATURE-PROTECTED ENDPOINTS (Require wallet signature)
+  // =============================================================================
+
+  /**
+   * Get email addresses for a wallet (requires signature)
+   * GET /api/wallets/:walletAddress/accounts
+   */
+  async getWalletAccounts(
+    walletAddress: string,
+    signature: string,
+    message: string
+  ): Promise<EmailAccountsResponse> {
+    console.log('[IndexerClient] getWalletAccounts called with:', {
+      walletAddress,
+      signatureLength: signature?.length,
+      messageLength: message?.length,
+      baseUrl: this.baseUrl,
+      endpoint: `/api/wallets/${encodeURIComponent(walletAddress)}/accounts`,
+    });
+
+    // Sanitize header values - remove newlines and control characters
+    // HTTP headers cannot contain newlines
+    const sanitizedMessage = message.replace(/[\r\n]/g, '\\n'); // Replace actual newlines with escaped version
+    const sanitizedSignature = signature.replace(/[\r\n]/g, ''); // Remove any newlines from signature
+
+    console.log('[IndexerClient] Sanitized headers:', {
+      messageHasNewlines: message.includes('\n'),
+      sanitizedMessageLength: sanitizedMessage.length,
+      signatureHasNewlines: signature.includes('\n'),
+      sanitizedSignatureLength: sanitizedSignature.length,
+    });
+
+    const response = await this.get<EmailAccountsResponse>(
+      `/api/wallets/${encodeURIComponent(walletAddress)}/accounts`,
+      {
+        headers: {
+          'x-signature': sanitizedSignature,
+          'x-message': sanitizedMessage,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get wallet accounts: ${(response.data as any)?.error || 'Unknown error'}`
+      );
+    }
+
+    return response.data as EmailAccountsResponse;
+  }
+
+  /**
+   * Get latest delegated address for a wallet (requires signature)
+   * GET /api/delegations/from/:walletAddress
+   */
+  async getDelegatedTo(
+    walletAddress: string,
+    signature: string,
+    message: string
+  ): Promise<DelegatedToResponse> {
+    const response = await this.get<DelegatedToResponse>(
+      `/api/delegations/from/${encodeURIComponent(walletAddress)}`,
+      {
+        headers: {
+          'x-signature': signature,
+          'x-message': message,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get delegation: ${(response.data as any)?.error || 'Unknown error'}`
+      );
+    }
+
+    return response.data as DelegatedToResponse;
+  }
+
+  /**
+   * Get all addresses that have delegated TO a wallet (requires signature)
+   * GET /api/delegations/to/:walletAddress
+   */
+  async getDelegatedFrom(
+    walletAddress: string,
+    signature: string,
+    message: string
+  ): Promise<DelegatedFromResponse> {
+    const response = await this.get<DelegatedFromResponse>(
+      `/api/delegations/to/${encodeURIComponent(walletAddress)}`,
+      {
+        headers: {
+          'x-signature': signature,
+          'x-message': message,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get delegators: ${(response.data as any)?.error || 'Unknown error'}`
+      );
+    }
+
+    return response.data as DelegatedFromResponse;
+  }
+
+  /**
+   * Create new nonce for username (requires signature)
+   * POST /api/users/:username/nonce
+   */
+  async createNonce(
+    username: string,
+    signature: string,
+    message: string
+  ): Promise<NonceResponse> {
+    const response = await this.post<NonceResponse>(
+      `/api/users/${encodeURIComponent(username)}/nonce`,
+      {},
+      {
+        headers: {
+          'x-signature': signature,
+          'x-message': message,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to create nonce: ${(response.data as any)?.error || 'Unknown error'}`
+      );
+    }
+
+    return response.data as NonceResponse;
+  }
+
+  /**
+   * Get nonce for username (requires signature)
+   * GET /api/users/:username/nonce
+   */
+  async getNonce(
+    username: string,
+    signature: string,
+    message: string
+  ): Promise<NonceResponse> {
+    const response = await this.get<NonceResponse>(
+      `/api/users/${encodeURIComponent(username)}/nonce`,
+      {
+        headers: {
+          'x-signature': signature,
+          'x-message': message,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get nonce: ${(response.data as any)?.error || 'Unknown error'}`
+      );
+    }
+
+    return response.data as NonceResponse;
+  }
+
+  /**
+   * Check entitlement for a wallet (requires signature)
+   * GET /api/wallets/:walletAddress/entitlements/
+   */
+  async getEntitlement(
+    walletAddress: string,
+    signature: string,
+    message: string
+  ): Promise<EntitlementResponse> {
+    const response = await this.get<EntitlementResponse>(
+      `/api/wallets/${encodeURIComponent(walletAddress)}/entitlements/`,
+      {
+        headers: {
+          'x-signature': signature,
+          'x-message': message,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get entitlement: ${(response.data as any)?.error || 'Unknown error'}`
+      );
+    }
+
+    return response.data as EntitlementResponse;
+  }
+
+  /**
+   * Get user points balance (requires signature)
+   * GET /api/wallets/:walletAddress/points
+   */
+  async getPointsBalance(
+    walletAddress: string,
+    signature: string,
+    message: string
+  ): Promise<PointsResponse> {
+    const response = await this.get<PointsResponse>(
+      `/api/wallets/${encodeURIComponent(walletAddress)}/points`,
+      {
+        headers: {
+          'x-signature': signature,
+          'x-message': message,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get points balance: ${(response.data as any)?.error || 'Unknown error'}`
+      );
+    }
+
+    return response.data as PointsResponse;
+  }
+
+  // Note: The following endpoints are IP-restricted and only accessible from WildDuck server:
+  // - POST /api/wallets/:walletAddress/points/add (IPHelper validation)
+  // - POST /api/authenticate (IPHelper validation)
+  // - POST /api/addresses/:address/verify (IPHelper validation)
 }
 
 /**
