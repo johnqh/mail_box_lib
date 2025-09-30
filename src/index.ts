@@ -218,6 +218,15 @@ export {
   UpdateFilterParams,
 } from './business';
 
+// Platform Types (from container/dependency-container)
+export type {
+  PlatformAnalytics,
+  PlatformNetwork,
+  PlatformNotifications,
+  PlatformStorage as PlatformStorageContainer,
+  PlatformTheme,
+} from './business/core/container/dependency-container';
+
 // Dependency Injection - All DI types and interfaces from local di module
 export type {
   AdvancedPlatformStorage,

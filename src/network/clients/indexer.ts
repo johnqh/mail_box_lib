@@ -157,7 +157,7 @@ class IndexerClient implements NetworkClient {
           message: error.message,
           code: error.code,
           url: fullUrl,
-          method: axiosConfig.method
+          method: axiosConfig.method,
         });
         throw new Error(`Indexer API request failed: ${error.message}`);
       }

@@ -92,3 +92,12 @@ export {
   useStorageService,
   useThemeService,
 };
+
+// Re-export platform types for convenience
+export type {
+  PlatformAnalytics,
+  PlatformNetwork,
+  PlatformNotifications,
+  PlatformStorage,
+  PlatformTheme,
+} from '../../core/container/dependency-container';
