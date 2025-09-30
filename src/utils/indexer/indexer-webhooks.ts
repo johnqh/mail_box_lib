@@ -159,7 +159,7 @@ export class IndexerWebhookHelper {
     processed: number;
     total: number;
   }> {
-    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/api/solana/webhook`, transactions);
+    const response = await this.client.post(`${getIndexerBaseUrl(this.config)}/solana/webhook`, transactions);
 
     if (!response.ok) {
       throw new Error((response.data as any)?.error || `HTTP error! status: ${response.status}`);

@@ -68,7 +68,7 @@ describe('IndexerClient', () => {
       expect(result.ok).toBe(true);
       expect(mockAxios).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: expect.stringContaining('/api/users/0x123.../validate'),
+          url: expect.stringContaining('/users/0x123.../validate'),
           method: 'GET',
           headers: expect.objectContaining({
             'Content-Type': 'application/json',
@@ -123,7 +123,7 @@ describe('IndexerClient', () => {
       expect(result.data?.message).toBeDefined();
       expect(mockAxios).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: expect.stringContaining('/api/wallets/0x123.../message?'),
+          url: expect.stringContaining('/wallets/0x123.../message?'),
           method: 'GET',
         })
       );

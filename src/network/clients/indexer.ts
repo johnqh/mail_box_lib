@@ -174,11 +174,11 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Validate username format (public endpoint)
-   * GET /api/users/:username/validate
+   * GET /users/:username/validate
    */
   async validateUsername(username: string): Promise<AddressValidationResponse> {
     const response = await this.get<AddressValidationResponse>(
-      `/api/users/${encodeURIComponent(username)}/validate`
+      `/users/${encodeURIComponent(username)}/validate`
     );
 
     if (!response.ok) {
@@ -192,7 +192,7 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get deterministic message for signing (public endpoint)
-   * GET /api/wallets/:walletAddress/message?chainId=...&domain=...&url=...
+   * GET /wallets/:walletAddress/message?chainId=...&domain=...&url=...
    */
   async getMessage(
     chainId: number,
@@ -207,7 +207,7 @@ class IndexerClient implements NetworkClient {
     });
 
     const response = await this.get<SignInMessageResponse>(
-      `/api/wallets/${encodeURIComponent(walletAddress)}/message?${queryParams.toString()}`
+      `/wallets/${encodeURIComponent(walletAddress)}/message?${queryParams.toString()}`
     );
 
     if (!response.ok) {
@@ -221,11 +221,11 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get points leaderboard (public endpoint)
-   * GET /api/points/leaderboard/:count
+   * GET /points/leaderboard/:count
    */
   async getPointsLeaderboard(count: number = 10): Promise<LeaderboardResponse> {
     const response = await this.get<LeaderboardResponse>(
-      `/api/points/leaderboard/${count}`
+      `/points/leaderboard/${count}`
     );
 
     if (!response.ok) {
@@ -239,12 +239,10 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get site-wide statistics (public endpoint)
-   * GET /api/points/site-stats
+   * GET /points/site-stats
    */
   async getPointsSiteStats(): Promise<SiteStatsResponse> {
-    const response = await this.get<SiteStatsResponse>(
-      '/api/points/site-stats'
-    );
+    const response = await this.get<SiteStatsResponse>('/points/site-stats');
 
     if (!response.ok) {
       throw new Error(
@@ -261,7 +259,7 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get email addresses for a wallet (requires signature)
-   * GET /api/wallets/:walletAddress/accounts
+   * GET /wallets/:walletAddress/accounts
    */
   async getWalletAccounts(
     walletAddress: string,
@@ -273,7 +271,7 @@ class IndexerClient implements NetworkClient {
       signatureLength: signature?.length,
       messageLength: message?.length,
       baseUrl: this.baseUrl,
-      endpoint: `/api/wallets/${encodeURIComponent(walletAddress)}/accounts`,
+      endpoint: `/wallets/${encodeURIComponent(walletAddress)}/accounts`,
     });
 
     // Sanitize header values - remove newlines and control characters
@@ -289,7 +287,7 @@ class IndexerClient implements NetworkClient {
     });
 
     const response = await this.get<EmailAccountsResponse>(
-      `/api/wallets/${encodeURIComponent(walletAddress)}/accounts`,
+      `/wallets/${encodeURIComponent(walletAddress)}/accounts`,
       {
         headers: {
           'x-signature': sanitizedSignature,
@@ -309,7 +307,7 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get latest delegated address for a wallet (requires signature)
-   * GET /api/delegations/from/:walletAddress
+   * GET /delegations/from/:walletAddress
    */
   async getDelegatedTo(
     walletAddress: string,
@@ -317,7 +315,7 @@ class IndexerClient implements NetworkClient {
     message: string
   ): Promise<DelegatedToResponse> {
     const response = await this.get<DelegatedToResponse>(
-      `/api/delegations/from/${encodeURIComponent(walletAddress)}`,
+      `/delegations/from/${encodeURIComponent(walletAddress)}`,
       {
         headers: {
           'x-signature': signature,
@@ -337,7 +335,7 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get all addresses that have delegated TO a wallet (requires signature)
-   * GET /api/delegations/to/:walletAddress
+   * GET /delegations/to/:walletAddress
    */
   async getDelegatedFrom(
     walletAddress: string,
@@ -345,7 +343,7 @@ class IndexerClient implements NetworkClient {
     message: string
   ): Promise<DelegatedFromResponse> {
     const response = await this.get<DelegatedFromResponse>(
-      `/api/delegations/to/${encodeURIComponent(walletAddress)}`,
+      `/delegations/to/${encodeURIComponent(walletAddress)}`,
       {
         headers: {
           'x-signature': signature,
@@ -365,7 +363,7 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Create new nonce for username (requires signature)
-   * POST /api/users/:username/nonce
+   * POST /users/:username/nonce
    */
   async createNonce(
     username: string,
@@ -373,7 +371,7 @@ class IndexerClient implements NetworkClient {
     message: string
   ): Promise<NonceResponse> {
     const response = await this.post<NonceResponse>(
-      `/api/users/${encodeURIComponent(username)}/nonce`,
+      `/users/${encodeURIComponent(username)}/nonce`,
       {},
       {
         headers: {
@@ -394,7 +392,7 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get nonce for username (requires signature)
-   * GET /api/users/:username/nonce
+   * GET /users/:username/nonce
    */
   async getNonce(
     username: string,
@@ -402,7 +400,7 @@ class IndexerClient implements NetworkClient {
     message: string
   ): Promise<NonceResponse> {
     const response = await this.get<NonceResponse>(
-      `/api/users/${encodeURIComponent(username)}/nonce`,
+      `/users/${encodeURIComponent(username)}/nonce`,
       {
         headers: {
           'x-signature': signature,
@@ -422,7 +420,7 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Check entitlement for a wallet (requires signature)
-   * GET /api/wallets/:walletAddress/entitlements/
+   * GET /wallets/:walletAddress/entitlements/
    */
   async getEntitlement(
     walletAddress: string,
@@ -430,7 +428,7 @@ class IndexerClient implements NetworkClient {
     message: string
   ): Promise<EntitlementResponse> {
     const response = await this.get<EntitlementResponse>(
-      `/api/wallets/${encodeURIComponent(walletAddress)}/entitlements/`,
+      `/wallets/${encodeURIComponent(walletAddress)}/entitlements/`,
       {
         headers: {
           'x-signature': signature,
@@ -450,7 +448,7 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get user points balance (requires signature)
-   * GET /api/wallets/:walletAddress/points
+   * GET /wallets/:walletAddress/points
    */
   async getPointsBalance(
     walletAddress: string,
@@ -458,7 +456,7 @@ class IndexerClient implements NetworkClient {
     message: string
   ): Promise<PointsResponse> {
     const response = await this.get<PointsResponse>(
-      `/api/wallets/${encodeURIComponent(walletAddress)}/points`,
+      `/wallets/${encodeURIComponent(walletAddress)}/points`,
       {
         headers: {
           'x-signature': signature,
@@ -477,9 +475,9 @@ class IndexerClient implements NetworkClient {
   }
 
   // Note: The following endpoints are IP-restricted and only accessible from WildDuck server:
-  // - POST /api/wallets/:walletAddress/points/add (IPHelper validation)
-  // - POST /api/authenticate (IPHelper validation)
-  // - POST /api/addresses/:address/verify (IPHelper validation)
+  // - POST /wallets/:walletAddress/points/add (IPHelper validation)
+  // - POST /authenticate (IPHelper validation)
+  // - POST /addresses/:address/verify (IPHelper validation)
 }
 
 /**
@@ -501,7 +499,7 @@ const createIndexerApiConfig = (config: AppConfig) => ({
   ENDPOINTS: {
     // Public endpoints only
     USERS_VALIDATE: (username: string) =>
-      `/api/users/${encodeURIComponent(username)}/validate`,
+      `/users/${encodeURIComponent(username)}/validate`,
     MESSAGE: (
       walletAddress: string,
       chainId: number,
@@ -513,10 +511,10 @@ const createIndexerApiConfig = (config: AppConfig) => ({
         domain,
         url,
       });
-      return `/api/wallets/${encodeURIComponent(walletAddress)}/message?${queryParams.toString()}`;
+      return `/wallets/${encodeURIComponent(walletAddress)}/message?${queryParams.toString()}`;
     },
-    POINTS_LEADERBOARD: (count: number) => `/api/points/leaderboard/${count}`,
-    POINTS_SITE_STATS: '/api/points/site-stats',
+    POINTS_LEADERBOARD: (count: number) => `/points/leaderboard/${count}`,
+    POINTS_SITE_STATS: '/points/site-stats',
   },
 });
 

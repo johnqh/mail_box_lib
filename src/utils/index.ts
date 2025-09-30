@@ -26,6 +26,9 @@ export * from './contracts';
 // Indexer utilities
 export * from './indexer';
 
+// WildDuck utilities
+export * from './wildduck';
+
 // General utilities
 export * from './url-params';
 export * from './document-helpers';
