@@ -80,7 +80,7 @@ function createWildDuckClient(config: WildDuckConfig): ReturnType<typeof axios.c
   return axios.create({
     baseURL: config.apiUrl,
     headers: {
-      'Authorization': `Bearer ${config.accessToken}`,
+      'X-Access-Token': config.accessToken,
       'Content-Type': 'application/json',
     },
   });

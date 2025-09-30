@@ -7,16 +7,71 @@ import {
 import type { AppConfig } from '../../types/environment';
 import type {
   AddressValidationResponse,
+  ChainType,
   DelegatedFromResponse,
   DelegatedToResponse,
   EmailAccountsResponse,
   EntitlementResponse,
   LeaderboardResponse,
   NonceResponse,
+  Optional,
   PointsResponse,
   SignInMessageResponse,
   SiteStatsResponse,
 } from '@johnqh/types';
+
+/**
+ * Referral code data
+ */
+export interface ReferralCodeData {
+  walletAddress: string;
+  chainType: ChainType;
+  referralCode: string;
+  totalRedemptions: number;
+  lastUsedAt?: string;
+  createdAt: string;
+}
+
+/**
+ * Referral code response
+ */
+export interface ReferralCodeResponse {
+  success: boolean;
+  data: ReferralCodeData;
+  error: Optional<string>;
+  timestamp: string;
+}
+
+/**
+ * Referred wallet data
+ */
+export interface ReferredWallet {
+  walletAddress: string;
+  chainType: ChainType;
+  createdAt: string;
+  ipAddress?: string;
+}
+
+/**
+ * Referral statistics data
+ */
+export interface ReferralStatsData {
+  walletAddress: string;
+  chainType: ChainType;
+  referralCode: string;
+  totalReferred: number;
+  referredWallets: ReferredWallet[];
+}
+
+/**
+ * Referral statistics response
+ */
+export interface ReferralStatsResponse {
+  success: boolean;
+  data: ReferralStatsData;
+  error: Optional<string>;
+  timestamp: string;
+}
 
 /**
  * Indexer API client for public endpoints only
@@ -472,6 +527,62 @@ class IndexerClient implements NetworkClient {
     }
 
     return response.data as PointsResponse;
+  }
+
+  /**
+   * Get or create referral code for a wallet (requires signature)
+   * GET /wallets/:walletAddress/referral
+   */
+  async getReferralCode(
+    walletAddress: string,
+    signature: string,
+    message: string
+  ): Promise<ReferralCodeResponse> {
+    const response = await this.get<ReferralCodeResponse>(
+      `/wallets/${encodeURIComponent(walletAddress)}/referral`,
+      {
+        headers: {
+          'x-signature': signature,
+          'x-message': message,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get referral code: ${(response.data as any)?.error || 'Unknown error'}`
+      );
+    }
+
+    return response.data as ReferralCodeResponse;
+  }
+
+  /**
+   * Get referral statistics for a wallet (requires signature)
+   * GET /wallets/:walletAddress/referral/stats
+   */
+  async getReferralStats(
+    walletAddress: string,
+    signature: string,
+    message: string
+  ): Promise<ReferralStatsResponse> {
+    const response = await this.get<ReferralStatsResponse>(
+      `/wallets/${encodeURIComponent(walletAddress)}/referral/stats`,
+      {
+        headers: {
+          'x-signature': signature,
+          'x-message': message,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get referral stats: ${(response.data as any)?.error || 'Unknown error'}`
+      );
+    }
+
+    return response.data as ReferralStatsResponse;
   }
 
   // Note: The following endpoints are IP-restricted and only accessible from WildDuck server:

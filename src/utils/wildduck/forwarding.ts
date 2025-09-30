@@ -29,10 +29,11 @@ export interface ForwardingTargetsResponse {
  * Create an axios instance configured for WildDuck API
  */
 function createWildDuckClient(config: WildDuckConfig): ReturnType<typeof axios.create> {
+  // Use Authorization Bearer header for user tokens (returned from /authenticate)
   return axios.create({
     baseURL: config.apiUrl,
     headers: {
-      'X-Access-Token': config.accessToken,
+      'Authorization': `Bearer ${config.accessToken}`,
       'Content-Type': 'application/json',
     },
   });

@@ -81,12 +81,16 @@ export interface WildDuckConfig {
 
 /**
  * Create an axios instance configured for WildDuck API
+ * The accessToken should be the user's authentication token from /authenticate endpoint
+ * with token=true parameter, NOT the master API token
  */
 function createWildDuckClient(config: WildDuckConfig): ReturnType<typeof axios.create> {
+  // Use Authorization Bearer header for user tokens (returned from /authenticate)
+  // WildDuck supports both X-Access-Token and Authorization: Bearer formats
   return axios.create({
     baseURL: config.apiUrl,
     headers: {
-      'X-Access-Token': config.accessToken,
+      'Authorization': `Bearer ${config.accessToken}`,
       'Content-Type': 'application/json',
     },
   });
