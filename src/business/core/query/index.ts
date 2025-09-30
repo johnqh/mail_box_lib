@@ -8,16 +8,15 @@ export * from './query-client';
 export * from './query-keys';
 
 // Re-export TanStack Query hooks with platform compatibility
+// Note: QueryClientProvider and useQueryClient are exported from context layer
 export {
   useQuery,
   useQueries,
   useInfiniteQuery,
   useMutation,
-  useQueryClient,
   useIsFetching,
   useIsMutating,
   QueryClient,
-  QueryClientProvider,
 } from '@tanstack/react-query';
 
 // Types

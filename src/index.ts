@@ -725,3 +725,11 @@ export {
 // Local business types with extensions
 export { WalletUserData, User, EmailAddress } from './types/email';
 export { WalletAccount } from '@johnqh/types';
+
+// Email transformation utilities
+export {
+  transformWalletAccountsToEmailGroups,
+  flattenEmailGroups,
+  chainTypeToString,
+  WalletEmailGroup,
+} from './utils/email/email-transformations';
