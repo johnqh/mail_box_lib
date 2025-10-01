@@ -313,42 +313,49 @@ class IndexerClient implements NetworkClient {
   // =============================================================================
 
   /**
+   * Helper method to create authentication headers for signature-protected endpoints
+   * Encodes the message using encodeURIComponent for HTTP header transmission
+   * The indexer will decode it using decodeURIComponent
+   */
+  private createAuthHeaders(
+    signature: string,
+    message: string
+  ): Record<string, string> {
+    return {
+      'x-signature': signature.replace(/[\r\n]/g, ''), // Remove any newlines from signature
+      'x-message': encodeURIComponent(message), // Encode message for HTTP header
+    };
+  }
+
+  /**
    * Get email addresses for a wallet (requires signature)
    * GET /wallets/:walletAddress/accounts
    */
   async getWalletAccounts(
     walletAddress: string,
     signature: string,
-    message: string
+    message: string,
+    referralCode?: string
   ): Promise<EmailAccountsResponse> {
     console.log('[IndexerClient] getWalletAccounts called with:', {
       walletAddress,
       signatureLength: signature?.length,
       messageLength: message?.length,
+      referralCode,
       baseUrl: this.baseUrl,
       endpoint: `/wallets/${encodeURIComponent(walletAddress)}/accounts`,
     });
 
-    // Sanitize header values - remove newlines and control characters
-    // HTTP headers cannot contain newlines
-    const sanitizedMessage = message.replace(/[\r\n]/g, '\\n'); // Replace actual newlines with escaped version
-    const sanitizedSignature = signature.replace(/[\r\n]/g, ''); // Remove any newlines from signature
+    const headers = this.createAuthHeaders(signature, message);
 
-    console.log('[IndexerClient] Sanitized headers:', {
-      messageHasNewlines: message.includes('\n'),
-      sanitizedMessageLength: sanitizedMessage.length,
-      signatureHasNewlines: signature.includes('\n'),
-      sanitizedSignatureLength: sanitizedSignature.length,
-    });
+    // Add referral code header if provided
+    if (referralCode) {
+      headers['x-referral'] = referralCode;
+    }
 
     const response = await this.get<EmailAccountsResponse>(
       `/wallets/${encodeURIComponent(walletAddress)}/accounts`,
-      {
-        headers: {
-          'x-signature': sanitizedSignature,
-          'x-message': sanitizedMessage,
-        },
-      }
+      { headers }
     );
 
     if (!response.ok) {
@@ -372,10 +379,7 @@ class IndexerClient implements NetworkClient {
     const response = await this.get<DelegatedToResponse>(
       `/delegations/from/${encodeURIComponent(walletAddress)}`,
       {
-        headers: {
-          'x-signature': signature,
-          'x-message': message,
-        },
+        headers: this.createAuthHeaders(signature, message),
       }
     );
 
@@ -400,10 +404,7 @@ class IndexerClient implements NetworkClient {
     const response = await this.get<DelegatedFromResponse>(
       `/delegations/to/${encodeURIComponent(walletAddress)}`,
       {
-        headers: {
-          'x-signature': signature,
-          'x-message': message,
-        },
+        headers: this.createAuthHeaders(signature, message),
       }
     );
 
@@ -429,10 +430,7 @@ class IndexerClient implements NetworkClient {
       `/users/${encodeURIComponent(username)}/nonce`,
       {},
       {
-        headers: {
-          'x-signature': signature,
-          'x-message': message,
-        },
+        headers: this.createAuthHeaders(signature, message),
       }
     );
 
@@ -457,10 +455,7 @@ class IndexerClient implements NetworkClient {
     const response = await this.get<NonceResponse>(
       `/users/${encodeURIComponent(username)}/nonce`,
       {
-        headers: {
-          'x-signature': signature,
-          'x-message': message,
-        },
+        headers: this.createAuthHeaders(signature, message),
       }
     );
 
@@ -485,10 +480,7 @@ class IndexerClient implements NetworkClient {
     const response = await this.get<EntitlementResponse>(
       `/wallets/${encodeURIComponent(walletAddress)}/entitlements/`,
       {
-        headers: {
-          'x-signature': signature,
-          'x-message': message,
-        },
+        headers: this.createAuthHeaders(signature, message),
       }
     );
 
@@ -513,10 +505,7 @@ class IndexerClient implements NetworkClient {
     const response = await this.get<PointsResponse>(
       `/wallets/${encodeURIComponent(walletAddress)}/points`,
       {
-        headers: {
-          'x-signature': signature,
-          'x-message': message,
-        },
+        headers: this.createAuthHeaders(signature, message),
       }
     );
 
@@ -531,49 +520,55 @@ class IndexerClient implements NetworkClient {
 
   /**
    * Get or create referral code for a wallet (requires signature)
-   * GET /wallets/:walletAddress/referral
+   * POST /wallets/:walletAddress/referral
    */
   async getReferralCode(
     walletAddress: string,
     signature: string,
     message: string
   ): Promise<ReferralCodeResponse> {
-    const response = await this.get<ReferralCodeResponse>(
+    console.log('[IndexerClient] getReferralCode called with:', {
+      walletAddress,
+      signatureLength: signature?.length,
+      messageLength: message?.length,
+      endpoint: `/wallets/${encodeURIComponent(walletAddress)}/referral`,
+    });
+
+    const response = await this.post<ReferralCodeResponse>(
       `/wallets/${encodeURIComponent(walletAddress)}/referral`,
+      {},
       {
-        headers: {
-          'x-signature': signature,
-          'x-message': message,
-        },
+        headers: this.createAuthHeaders(signature, message),
       }
     );
 
+    console.log('[IndexerClient] getReferralCode response:', {
+      ok: response.ok,
+      status: response.status,
+      data: response.data,
+    });
+
     if (!response.ok) {
-      throw new Error(
-        `Failed to get referral code: ${(response.data as any)?.error || 'Unknown error'}`
-      );
+      const errorMessage =
+        (response.data as any)?.error ||
+        (response.data as any)?.message ||
+        JSON.stringify(response.data) ||
+        `HTTP ${response.status}`;
+      console.error('[IndexerClient] getReferralCode failed:', errorMessage);
+      throw new Error(`Failed to get referral code: ${errorMessage}`);
     }
 
     return response.data as ReferralCodeResponse;
   }
 
   /**
-   * Get referral statistics for a wallet (requires signature)
-   * GET /wallets/:walletAddress/referral/stats
+   * Get referral statistics by referral code (public endpoint)
+   * POST /referrals/:referralCode/stats
    */
-  async getReferralStats(
-    walletAddress: string,
-    signature: string,
-    message: string
-  ): Promise<ReferralStatsResponse> {
-    const response = await this.get<ReferralStatsResponse>(
-      `/wallets/${encodeURIComponent(walletAddress)}/referral/stats`,
-      {
-        headers: {
-          'x-signature': signature,
-          'x-message': message,
-        },
-      }
+  async getReferralStats(referralCode: string): Promise<ReferralStatsResponse> {
+    const response = await this.post<ReferralStatsResponse>(
+      `/referrals/${encodeURIComponent(referralCode)}/stats`,
+      {}
     );
 
     if (!response.ok) {

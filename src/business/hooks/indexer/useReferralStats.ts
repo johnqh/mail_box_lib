@@ -3,8 +3,8 @@ import { Optional } from '@johnqh/types';
 import { IndexerClient, ReferralStatsResponse } from '../../../network/clients/indexer';
 
 /**
- * Hook for getting referral statistics for a wallet
- * GET /wallets/:walletAddress/referral/stats
+ * Hook for getting referral statistics by referral code (public endpoint)
+ * POST /referrals/:referralCode/stats
  *
  * @param endpointUrl - Indexer backend URL
  * @param dev - Development mode flag
@@ -17,8 +17,8 @@ import { IndexerClient, ReferralStatsResponse } from '../../../network/clients/i
  *   false
  * );
  *
- * // Get referral statistics
- * await fetchStats(walletAddress, signature, message);
+ * // Get referral statistics by code
+ * await fetchStats('ABC123DEF');
  * console.log(stats?.data.totalReferred); // Number of referrals
  * console.log(stats?.data.referredWallets); // Array of referred wallets
  * ```
@@ -31,12 +31,12 @@ export const useReferralStats = (endpointUrl: string, dev: boolean) => {
   const client = new IndexerClient(endpointUrl, dev);
 
   const fetchStats = useCallback(
-    async (walletAddress: string, signature: string, message: string) => {
+    async (referralCode: string) => {
       setIsLoading(true);
       setError(null);
 
       try {
-        const response = await client.getReferralStats(walletAddress, signature, message);
+        const response = await client.getReferralStats(referralCode);
         setStats(response);
         return response;
       } catch (err) {

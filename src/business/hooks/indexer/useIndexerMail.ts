@@ -33,7 +33,8 @@ interface UseIndexerMailReturn {
   getWalletAccounts: (
     walletAddress: string,
     signature: string,
-    message: string
+    message: string,
+    referralCode?: string
   ) => Promise<Optional<EmailAccountsResponse>>;
   getDelegatedTo: (
     walletAddress: string,
@@ -141,9 +142,9 @@ const useIndexerMail = (endpointUrl: string, dev: boolean = false, devMode: bool
 
   // Signature-protected endpoints
   const getWalletAccounts = useCallback(
-    execute(async (walletAddress: string, signature: string, message: string) => {
+    execute(async (walletAddress: string, signature: string, message: string, referralCode?: string) => {
       try {
-        return await indexerClient.getWalletAccounts(walletAddress, signature, message);
+        return await indexerClient.getWalletAccounts(walletAddress, signature, message, referralCode);
       } catch (err) {
         if (devMode) {
           console.warn('[DevMode] getWalletAccounts failed, returning mock data:', err);
