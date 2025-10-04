@@ -13,11 +13,13 @@ import {
   type InitiateKYCResponse,
   type KYCVerificationLevel,
 } from '@johnqh/types';
+import { generateNonce } from '../../../utils/auth/blockchainAuth';
 
 interface UseKYCOptions {
   walletAddress: string | null;
   chainType?: ChainType;
   autoFetch?: boolean;
+  signMessage?: (message: string) => Promise<string>;
 }
 
 interface UseKYCReturn {
@@ -72,11 +74,39 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
     walletAddress,
     chainType = ChainType.EVM,
     autoFetch = true,
+    signMessage,
   } = options;
 
   const [status, setStatus] = useState<GetKYCStatusResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  /**
+   * Create authentication headers for protected endpoints
+   */
+  const createAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
+    if (!signMessage || !walletAddress) {
+      return {
+        'Content-Type': 'application/json',
+      };
+    }
+
+    try {
+      const nonce = generateNonce();
+      const signature = await signMessage(nonce);
+
+      return {
+        'Content-Type': 'application/json',
+        'x-message': encodeURIComponent(nonce),
+        'x-signature': signature,
+      };
+    } catch (err) {
+      console.error('Failed to create auth headers:', err);
+      return {
+        'Content-Type': 'application/json',
+      };
+    }
+  }, [signMessage, walletAddress]);
 
   /**
    * Fetch current KYC status for the wallet
@@ -87,17 +117,21 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
       return;
     }
 
+    if (!signMessage) {
+      console.warn('KYC status check requires wallet signing capability');
+      setError('Wallet signing capability required');
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
 
+      const headers = await createAuthHeaders();
+
       const response = await fetch(
         `${API_BASE_URL}/api/kyc/status/${walletAddress}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
+        { headers }
       );
 
       if (response.status === 404) {
@@ -123,7 +157,7 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
     } finally {
       setLoading(false);
     }
-  }, [walletAddress]);
+  }, [walletAddress, signMessage, createAuthHeaders]);
 
   /**
    * Initiate KYC verification for a specific level
@@ -137,9 +171,15 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
         throw new Error('Wallet not connected');
       }
 
+      if (!signMessage) {
+        throw new Error('Wallet signing capability required');
+      }
+
       try {
         setLoading(true);
         setError(null);
+
+        const headers = await createAuthHeaders();
 
         const request: InitiateKYCRequest = {
           walletAddress,
@@ -149,17 +189,21 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
 
         const response = await fetch(`${API_BASE_URL}/api/kyc/initiate`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers,
           body: JSON.stringify(request),
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.error || 'Failed to initiate KYC verification'
-          );
+          // Try to parse JSON error, fallback to text if not JSON
+          let errorMessage = 'Failed to initiate KYC verification';
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.error || errorMessage;
+          } catch {
+            // Response is not JSON (e.g., 404 HTML page)
+            errorMessage = `KYC service unavailable (${response.status})`;
+          }
+          throw new Error(errorMessage);
         }
 
         const data = await response.json();
@@ -180,7 +224,7 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
         setLoading(false);
       }
     },
-    [walletAddress, chainType, fetchStatus]
+    [walletAddress, chainType, signMessage, createAuthHeaders, fetchStatus]
   );
 
   // Auto-fetch status on mount and when wallet changes
