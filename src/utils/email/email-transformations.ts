@@ -3,12 +3,12 @@
  * Transforms wallet account data into email address formats for UI consumption
  */
 
-import { ChainType } from '@johnqh/types';
+import { ChainType, NameServiceAccount } from '@johnqh/types';
 
 export interface WalletAccount {
   walletAddress: string;
   chainType: ChainType;
-  names: string[];
+  names: NameServiceAccount[];
 }
 
 export interface EmailAddress {
@@ -17,6 +17,7 @@ export interface EmailAddress {
   type: 'primary' | 'ens' | 'sns';
   walletAddress: string;
   addressType: 'evm' | 'solana';
+  entitled?: boolean;
 }
 
 export interface WalletEmailGroup {
@@ -36,26 +37,24 @@ export function transformWalletAccountsToEmailGroups(
   if (!walletAccounts || walletAccounts.length === 0) return [];
 
   return walletAccounts.map(walletAccount => {
-    // First name is the wallet address (primary)
-    const primaryName = walletAccount.names[0] || walletAccount.walletAddress;
-    // Remaining names are domain names (ENS/SNS)
-    const domainNames = walletAccount.names.slice(1);
-
     const addressType =
       walletAccount.chainType === ChainType.SOLANA ? 'solana' : 'evm';
 
     return {
       walletAddress: walletAccount.walletAddress,
       addressType,
+      // Primary email is always the wallet address itself (always entitled)
       primaryEmail: {
-        address: primaryName,
+        address: walletAccount.walletAddress,
         name: `${walletAccount.walletAddress.slice(0, 8)}...`,
         type: 'primary' as const,
         walletAddress: walletAccount.walletAddress,
         addressType,
+        entitled: true, // Wallet addresses are always entitled
       },
-      domainEmails: domainNames.map((domainName: string) => {
-        // Parse domain name to determine if it's ENS or SNS
+      // Domain names (ENS/SNS) with their entitled status from the API
+      domainEmails: walletAccount.names.map((nameServiceAccount: NameServiceAccount) => {
+        const domainName = nameServiceAccount.name;
         const isSNS = domainName.endsWith('.sol');
         const isENS = domainName.endsWith('.eth');
 
@@ -69,6 +68,7 @@ export function transformWalletAccountsToEmailGroups(
               : ('primary' as const),
           walletAddress: walletAccount.walletAddress,
           addressType: isSNS ? 'solana' : 'evm',
+          entitled: nameServiceAccount.entitled, // Use entitled from API
         };
       }),
     };

@@ -80,7 +80,7 @@ export class IndexerMockData {
         accounts: [{
           walletAddress,
           chainType: 'ethereum' as ChainType,
-          names: ['user@0xmail.box'],
+          names: [{ name: 'user@0xmail.box', entitled: true }],
         }],
       },
       error: null,
