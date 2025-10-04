@@ -53,24 +53,26 @@ export function transformWalletAccountsToEmailGroups(
         entitled: true, // Wallet addresses are always entitled
       },
       // Domain names (ENS/SNS) with their entitled status from the API
-      domainEmails: walletAccount.names.map((nameServiceAccount: NameServiceAccount) => {
-        const domainName = nameServiceAccount.name;
-        const isSNS = domainName.endsWith('.sol');
-        const isENS = domainName.endsWith('.eth');
+      domainEmails: walletAccount.names.map(
+        (nameServiceAccount: NameServiceAccount) => {
+          const domainName = nameServiceAccount.name;
+          const isSNS = domainName.endsWith('.sol');
+          const isENS = domainName.endsWith('.eth');
 
-        return {
-          address: domainName,
-          name: domainName,
-          type: isSNS
-            ? ('sns' as const)
-            : isENS
-              ? ('ens' as const)
-              : ('primary' as const),
-          walletAddress: walletAccount.walletAddress,
-          addressType: isSNS ? 'solana' : 'evm',
-          entitled: nameServiceAccount.entitled, // Use entitled from API
-        };
-      }),
+          return {
+            address: domainName,
+            name: domainName,
+            type: isSNS
+              ? ('sns' as const)
+              : isENS
+                ? ('ens' as const)
+                : ('primary' as const),
+            walletAddress: walletAccount.walletAddress,
+            addressType: isSNS ? 'solana' : 'evm',
+            entitled: nameServiceAccount.entitled, // Use entitled from API
+          };
+        }
+      ),
     };
   });
 }
