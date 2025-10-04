@@ -16,3 +16,6 @@ export * from './nameservice';
 
 // Contract hooks for @johnqh/mail_box_contracts
 export * from './contracts';
+
+// KYC verification hooks
+export * from './kyc';

@@ -164,6 +164,9 @@ export {
   useWildduckAuth,
   UseWildduckAuthReturn,
 
+  // KYC Hooks
+  useKYC,
+
   // WildDuck Query Hooks
   useWildduckHealthQuery,
   useWildduckUsersListQuery,
