@@ -14,12 +14,13 @@ declare const sessionStorage: Storage;
 
 // Type definition for WildDuck API client interface
 interface WildDuckAPIClient {
-  authenticate(
-    username: string,
-    signature: string,
-    nonce: string,
-    scope?: string
-  ): Promise<any>;
+  authenticate(request: {
+    username: string;
+    signature: string;
+    nonce: string;
+    message: string;
+    scope?: string;
+  }): Promise<any>;
   authenticateWithPassword(
     username: string,
     password: string,
@@ -196,12 +197,13 @@ const getWildDuckUserId = async (
 
       // Authenticate with WildDuck - WildDuck verifies signature against the nonce
       // WildDuck handles ENS/SNS resolution internally
-      const authResponse = await wildDuckAPI.authenticate(
-        normalizedUsername,
-        formattedSignature,
-        nonce, // The nonce that was signed
-        'master'
-      );
+      const authResponse = await wildDuckAPI.authenticate({
+        username: normalizedUsername,
+        signature: formattedSignature,
+        nonce: nonce, // The nonce that was signed
+        message: nonce, // The message that was signed (same as nonce for WildDuck)
+        scope: 'master',
+      });
 
       if (authResponse.success && authResponse.id) {
         // Store the authentication data
