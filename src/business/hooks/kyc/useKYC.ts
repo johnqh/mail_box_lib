@@ -13,13 +13,17 @@ import {
   type InitiateKYCResponse,
   type KYCVerificationLevel,
 } from '@johnqh/types';
-import { generateNonce } from '../../../utils/auth/blockchainAuth';
+
+interface SignedData {
+  signature: string;
+  message: string;
+}
 
 interface UseKYCOptions {
   walletAddress: string | null;
   chainType?: ChainType;
   autoFetch?: boolean;
-  signMessage?: (message: string) => Promise<string>;
+  signedData?: SignedData | null;
 }
 
 interface UseKYCReturn {
@@ -74,7 +78,7 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
     walletAddress,
     chainType = ChainType.EVM,
     autoFetch = true,
-    signMessage,
+    signedData,
   } = options;
 
   const [status, setStatus] = useState<GetKYCStatusResponse | null>(null);
@@ -82,31 +86,22 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
   const [error, setError] = useState<string | null>(null);
 
   /**
-   * Create authentication headers for protected endpoints
+   * Create authentication headers for protected endpoints using existing signed data
+   * Follows the same pattern as IndexerClient.createAuthHeaders()
    */
-  const createAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
-    if (!signMessage || !walletAddress) {
+  const createAuthHeaders = useCallback((): Record<string, string> => {
+    if (!signedData || !walletAddress) {
       return {
         'Content-Type': 'application/json',
       };
     }
 
-    try {
-      const nonce = generateNonce();
-      const signature = await signMessage(nonce);
-
-      return {
-        'Content-Type': 'application/json',
-        'x-message': encodeURIComponent(nonce),
-        'x-signature': signature,
-      };
-    } catch (err) {
-      console.error('Failed to create auth headers:', err);
-      return {
-        'Content-Type': 'application/json',
-      };
-    }
-  }, [signMessage, walletAddress]);
+    return {
+      'Content-Type': 'application/json',
+      'x-signature': signedData.signature.replace(/[\r\n]/g, ''), // Remove any newlines from signature
+      'x-message': encodeURIComponent(signedData.message), // Encode message for HTTP header
+    };
+  }, [signedData, walletAddress]);
 
   /**
    * Fetch current KYC status for the wallet
@@ -117,9 +112,9 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
       return;
     }
 
-    if (!signMessage) {
-      console.warn('KYC status check requires wallet signing capability');
-      setError('Wallet signing capability required');
+    if (!signedData) {
+      console.log('KYC status check skipped - wallet not authenticated yet');
+      // Don't set error during auto-fetch, just skip silently
       return;
     }
 
@@ -127,7 +122,7 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
       setLoading(true);
       setError(null);
 
-      const headers = await createAuthHeaders();
+      const headers = createAuthHeaders();
 
       const response = await fetch(
         `${API_BASE_URL}/api/kyc/status/${walletAddress}`,
@@ -157,7 +152,7 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
     } finally {
       setLoading(false);
     }
-  }, [walletAddress, signMessage, createAuthHeaders]);
+  }, [walletAddress, signedData, createAuthHeaders]);
 
   /**
    * Initiate KYC verification for a specific level
@@ -171,15 +166,15 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
         throw new Error('Wallet not connected');
       }
 
-      if (!signMessage) {
-        throw new Error('Wallet signing capability required');
+      if (!signedData) {
+        throw new Error('Please sign in with your wallet first');
       }
 
       try {
         setLoading(true);
         setError(null);
 
-        const headers = await createAuthHeaders();
+        const headers = createAuthHeaders();
 
         const request: InitiateKYCRequest = {
           walletAddress,
@@ -187,11 +182,14 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
           verificationLevel: level,
         };
 
-        const response = await fetch(`${API_BASE_URL}/api/kyc/initiate`, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(request),
-        });
+        const response = await fetch(
+          `${API_BASE_URL}/api/kyc/initiate/${walletAddress}`,
+          {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(request),
+          }
+        );
 
         if (!response.ok) {
           // Try to parse JSON error, fallback to text if not JSON
@@ -224,7 +222,7 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
         setLoading(false);
       }
     },
-    [walletAddress, chainType, signMessage, createAuthHeaders, fetchStatus]
+    [walletAddress, chainType, signedData, createAuthHeaders, fetchStatus]
   );
 
   // Auto-fetch status on mount and when wallet changes
