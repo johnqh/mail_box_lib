@@ -125,7 +125,7 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
       const headers = createAuthHeaders();
 
       const response = await fetch(
-        `${API_BASE_URL}/api/kyc/status/${walletAddress}`,
+        `${API_BASE_URL}/kyc/status/${walletAddress}`,
         { headers }
       );
 
@@ -183,7 +183,7 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
         };
 
         const response = await fetch(
-          `${API_BASE_URL}/api/kyc/initiate/${walletAddress}`,
+          `${API_BASE_URL}/kyc/initiate/${walletAddress}`,
           {
             method: 'POST',
             headers,
