@@ -11,7 +11,6 @@ import type {
   Optional,
   UpdateMailboxRequest,
 } from '@johnqh/types';
-import { WildDuckMockData } from './mocks';
 
 interface UseWildduckMailboxesReturn {
   // Query state
@@ -111,19 +110,7 @@ const useWildduckMailboxes = (config: WildDuckConfig, devMode: boolean = false, 
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to get mailboxes';
-
-      // Return mock data in devMode when API fails
-      if (devMode) {
-        console.warn('[DevMode] Get mailboxes failed, returning mock data:', errorMessage);
-        const mockData = WildDuckMockData.getMailboxes();
-        const mockMailboxes = mockData.data.mailboxes as unknown as MailboxData[];
-
-        // Update cache with mock data
-        queryClient.setQueryData(['wildduck-mailboxes', userId], mockMailboxes);
-
-        return mockMailboxes;
-      }
-
+      console.error('[useWildduckMailboxes] Failed to get mailboxes:', errorMessage);
       throw new Error(errorMessage);
     }
   };
@@ -162,13 +149,7 @@ const useWildduckMailboxes = (config: WildDuckConfig, devMode: boolean = false, 
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to create mailbox';
-
-        // Return mock data in devMode when API fails
-        if (devMode) {
-          console.warn('[DevMode] Create mailbox failed, returning mock success:', errorMessage);
-          return WildDuckMockData.getCreateMailbox();
-        }
-
+        console.error('[useWildduckMailboxes] Failed to create mailbox:', errorMessage);
         throw new Error(errorMessage);
       }
     },
@@ -204,13 +185,7 @@ const useWildduckMailboxes = (config: WildDuckConfig, devMode: boolean = false, 
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to update mailbox';
-
-        // Return mock data in devMode when API fails
-        if (devMode) {
-          console.warn('[DevMode] Update mailbox failed, returning mock success:', errorMessage);
-          return WildDuckMockData.getUpdateMailbox();
-        }
-
+        console.error('[useWildduckMailboxes] Failed to update mailbox:', errorMessage);
         throw new Error(errorMessage);
       }
     },
@@ -243,13 +218,7 @@ const useWildduckMailboxes = (config: WildDuckConfig, devMode: boolean = false, 
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to delete mailbox';
-
-        // Return mock data in devMode when API fails
-        if (devMode) {
-          console.warn('[DevMode] Delete mailbox failed, returning mock success:', errorMessage);
-          return WildDuckMockData.getDeleteMailbox();
-        }
-
+        console.error('[useWildduckMailboxes] Failed to delete mailbox:', errorMessage);
         throw new Error(errorMessage);
       }
     },
