@@ -111,8 +111,8 @@ export async function getSMTPRelay(
       return {
         enabled: true,
         host: url.hostname,
-        port: port,
-        secure: secure,
+        port,
+        secure,
         ...(url.username && {
           auth: {
             user: decodeURIComponent(url.username),

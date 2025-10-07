@@ -131,6 +131,8 @@ export {
   useIndexerMail,
   UseIndexerMailReturn,
   IndexerMockData,
+  useWalletNames,
+  useResolveNameToAddress,
   useReferralCode,
   useReferralShare,
   useReferralConsumption,

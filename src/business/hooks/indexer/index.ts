@@ -4,6 +4,7 @@
 
 export * from './useIndexerPoints';
 export * from './useIndexerMail';
+export * from './useIndexerNameService';
 export * from './useReferralCode';
 export * from './useReferralShare';
 export * from './useReferralConsumption';

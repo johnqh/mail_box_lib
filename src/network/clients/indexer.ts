@@ -13,6 +13,8 @@ import type {
   EmailAccountsResponse,
   EntitlementResponse,
   LeaderboardResponse,
+  NameResolutionResponse,
+  NameServiceResponse,
   NonceResponse,
   Optional,
   PointsResponse,
@@ -578,6 +580,53 @@ class IndexerClient implements NetworkClient {
     }
 
     return response.data as ReferralStatsResponse;
+  }
+
+  // =============================================================================
+  // NAME SERVICE ENDPOINTS
+  // =============================================================================
+
+  /**
+   * Get all ENS/SNS names for a wallet address (requires signature)
+   * GET /wallets/:walletAddress/names
+   */
+  async getWalletNames(
+    walletAddress: string,
+    signature: string,
+    message: string
+  ): Promise<NameServiceResponse> {
+    const response = await this.get<NameServiceResponse>(
+      `/wallets/${encodeURIComponent(walletAddress)}/names`,
+      {
+        headers: this.createAuthHeaders(signature, message),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get wallet names: ${(response.data as any)?.error || 'Unknown error'}`
+      );
+    }
+
+    return response.data as NameServiceResponse;
+  }
+
+  /**
+   * Resolve ENS/SNS name to wallet address (public endpoint)
+   * GET /wallets/named/:name
+   */
+  async resolveNameToAddress(name: string): Promise<NameResolutionResponse> {
+    const response = await this.get<NameResolutionResponse>(
+      `/wallets/named/${encodeURIComponent(name)}`
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to resolve name: ${(response.data as any)?.error || 'Unknown error'}`
+      );
+    }
+
+    return response.data as NameResolutionResponse;
   }
 
   // Note: The following endpoints are IP-restricted and only accessible from WildDuck server:
