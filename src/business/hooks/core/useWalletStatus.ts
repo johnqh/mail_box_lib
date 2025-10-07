@@ -1,9 +1,10 @@
 /**
  * React hook for wallet status management
- * Provides reactive access to the global wallet status singleton
+ * Provides reactive access to the global wallet status
+ * Now uses createGlobalState for React Native compatibility
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import {
   isWalletConnected as checkWalletConnected,
   isWalletVerified as checkWalletVerified,
@@ -14,11 +15,11 @@ import {
 import {
   connectWallet as connectWalletAction,
   disconnectWallet as disconnectWalletAction,
-  getWalletAddress,
-  getWalletStatus,
   verifyWallet as verifyWalletAction,
-  WalletStatusChangeListener,
-  walletStatusManager,
+  getWalletConnectionState,
+  updateWalletAddress as updateWalletAddressAction,
+  clearVerification as clearVerificationAction,
+  useGlobalWalletStatus,
 } from '../../core/wallet/wallet-status-manager';
 
 /**
@@ -97,22 +98,8 @@ export interface UseWalletStatusReturn {
  * ```
  */
 export const useWalletStatus = (): UseWalletStatusReturn => {
-  // Initialize state with current status
-  const [status, setStatus] = useState<Optional<WalletStatus>>(() =>
-    getWalletStatus()
-  );
-
-  // Subscribe to status changes
-  useEffect(() => {
-    const listener: WalletStatusChangeListener = newStatus => {
-      setStatus(newStatus);
-    };
-
-    const unsubscribe = walletStatusManager.subscribe(listener);
-
-    // Cleanup subscription on unmount
-    return unsubscribe;
-  }, []);
+  // Use shared global state
+  const [status] = useGlobalWalletStatus();
 
   // Memoized action functions
   const connectWallet = useCallback((walletAddress: string) => {
@@ -131,15 +118,15 @@ export const useWalletStatus = (): UseWalletStatusReturn => {
   }, []);
 
   const updateWalletAddress = useCallback((walletAddress: string) => {
-    walletStatusManager.updateWalletAddress(walletAddress);
+    updateWalletAddressAction(walletAddress);
   }, []);
 
   const clearVerification = useCallback(() => {
-    walletStatusManager.clearVerification();
+    clearVerificationAction();
   }, []);
 
   // Derived values
-  const connectionState = walletStatusManager.getConnectionState();
+  const connectionState = getWalletConnectionState();
   const isConnected = checkWalletConnected(status);
   const isVerified = checkWalletVerified(status);
 
@@ -170,20 +157,8 @@ export const useWalletStatus = (): UseWalletStatusReturn => {
  * @returns Current wallet address or undefined
  */
 export const useWalletAddress = (): Optional<string> => {
-  const [address, setAddress] = useState<Optional<string>>(() =>
-    getWalletAddress()
-  );
-
-  useEffect(() => {
-    const listener: WalletStatusChangeListener = status => {
-      setAddress(status?.walletAddress);
-    };
-
-    const unsubscribe = walletStatusManager.subscribe(listener);
-    return unsubscribe;
-  }, []);
-
-  return address;
+  const [status] = useGlobalWalletStatus();
+  return status?.walletAddress;
 };
 
 /**
@@ -192,18 +167,6 @@ export const useWalletAddress = (): Optional<string> => {
  * @returns Current wallet connection state
  */
 export const useWalletConnectionState = (): ConnectionState => {
-  const [connectionState, setConnectionState] = useState<ConnectionState>(() =>
-    walletStatusManager.getConnectionState()
-  );
-
-  useEffect(() => {
-    const listener: WalletStatusChangeListener = () => {
-      setConnectionState(walletStatusManager.getConnectionState());
-    };
-
-    const unsubscribe = walletStatusManager.subscribe(listener);
-    return unsubscribe;
-  }, []);
-
-  return connectionState;
+  const [status] = useGlobalWalletStatus();
+  return getWalletConnectionState();
 };

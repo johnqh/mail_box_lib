@@ -1,42 +1,132 @@
 /**
- * Singleton Wallet Status Manager
- * Manages global wallet connection and verification state across the application
+ * Wallet Status Management with Global State
+ * Simplified version using createGlobalState - no singleton needed
  */
 
 import {
   ConnectionState,
-  getWalletConnectionState,
+  getWalletConnectionState as getConnectionStateFromStatus,
   Optional,
   WalletStatus,
 } from '@johnqh/types';
+import { createGlobalState, getGlobalState, setGlobalState } from '../../../utils/useGlobalState';
 
 /**
  * Callback function type for wallet status change notifications
+ * (Kept for backward compatibility but no longer used with global state)
  */
 export type WalletStatusChangeListener = (
   status: Optional<WalletStatus>
 ) => void;
 
 /**
- * WalletStatusManager - Singleton class for managing wallet status
- *
- * This class maintains a single source of truth for wallet connection state:
- * - undefined: No wallet connected
- * - WalletStatus with walletAddress only: Wallet connected but not verified
- * - WalletStatus with walletAddress, message, signature: Wallet verified
+ * Global wallet status state - shared across all components
  */
-class WalletStatusManager {
+export const useGlobalWalletStatus = createGlobalState<Optional<WalletStatus>>(
+  'walletStatus',
+  undefined
+);
+
+/**
+ * Get current wallet status from global state
+ */
+export const getWalletStatus = (): Optional<WalletStatus> => {
+  return getGlobalState<Optional<WalletStatus>>('walletStatus');
+};
+
+/**
+ * Get current wallet address (if connected)
+ */
+export const getWalletAddress = (): Optional<string> => {
+  return getWalletStatus()?.walletAddress;
+};
+
+/**
+ * Get current wallet connection state
+ */
+export const getWalletConnectionState = (): ConnectionState => {
+  return getConnectionStateFromStatus(getWalletStatus());
+};
+
+/**
+ * Check if wallet is connected
+ */
+export const isWalletConnected = (): boolean => {
+  return getWalletConnectionState() !== ConnectionState.DISCONNECTED;
+};
+
+/**
+ * Check if wallet is verified
+ */
+export const isWalletVerified = (): boolean => {
+  return getWalletConnectionState() === ConnectionState.VERIFIED;
+};
+
+/**
+ * Connect wallet with address only (not verified yet)
+ */
+export const connectWallet = (walletAddress: string): void => {
+  // Use walletStatusManager to ensure listeners are notified
+  walletStatusManager.connectWallet(walletAddress);
+};
+
+/**
+ * Verify wallet with message and signature
+ */
+export const verifyWallet = (
+  walletAddress: string,
+  message: string,
+  signature: string
+): void => {
+  // Use walletStatusManager to ensure listeners are notified
+  walletStatusManager.verifyWallet(walletAddress, message, signature);
+};
+
+/**
+ * Disconnect wallet (set status to undefined)
+ */
+export const disconnectWallet = (): void => {
+  // Use walletStatusManager to ensure listeners are notified
+  walletStatusManager.disconnectWallet();
+};
+
+/**
+ * Update wallet address while preserving verification status
+ */
+export const updateWalletAddress = (walletAddress: string): void => {
+  // Use walletStatusManager to ensure listeners are notified
+  walletStatusManager.updateWalletAddress(walletAddress);
+};
+
+/**
+ * Clear verification data while keeping wallet connected
+ */
+export const clearVerification = (): void => {
+  // Use walletStatusManager to ensure listeners are notified
+  walletStatusManager.clearVerification();
+};
+
+/**
+ * Subscribe to wallet status changes
+ * @deprecated With createGlobalState, components automatically re-render when state changes
+ * This is kept for backward compatibility - uses walletStatusManager internally
+ */
+export const subscribeToWalletStatus = (
+  listener: WalletStatusChangeListener
+): (() => void) => {
+  return walletStatusManager.subscribe(listener);
+};
+
+/**
+ * Deprecated: WalletStatusManager singleton
+ * Kept for backward compatibility but functionality moved to global state
+ */
+export class WalletStatusManager {
   private static instance: WalletStatusManager;
-  private _status: Optional<WalletStatus> = undefined;
   private listeners: Set<WalletStatusChangeListener> = new Set();
 
-  private constructor() {
-    // Private constructor to enforce singleton pattern
-  }
+  private constructor() {}
 
-  /**
-   * Get the singleton instance
-   */
   public static getInstance(): WalletStatusManager {
     if (!WalletStatusManager.instance) {
       WalletStatusManager.instance = new WalletStatusManager();
@@ -44,43 +134,23 @@ class WalletStatusManager {
     return WalletStatusManager.instance;
   }
 
-  /**
-   * Get current wallet status
-   */
-  public getStatus(): Optional<WalletStatus> {
-    return this._status;
-  }
+  public getStatus = getWalletStatus;
+  public getConnectionState = getWalletConnectionState;
 
-  /**
-   * Get current wallet connection state
-   */
-  public getConnectionState(): ConnectionState {
-    return getWalletConnectionState(this._status);
-  }
-
-  /**
-   * Connect wallet with address only (not verified yet)
-   */
-  public connectWallet(walletAddress: string): void {
+  public connectWallet = (walletAddress: string) => {
     if (!walletAddress || walletAddress.trim() === '') {
       throw new Error('Wallet address is required');
     }
 
-    this._status = {
+    const newStatus: WalletStatus = {
       walletAddress: walletAddress.trim(),
     };
 
+    setGlobalState('walletStatus', newStatus);
     this.notifyListeners();
-  }
+  };
 
-  /**
-   * Verify wallet with message and signature
-   */
-  public verifyWallet(
-    walletAddress: string,
-    message: string,
-    signature: string
-  ): void {
+  public verifyWallet = (walletAddress: string, message: string, signature: string) => {
     if (!walletAddress || walletAddress.trim() === '') {
       throw new Error('Wallet address is required');
     }
@@ -91,101 +161,75 @@ class WalletStatusManager {
       throw new Error('Signature is required for verification');
     }
 
-    this._status = {
+    const newStatus: WalletStatus = {
       walletAddress: walletAddress.trim(),
       message: message.trim(),
       signature: signature.trim(),
     };
 
+    setGlobalState('walletStatus', newStatus);
     this.notifyListeners();
-  }
+  };
 
-  /**
-   * Disconnect wallet (set status to undefined)
-   */
-  public disconnectWallet(): void {
-    this._status = undefined;
+  public disconnectWallet = () => {
+    setGlobalState('walletStatus', undefined);
     this.notifyListeners();
-  }
+  };
 
-  /**
-   * Update wallet address while preserving verification status
-   */
-  public updateWalletAddress(walletAddress: string): void {
+  public updateWalletAddress = (walletAddress: string) => {
     if (!walletAddress || walletAddress.trim() === '') {
       throw new Error('Wallet address is required');
     }
 
-    if (this._status) {
-      this._status = {
-        ...this._status,
+    const currentStatus = getWalletStatus();
+    if (currentStatus) {
+      const newStatus: WalletStatus = {
+        ...currentStatus,
         walletAddress: walletAddress.trim(),
       };
+      setGlobalState('walletStatus', newStatus);
       this.notifyListeners();
     } else {
       // If no current status, treat as new connection
       this.connectWallet(walletAddress);
     }
-  }
+  };
 
-  /**
-   * Clear verification data while keeping wallet connected
-   */
-  public clearVerification(): void {
-    if (this._status) {
-      this._status = {
-        walletAddress: this._status.walletAddress,
+  public clearVerification = () => {
+    const currentStatus = getWalletStatus();
+    if (currentStatus) {
+      const newStatus: WalletStatus = {
+        walletAddress: currentStatus.walletAddress,
       };
+      setGlobalState('walletStatus', newStatus);
       this.notifyListeners();
     }
-  }
+  };
 
-  /**
-   * Subscribe to wallet status changes
-   */
-  public subscribe(listener: WalletStatusChangeListener): () => void {
+  public subscribe = (listener: WalletStatusChangeListener): (() => void) => {
     this.listeners.add(listener);
-
-    // Return unsubscribe function
     return () => {
       this.listeners.delete(listener);
     };
-  }
+  };
 
-  /**
-   * Unsubscribe from wallet status changes
-   */
-  public unsubscribe(listener: WalletStatusChangeListener): void {
+  public unsubscribe = (listener: WalletStatusChangeListener) => {
     this.listeners.delete(listener);
-  }
+  };
 
-  /**
-   * Get number of active listeners (for debugging)
-   */
-  public getListenerCount(): number {
-    return this.listeners.size;
-  }
+  public getListenerCount = () => this.listeners.size;
 
-  /**
-   * Clear all listeners (useful for testing)
-   */
-  public clearAllListeners(): void {
+  public clearAllListeners = () => {
     this.listeners.clear();
-  }
+  };
 
-  /**
-   * Reset the manager (useful for testing)
-   */
-  public reset(): void {
-    this._status = undefined;
+  public reset = () => {
+    setGlobalState('walletStatus', undefined);
     this.listeners.clear();
-  }
+  };
 
-  /**
-   * Notify all listeners of status changes
-   */
   private notifyListeners(): void {
-    const status = this._status;
+    const status = getWalletStatus();
     this.listeners.forEach(listener => {
       try {
         listener(status);
@@ -197,76 +241,7 @@ class WalletStatusManager {
 }
 
 /**
- * Export singleton instance
+ * Export singleton instance for backward compatibility
+ * @deprecated Use direct functions instead
  */
 export const walletStatusManager = WalletStatusManager.getInstance();
-
-/**
- * Convenience functions for common operations
- */
-
-/**
- * Get current wallet status
- */
-export const getWalletStatus = (): Optional<WalletStatus> => {
-  return walletStatusManager.getStatus();
-};
-
-/**
- * Get current wallet address (if connected)
- */
-export const getWalletAddress = (): Optional<string> => {
-  return walletStatusManager.getStatus()?.walletAddress;
-};
-
-/**
- * Check if wallet is connected
- */
-export const isWalletConnected = (): boolean => {
-  return (
-    walletStatusManager.getConnectionState() !== ConnectionState.DISCONNECTED
-  );
-};
-
-/**
- * Check if wallet is verified
- */
-export const isWalletVerified = (): boolean => {
-  return walletStatusManager.getConnectionState() === ConnectionState.VERIFIED;
-};
-
-/**
- * Connect wallet
- */
-export const connectWallet = (walletAddress: string): void => {
-  walletStatusManager.connectWallet(walletAddress);
-};
-
-/**
- * Verify wallet
- */
-export const verifyWallet = (
-  walletAddress: string,
-  message: string,
-  signature: string
-): void => {
-  walletStatusManager.verifyWallet(walletAddress, message, signature);
-};
-
-/**
- * Disconnect wallet
- */
-export const disconnectWallet = (): void => {
-  walletStatusManager.disconnectWallet();
-};
-
-/**
- * Subscribe to wallet status changes
- */
-export const subscribeToWalletStatus = (
-  listener: WalletStatusChangeListener
-): (() => void) => {
-  return walletStatusManager.subscribe(listener);
-};
-
-export { WalletStatusManager };
