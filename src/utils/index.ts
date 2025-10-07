@@ -36,4 +36,7 @@ export * from './errorHandling';
 export * from './formatters';
 export * from './async-helpers';
 
+// React utilities
+export * from './useBetween';
+
 // Type validation utilities now in @johnqh/types
