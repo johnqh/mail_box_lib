@@ -259,6 +259,7 @@ class WildDuckAPI {
       signature: request.signature, // Signature that was created by signing the nonce
       nonce: request.nonce, // The nonce that was signed
       message: request.message, // SIWE/SIWS message that was signed
+      signer: request.signer, // The wallet address that created the signature
       // WildDuck handles ENS/SNS resolution internally
       scope: request.scope || 'master', // master scope for full access
       token: request.token !== undefined ? request.token : true, // Request a token to get access token in response

@@ -19,6 +19,7 @@ interface WildDuckAPIClient {
     signature: string;
     nonce: string;
     message: string;
+    signer?: string; // The wallet address that created the signature
     scope?: string;
   }): Promise<any>;
   authenticateWithPassword(
@@ -139,6 +140,7 @@ const getWildDuckUserId = async (
     forceReauth?: boolean;
     signMessage?: (message: string) => Promise<string>;
     chainType?: ChainType;
+    walletAddress?: string; // The actual wallet address that signed the message
   }
 ): Promise<Optional<string>> => {
   const normalizedUsername = username.toLowerCase();
@@ -200,8 +202,9 @@ const getWildDuckUserId = async (
       const authResponse = await wildDuckAPI.authenticate({
         username: normalizedUsername,
         signature: formattedSignature,
-        nonce: nonce, // The nonce that was signed
+        nonce, // The nonce that was signed
         message: nonce, // The message that was signed (same as nonce for WildDuck)
+        signer: options.walletAddress || normalizedUsername, // The wallet address that signed
         scope: 'master',
       });
 

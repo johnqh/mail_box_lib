@@ -1,6 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { Optional } from '@johnqh/types';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
 import { WildDuckMockData } from './mocks';
 
@@ -35,127 +36,197 @@ interface ForwardedAddress {
 }
 
 interface UseWildduckAddressesReturn {
+  // Query state
+  addresses: WildduckAddress[];
   isLoading: boolean;
   error: Optional<string>;
-  addresses: WildduckAddress[];
+
+  // Query functions
   getUserAddresses: (userId: string) => Promise<WildduckAddress[]>;
+  getForwardedAddresses: () => Promise<ForwardedAddress[]>;
+  resolveAddress: (address: string) => Promise<{ success: boolean; user?: string }>;
+  refresh: (userId: string) => Promise<void>;
+
+  // Create address mutation
   createAddress: (
     userId: string,
     params: CreateAddressParams
   ) => Promise<{ success: boolean; id: string }>;
+  isCreating: boolean;
+  createError: Optional<Error>;
+
+  // Update address mutation
   updateAddress: (
     userId: string,
     addressId: string,
     params: UpdateAddressParams
   ) => Promise<{ success: boolean }>;
+  isUpdating: boolean;
+  updateError: Optional<Error>;
+
+  // Delete address mutation
   deleteAddress: (
     userId: string,
     addressId: string
   ) => Promise<{ success: boolean }>;
-  getForwardedAddresses: () => Promise<ForwardedAddress[]>;
+  isDeleting: boolean;
+  deleteError: Optional<Error>;
+
+  // Forwarded address mutations
   createForwardedAddress: (
     address: string,
     target: string
   ) => Promise<{ success: boolean; id: string }>;
   deleteForwardedAddress: (addressId: string) => Promise<{ success: boolean }>;
-  resolveAddress: (
-    address: string
-  ) => Promise<{ success: boolean; user?: string }>;
+
+  // Legacy compatibility
   clearError: () => void;
-  refresh: (userId: string) => Promise<void>;
 }
 
 /**
- * Hook for WildDuck address management operations
+ * Hook for WildDuck address management operations using React Query
+ * Mutations automatically invalidate related address queries
  */
 const useWildduckAddresses = (config: WildDuckConfig, devMode: boolean = false): UseWildduckAddressesReturn => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Optional<string>>(null);
+  const queryClient = useQueryClient();
+
+  // Local state
   const [addresses, setAddresses] = useState<WildduckAddress[]>([]);
 
-  const clearError = useCallback(() => {
-    setError(null);
-  }, []);
+  // Helper to build headers
+  const buildHeaders = (): Record<string, string> => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
 
-  const getUserAddresses = useCallback(
-    async (userId: string): Promise<WildduckAddress[]> => {
-      setIsLoading(true);
-      setError(null);
+    if (config.cloudflareWorkerUrl) {
+      headers['Authorization'] = `Bearer ${config.apiToken}`;
+      headers['X-App-Source'] = '0xmail-box';
+    } else {
+      headers['X-Access-Token'] = config.apiToken;
+    }
 
-      try {
-        // Use config URLs and headers
-        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        };
+    return headers;
+  };
 
-        if (config.cloudflareWorkerUrl) {
-          headers['Authorization'] = `Bearer ${config.apiToken}`;
-          headers['X-App-Source'] = '0xmail-box';
-        } else {
-          headers['X-Access-Token'] = config.apiToken;
-        }
+  // Get user addresses function (imperative)
+  const getUserAddresses = async (userId: string): Promise<WildduckAddress[]> => {
+    try {
+      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+      const headers = buildHeaders();
 
-        const response = await axios.get(
-          `${apiUrl}/users/${userId}/addresses`,
-          { headers }
-        );
+      const response = await axios.get(
+        `${apiUrl}/users/${userId}/addresses`,
+        { headers }
+      );
 
-        const addressData = response.data as { success: boolean; results: Array<{ id: string; address: string; main: boolean }> };
-        const addressList = addressData.results?.map(addr => ({
-          id: addr.id,
-          address: addr.address,
-          name: addr.address,
-          main: addr.main,
-          created: new Date().toISOString(),
-          tags: [],
-        })) || [];
-        setAddresses(addressList);
-        return addressList;
-      } catch (err) {
-        if (devMode) {
-          console.warn('[DevMode] Get user addresses failed, returning mock data:', err);
-          const mockData = WildDuckMockData.getUserAddresses();
-          const mockAddresses = mockData.data.addresses as WildduckAddress[];
-          setAddresses(mockAddresses);
-          return mockAddresses;
-        }
+      const addressData = response.data as { success: boolean; results: Array<{ id: string; address: string; main: boolean }> };
+      const addressList = addressData.results?.map(addr => ({
+        id: addr.id,
+        address: addr.address,
+        name: addr.address,
+        main: addr.main,
+        created: new Date().toISOString(),
+        tags: [],
+      })) || [];
 
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to get addresses';
-        setError(errorMessage);
-        setAddresses([]);
-        throw err;
-      } finally {
-        setIsLoading(false);
+      setAddresses(addressList);
+
+      // Update cache
+      queryClient.setQueryData(['wildduck-addresses', userId], addressList);
+
+      return addressList;
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to get addresses';
+
+      // Return mock data in devMode when API fails
+      if (devMode) {
+        console.warn('[DevMode] Get user addresses failed, returning mock data:', errorMessage);
+        const mockData = WildDuckMockData.getUserAddresses();
+        const mockAddresses = mockData.data.addresses as WildduckAddress[];
+        setAddresses(mockAddresses);
+
+        // Update cache with mock data
+        queryClient.setQueryData(['wildduck-addresses', userId], mockAddresses);
+
+        return mockAddresses;
       }
-    },
-    []
-  );
 
-  const createAddress = useCallback(
-    async (
-      userId: string,
-      params: CreateAddressParams
-    ): Promise<{ success: boolean; id: string }> => {
-      setIsLoading(true);
-      setError(null);
+      setAddresses([]);
+      throw new Error(errorMessage);
+    }
+  };
 
+  // Get forwarded addresses function (imperative)
+  const getForwardedAddresses = async (): Promise<ForwardedAddress[]> => {
+    try {
+      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+      const headers = buildHeaders();
+
+      const response = await axios.get(
+        `${apiUrl}/addresses/forwarded`,
+        { headers }
+      );
+
+      return (response.data as { results?: ForwardedAddress[] }).results || [];
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'Failed to get forwarded addresses';
+
+      // Return mock data in devMode when API fails
+      if (devMode) {
+        console.warn('[DevMode] Get forwarded addresses failed, returning mock data:', errorMessage);
+        const mockData = WildDuckMockData.getForwardedAddresses();
+        return mockData.data.addresses as ForwardedAddress[];
+      }
+
+      throw new Error(errorMessage);
+    }
+  };
+
+  // Resolve address function (imperative)
+  const resolveAddress = async (address: string): Promise<{ success: boolean; user?: string }> => {
+    try {
+      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+      const headers = buildHeaders();
+
+      const response = await axios.get(
+        `${apiUrl}/addresses/resolve/${encodeURIComponent(address)}`,
+        { headers }
+      );
+
+      return response.data as { success: boolean; user?: string };
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to resolve address';
+
+      // Return mock data in devMode when API fails
+      if (devMode) {
+        console.warn('[DevMode] Resolve address failed, returning mock success:', errorMessage);
+        return WildDuckMockData.getResolveAddress(address);
+      }
+
+      throw new Error(errorMessage);
+    }
+  };
+
+  // Create address mutation
+  const createMutation = useMutation({
+    mutationKey: ['wildduck-create-address', config.cloudflareWorkerUrl || config.backendUrl],
+    mutationFn: async ({
+      userId,
+      params,
+    }: {
+      userId: string;
+      params: CreateAddressParams;
+    }): Promise<{ success: boolean; id: string }> => {
       try {
-        // Use config URLs and headers
         const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        };
-
-        if (config.cloudflareWorkerUrl) {
-          headers['Authorization'] = `Bearer ${config.apiToken}`;
-          headers['X-App-Source'] = '0xmail-box';
-        } else {
-          headers['X-Access-Token'] = config.apiToken;
-        }
+        const headers = buildHeaders();
 
         const response = await axios.post(
           `${apiUrl}/users/${userId}/addresses`,
@@ -165,45 +236,39 @@ const useWildduckAddresses = (config: WildDuckConfig, devMode: boolean = false):
 
         return response.data as { success: boolean; id: string };
       } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to create address';
+
+        // Return mock data in devMode when API fails
         if (devMode) {
-          console.warn('[DevMode] Create address failed, returning mock success:', err);
+          console.warn('[DevMode] Create address failed, returning mock success:', errorMessage);
           return WildDuckMockData.getCreateAddress();
         }
 
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to create address';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setIsLoading(false);
+        throw new Error(errorMessage);
       }
     },
-    []
-  );
+    onSuccess: (_, variables) => {
+      // Invalidate addresses query to refetch
+      queryClient.invalidateQueries({ queryKey: ['wildduck-addresses', variables.userId] });
+    },
+  });
 
-  const updateAddress = useCallback(
-    async (
-      userId: string,
-      addressId: string,
-      params: UpdateAddressParams
-    ): Promise<{ success: boolean }> => {
-      setIsLoading(true);
-      setError(null);
-
+  // Update address mutation
+  const updateMutation = useMutation({
+    mutationKey: ['wildduck-update-address', config.cloudflareWorkerUrl || config.backendUrl],
+    mutationFn: async ({
+      userId,
+      addressId,
+      params,
+    }: {
+      userId: string;
+      addressId: string;
+      params: UpdateAddressParams;
+    }): Promise<{ success: boolean }> => {
       try {
-        // Use config URLs and headers
         const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        };
-
-        if (config.cloudflareWorkerUrl) {
-          headers['Authorization'] = `Bearer ${config.apiToken}`;
-          headers['X-App-Source'] = '0xmail-box';
-        } else {
-          headers['X-Access-Token'] = config.apiToken;
-        }
+        const headers = buildHeaders();
 
         const response = await axios.put(
           `${apiUrl}/users/${userId}/addresses/${addressId}`,
@@ -213,44 +278,37 @@ const useWildduckAddresses = (config: WildDuckConfig, devMode: boolean = false):
 
         return response.data as { success: boolean };
       } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to update address';
+
+        // Return mock data in devMode when API fails
         if (devMode) {
-          console.warn('[DevMode] Update address failed, returning mock success:', err);
+          console.warn('[DevMode] Update address failed, returning mock success:', errorMessage);
           return WildDuckMockData.getUpdateAddress();
         }
 
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to update address';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setIsLoading(false);
+        throw new Error(errorMessage);
       }
     },
-    []
-  );
+    onSuccess: (_, variables) => {
+      // Invalidate addresses query to refetch
+      queryClient.invalidateQueries({ queryKey: ['wildduck-addresses', variables.userId] });
+    },
+  });
 
-  const deleteAddress = useCallback(
-    async (
-      userId: string,
-      addressId: string
-    ): Promise<{ success: boolean }> => {
-      setIsLoading(true);
-      setError(null);
-
+  // Delete address mutation
+  const deleteMutation = useMutation({
+    mutationKey: ['wildduck-delete-address', config.cloudflareWorkerUrl || config.backendUrl],
+    mutationFn: async ({
+      userId,
+      addressId,
+    }: {
+      userId: string;
+      addressId: string;
+    }): Promise<{ success: boolean }> => {
       try {
-        // Use config URLs and headers
         const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        };
-
-        if (config.cloudflareWorkerUrl) {
-          headers['Authorization'] = `Bearer ${config.apiToken}`;
-          headers['X-App-Source'] = '0xmail-box';
-        } else {
-          headers['X-Access-Token'] = config.apiToken;
-        }
+        const headers = buildHeaders();
 
         const response = await axios.delete(
           `${apiUrl}/users/${userId}/addresses/${addressId}`,
@@ -259,89 +317,37 @@ const useWildduckAddresses = (config: WildDuckConfig, devMode: boolean = false):
 
         return response.data as { success: boolean };
       } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to delete address';
+
+        // Return mock data in devMode when API fails
         if (devMode) {
-          console.warn('[DevMode] Delete address failed, returning mock success:', err);
+          console.warn('[DevMode] Delete address failed, returning mock success:', errorMessage);
           return WildDuckMockData.getDeleteAddress();
         }
 
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to delete address';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setIsLoading(false);
+        throw new Error(errorMessage);
       }
     },
-    []
-  );
+    onSuccess: (_, variables) => {
+      // Invalidate addresses query to refetch
+      queryClient.invalidateQueries({ queryKey: ['wildduck-addresses', variables.userId] });
+    },
+  });
 
-  const getForwardedAddresses = useCallback(async (): Promise<
-    ForwardedAddress[]
-  > => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Use config URLs and headers
-      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      };
-
-      if (config.cloudflareWorkerUrl) {
-        headers['Authorization'] = `Bearer ${config.apiToken}`;
-        headers['X-App-Source'] = '0xmail-box';
-      } else {
-        headers['X-Access-Token'] = config.apiToken;
-      }
-
-      const response = await axios.get(
-        `${apiUrl}/addresses/forwarded`,
-        { headers }
-      );
-
-      return (response.data as { results?: ForwardedAddress[] }).results || [];
-    } catch (err) {
-      if (devMode) {
-        console.warn('[DevMode] Get forwarded addresses failed, returning mock data:', err);
-        const mockData = WildDuckMockData.getForwardedAddresses();
-        return mockData.data.addresses as ForwardedAddress[];
-      }
-
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : 'Failed to get forwarded addresses';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const createForwardedAddress = useCallback(
-    async (
-      address: string,
-      target: string
-    ): Promise<{ success: boolean; id: string }> => {
-      setIsLoading(true);
-      setError(null);
-
+  // Create forwarded address mutation
+  const createForwardedMutation = useMutation({
+    mutationKey: ['wildduck-create-forwarded-address', config.cloudflareWorkerUrl || config.backendUrl],
+    mutationFn: async ({
+      address,
+      target,
+    }: {
+      address: string;
+      target: string;
+    }): Promise<{ success: boolean; id: string }> => {
       try {
-        // Use config URLs and headers
         const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        };
-
-        if (config.cloudflareWorkerUrl) {
-          headers['Authorization'] = `Bearer ${config.apiToken}`;
-          headers['X-App-Source'] = '0xmail-box';
-        } else {
-          headers['X-Access-Token'] = config.apiToken;
-        }
+        const headers = buildHeaders();
 
         const response = await axios.post(
           `${apiUrl}/addresses/forwarded`,
@@ -351,43 +357,33 @@ const useWildduckAddresses = (config: WildDuckConfig, devMode: boolean = false):
 
         return response.data as { success: boolean; id: string };
       } catch (err) {
-        if (devMode) {
-          console.warn('[DevMode] Create forwarded address failed, returning mock success:', err);
-          return WildDuckMockData.getCreateForwardedAddress();
-        }
-
         const errorMessage =
           err instanceof Error
             ? err.message
             : 'Failed to create forwarded address';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setIsLoading(false);
+
+        // Return mock data in devMode when API fails
+        if (devMode) {
+          console.warn('[DevMode] Create forwarded address failed, returning mock success:', errorMessage);
+          return WildDuckMockData.getCreateForwardedAddress();
+        }
+
+        throw new Error(errorMessage);
       }
     },
-    []
-  );
+    onSuccess: () => {
+      // Invalidate forwarded addresses query
+      queryClient.invalidateQueries({ queryKey: ['wildduck-forwarded-addresses'] });
+    },
+  });
 
-  const deleteForwardedAddress = useCallback(
-    async (addressId: string): Promise<{ success: boolean }> => {
-      setIsLoading(true);
-      setError(null);
-
+  // Delete forwarded address mutation
+  const deleteForwardedMutation = useMutation({
+    mutationKey: ['wildduck-delete-forwarded-address', config.cloudflareWorkerUrl || config.backendUrl],
+    mutationFn: async (addressId: string): Promise<{ success: boolean }> => {
       try {
-        // Use config URLs and headers
         const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        };
-
-        if (config.cloudflareWorkerUrl) {
-          headers['Authorization'] = `Bearer ${config.apiToken}`;
-          headers['X-App-Source'] = '0xmail-box';
-        } else {
-          headers['X-Access-Token'] = config.apiToken;
-        }
+        const headers = buildHeaders();
 
         const response = await axios.delete(
           `${apiUrl}/addresses/forwarded/${addressId}`,
@@ -396,96 +392,99 @@ const useWildduckAddresses = (config: WildDuckConfig, devMode: boolean = false):
 
         return response.data as { success: boolean };
       } catch (err) {
-        if (devMode) {
-          console.warn('[DevMode] Delete forwarded address failed, returning mock success:', err);
-          return WildDuckMockData.getDeleteForwardedAddress();
-        }
-
         const errorMessage =
           err instanceof Error
             ? err.message
             : 'Failed to delete forwarded address';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
 
-  const resolveAddress = useCallback(
-    async (address: string): Promise<{ success: boolean; user?: string }> => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        // Use config URLs and headers
-        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        };
-
-        if (config.cloudflareWorkerUrl) {
-          headers['Authorization'] = `Bearer ${config.apiToken}`;
-          headers['X-App-Source'] = '0xmail-box';
-        } else {
-          headers['X-Access-Token'] = config.apiToken;
-        }
-
-        const response = await axios.get(
-          `${apiUrl}/addresses/resolve/${encodeURIComponent(address)}`,
-          { headers }
-        );
-
-        return response.data as { success: boolean; user?: string };
-      } catch (err) {
+        // Return mock data in devMode when API fails
         if (devMode) {
-          console.warn('[DevMode] Resolve address failed, returning mock success:', err);
-          return WildDuckMockData.getResolveAddress(address);
+          console.warn('[DevMode] Delete forwarded address failed, returning mock success:', errorMessage);
+          return WildDuckMockData.getDeleteForwardedAddress();
         }
 
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to resolve address';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setIsLoading(false);
+        throw new Error(errorMessage);
       }
     },
-    []
-  );
-
-  const refresh = useCallback(
-    async (userId: string): Promise<void> => {
-      await getUserAddresses(userId);
+    onSuccess: () => {
+      // Invalidate forwarded addresses query
+      queryClient.invalidateQueries({ queryKey: ['wildduck-forwarded-addresses'] });
     },
-    [getUserAddresses]
-  );
+  });
+
+  // Refresh function (refetch user addresses)
+  const refresh = async (userId: string): Promise<void> => {
+    await getUserAddresses(userId);
+  };
+
+  // Aggregate loading and error states for legacy compatibility
+  const isLoading =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    deleteMutation.isPending ||
+    createForwardedMutation.isPending ||
+    deleteForwardedMutation.isPending;
+
+  const error: Optional<string> =
+    createMutation.error?.message ||
+    updateMutation.error?.message ||
+    deleteMutation.error?.message ||
+    createForwardedMutation.error?.message ||
+    deleteForwardedMutation.error?.message ||
+    null;
 
   return {
+    // Query state
+    addresses,
     isLoading,
     error,
-    addresses,
+
+    // Query functions
     getUserAddresses,
-    createAddress,
-    updateAddress,
-    deleteAddress,
     getForwardedAddresses,
-    createForwardedAddress,
-    deleteForwardedAddress,
     resolveAddress,
-    clearError,
     refresh,
+
+    // Create address mutation
+    createAddress: async (userId: string, params: CreateAddressParams) =>
+      createMutation.mutateAsync({ userId, params }),
+    isCreating: createMutation.isPending,
+    createError: createMutation.error,
+
+    // Update address mutation
+    updateAddress: async (userId: string, addressId: string, params: UpdateAddressParams) =>
+      updateMutation.mutateAsync({ userId, addressId, params }),
+    isUpdating: updateMutation.isPending,
+    updateError: updateMutation.error,
+
+    // Delete address mutation
+    deleteAddress: async (userId: string, addressId: string) =>
+      deleteMutation.mutateAsync({ userId, addressId }),
+    isDeleting: deleteMutation.isPending,
+    deleteError: deleteMutation.error,
+
+    // Forwarded address mutations
+    createForwardedAddress: async (address: string, target: string) =>
+      createForwardedMutation.mutateAsync({ address, target }),
+    deleteForwardedAddress: async (addressId: string) =>
+      deleteForwardedMutation.mutateAsync(addressId),
+
+    // Legacy compatibility
+    clearError: () => {
+      createMutation.reset();
+      updateMutation.reset();
+      deleteMutation.reset();
+      createForwardedMutation.reset();
+      deleteForwardedMutation.reset();
+    },
   };
 };
 
 export {
   useWildduckAddresses,
   type WildduckAddress,
-  // type CreateAddressParams, // Moved to shared types
-  // type UpdateAddressParams, // Moved to shared types
+  type CreateAddressParams,
+  type UpdateAddressParams,
   type ForwardedAddress,
   type UseWildduckAddressesReturn
 };

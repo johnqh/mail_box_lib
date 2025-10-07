@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
 import type {
@@ -14,124 +14,136 @@ import type {
 import { WildDuckMockData } from './mocks';
 
 interface UseWildduckMailboxesReturn {
-  isLoading: boolean;
-  error: string | null;
+  // Query state
   mailboxes: MailboxData[];
+  isLoading: boolean;
+  error: Optional<string>;
+
+  // Query functions
   getMailboxes: (
     userId: string,
     options?: Omit<GetMailboxesRequest, 'sess' | 'ip'>
   ) => Promise<MailboxData[]>;
+  refresh: (userId: string) => Promise<void>;
+
+  // Mutations
   createMailbox: (
     userId: string,
     params: Omit<CreateMailboxRequest, 'sess' | 'ip'>
   ) => Promise<{ success: boolean; id: string }>;
+  isCreating: boolean;
+  createError: Optional<Error>;
+
   updateMailbox: (
     userId: string,
     mailboxId: string,
     params: Omit<UpdateMailboxRequest, 'sess' | 'ip'>
   ) => Promise<{ success: boolean }>;
+  isUpdating: boolean;
+  updateError: Optional<Error>;
+
   deleteMailbox: (
     userId: string,
     mailboxId: string
   ) => Promise<{ success: boolean }>;
+  isDeleting: boolean;
+  deleteError: Optional<Error>;
+
+  // Legacy compatibility
   clearError: () => void;
-  refresh: (userId: string) => Promise<void>;
 }
 
 /**
- * Hook for WildDuck mailbox operations
+ * Hook for WildDuck mailbox operations using React Query
+ * Queries are cached and automatically refetched, mutations invalidate related queries
  */
 const useWildduckMailboxes = (config: WildDuckConfig, devMode: boolean = false): UseWildduckMailboxesReturn => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [mailboxes, setMailboxes] = useState<MailboxData[]>([]);
+  const queryClient = useQueryClient();
 
-  const clearError = useCallback(() => {
-    setError(null);
-  }, []);
+  // Helper to build headers
+  const buildHeaders = (): Record<string, string> => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
 
-  const getMailboxes = useCallback(
-    async (userId: string, options: {
+    if (config.cloudflareWorkerUrl) {
+      headers['Authorization'] = `Bearer ${config.apiToken}`;
+      headers['X-App-Source'] = '0xmail-box';
+    } else {
+      headers['X-Access-Token'] = config.apiToken;
+    }
+
+    return headers;
+  };
+
+  // Get mailboxes query (not auto-fetched, only when explicitly called)
+  const getMailboxes = async (
+    userId: string,
+    options: {
       specialUse?: Optional<boolean>;
       showHidden?: Optional<boolean>;
       counters?: Optional<boolean>;
       sizes?: Optional<boolean>;
-    } = {}): Promise<MailboxData[]> => {
-      setIsLoading(true);
-      setError(null);
+    } = {}
+  ): Promise<MailboxData[]> => {
+    try {
+      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+      const headers = buildHeaders();
 
-      try {
-        // Use config URLs and headers
-        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        };
+      const queryParams = new URLSearchParams();
+      if (options.specialUse) queryParams.append('specialUse', 'true');
+      if (options.showHidden) queryParams.append('showHidden', 'true');
+      if (options.counters) queryParams.append('counters', 'true');
+      if (options.sizes) queryParams.append('sizes', 'true');
 
-        if (config.cloudflareWorkerUrl) {
-          headers['Authorization'] = `Bearer ${config.apiToken}`;
-          headers['X-App-Source'] = '0xmail-box';
-        } else {
-          headers['X-Access-Token'] = config.apiToken;
-        }
+      const query = queryParams.toString();
+      const endpoint = `/users/${userId}/mailboxes${query ? `?${query}` : ''}`;
 
-        const queryParams = new URLSearchParams();
-        if (options.specialUse) queryParams.append('specialUse', 'true');
-        if (options.showHidden) queryParams.append('showHidden', 'true');
-        if (options.counters) queryParams.append('counters', 'true');
-        if (options.sizes) queryParams.append('sizes', 'true');
+      const response = await axios.get(`${apiUrl}${endpoint}`, { headers });
+      const mailboxData = response.data as GetMailboxesResponse;
+      const mailboxList = mailboxData.results || [];
 
-        const query = queryParams.toString();
-        const endpoint = `/users/${userId}/mailboxes${query ? `?${query}` : ''}`;
+      // Update cache
+      queryClient.setQueryData(['wildduck-mailboxes', userId], mailboxList);
 
-        const response = await axios.get(`${apiUrl}${endpoint}`, { headers });
-        const mailboxData = response.data as GetMailboxesResponse;
-        const mailboxList = mailboxData.results || [];
-        setMailboxes(mailboxList);
-        return mailboxList;
-      } catch (err) {
-        if (devMode) {
-          console.warn('[DevMode] Get mailboxes failed, returning mock data:', err);
-          const mockData = WildDuckMockData.getMailboxes();
-          const mockMailboxes = mockData.data.mailboxes as unknown as MailboxData[];
-          setMailboxes(mockMailboxes);
-          return mockMailboxes;
-        }
+      return mailboxList;
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to get mailboxes';
 
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to get mailboxes';
-        setError(errorMessage);
-        setMailboxes([]);
-        throw err;
-      } finally {
-        setIsLoading(false);
+      // Return mock data in devMode when API fails
+      if (devMode) {
+        console.warn('[DevMode] Get mailboxes failed, returning mock data:', errorMessage);
+        const mockData = WildDuckMockData.getMailboxes();
+        const mockMailboxes = mockData.data.mailboxes as unknown as MailboxData[];
+
+        // Update cache with mock data
+        queryClient.setQueryData(['wildduck-mailboxes', userId], mockMailboxes);
+
+        return mockMailboxes;
       }
-    },
-    []
-  );
 
-  const createMailbox = useCallback(
-    async (
-      userId: string,
-      params: Omit<CreateMailboxRequest, 'sess' | 'ip'>
-    ): Promise<{ success: boolean; id: string }> => {
-      setIsLoading(true);
-      setError(null);
+      throw new Error(errorMessage);
+    }
+  };
 
+  // Get cached mailboxes from query cache (used for reading state)
+  const cachedMailboxes = queryClient.getQueryData<MailboxData[]>(['wildduck-mailboxes']) || [];
+
+  // Create mailbox mutation
+  const createMutation = useMutation({
+    mutationKey: ['wildduck-create-mailbox', config.cloudflareWorkerUrl || config.backendUrl],
+    mutationFn: async ({
+      userId,
+      params,
+    }: {
+      userId: string;
+      params: Omit<CreateMailboxRequest, 'sess' | 'ip'>;
+    }): Promise<{ success: boolean; id: string }> => {
       try {
-        // Use config URLs and headers
         const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        };
-
-        if (config.cloudflareWorkerUrl) {
-          headers['Authorization'] = `Bearer ${config.apiToken}`;
-          headers['X-App-Source'] = '0xmail-box';
-        } else {
-          headers['X-Access-Token'] = config.apiToken;
-        }
+        const headers = buildHeaders();
 
         const response = await axios.post(
           `${apiUrl}/users/${userId}/mailboxes`,
@@ -145,45 +157,39 @@ const useWildduckMailboxes = (config: WildDuckConfig, devMode: boolean = false):
 
         return response.data as { success: boolean; id: string };
       } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to create mailbox';
+
+        // Return mock data in devMode when API fails
         if (devMode) {
-          console.warn('[DevMode] Create mailbox failed, returning mock success:', err);
+          console.warn('[DevMode] Create mailbox failed, returning mock success:', errorMessage);
           return WildDuckMockData.getCreateMailbox();
         }
 
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to create mailbox';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setIsLoading(false);
+        throw new Error(errorMessage);
       }
     },
-    []
-  );
+    onSuccess: (_, variables) => {
+      // Invalidate mailboxes query to refetch
+      queryClient.invalidateQueries({ queryKey: ['wildduck-mailboxes', variables.userId] });
+    },
+  });
 
-  const updateMailbox = useCallback(
-    async (
-      userId: string,
-      mailboxId: string,
-      params: Omit<UpdateMailboxRequest, 'sess' | 'ip'>
-    ): Promise<{ success: boolean }> => {
-      setIsLoading(true);
-      setError(null);
-
+  // Update mailbox mutation
+  const updateMutation = useMutation({
+    mutationKey: ['wildduck-update-mailbox', config.cloudflareWorkerUrl || config.backendUrl],
+    mutationFn: async ({
+      userId,
+      mailboxId,
+      params,
+    }: {
+      userId: string;
+      mailboxId: string;
+      params: Omit<UpdateMailboxRequest, 'sess' | 'ip'>;
+    }): Promise<{ success: boolean }> => {
       try {
-        // Use config URLs and headers
         const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        };
-
-        if (config.cloudflareWorkerUrl) {
-          headers['Authorization'] = `Bearer ${config.apiToken}`;
-          headers['X-App-Source'] = '0xmail-box';
-        } else {
-          headers['X-Access-Token'] = config.apiToken;
-        }
+        const headers = buildHeaders();
 
         const response = await axios.put(
           `${apiUrl}/users/${userId}/mailboxes/${mailboxId}`,
@@ -193,44 +199,37 @@ const useWildduckMailboxes = (config: WildDuckConfig, devMode: boolean = false):
 
         return response.data as { success: boolean };
       } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to update mailbox';
+
+        // Return mock data in devMode when API fails
         if (devMode) {
-          console.warn('[DevMode] Update mailbox failed, returning mock success:', err);
+          console.warn('[DevMode] Update mailbox failed, returning mock success:', errorMessage);
           return WildDuckMockData.getUpdateMailbox();
         }
 
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to update mailbox';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setIsLoading(false);
+        throw new Error(errorMessage);
       }
     },
-    []
-  );
+    onSuccess: (_, variables) => {
+      // Invalidate mailboxes query to refetch
+      queryClient.invalidateQueries({ queryKey: ['wildduck-mailboxes', variables.userId] });
+    },
+  });
 
-  const deleteMailbox = useCallback(
-    async (
-      userId: string,
-      mailboxId: string
-    ): Promise<{ success: boolean }> => {
-      setIsLoading(true);
-      setError(null);
-
+  // Delete mailbox mutation
+  const deleteMutation = useMutation({
+    mutationKey: ['wildduck-delete-mailbox', config.cloudflareWorkerUrl || config.backendUrl],
+    mutationFn: async ({
+      userId,
+      mailboxId,
+    }: {
+      userId: string;
+      mailboxId: string;
+    }): Promise<{ success: boolean }> => {
       try {
-        // Use config URLs and headers
         const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        };
-
-        if (config.cloudflareWorkerUrl) {
-          headers['Authorization'] = `Bearer ${config.apiToken}`;
-          headers['X-App-Source'] = '0xmail-box';
-        } else {
-          headers['X-Access-Token'] = config.apiToken;
-        }
+        const headers = buildHeaders();
 
         const response = await axios.delete(
           `${apiUrl}/users/${userId}/mailboxes/${mailboxId}`,
@@ -239,39 +238,74 @@ const useWildduckMailboxes = (config: WildDuckConfig, devMode: boolean = false):
 
         return response.data as { success: boolean };
       } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to delete mailbox';
+
+        // Return mock data in devMode when API fails
         if (devMode) {
-          console.warn('[DevMode] Delete mailbox failed, returning mock success:', err);
+          console.warn('[DevMode] Delete mailbox failed, returning mock success:', errorMessage);
           return WildDuckMockData.getDeleteMailbox();
         }
 
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to delete mailbox';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setIsLoading(false);
+        throw new Error(errorMessage);
       }
     },
-    []
-  );
-
-  const refresh = useCallback(
-    async (userId: string): Promise<void> => {
-      await getMailboxes(userId, { counters: true });
+    onSuccess: (_, variables) => {
+      // Invalidate mailboxes query to refetch
+      queryClient.invalidateQueries({ queryKey: ['wildduck-mailboxes', variables.userId] });
     },
-    [getMailboxes]
-  );
+  });
+
+  // Refresh function (refetch with counters)
+  const refresh = async (userId: string): Promise<void> => {
+    await getMailboxes(userId, { counters: true });
+  };
+
+  // Aggregate loading and error states for legacy compatibility
+  const isLoading = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
+  const error: Optional<string> =
+    createMutation.error?.message ||
+    updateMutation.error?.message ||
+    deleteMutation.error?.message ||
+    null;
 
   return {
+    // Query state
+    mailboxes: cachedMailboxes,
     isLoading,
     error,
-    mailboxes,
+
+    // Query functions
     getMailboxes,
-    createMailbox,
-    updateMailbox,
-    deleteMailbox,
-    clearError,
     refresh,
+
+    // Create mutation
+    createMailbox: async (userId: string, params: Omit<CreateMailboxRequest, 'sess' | 'ip'>) =>
+      createMutation.mutateAsync({ userId, params }),
+    isCreating: createMutation.isPending,
+    createError: createMutation.error,
+
+    // Update mutation
+    updateMailbox: async (
+      userId: string,
+      mailboxId: string,
+      params: Omit<UpdateMailboxRequest, 'sess' | 'ip'>
+    ) => updateMutation.mutateAsync({ userId, mailboxId, params }),
+    isUpdating: updateMutation.isPending,
+    updateError: updateMutation.error,
+
+    // Delete mutation
+    deleteMailbox: async (userId: string, mailboxId: string) =>
+      deleteMutation.mutateAsync({ userId, mailboxId }),
+    isDeleting: deleteMutation.isPending,
+    deleteError: deleteMutation.error,
+
+    // Legacy compatibility
+    clearError: () => {
+      createMutation.reset();
+      updateMutation.reset();
+      deleteMutation.reset();
+    },
   };
 };
 

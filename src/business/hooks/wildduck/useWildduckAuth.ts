@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { useStorageService } from '../core/useServices';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
@@ -18,34 +18,186 @@ import type {
 import { WildDuckMockData } from './mocks';
 
 interface UseWildduckAuthReturn {
+  // Authenticate mutation
+  authenticate: (params: Omit<AuthenticateRequest, 'sess' | 'ip'>) => Promise<AuthenticationResponse>;
+  isAuthenticating: boolean;
+  authError: Optional<Error>;
+
+  // PreAuth mutation
+  preAuth: (params: Omit<PreAuthRequest, 'sess' | 'ip'>) => Promise<PreAuthResponse>;
+  isPreAuthing: boolean;
+  preAuthError: Optional<Error>;
+
+  // Logout mutation
+  logout: (token?: string) => Promise<{ success: boolean }>;
+  isLoggingOut: boolean;
+  logoutError: Optional<Error>;
+
+  // Auth status check
+  getAuthStatus: () => Promise<{ authenticated: boolean; user?: any }>;
+
+  // Legacy compatibility
   isLoading: boolean;
   error: Optional<string>;
-  getAuthStatus: () => Promise<{ authenticated: boolean; user?: any }>;
-  preAuth: (params: Omit<PreAuthRequest, 'sess' | 'ip'>) => Promise<PreAuthResponse>;
-  authenticate: (params: Omit<AuthenticateRequest, 'sess' | 'ip'>) => Promise<AuthenticationResponse>;
-  logout: (token?: string) => Promise<{ success: boolean }>;
   clearError: () => void;
 }
 
 /**
- * Hook for WildDuck authentication operations
+ * Hook for WildDuck authentication operations using React Query
+ * All mutations are automatically deduplicated and cached by React Query
  */
 const useWildduckAuth = (config: WildDuckConfig, devMode: boolean = false): UseWildduckAuthReturn => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Optional<string>>(null);
   const storageService = useStorageService();
+  const queryClient = useQueryClient();
 
-  const clearError = useCallback(() => {
-    setError(null);
-  }, []);
+  // Authenticate mutation
+  const authenticateMutation = useMutation({
+    mutationKey: ['wildduck-authenticate', config.cloudflareWorkerUrl || config.backendUrl],
+    mutationFn: async (params: Omit<AuthenticateRequest, 'sess' | 'ip'>): Promise<AuthenticationResponse> => {
+      try {
+        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+        const requestBody = createAuthenticateRequest(
+          params.username,
+          params.signature,
+          params.nonce,
+          params.message,
+          {
+            ...(params.signer && { signer: params.signer }),
+            ...(params.scope && { scope: params.scope }),
+            ...(params.protocol && { protocol: params.protocol }),
+            ...(params.token !== undefined && { token: params.token }),
+            ...(params.appId && { appId: params.appId }),
+            sess: 'api-session',
+            ip: '127.0.0.1',
+          }
+        );
 
-  const getAuthStatus = useCallback(async (): Promise<{
-    authenticated: boolean;
-    user?: any;
-  }> => {
-    setIsLoading(true);
-    setError(null);
+        const response = await axios.post(`${apiUrl}/authenticate`, requestBody, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
+        const result = response.data as AuthenticationResponse;
+
+        // Store token if authentication was successful
+        if (result.success && result.token) {
+          await storageService.setItem('wildduck_token', result.token);
+        }
+
+        return result;
+      } catch (err: unknown) {
+        const errorMessage = (err as any)?.response?.data?.error ||
+                            (err instanceof Error ? err.message : 'Authentication failed');
+
+        // Return mock data in devMode when API fails
+        if (devMode) {
+          console.warn('[DevMode] authenticate failed, returning mock data:', errorMessage);
+          const mockResult = WildDuckMockData.getAuthentication(params.username);
+
+          // Store mock token
+          if (mockResult.token) {
+            await storageService.setItem('wildduck_token', mockResult.token);
+          }
+          return mockResult;
+        }
+
+        throw new Error(errorMessage);
+      }
+    },
+    onSuccess: () => {
+      // Invalidate auth-related queries
+      queryClient.invalidateQueries({ queryKey: ['wildduck-auth-status'] });
+    },
+  });
+
+  // PreAuth mutation
+  const preAuthMutation = useMutation({
+    mutationKey: ['wildduck-preauth', config.cloudflareWorkerUrl || config.backendUrl],
+    mutationFn: async (params: Omit<PreAuthRequest, 'sess' | 'ip'>): Promise<PreAuthResponse> => {
+      try {
+        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+        const requestBody = createPreAuthRequest(params.username, {
+          ...(params.scope && { scope: params.scope }),
+          sess: 'api-session',
+          ip: '127.0.0.1',
+        });
+
+        const response = await axios.post(`${apiUrl}/preauth`, requestBody, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        return response.data as PreAuthResponse;
+      } catch (err: unknown) {
+        const errorMessage = (err as any)?.response?.data?.error ||
+                            (err instanceof Error ? err.message : 'Pre-authentication failed');
+
+        // Return mock data in devMode when API fails
+        if (devMode) {
+          console.warn('[DevMode] preAuth failed, returning mock data:', errorMessage);
+          return WildDuckMockData.getPreAuth();
+        }
+
+        throw new Error(errorMessage);
+      }
+    },
+  });
+
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationKey: ['wildduck-logout', config.cloudflareWorkerUrl || config.backendUrl],
+    mutationFn: async (token?: string): Promise<{ success: boolean }> => {
+      try {
+        const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
+        const authToken = token || await storageService.getItem('wildduck_token');
+
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+
+        if (authToken) {
+          if (config.cloudflareWorkerUrl) {
+            headers['Authorization'] = `Bearer ${authToken}`;
+            headers['X-App-Source'] = '0xmail-box';
+          } else {
+            headers['X-Access-Token'] = authToken;
+          }
+        }
+
+        const response = await axios.delete(`${apiUrl}/authenticate`, { headers });
+
+        const result = response.data as { success: boolean };
+
+        // Clear stored token on successful logout
+        if (result.success) {
+          await storageService.removeItem('wildduck_token');
+        }
+
+        return result;
+      } catch (err: unknown) {
+        const errorMessage = (err as any)?.response?.data?.error ||
+                            (err instanceof Error ? err.message : 'Logout failed');
+
+        // Return mock data in devMode when API fails
+        if (devMode) {
+          console.warn('[DevMode] logout failed, returning mock data:', errorMessage);
+          await storageService.removeItem('wildduck_token');
+          return WildDuckMockData.getLogout();
+        }
+
+        throw new Error(errorMessage);
+      }
+    },
+    onSuccess: () => {
+      // Clear all cached data on logout
+      queryClient.clear();
+    },
+  });
+
+  // Auth status check function (imperative, not a React Query hook)
+  const getAuthStatus = async (): Promise<{ authenticated: boolean; user?: any }> => {
     try {
       // Check if user has valid token or authentication status
       const token = await storageService.getItem('wildduck_token');
@@ -80,174 +232,48 @@ const useWildduckAuth = (config: WildDuckConfig, devMode: boolean = false): UseW
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to check auth status';
-      setError(errorMessage);
-      
+
       // Return mock data in devMode when API fails
       if (devMode) {
         console.warn('[DevMode] getAuthStatus failed, returning mock data:', errorMessage);
         return WildDuckMockData.getAuthStatus();
       }
-      
+
       return { authenticated: false };
-    } finally {
-      setIsLoading(false);
     }
-  }, [config, storageService]);
+  };
 
-  const preAuth = useCallback(async (params: Omit<PreAuthRequest, 'sess' | 'ip'>): Promise<PreAuthResponse> => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-      const requestBody = createPreAuthRequest(params.username, {
-        ...(params.scope && { scope: params.scope }),
-        sess: 'api-session',
-        ip: '127.0.0.1',
-      });
-
-      const response = await axios.post(`${apiUrl}/preauth`, requestBody, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      return response.data as PreAuthResponse;
-    } catch (err: unknown) {
-      const errorMessage = (err as any)?.response?.data?.error || 
-                          (err instanceof Error ? err.message : 'Pre-authentication failed');
-      
-      setError(errorMessage);
-      
-      // Return mock data in devMode when API fails
-      if (devMode) {
-        console.warn('[DevMode] preAuth failed, returning mock data:', errorMessage);
-        return WildDuckMockData.getPreAuth();
-      }
-      
-      throw new Error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [config]);
-
-  const authenticate = useCallback(async (params: Omit<AuthenticateRequest, 'sess' | 'ip'>): Promise<AuthenticationResponse> => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-      const requestBody = createAuthenticateRequest(
-        params.username,
-        params.signature,
-        params.nonce,
-        params.message,
-        {
-          ...(params.scope && { scope: params.scope }),
-          ...(params.protocol && { protocol: params.protocol }),
-          ...(params.token !== undefined && { token: params.token }),
-          ...(params.appId && { appId: params.appId }),
-          sess: 'api-session',
-          ip: '127.0.0.1',
-        }
-      );
-
-      const response = await axios.post(`${apiUrl}/authenticate`, requestBody, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const result = response.data as AuthenticationResponse;
-
-      // Store token if authentication was successful
-      if (result.success && result.token) {
-        await storageService.setItem('wildduck_token', result.token);
-      }
-
-      return result;
-    } catch (err: unknown) {
-      const errorMessage = (err as any)?.response?.data?.error || 
-                          (err instanceof Error ? err.message : 'Authentication failed');
-      
-      setError(errorMessage);
-      
-      // Return mock data in devMode when API fails
-      if (devMode) {
-        console.warn('[DevMode] authenticate failed, returning mock data:', errorMessage);
-        const mockResult = WildDuckMockData.getAuthentication(params.username);
-        
-        // Store mock token
-        if (mockResult.token) {
-          await storageService.setItem('wildduck_token', mockResult.token);
-        }
-        return mockResult;
-      }
-      
-      throw new Error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [config, storageService]);
-
-  const logout = useCallback(async (token?: string): Promise<{ success: boolean }> => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-      const authToken = token || await storageService.getItem('wildduck_token');
-      
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-
-      if (authToken) {
-        if (config.cloudflareWorkerUrl) {
-          headers['Authorization'] = `Bearer ${authToken}`;
-          headers['X-App-Source'] = '0xmail-box';
-        } else {
-          headers['X-Access-Token'] = authToken;
-        }
-      }
-
-      const response = await axios.delete(`${apiUrl}/authenticate`, { headers });
-
-      const result = response.data as { success: boolean };
-
-      // Clear stored token on successful logout
-      if (result.success) {
-        await storageService.removeItem('wildduck_token');
-      }
-
-      return result;
-    } catch (err: unknown) {
-      const errorMessage = (err as any)?.response?.data?.error || 
-                          (err instanceof Error ? err.message : 'Logout failed');
-      
-      setError(errorMessage);
-      
-      // Return mock data in devMode when API fails
-      if (devMode) {
-        console.warn('[DevMode] logout failed, returning mock data:', errorMessage);
-        await storageService.removeItem('wildduck_token');
-        return WildDuckMockData.getLogout();
-      }
-      
-      throw new Error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [config, storageService]);
+  // Aggregate loading and error states for legacy compatibility
+  const isLoading = authenticateMutation.isPending || preAuthMutation.isPending || logoutMutation.isPending;
+  const error: Optional<string> = authenticateMutation.error?.message || preAuthMutation.error?.message || logoutMutation.error?.message || null;
 
   return {
+    // Authenticate
+    authenticate: authenticateMutation.mutateAsync,
+    isAuthenticating: authenticateMutation.isPending,
+    authError: authenticateMutation.error,
+
+    // PreAuth
+    preAuth: preAuthMutation.mutateAsync,
+    isPreAuthing: preAuthMutation.isPending,
+    preAuthError: preAuthMutation.error,
+
+    // Logout
+    logout: logoutMutation.mutateAsync,
+    isLoggingOut: logoutMutation.isPending,
+    logoutError: logoutMutation.error,
+
+    // Auth status check
+    getAuthStatus,
+
+    // Legacy compatibility
     isLoading,
     error,
-    getAuthStatus,
-    preAuth,
-    authenticate,
-    logout,
-    clearError,
+    clearError: () => {
+      authenticateMutation.reset();
+      preAuthMutation.reset();
+      logoutMutation.reset();
+    },
   };
 };
 

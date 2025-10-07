@@ -84,7 +84,10 @@ export async function updateUploadSentMessages(
 
 /**
  * Get SMTP relay settings for a user
- * GET /users/:user/smtp
+ * GET /users/:user (mtaRelay is part of user object)
+ *
+ * WildDuck stores mtaRelay as a URL string like "smtp://host:port" or "smtps://host:port"
+ * The secure protocol (smtps://) indicates TLS should be used
  */
 export async function getSMTPRelay(
   config: WildDuckConfig,
@@ -92,21 +95,54 @@ export async function getSMTPRelay(
 ): Promise<SMTPRelay> {
   const client = createWildDuckClient(config);
   try {
-    const response = await client.get<any>(`/users/${userId}/smtp`);
-    return response.data;
-  } catch {
-    // If no SMTP relay is configured, return disabled state
+    const response = await client.get<any>(`/users/${userId}`);
+    const mtaRelay = response.data.mtaRelay;
+
+    if (!mtaRelay) {
+      return { enabled: false };
+    }
+
+    // Parse the mtaRelay URL (e.g., "smtp://user:pass@host:port" or "smtps://host:port")
+    try {
+      const url = new URL(mtaRelay);
+      const secure = url.protocol === 'smtps:';
+      const port = url.port ? parseInt(url.port) : (secure ? 465 : 587);
+
+      return {
+        enabled: true,
+        host: url.hostname,
+        port: port,
+        secure: secure,
+        ...(url.username && {
+          auth: {
+            user: decodeURIComponent(url.username),
+            pass: decodeURIComponent(url.password || '')
+          }
+        })
+      };
+    } catch (parseError) {
+      console.error('Failed to parse mtaRelay URL:', mtaRelay, parseError);
+      return { enabled: false };
+    }
+  } catch (error) {
+    console.error('Failed to get SMTP relay settings:', error);
     return { enabled: false };
   }
 }
 
 /**
  * Update SMTP relay settings
- * PUT /users/:user/smtp
+ * PUT /users/:user with mtaRelay parameter
+ *
  * @param host - SMTP server hostname
  * @param port - SMTP server port (25, 465, 587)
  * @param secure - Use TLS encryption
  * @param auth - SMTP authentication credentials
+ *
+ * WildDuck expects mtaRelay as a URL string: "smtp://host:port" or "smtps://host:port"
+ * - Use "smtps://" for secure connections
+ * - Include auth in URL: "smtp://user:pass@host:port"
+ * - To disable/delete, set mtaRelay to empty string
  */
 export async function updateSMTPRelay(
   config: WildDuckConfig,
@@ -125,8 +161,29 @@ export async function updateSMTPRelay(
   ip?: string
 ): Promise<{ success: boolean }> {
   const client = createWildDuckClient(config);
-  const response = await client.put<any>(`/users/${userId}/smtp`, {
-    ...settings,
+
+  let mtaRelay: string | undefined = undefined;
+
+  if (settings.enabled && settings.host && settings.port) {
+    const protocol = settings.secure ? 'smtps' : 'smtp';
+    const port = settings.port;
+
+    if (settings.auth && settings.auth.user) {
+      // Include authentication in URL
+      const user = encodeURIComponent(settings.auth.user);
+      const pass = encodeURIComponent(settings.auth.pass || '');
+      mtaRelay = `${protocol}://${user}:${pass}@${settings.host}:${port}`;
+    } else {
+      // No authentication
+      mtaRelay = `${protocol}://${settings.host}:${port}`;
+    }
+  } else {
+    // If disabled or incomplete settings, set to empty string to clear
+    mtaRelay = '';
+  }
+
+  const response = await client.put<any>(`/users/${userId}`, {
+    mtaRelay,
     sess,
     ip,
   });
@@ -187,7 +244,9 @@ export async function disableSMTPRelay(
 
 /**
  * Delete SMTP relay configuration
- * DELETE /users/:user/smtp
+ * PUT /users/:user with empty mtaRelay
+ *
+ * In WildDuck, you delete the mtaRelay by setting it to an empty string
  */
 export async function deleteSMTPRelay(
   config: WildDuckConfig,
@@ -196,8 +255,10 @@ export async function deleteSMTPRelay(
   ip?: string
 ): Promise<{ success: boolean }> {
   const client = createWildDuckClient(config);
-  const response = await client.delete<any>(`/users/${userId}/smtp`, {
-    data: { sess, ip },
-  } as any);
+  const response = await client.put<any>(`/users/${userId}`, {
+    mtaRelay: '',
+    sess,
+    ip,
+  });
   return response.data;
 }
