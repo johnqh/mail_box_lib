@@ -4,18 +4,23 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { 
-  useWalletStatus, 
-  useWalletAddress, 
-  useWalletConnectionState 
+import {
+  useWalletStatus,
+  useWalletAddress,
+  useWalletConnectionState,
 } from '../useWalletStatus';
-import { walletStatusManager } from '../../../core/wallet/wallet-status-manager';
+import {
+  disconnectWallet,
+  connectWallet,
+  verifyWallet,
+  clearVerification,
+} from '../../../core/wallet/wallet-status-manager';
 import { ConnectionState } from '@johnqh/types';
 
 describe('useWalletStatus', () => {
-  // Reset manager state before each test
+  // Reset wallet state before each test
   beforeEach(() => {
-    walletStatusManager.reset();
+    disconnectWallet();
   });
 
   const testAddress = '0x742d35Cc6e3c05652aA6E10f35F74c29C5881398';
@@ -93,20 +98,20 @@ describe('useWalletStatus', () => {
   describe('External State Changes', () => {
     it('should react to external status changes', () => {
       const { result } = renderHook(() => useWalletStatus());
-      
-      // External change via manager
+
+      // External change via direct function
       act(() => {
-        walletStatusManager.connectWallet(testAddress);
+        connectWallet(testAddress);
       });
-      
+
       expect(result.current.walletAddress).toBe(testAddress);
       expect(result.current.isConnected).toBe(true);
-      
+
       // Another external change
       act(() => {
-        walletStatusManager.verifyWallet(testAddress, testMessage, testSignature);
+        verifyWallet(testAddress, testMessage, testSignature);
       });
-      
+
       expect(result.current.isVerified).toBe(true);
       expect(result.current.status?.message).toBe(testMessage);
       expect(result.current.status?.signature).toBe(testSignature);
@@ -188,7 +193,7 @@ describe('useWalletStatus', () => {
 
 describe('useWalletAddress', () => {
   beforeEach(() => {
-    walletStatusManager.reset();
+    disconnectWallet();
   });
 
   const testAddress = '0x742d35Cc6e3c05652aA6E10f35F74c29C5881398';
@@ -200,26 +205,26 @@ describe('useWalletAddress', () => {
 
   it('should update when wallet address changes', () => {
     const { result } = renderHook(() => useWalletAddress());
-    
+
     act(() => {
-      walletStatusManager.connectWallet(testAddress);
+      connectWallet(testAddress);
     });
-    
+
     expect(result.current).toBe(testAddress);
   });
 
   it('should return undefined when wallet is disconnected', () => {
     const { result } = renderHook(() => useWalletAddress());
-    
+
     // Connect first
     act(() => {
-      walletStatusManager.connectWallet(testAddress);
+      connectWallet(testAddress);
     });
     expect(result.current).toBe(testAddress);
-    
+
     // Then disconnect
     act(() => {
-      walletStatusManager.disconnectWallet();
+      disconnectWallet();
     });
     expect(result.current).toBeUndefined();
   });
@@ -227,7 +232,7 @@ describe('useWalletAddress', () => {
 
 describe('useWalletConnectionState', () => {
   beforeEach(() => {
-    walletStatusManager.reset();
+    disconnectWallet();
   });
 
   const testAddress = '0x742d35Cc6e3c05652aA6E10f35F74c29C5881398';
@@ -241,38 +246,38 @@ describe('useWalletConnectionState', () => {
 
   it('should update through all connection states', () => {
     const { result } = renderHook(() => useWalletConnectionState());
-    
+
     // Connect wallet
     act(() => {
-      walletStatusManager.connectWallet(testAddress);
+      connectWallet(testAddress);
     });
     expect(result.current).toBe(ConnectionState.CONNECTED);
-    
+
     // Verify wallet
     act(() => {
-      walletStatusManager.verifyWallet(testAddress, testMessage, testSignature);
+      verifyWallet(testAddress, testMessage, testSignature);
     });
     expect(result.current).toBe(ConnectionState.VERIFIED);
-    
+
     // Disconnect wallet
     act(() => {
-      walletStatusManager.disconnectWallet();
+      disconnectWallet();
     });
     expect(result.current).toBe(ConnectionState.DISCONNECTED);
   });
 
   it('should handle state transitions correctly', () => {
     const { result } = renderHook(() => useWalletConnectionState());
-    
+
     // Direct verification (skipping connect)
     act(() => {
-      walletStatusManager.verifyWallet(testAddress, testMessage, testSignature);
+      verifyWallet(testAddress, testMessage, testSignature);
     });
     expect(result.current).toBe(ConnectionState.VERIFIED);
-    
+
     // Clear verification (back to connected)
     act(() => {
-      walletStatusManager.clearVerification();
+      clearVerification();
     });
     expect(result.current).toBe(ConnectionState.CONNECTED);
   });

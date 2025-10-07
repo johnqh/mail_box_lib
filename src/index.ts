@@ -65,15 +65,11 @@ export {
   IndexerService,
 
   // Wallet Status Management
-  walletStatusManager,
-  WalletStatusManager,
-  WalletStatusChangeListener,
   getWalletStatus,
   getWalletAddress,
   connectWallet,
   verifyWallet,
   disconnectWallet,
-  subscribeToWalletStatus,
 
   // Services and DI
   ServiceContainer,

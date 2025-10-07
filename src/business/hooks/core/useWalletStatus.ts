@@ -13,13 +13,13 @@ import {
   WalletStatus,
 } from '@johnqh/types';
 import {
+  clearVerification as clearVerificationAction,
   connectWallet as connectWalletAction,
   disconnectWallet as disconnectWalletAction,
-  verifyWallet as verifyWalletAction,
   getWalletConnectionState,
   updateWalletAddress as updateWalletAddressAction,
-  clearVerification as clearVerificationAction,
   useGlobalWalletStatus,
+  verifyWallet as verifyWalletAction,
 } from '../../core/wallet/wallet-status-manager';
 
 /**
@@ -167,6 +167,6 @@ export const useWalletAddress = (): Optional<string> => {
  * @returns Current wallet connection state
  */
 export const useWalletConnectionState = (): ConnectionState => {
-  const [status] = useGlobalWalletStatus();
+  useGlobalWalletStatus(); // Subscribe to changes
   return getWalletConnectionState();
 };
