@@ -22,6 +22,7 @@ interface UseWildduckAuthReturn {
   authenticate: (params: Omit<AuthenticateRequest, 'sess' | 'ip'>) => Promise<AuthenticationResponse>;
   isAuthenticating: boolean;
   authError: Optional<Error>;
+  authData: Optional<AuthenticationResponse>; // Current auth result with userId, token
 
   // PreAuth mutation
   preAuth: (params: Omit<PreAuthRequest, 'sess' | 'ip'>) => Promise<PreAuthResponse>;
@@ -252,6 +253,7 @@ const useWildduckAuth = (config: WildDuckConfig, devMode: boolean = false): UseW
     authenticate: authenticateMutation.mutateAsync,
     isAuthenticating: authenticateMutation.isPending,
     authError: authenticateMutation.error,
+    authData: authenticateMutation.data || null, // Expose auth result (userId, token, etc.)
 
     // PreAuth
     preAuth: preAuthMutation.mutateAsync,
