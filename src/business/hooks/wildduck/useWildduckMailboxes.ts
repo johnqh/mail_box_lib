@@ -57,7 +57,7 @@ interface UseWildduckMailboxesReturn {
  * Hook for WildDuck mailbox operations using React Query
  * Queries are cached and automatically refetched, mutations invalidate related queries
  */
-const useWildduckMailboxes = (config: WildDuckConfig, devMode: boolean = false): UseWildduckMailboxesReturn => {
+const useWildduckMailboxes = (config: WildDuckConfig, devMode: boolean = false, userId: Optional<string> = null): UseWildduckMailboxesReturn => {
   const queryClient = useQueryClient();
 
   // Helper to build headers
@@ -129,7 +129,10 @@ const useWildduckMailboxes = (config: WildDuckConfig, devMode: boolean = false):
   };
 
   // Get cached mailboxes from query cache (used for reading state)
-  const cachedMailboxes = queryClient.getQueryData<MailboxData[]>(['wildduck-mailboxes']) || [];
+  // Use userId parameter to get the correct cached mailboxes
+  const cachedMailboxes = userId
+    ? (queryClient.getQueryData<MailboxData[]>(['wildduck-mailboxes', userId]) || [])
+    : [];
 
   // Create mailbox mutation
   const createMutation = useMutation({
