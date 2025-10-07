@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useStorageService } from '../core/useServices';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
@@ -16,6 +17,39 @@ import type {
   PreAuthResponse,
 } from '../../../types/api/wildduck-responses';
 import { WildDuckMockData } from './mocks';
+
+// Singleton to persist authData across all hook instances
+class AuthDataStore {
+  private authData: Optional<AuthenticationResponse> = null;
+  private listeners: Set<(data: Optional<AuthenticationResponse>) => void> = new Set();
+
+  setAuthData(data: Optional<AuthenticationResponse>) {
+    this.authData = data;
+    this.notifyListeners();
+  }
+
+  getAuthData(): Optional<AuthenticationResponse> {
+    return this.authData;
+  }
+
+  subscribe(listener: (data: Optional<AuthenticationResponse>) => void) {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  private notifyListeners() {
+    this.listeners.forEach(listener => listener(this.authData));
+  }
+
+  clear() {
+    this.authData = null;
+    this.notifyListeners();
+  }
+}
+
+const authDataStore = new AuthDataStore();
 
 interface UseWildduckAuthReturn {
   // Authenticate mutation
@@ -50,6 +84,14 @@ interface UseWildduckAuthReturn {
 const useWildduckAuth = (config: WildDuckConfig, devMode: boolean = false): UseWildduckAuthReturn => {
   const storageService = useStorageService();
   const queryClient = useQueryClient();
+
+  // Subscribe to singleton authData changes
+  const [authData, setAuthData] = useState<Optional<AuthenticationResponse>>(() => authDataStore.getAuthData());
+
+  useEffect(() => {
+    const unsubscribe = authDataStore.subscribe(setAuthData);
+    return unsubscribe;
+  }, []);
 
   // Authenticate mutation
   const authenticateMutation = useMutation({
@@ -106,7 +148,9 @@ const useWildduckAuth = (config: WildDuckConfig, devMode: boolean = false): UseW
         throw new Error(errorMessage);
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Store authData in singleton
+      authDataStore.setAuthData(data);
       // Invalidate auth-related queries
       queryClient.invalidateQueries({ queryKey: ['wildduck-auth-status'] });
     },
@@ -192,6 +236,8 @@ const useWildduckAuth = (config: WildDuckConfig, devMode: boolean = false): UseW
       }
     },
     onSuccess: () => {
+      // Clear authData from singleton
+      authDataStore.clear();
       // Clear all cached data on logout
       queryClient.clear();
     },
@@ -253,7 +299,7 @@ const useWildduckAuth = (config: WildDuckConfig, devMode: boolean = false): UseW
     authenticate: authenticateMutation.mutateAsync,
     isAuthenticating: authenticateMutation.isPending,
     authError: authenticateMutation.error,
-    authData: authenticateMutation.data || null, // Expose auth result (userId, token, etc.)
+    authData, // Expose auth result from singleton (userId, token, etc.)
 
     // PreAuth
     preAuth: preAuthMutation.mutateAsync,

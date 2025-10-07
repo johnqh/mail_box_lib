@@ -1,7 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import axios from 'axios';
 import { WildDuckConfig } from '../../../network/clients/wildduck';
 import type {
+  AuthenticationResponse,
   GetMailboxesResponse,
   MailboxData,
 } from '../../../types/api/wildduck-responses';
@@ -54,10 +56,22 @@ interface UseWildduckMailboxesReturn {
 
 /**
  * Hook for WildDuck mailbox operations using React Query
+ * Automatically fetches mailboxes when user is authenticated
  * Queries are cached and automatically refetched, mutations invalidate related queries
+ *
+ * @param config - WildDuck configuration
+ * @param authData - Authentication data from useWildduckAuth (single source of truth)
+ * @param devMode - Development mode flag
  */
-const useWildduckMailboxes = (config: WildDuckConfig, devMode: boolean = false, userId: Optional<string> = null): UseWildduckMailboxesReturn => {
+const useWildduckMailboxes = (
+  config: WildDuckConfig,
+  authData: Optional<AuthenticationResponse>,
+  _devMode: boolean = false
+): UseWildduckMailboxesReturn => {
   const queryClient = useQueryClient();
+
+  // Get userId from authData (single source of truth)
+  const userId = authData?.id || null;
 
   // Helper to build headers
   const buildHeaders = (): Record<string, string> => {
@@ -120,6 +134,20 @@ const useWildduckMailboxes = (config: WildDuckConfig, devMode: boolean = false, 
   const cachedMailboxes = userId
     ? (queryClient.getQueryData<MailboxData[]>(['wildduck-mailboxes', userId]) || [])
     : [];
+
+  // Auto-fetch mailboxes when user is authenticated
+  useEffect(() => {
+    if (userId && cachedMailboxes.length === 0) {
+      getMailboxes(userId, {
+        counters: true,
+        specialUse: false,
+        showHidden: false,
+        sizes: false,
+      }).catch((error) => {
+        console.error('[useWildduckMailboxes] Auto-fetch failed:', error);
+      });
+    }
+  }, [userId]);
 
   // Create mailbox mutation
   const createMutation = useMutation({

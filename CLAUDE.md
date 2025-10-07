@@ -2,6 +2,15 @@
 
 This document provides context and instructions for AI assistants working on the @johnqh/lib project.
 
+## ⚠️ CRITICAL RULES
+
+**NEVER automatically commit or push changes:**
+- ❌ DO NOT run `git add` without explicit user request
+- ❌ DO NOT run `git commit` without explicit user request
+- ❌ DO NOT run `git push` without explicit user request
+- ✅ ONLY commit/push when user explicitly says "commit" or "push"
+- ✅ ALWAYS wait for user approval before any git operations
+
 ## AI Assistant Quick Start
 
 **Before any task, run these checks:**
