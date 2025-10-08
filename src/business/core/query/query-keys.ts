@@ -5,63 +5,9 @@
  * Following TanStack Query best practices for key structure.
  */
 
-/**
- * Query key factory for the indexer API
- *
- * Structure: [service, resource, ...identifiers, filters]
- */
-// Create base key functions first to avoid circular references
-const indexerBase = () => ['indexer'] as const;
 const wildduckBase = () => ['wildduck'] as const;
 
 const queryKeys = {
-  // Indexer API keys
-  indexer: {
-    all: indexerBase,
-
-    // Username validation
-    users: () => [...indexerBase(), 'users'] as const,
-    validateUsername: (username: string) =>
-      [...indexerBase(), 'users', 'validate', username] as const,
-
-    // Message signing
-    messages: () => [...indexerBase(), 'messages'] as const,
-    message: (
-      chainId: number,
-      walletAddress: string,
-      domain: string,
-      url: string
-    ) =>
-      [
-        ...indexerBase(),
-        'messages',
-        { chainId, walletAddress, domain, url },
-      ] as const,
-
-    // Points system
-    points: () => [...indexerBase(), 'points'] as const,
-    howToEarn: () => [...indexerBase(), 'points', 'how-to-earn'] as const,
-    publicStats: () => [...indexerBase(), 'points', 'public-stats'] as const,
-    siteStats: () => [...indexerBase(), 'points', 'site-stats'] as const,
-
-    // Leaderboards
-    leaderboards: () => [...indexerBase(), 'leaderboards'] as const,
-    leaderboard: (limit?: number, offset?: number) =>
-      [...indexerBase(), 'leaderboards', { limit, offset }] as const,
-    pointsLeaderboard: (count: number) =>
-      [...indexerBase(), 'leaderboards', 'points', { count }] as const,
-
-    // Campaigns
-    campaigns: () => [...indexerBase(), 'campaigns'] as const,
-    campaignsList: () => [...indexerBase(), 'campaigns', 'list'] as const,
-    campaignStats: (campaignId: string) =>
-      [...indexerBase(), 'campaigns', 'stats', campaignId] as const,
-
-    // Solana
-    solana: () => [...indexerBase(), 'solana'] as const,
-    solanaStatus: () => [...indexerBase(), 'solana', 'status'] as const,
-  },
-
   // WildDuck API keys
   wildduck: {
     all: wildduckBase,
@@ -148,7 +94,7 @@ const createQueryKey = (
 /**
  * Helper to get all keys for a service (useful for invalidation)
  */
-const getServiceKeys = (service: 'indexer' | 'wildduck') => {
+const getServiceKeys = (service: 'wildduck') => {
   return queryKeys[service].all();
 };
 

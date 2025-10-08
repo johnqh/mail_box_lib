@@ -6,7 +6,6 @@
 interface EnvironmentVariables {
   VITE_WILDDUCK_API_TOKEN?: string;
   VITE_WILDDUCK_BACKEND_URL?: string;
-  VITE_INDEXER_BACKEND_URL?: string;
   VITE_REVENUECAT_API_KEY?: string;
   VITE_WALLETCONNECT_PROJECT_ID?: string;
   VITE_PRIVY_APP_ID?: string;
@@ -58,7 +57,6 @@ interface EnvProvider {
 interface AppConfig {
   wildDuckApiToken: string;
   wildDuckBackendUrl: string;
-  indexerBackendUrl: string;
   revenueCatApiKey: string;
   walletConnectProjectId: string;
   privyAppId: string;

@@ -72,7 +72,6 @@ interface PlatformNetwork {
 interface ServiceContainerConfig {
   wildduckBaseUrl: string;
   wildduckApiToken?: string;
-  indexerBackendUrl: string;
   revenueCatApiKey?: string;
   firebaseConfig?: any;
   platform: PlatformType;
