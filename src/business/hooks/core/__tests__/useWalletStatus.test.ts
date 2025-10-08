@@ -15,7 +15,7 @@ import {
   verifyWallet,
   clearVerification,
 } from '../../../core/wallet/wallet-status-manager';
-import { ConnectionState } from '@johnqh/types';
+import { ChainType, ConnectionState } from '@johnqh/types';
 
 describe('useWalletStatus', () => {
   // Reset wallet state before each test
@@ -24,6 +24,7 @@ describe('useWalletStatus', () => {
   });
 
   const testAddress = '0x742d35Cc6e3c05652aA6E10f35F74c29C5881398';
+  const testChainType = ChainType.EVM;
   const testMessage = 'Authenticate with 0xMail';
   const testSignature = '0x1234567890abcdef';
 
@@ -44,11 +45,12 @@ describe('useWalletStatus', () => {
       const { result } = renderHook(() => useWalletStatus());
       
       act(() => {
-        result.current.connectWallet(testAddress);
+        result.current.connectWallet(testAddress, testChainType);
       });
       
       expect(result.current.status).toEqual({
         walletAddress: testAddress,
+        chainType: testChainType,
       });
       expect(result.current.walletAddress).toBe(testAddress);
       expect(result.current.connectionState).toBe(ConnectionState.CONNECTED);
@@ -60,11 +62,12 @@ describe('useWalletStatus', () => {
       const { result } = renderHook(() => useWalletStatus());
       
       act(() => {
-        result.current.verifyWallet(testAddress, testMessage, testSignature);
+        result.current.verifyWallet(testAddress, testChainType, testMessage, testSignature);
       });
       
       expect(result.current.status).toEqual({
         walletAddress: testAddress,
+        chainType: testChainType,
         message: testMessage,
         signature: testSignature,
       });
@@ -78,7 +81,7 @@ describe('useWalletStatus', () => {
       
       // First connect
       act(() => {
-        result.current.connectWallet(testAddress);
+        result.current.connectWallet(testAddress, testChainType);
       });
       expect(result.current.isConnected).toBe(true);
       
@@ -101,7 +104,7 @@ describe('useWalletStatus', () => {
 
       // External change via direct function
       act(() => {
-        connectWallet(testAddress);
+        connectWallet(testAddress, testChainType);
       });
 
       expect(result.current.walletAddress).toBe(testAddress);
@@ -109,7 +112,7 @@ describe('useWalletStatus', () => {
 
       // Another external change
       act(() => {
-        verifyWallet(testAddress, testMessage, testSignature);
+        verifyWallet(testAddress, testChainType, testMessage, testSignature);
       });
 
       expect(result.current.isVerified).toBe(true);
@@ -125,13 +128,13 @@ describe('useWalletStatus', () => {
       
       // First verify wallet
       act(() => {
-        result.current.verifyWallet(testAddress, testMessage, testSignature);
+        result.current.verifyWallet(testAddress, testChainType, testMessage, testSignature);
       });
       expect(result.current.isVerified).toBe(true);
       
       // Update address
       act(() => {
-        result.current.updateWalletAddress(newAddress);
+        result.current.updateWalletAddress(newAddress, testChainType);
       });
       
       expect(result.current.walletAddress).toBe(newAddress);
@@ -145,7 +148,7 @@ describe('useWalletStatus', () => {
       
       // First verify wallet
       act(() => {
-        result.current.verifyWallet(testAddress, testMessage, testSignature);
+        result.current.verifyWallet(testAddress, testChainType, testMessage, testSignature);
       });
       expect(result.current.isVerified).toBe(true);
       
@@ -176,7 +179,7 @@ describe('useWalletStatus', () => {
       
       // Trigger a re-render by connecting wallet
       act(() => {
-        result.current.connectWallet(testAddress);
+        result.current.connectWallet(testAddress, testChainType);
       });
       
       rerender();
@@ -197,6 +200,7 @@ describe('useWalletAddress', () => {
   });
 
   const testAddress = '0x742d35Cc6e3c05652aA6E10f35F74c29C5881398';
+  const testChainType = ChainType.EVM;
 
   it('should start with undefined address', () => {
     const { result } = renderHook(() => useWalletAddress());
@@ -207,7 +211,7 @@ describe('useWalletAddress', () => {
     const { result } = renderHook(() => useWalletAddress());
 
     act(() => {
-      connectWallet(testAddress);
+      connectWallet(testAddress, testChainType);
     });
 
     expect(result.current).toBe(testAddress);
@@ -218,7 +222,7 @@ describe('useWalletAddress', () => {
 
     // Connect first
     act(() => {
-      connectWallet(testAddress);
+      connectWallet(testAddress, testChainType);
     });
     expect(result.current).toBe(testAddress);
 
@@ -236,6 +240,7 @@ describe('useWalletConnectionState', () => {
   });
 
   const testAddress = '0x742d35Cc6e3c05652aA6E10f35F74c29C5881398';
+  const testChainType = ChainType.EVM;
   const testMessage = 'Authenticate with 0xMail';
   const testSignature = '0x1234567890abcdef';
 
@@ -249,13 +254,13 @@ describe('useWalletConnectionState', () => {
 
     // Connect wallet
     act(() => {
-      connectWallet(testAddress);
+      connectWallet(testAddress, testChainType);
     });
     expect(result.current).toBe(ConnectionState.CONNECTED);
 
     // Verify wallet
     act(() => {
-      verifyWallet(testAddress, testMessage, testSignature);
+      verifyWallet(testAddress, testChainType, testMessage, testSignature);
     });
     expect(result.current).toBe(ConnectionState.VERIFIED);
 
@@ -271,7 +276,7 @@ describe('useWalletConnectionState', () => {
 
     // Direct verification (skipping connect)
     act(() => {
-      verifyWallet(testAddress, testMessage, testSignature);
+      verifyWallet(testAddress, testChainType, testMessage, testSignature);
     });
     expect(result.current).toBe(ConnectionState.VERIFIED);
 

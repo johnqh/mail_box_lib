@@ -111,6 +111,10 @@ export {
   UseWalletStatusReturn,
   useWalletAddress,
   useWalletConnectionState,
+  useWalletAccounts,
+  WildDuckAccount,
+  useSelectedAccount,
+  useGlobalSelectedAccount,
 
   // Contract Hooks
   useContractConfig,
@@ -723,6 +727,7 @@ export { WalletAccount } from '@johnqh/types';
 // Email transformation utilities
 export {
   transformWalletAccountsToEmailGroups,
+  transformWildDuckAccountsToWalletAccounts,
   flattenEmailGroups,
   chainTypeToString,
   WalletEmailGroup,

@@ -4,6 +4,7 @@
  */
 
 import { ChainType, NameServiceAccount } from '@johnqh/types';
+import { WildDuckAccount } from '../../business/hooks/core/useWalletAccounts';
 
 export interface WalletAccount {
   walletAddress: string;
@@ -75,6 +76,45 @@ export function transformWalletAccountsToEmailGroups(
       ),
     };
   });
+}
+
+/**
+ * Transform WildDuckAccount[] to WalletAccount[] for email selection UI
+ * Groups accounts by wallet address and collects names
+ */
+export function transformWildDuckAccountsToWalletAccounts(
+  wildDuckAccounts: WildDuckAccount[]
+): WalletAccount[] {
+  if (!wildDuckAccounts || wildDuckAccounts.length === 0) return [];
+
+  // Group accounts by walletAddress
+  const walletMap = new Map<string, WalletAccount>();
+
+  for (const account of wildDuckAccounts) {
+    const { walletAddress, chainType, username, entitled } = account;
+
+    if (!walletMap.has(walletAddress)) {
+      // Create new wallet account entry
+      walletMap.set(walletAddress, {
+        walletAddress,
+        chainType,
+        names: [],
+      });
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const walletAccount = walletMap.get(walletAddress)!;
+
+    // If username is different from walletAddress, it's a name service account
+    if (username !== walletAddress) {
+      walletAccount.names.push({
+        name: username,
+        entitled,
+      });
+    }
+  }
+
+  return Array.from(walletMap.values());
 }
 
 /**

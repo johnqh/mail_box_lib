@@ -4,6 +4,7 @@
  */
 
 import {
+  ChainType,
   ConnectionState,
   getWalletConnectionState as getConnectionStateFromStatus,
   Optional,
@@ -61,13 +62,17 @@ export const isWalletVerified = (): boolean => {
 /**
  * Connect wallet with address only (not verified yet)
  */
-export const connectWallet = (walletAddress: string): void => {
+export const connectWallet = (
+  walletAddress: string,
+  chainType: ChainType
+): void => {
   if (!walletAddress || walletAddress.trim() === '') {
     throw new Error('Wallet address is required');
   }
 
   const newStatus: WalletStatus = {
     walletAddress: walletAddress.trim(),
+    chainType,
   };
 
   setGlobalState('walletStatus', newStatus);
@@ -78,6 +83,7 @@ export const connectWallet = (walletAddress: string): void => {
  */
 export const verifyWallet = (
   walletAddress: string,
+  chainType: ChainType,
   message: string,
   signature: string
 ): void => {
@@ -93,6 +99,7 @@ export const verifyWallet = (
 
   const newStatus: WalletStatus = {
     walletAddress: walletAddress.trim(),
+    chainType,
     message: message.trim(),
     signature: signature.trim(),
   };
@@ -110,7 +117,10 @@ export const disconnectWallet = (): void => {
 /**
  * Update wallet address while preserving verification status
  */
-export const updateWalletAddress = (walletAddress: string): void => {
+export const updateWalletAddress = (
+  walletAddress: string,
+  chainType: ChainType
+): void => {
   if (!walletAddress || walletAddress.trim() === '') {
     throw new Error('Wallet address is required');
   }
@@ -120,11 +130,12 @@ export const updateWalletAddress = (walletAddress: string): void => {
     const newStatus: WalletStatus = {
       ...currentStatus,
       walletAddress: walletAddress.trim(),
+      chainType,
     };
     setGlobalState('walletStatus', newStatus);
   } else {
     // If no current status, treat as new connection
-    connectWallet(walletAddress);
+    connectWallet(walletAddress, chainType);
   }
 };
 
@@ -136,6 +147,7 @@ export const clearVerification = (): void => {
   if (currentStatus) {
     const newStatus: WalletStatus = {
       walletAddress: currentStatus.walletAddress,
+      chainType: currentStatus.chainType,
     };
     setGlobalState('walletStatus', newStatus);
   }

@@ -16,3 +16,5 @@ export * from './ServiceProvider';
 
 // Wallet status hooks
 export * from './useWalletStatus';
+export * from './useWalletAccounts';
+export * from './useSelectedAccount';

@@ -37,17 +37,24 @@ export interface UseWalletStatusReturn {
   /** Whether wallet is verified */
   isVerified: boolean;
   /** Connect wallet with address */
-  connectWallet: (walletAddress: string) => void;
+  connectWallet: (
+    walletAddress: string,
+    chainType: import('@johnqh/types').ChainType
+  ) => void;
   /** Verify wallet with message and signature */
   verifyWallet: (
     walletAddress: string,
+    chainType: import('@johnqh/types').ChainType,
     message: string,
     signature: string
   ) => void;
   /** Disconnect wallet */
   disconnectWallet: () => void;
   /** Update wallet address while preserving verification status */
-  updateWalletAddress: (walletAddress: string) => void;
+  updateWalletAddress: (
+    walletAddress: string,
+    chainType: import('@johnqh/types').ChainType
+  ) => void;
   /** Clear verification data while keeping wallet connected */
   clearVerification: () => void;
 }
@@ -102,13 +109,21 @@ export const useWalletStatus = (): UseWalletStatusReturn => {
   const [status] = useGlobalWalletStatus();
 
   // Memoized action functions
-  const connectWallet = useCallback((walletAddress: string) => {
-    connectWalletAction(walletAddress);
-  }, []);
+  const connectWallet = useCallback(
+    (walletAddress: string, chainType: import('@johnqh/types').ChainType) => {
+      connectWalletAction(walletAddress, chainType);
+    },
+    []
+  );
 
   const verifyWallet = useCallback(
-    (walletAddress: string, message: string, signature: string) => {
-      verifyWalletAction(walletAddress, message, signature);
+    (
+      walletAddress: string,
+      chainType: import('@johnqh/types').ChainType,
+      message: string,
+      signature: string
+    ) => {
+      verifyWalletAction(walletAddress, chainType, message, signature);
     },
     []
   );
@@ -117,9 +132,12 @@ export const useWalletStatus = (): UseWalletStatusReturn => {
     disconnectWalletAction();
   }, []);
 
-  const updateWalletAddress = useCallback((walletAddress: string) => {
-    updateWalletAddressAction(walletAddress);
-  }, []);
+  const updateWalletAddress = useCallback(
+    (walletAddress: string, chainType: import('@johnqh/types').ChainType) => {
+      updateWalletAddressAction(walletAddress, chainType);
+    },
+    []
+  );
 
   const clearVerification = useCallback(() => {
     clearVerificationAction();
