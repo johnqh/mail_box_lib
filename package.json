@@ -120,6 +120,7 @@
     "@johnqh/indexer_client": "^0.0.2",
     "@johnqh/mail_box_contracts": "^1.8.9",
     "@johnqh/types": "^1.8.16",
+    "@johnqh/wildduck_client": "^0.0.2",
     "@solana/web3.js": "^1.98.4",
     "@tanstack/react-query": "^5.90.1",
     "axios": "^1.12.1",
