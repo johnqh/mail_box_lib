@@ -77,13 +77,8 @@ export * from './business/ui';
 // Mailbox types
 export * from './mailbox';
 
-// WildDuck shared types
-export * from './wildduck';
-
 // Common types and validation utilities
 export * from './common';
 
 // IndexerClient API response types are now in @johnqh/types
-
-// WildDuckAPI response types
-export * from './api/wildduck-responses';
+// WildDuck types are now in @johnqh/wildduck_client

@@ -1,9 +1,17 @@
-import { Optional } from '@johnqh/types';
 /**
  * Platform-agnostic dependency injection container
  * Manages all services and their dependencies
  */
 
+import { PlatformType } from '@johnqh/types';
+import {
+  ServiceKeys as DIServiceKeys,
+  PlatformAnalytics,
+  PlatformNetwork,
+  PlatformNotifications,
+  PlatformStorage,
+  PlatformTheme,
+} from '@johnqh/di';
 import { EmailService, MailboxService } from '../../../types/services';
 import {
   AuthBusinessLogic,
@@ -15,7 +23,6 @@ import {
   DefaultEmailOperations,
   EmailOperations,
 } from '../email/email-operations';
-import { PlatformType } from '@johnqh/types';
 import { DefaultFolderOperations } from '../folder/folder-operations';
 import {
   DefaultMailboxOperations,
@@ -26,52 +33,8 @@ import {
   NavigationOperations,
 } from '../navigation/navigation-state';
 
-// Storage interface for platform abstraction
-interface PlatformStorage {
-  getItem(key: string): Promise<Optional<string>> | Optional<string>;
-  setItem(key: string, value: string): Promise<void> | void;
-  removeItem(key: string): Promise<void> | void;
-  clear(): Promise<void> | void;
-}
-
-// Analytics interface for platform abstraction
-interface PlatformAnalytics {
-  trackEvent(event: string, properties: Record<string, any>): void;
-  setUserProperty(key: string, value: string): void;
-  setUserId(userId: string): void;
-  isEnabled(): boolean;
-}
-
-// Notification interface for platform abstraction
-interface PlatformNotifications {
-  showNotification(
-    title: string,
-    message: string,
-    type: 'info' | 'success' | 'warning' | 'error'
-  ): void;
-  requestPermission(): Promise<boolean>;
-  scheduleNotification(title: string, message: string, delay: number): void;
-}
-
-// Theme interface for platform abstraction
-interface PlatformTheme {
-  applyTheme(theme: string): void;
-  applyFontSize(fontSize: string): void;
-  getCurrentTheme(): string;
-  watchSystemTheme(callback: (theme: string) => void): () => void;
-}
-
-// Network interface for platform abstraction
-interface PlatformNetwork {
-  request(url: string, options: RequestInit): Promise<Response>;
-  isOnline(): boolean;
-  watchNetworkStatus(callback: (isOnline: boolean) => void): () => void;
-}
-
 // Configuration interface
 interface ServiceContainerConfig {
-  wildduckBaseUrl: string;
-  wildduckApiToken?: string;
   revenueCatApiKey?: string;
   firebaseConfig?: any;
   platform: PlatformType;
@@ -140,20 +103,15 @@ class ServiceContainer {
 
 /**
  * Service keys for type-safe service resolution
+ * Extends platform service keys from @johnqh/di with app-specific keys
  */
 const ServiceKeys = {
-  // Platform services
-  STORAGE: 'storage',
-  ANALYTICS: 'analytics',
-  NOTIFICATIONS: 'notifications',
-  THEME: 'theme',
-  NETWORK: 'network',
-  PERSISTENCE: 'persistence',
+  // Platform services (from @johnqh/di)
+  ...DIServiceKeys,
 
   // Business logic
   EMAIL_OPERATIONS: 'emailOperations',
   MAILBOX_OPERATIONS: 'mailboxOperations',
-  FOLDER_OPERATIONS: 'folderOperations',
   NAVIGATION_OPERATIONS: 'navigationOperations',
   AUTH_BUSINESS_LOGIC: 'authBusinessLogic',
   EMAIL_ADDRESS_BUSINESS_LOGIC: 'emailAddressBusinessLogic',

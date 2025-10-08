@@ -23,9 +23,6 @@ export * from './nameservice';
 // Smart contract utilities
 export * from './contracts';
 
-// WildDuck utilities
-export * from './wildduck';
-
 // General utilities
 export * from './url-params';
 export * from './document-helpers';

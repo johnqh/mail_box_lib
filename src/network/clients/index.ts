@@ -2,4 +2,4 @@
  * API clients for external services
  */
 
-export * from './wildduck';
+// No clients exported - use dedicated client packages (@johnqh/wildduck_client, @johnqh/indexer_client)

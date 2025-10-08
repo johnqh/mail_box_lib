@@ -111,7 +111,6 @@ export {
   useWalletAddress,
   useWalletConnectionState,
   useWalletAccounts,
-  WildDuckAccount,
   useSelectedAccount,
   useGlobalSelectedAccount,
 
@@ -135,51 +134,8 @@ export {
   SNSResolutionResponse,
   WalletResolutionResponse,
 
-  // WildDuck Hooks
-  useWildduckHealth,
-  UseWildduckHealthReturn,
-  useWildduckSettings,
-  UseWildduckSettingsReturn,
-  useWildduckMessages,
-  UseWildduckMessagesReturn,
-  useWildduckMailboxes,
-  UseWildduckMailboxesReturn,
-  useWildduckUsers,
-  UseWildduckUsersReturn,
-  useWildduckFilters,
-  UseWildduckFiltersReturn,
-  useWildduckAddresses,
-  UseWildduckAddressesReturn,
-  useWildduckAuth,
-  UseWildduckAuthReturn,
-
   // KYC Hooks
   useKYC,
-
-  // WildDuck Query Hooks
-  useWildduckHealthQuery,
-  useWildduckUsersListQuery,
-  useWildduckUserQuery,
-  useWildduckUserAddressesQuery,
-  useWildduckUserMessagesQuery,
-  useWildduckMessageQuery,
-  useWildduckUserFiltersQuery,
-  useWildduckUserSettingsQuery,
-  useWildduckUserMailboxesQuery,
-  useWildduckAuthStatusQuery,
-  useWildduckSearchMessagesQuery,
-
-  // WildDuck Types
-  WildduckHealthResponse,
-  WildduckHealthStatus,
-  WildduckUserSettings,
-  WildduckFilter,
-  WildduckAuthStatusResponse,
-  WildduckUser,
-  WildduckAddress,
-  WildduckSettings,
-  WildDuckMockData,
-  WildduckMailbox,
 
   // Utility Hooks
   useArrayState,
@@ -203,15 +159,9 @@ export {
   // Helper Types
   EmailAddressBusinessLogic,
   EmailAddressHelper,
-  GetMessagesOptions,
   ParsedEmailAddress,
-  SendMessageParams,
   ServiceKeys,
   UserProperties,
-
-  // Filter and Message Types
-  CreateFilterParams,
-  UpdateFilterParams,
 } from './business';
 
 // Platform Types (from container/dependency-container)
@@ -419,7 +369,6 @@ export {
   isAddressValidationResponse,
   isWalletConnected,
   isWalletVerified,
-  isWildDuckRequest,
   isZeroAddress,
   logger,
   normalizeAddress,
@@ -454,16 +403,7 @@ export {
   WalletDetector,
 } from '@johnqh/mail_box_contracts';
 
-// Infrastructure - Network clients only
-export {
-  // WildDuck Client
-  WildDuckAPI,
-  WildDuckConfig,
-  createWildDuckAPI,
-  emailToUserId,
-  validateUserId,
-  isValidObjectId,
-} from './network';
+// Infrastructure - Network clients moved to dedicated packages
 
 // Utilities - General utility functions
 export {
@@ -491,32 +431,11 @@ export {
   withErrorBoundary,
 
   // Auth Utils
-  CreateForwardedAddressParams,
-  CreateUserParams,
-  ForwardMessageParams,
-  SearchApplyParams,
   SigninMessage,
-  SubmitMessageParams,
-  UpdateForwardedAddressParams,
-  UpdateUserParams,
-  UploadMessageParams,
-  WildDuckAPIClient,
-  WildDuckAddressHelper,
-  WildDuckAuthHelper,
-  WildDuckAuthResult,
-  WildDuckMessageHelper,
-  WildDuckUserHelper,
   createAuthMessage,
-  createWildDuckAuthMessage,
-  authenticateWithPassword,
-  clearWildDuckAuth,
   createSIWEMessage,
   createSolanaSignMessage,
-  formatSignatureForWildDuck,
   detectAddressType,
-  getAuthenticatedUsers,
-  getWildDuckStorageKeys,
-  getWildDuckUserId,
   isValidBlockchainUsername,
 
   // Blockchain Utils
@@ -600,8 +519,6 @@ export {
   GraphQLWhereInput,
   isGraphQLResponse,
   // Type guards and validators
-  isWildDuckAuthResponse,
-  isWildDuckMessage,
   Mailbox,
   MailboxService,
   MockDataProvider,
@@ -615,23 +532,6 @@ export {
   validateObjectId,
   validateWalletAddress,
   ValidationError,
-  WildDuckAddress,
-  WildDuckAddressResponse,
-  // API types
-  WildDuckAuthRequest,
-  WildDuckAuthResponse,
-  WildDuckCreateMailboxRequest,
-  WildDuckCreateUserRequest,
-  WildDuckMessageAddress,
-  WildDuckMessageAttachment,
-  WildDuckMessageBase,
-  WildDuckMessageDetail,
-  WildDuckPreAuthRequest,
-  WildDuckPreAuthResponse,
-  WildDuckSendMessageRequest,
-  WildDuckUpdateUserRequest,
-  WildDuckUser,
-  WildDuckUserResponse,
 } from './types';
 
 // Local business types with extensions
@@ -641,7 +541,6 @@ export { WalletAccount } from '@johnqh/types';
 // Email transformation utilities
 export {
   transformWalletAccountsToEmailGroups,
-  transformWildDuckAccountsToWalletAccounts,
   flattenEmailGroups,
   chainTypeToString,
   WalletEmailGroup,
