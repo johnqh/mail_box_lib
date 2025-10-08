@@ -1,6 +1,6 @@
 {
   "name": "@johnqh/lib",
-  "version": "3.3.10",
+  "version": "3.3.11",
   "description": "React Native-compatible shared utilities library for 0xmail.box projects with Optional<T> type safety patterns and comprehensive blockchain integration",
   "type": "module",
   "main": "dist/index.js",
