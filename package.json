@@ -119,7 +119,7 @@
     "@johnqh/di": "^1.3.27",
     "@johnqh/indexer_client": "^0.0.1",
     "@johnqh/mail_box_contracts": "^1.8.2",
-    "@johnqh/types": "^1.8.11",
+    "@johnqh/types": "^1.8.15",
     "@solana/web3.js": "^1.98.4",
     "@tanstack/react-query": "^5.90.1",
     "axios": "^1.12.1",
