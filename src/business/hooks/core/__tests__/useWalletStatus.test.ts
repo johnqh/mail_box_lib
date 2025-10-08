@@ -14,7 +14,7 @@ import {
   connectWallet,
   verifyWallet,
   clearVerification,
-} from '../../../core/wallet/wallet-status-manager';
+} from '../useWalletStatus';
 import { ChainType, ConnectionState } from '@johnqh/types';
 
 describe('useWalletStatus', () => {
