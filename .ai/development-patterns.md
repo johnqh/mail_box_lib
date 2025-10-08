@@ -182,77 +182,28 @@ export const useMyFeature = () => {
 };
 ```
 
-### 2. Indexer Hook Pattern
+### 2. Async Operation Hook Pattern
 
 ```typescript
-// src/business/hooks/indexer/useIndexerMyFeature.ts
+// src/business/hooks/data/useAsyncOperation.ts
 import { useCallback, useState } from 'react';
-import { IndexerClient } from '../../../network/clients/indexer';
+import { Optional } from '@johnqh/types';
 
-export const useIndexerMyFeature = (endpointUrl: string, dev: boolean) => {
+export const useAsyncOperation = (config: OperationConfig) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const client = new IndexerClient(endpointUrl, dev);
+  const [error, setError] = useState<Optional<string>>(null);
+  const [data, setData] = useState<Optional<OperationResult>>(null);
 
-  const myFeatureAction = useCallback(async (param: string) => {
+  const executeOperation = useCallback(async (param: string) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      const result = await client.myFeatureEndpoint(param);
+      const result = await performOperation(config, param);
+      setData(result);
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Feature operation failed';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [client]);
-
-  return { 
-    myFeatureAction, 
-    isLoading, 
-    error, 
-    clearError: () => setError(null) 
-  };
-};
-```
-
-### 3. WildDuck Hook Pattern
-
-```typescript
-// src/business/hooks/wildduck/useWildduckMyFeature.ts
-import { useCallback, useState } from 'react';
-import { WildDuckConfig } from '../../../network/clients/wildduck';
-import axios from 'axios';
-
-export const useWildduckMyFeature = (config: WildDuckConfig) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const myFeatureAction = useCallback(async (param: string) => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      };
-
-      if (config.cloudflareWorkerUrl) {
-        headers['Authorization'] = `Bearer ${config.apiToken}`;
-        headers['X-App-Source'] = '0xmail-box';
-      } else {
-        headers['X-Access-Token'] = config.apiToken;
-      }
-
-      const response = await axios.post(`${apiUrl}/my-feature`, { param }, { headers });
-      return response.data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'WildDuck operation failed';
+      const errorMessage = err instanceof Error ? err.message : 'Operation failed';
       setError(errorMessage);
       throw err;
     } finally {
@@ -260,14 +211,20 @@ export const useWildduckMyFeature = (config: WildDuckConfig) => {
     }
   }, [config]);
 
-  return { 
-    myFeatureAction, 
-    isLoading, 
-    error, 
-    clearError: () => setError(null) 
+  return {
+    executeOperation,
+    data,
+    isLoading,
+    error,
+    clearError: () => setError(null),
+    clearData: () => setData(null)
   };
 };
 ```
+
+**Note:** WildDuck and Indexer hooks have been moved to separate packages:
+- `@johnqh/wildduck_client` - Email server operations
+- `@johnqh/indexer_client` - Blockchain indexing operations
 
 ## 🧪 Testing Patterns
 

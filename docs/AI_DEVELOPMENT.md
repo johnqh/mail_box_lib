@@ -39,11 +39,14 @@ touch src/business/core/my-service/__tests__/my-service-operations.test.ts
 
 #### 2. Updating API Clients
 When backend APIs change:
-1. Check the actual API implementation in linked projects (`./indexer`, `./wildduck`)
-2. Update the client in `src/network/clients/`
-3. Update corresponding hooks in `src/business/hooks/`
-4. Run `npm run typecheck` to catch signature mismatches
-5. Update tests to reflect new behavior
+1. Update the client in `src/network/clients/`
+2. Update corresponding hooks in `src/business/hooks/`
+3. Run `npm run typecheck` to catch signature mismatches
+4. Update tests to reflect new behavior
+
+**Note:** WildDuck and Indexer API clients are now in separate packages:
+- `@johnqh/wildduck_client` for email server operations
+- `@johnqh/indexer_client` for blockchain indexing
 
 #### 3. Platform-Specific Implementations
 ```typescript
@@ -64,21 +67,23 @@ export class ReactNativeStorageService implements StorageService {
 
 ### API Signature Patterns
 
-#### Current Indexer API Requirements
-All protected endpoints now require these parameters:
-- `walletAddress: string` - The user's wallet address
-- `signature: string` - Cryptographic signature
-- `message: string` - The message that was signed
+#### Authentication Patterns
+API clients should follow consistent authentication patterns:
 
 ```typescript
-// Example of updated API call
-await indexerClient.getEmailAddresses(walletAddress, signature, message);
-```
+// Configuration-based authentication
+interface APIConfig {
+  apiUrl: string;
+  apiToken: string;
+  options?: RequestOptions;
+}
 
-#### Points API Endpoints
-- `GET /api/points/balance/:address` - Public, no signature needed
-- `GET /api/points/leaderboard/:count` - Public, no signature needed  
-- `POST /api/points/rewards/add` - Requires signature verification
+// Token-based authentication
+const headers = {
+  'Authorization': `Bearer ${apiToken}`,
+  'Content-Type': 'application/json'
+};
+```
 
 ### Testing Patterns
 
@@ -97,13 +102,13 @@ describe('EmailOperations', () => {
 #### Hook Tests
 ```typescript
 // Use React Testing Library for hooks
-import { renderHook } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 
-describe('useIndexerMail', () => {
-  it('should handle signature verification', async () => {
-    const { result } = renderHook(() => useIndexerMail());
+describe('useFeature', () => {
+  it('should handle operations correctly', async () => {
+    const { result } = renderHook(() => useFeature(config));
     await act(async () => {
-      await result.current.verifySignature(wallet, signature, message);
+      await result.current.executeAction(param);
     });
     expect(result.current.error).toBeNull();
   });
@@ -201,11 +206,11 @@ When things go wrong, check these in order:
 
 ### External Dependencies
 
-#### Symbolic Links
-- `./indexer` → Points to mail_box_indexer project
-- `./wildduck` → Points to wildduck email server
+#### Separated Packages
+- `@johnqh/wildduck_client` → WildDuck email server integration
+- `@johnqh/indexer_client` → Blockchain indexer integration
 
-These are external projects. Check their APIs when client calls fail.
+These are now separate npm packages with their own documentation.
 
 #### Key Libraries
 - `@solana/web3.js` - Solana blockchain integration

@@ -28,6 +28,10 @@ This document provides a comprehensive technical overview of the @johnqh/lib arc
 ├── @tanstack/react-query (v5.87.4)        # Data fetching
 ├── viem (v2.37.5)                         # Ethereum client
 └── @solana/web3.js (v1.98.4)             # Solana client
+
+Separated Packages (now independent):
+├── @johnqh/wildduck_client                # Email server integration
+└── @johnqh/indexer_client                 # Blockchain indexer integration
 ```
 
 ## 🎯 Core Design Principles
@@ -79,12 +83,10 @@ network/clients/ ←────────────────────
 business/
 ├── core/           # Pure business logic (no React)
 │   ├── auth/       # Authentication operations
-│   ├── email/      # Email management
-│   ├── mailbox/    # Mailbox operations
+│   ├── analytics/  # Analytics operations
+│   ├── navigation/ # Navigation state
 │   └── wallet/     # Wallet management
 ├── hooks/          # React hooks layer
-│   ├── indexer/    # mail_box_indexer API hooks
-│   ├── wildduck/   # WildDuck API hooks
 │   ├── core/       # Utility hooks
 │   └── contracts/  # Smart contract hooks
 └── context/        # React Context providers
@@ -103,73 +105,54 @@ types/
 ```
 utils/
 ├── auth/           # Authentication utilities
-├── blockchain/     # Blockchain utilities  
-├── contracts/      # Contract utilities
-├── indexer/        # Indexer utilities
-└── nameservice/    # ENS/SNS utilities
+├── blockchain/     # Blockchain utilities
+└── contracts/      # Contract utilities
 ```
 
 ### `/src/network/` - API Clients
 ```
 network/
-└── clients/
-    ├── indexer.ts  # IndexerClient for mail_box_indexer
-    └── wildduck.ts # WildDuckAPI for email services
+└── clients/        # Core API client implementations
 ```
 
 ## 🔌 API Integration Architecture
 
-### Indexer API (mail_box_indexer v2.2.0)
-```
-IndexerClient → HTTP/GraphQL → mail_box_indexer
-    │
-    ├── Address validation & management
-    ├── Email address resolution
-    ├── Points & rewards system
-    ├── Campaign management
-    └── Solana wallet integration
-```
+### Separated API Clients
 
-**Authentication Pattern:**
-- Signature-based authentication via headers
-- `x-signature` and `x-message` for GET requests
-- Body signature for POST requests
+API integrations for WildDuck and Indexer have been moved to dedicated packages:
 
-### WildDuck API (Email Backend)
-```
-WildDuckAPI → HTTPS → 0xmail.box
-    │
-    ├── User management
-    ├── Mailbox operations
-    ├── Message handling
-    └── Address management
-```
+- **@johnqh/wildduck_client**: Email server operations (user management, mailboxes, messages)
+- **@johnqh/indexer_client**: Blockchain indexing (address validation, points, rewards)
+
+**Benefits:**
+- Cleaner separation of concerns
+- Independent versioning
+- Smaller bundle sizes
+- Focused documentation
 
 **Configuration Pattern:**
 ```typescript
-interface WildDuckConfig {
-  backendUrl?: string;
-  cloudflareWorkerUrl?: string;
+interface APIConfig {
+  apiUrl: string;
   apiToken: string;
+  options?: RequestOptions;
 }
 ```
 
 ## 🧩 Hook Patterns
 
-### Indexer Hooks Pattern
+### Core Hook Pattern
 ```typescript
-const useIndexerFeature = (endpointUrl: string, dev: boolean) => {
-  const client = new IndexerClient(endpointUrl, dev);
-  
+const useFeature = (config: FeatureConfig) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
+  const [error, setError] = useState<Optional<string>>(null);
+
   const executeAction = useCallback(async (param: string) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      const result = await client.apiMethod(param);
+      const result = await performOperation(param);
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Operation failed';
@@ -178,23 +161,15 @@ const useIndexerFeature = (endpointUrl: string, dev: boolean) => {
     } finally {
       setIsLoading(false);
     }
-  }, [client]);
-  
+  }, [config]);
+
   return { executeAction, isLoading, error, clearError: () => setError(null) };
 };
 ```
 
-### WildDuck Hooks Pattern
-```typescript
-const useWildduckFeature = (config: WildDuckConfig) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Implementation using config
-  
-  return { /* hook interface */ };
-};
-```
+**Note:** WildDuck and Indexer hooks are now in separate packages:
+- `@johnqh/wildduck_client` - Email server hooks
+- `@johnqh/indexer_client` - Blockchain indexer hooks
 
 ## 🔄 Data Flow Architecture
 

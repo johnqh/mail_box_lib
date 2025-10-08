@@ -53,15 +53,11 @@ npm run performance-check # Performance monitoring
 src/
 ├── business/           # ✅ Core business logic (AI: modify here for features)
 │   ├── hooks/         # React hooks (AI: extend functionality here)
-│   │   ├── indexer/   # Indexer API hooks - (endpointUrl, dev) params
-│   │   ├── wildduck/  # WildDuck hooks - (config: WildDuckConfig) params
 │   │   ├── contracts/ # Blockchain contract hooks
 │   │   └── core/      # Core utility hooks
 │   └── core/          # Domain operations (AI: business rules here)
 ├── network/           # ✅ API clients (AI: update endpoints here)
-│   └── clients/
-│       ├── indexer.ts # IndexerClient with dev mode support
-│       └── wildduck.ts # WildDuckAPI with WildDuckConfig
+│   └── clients/       # API client implementations
 ├── types/             # ✅ TypeScript definitions (AI: start here for new features)
 └── utils/             # ✅ Utility functions (AI: helpers and tools)
 ```
@@ -74,19 +70,14 @@ src/
 Grep -n "use.*Hook" src/business/hooks/
 
 // 2. Use template for consistency
-// For Indexer hooks:
-const useIndexerFeature = (endpointUrl: string, dev: boolean) => {
-  const client = new IndexerClient(endpointUrl, dev);
+const useFeature = (config: FeatureConfig) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Optional<string>>(null);
   // ... implementation
 };
 
-// For WildDuck hooks:
-const useWildduckFeature = (config: WildDuckConfig) => {
-  // ... implementation using config
-};
-
 // 3. Export from index
-export { useIndexerFeature } from './useIndexerFeature';
+export { useFeature } from './useFeature';
 ```
 
 #### 🎯 Optional<T> Pattern (REQUIRED)
@@ -147,12 +138,11 @@ try {
 A React Native-compatible shared utilities library for 0xmail.box projects, providing:
 
 - Platform-agnostic business logic
-- Email management services (WildDuck integration)
 - Blockchain integration (Solana & EVM)
 - Authentication services (Firebase Auth)
 - AI-powered features (email assistance)
-- Points/rewards system
 - UI hooks and utilities
+- Core utility services
 
 ### Key Principles
 
@@ -172,7 +162,9 @@ A React Native-compatible shared utilities library for 0xmail.box projects, prov
   - `StandardEmailFolder` → `MailboxType`
   - `WalletConnectionState` → `ConnectionState`
   - `NetworkStatus` → removed (consolidated into `ConnectionState`)
-- **Indexer API v2.2.0**: Updated all endpoints to match new structure
+- **Package Extraction**: WildDuck and Indexer functionality moved to dedicated packages:
+  - WildDuck hooks → `@johnqh/wildduck_client`
+  - Indexer hooks → `@johnqh/indexer_client`
 - **Enhanced NetworkResponse**: Added BaseResponse fields (success, timestamp)
 - **Improved Type Safety**: Stricter typing with better error handling
 
@@ -199,36 +191,24 @@ src/
 │   ├── core/          # Domain operations
 │   │   ├── analytics/ # Analytics business logic
 │   │   ├── auth/      # Authentication logic
-│   │   ├── email/     # Email operations
-│   │   ├── folder/    # Folder management
-│   │   ├── indexer/   # Indexer service logic
-│   │   ├── mailbox/   # Mailbox operations
 │   │   ├── navigation/# Navigation state
 │   │   └── wallet/    # Wallet status management
 │   ├── hooks/         # React hooks
 │   │   ├── contracts/ # Blockchain contract hooks
-│   │   ├── core/      # Core utility hooks
-│   │   ├── indexer/   # Indexer API hooks
-│   │   ├── nameservice/# Name resolution hooks
-│   │   └── wildduck/  # WildDuck API hooks
+│   │   └── core/      # Core utility hooks
 │   └── context/       # React contexts
 ├── di/                # Dependency injection
 ├── network/           # HTTP clients
-│   └── clients/
-│       ├── indexer.ts # IndexerClient (dev mode aware)
-│       └── wildduck.ts# WildDuckAPI (config-based)
+│   └── clients/       # API client implementations
 ├── storage/           # Storage services
 ├── types/             # TypeScript definitions
 │   ├── api.ts         # API response types
-│   ├── email.ts       # Email interfaces
 │   └── services/      # Service interfaces
 └── utils/             # Platform-specific implementations
     ├── async-helpers.ts
     ├── auth/          # Authentication utilities
     ├── blockchain/    # Blockchain utilities
-    ├── contracts/     # Smart contract utilities
-    ├── indexer/       # Indexer utilities
-    └── nameservice/   # Name resolution utilities
+    └── contracts/     # Smart contract utilities
 ```
 
 ## Common Tasks & Patterns
@@ -344,70 +324,24 @@ npm run analyze:health # Health analysis
 
 ### 🚀 Quick Start Templates
 
-#### Creating a New Indexer Hook
+#### Creating a New Hook
 ```typescript
-// File: src/business/hooks/indexer/useIndexerNewFeature.ts
+// File: src/business/hooks/data/useNewFeature.ts
 import { useCallback, useState } from 'react';
 import { Optional } from '@johnqh/types';
-import { IndexerClient } from '../../../network/clients/indexer';
 
-export const useIndexerNewFeature = (endpointUrl: string, dev: boolean) => {
+export const useNewFeature = (config: FeatureConfig) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Optional<string>>(null);
-  const client = new IndexerClient(endpointUrl, dev);
 
   const fetchData = useCallback(async (param: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = await client.newEndpoint(param);
+      // Implementation logic
+      const result = await performOperation(param);
       return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Operation failed';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [client]);
-
-  return { fetchData, isLoading, error, clearError: () => setError(null) };
-};
-```
-
-#### Creating a New WildDuck Hook
-```typescript
-// File: src/business/hooks/wildduck/useWildduckNewFeature.ts
-import { useCallback, useState } from 'react';
-import { Optional } from '@johnqh/types';
-import { WildDuckConfig } from '../../../network/clients/wildduck';
-import axios from 'axios';
-
-export const useWildduckNewFeature = (config: WildDuckConfig) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Optional<string>>(null);
-
-  const fetchData = useCallback(async (param: string) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const apiUrl = config.cloudflareWorkerUrl || config.backendUrl;
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      };
-
-      if (config.cloudflareWorkerUrl) {
-        headers['Authorization'] = `Bearer ${config.apiToken}`;
-        headers['X-App-Source'] = '0xmail-box';
-      } else {
-        headers['X-Access-Token'] = config.apiToken;
-      }
-
-      const response = await axios.get(`${apiUrl}/new-endpoint/${param}`, { headers });
-      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Operation failed';
       setError(errorMessage);
@@ -438,25 +372,12 @@ const useService = (config: ServiceConfig) => {
 };
 ```
 
-#### Hook Parameter Patterns
-```typescript
-// Indexer hooks ALWAYS use:
-(endpointUrl: string, dev: boolean)
-
-// WildDuck hooks ALWAYS use:
-(config: WildDuckConfig)
-
-// TanStack Query hooks ADD options:
-(endpointUrl: string, dev: boolean, options?: UseQueryOptions<T>)
-```
-
 ### 🔍 AI Search Commands
 
 #### Find Similar Code
 ```bash
 # Find all hooks with similar functionality
-Grep -n "useIndexer.*" src/business/hooks/indexer/
-Grep -n "useWildduck.*" src/business/hooks/wildduck/
+Grep -n "use.*" src/business/hooks/
 
 # Find configuration patterns
 Grep -n "Config" src/network/clients/
@@ -494,13 +415,13 @@ const result: Optional<ExpectedType> = response.data;
 ```
 
 #### Hook Issues
-1. **Wrong parameter pattern**: Check if it's Indexer or WildDuck hook
-2. **Missing config**: Ensure WildDuck hooks receive WildDuckConfig
-3. **Dev mode not working**: Check if dev parameter is passed as x-dev header
+1. **Wrong parameter pattern**: Check hook signature and configuration requirements
+2. **Missing config**: Ensure hooks receive required configuration objects
+3. **State not updating**: Verify dependencies in useCallback/useMemo
 
 #### API Client Issues
 1. **Endpoint not found**: Check if endpoint exists in client class
-2. **Authentication fails**: Verify header configuration (Bearer vs X-Access-Token)
+2. **Authentication fails**: Verify authentication configuration
 3. **CORS issues**: Check if using correct API URL
 
 ## External Dependencies
@@ -606,27 +527,25 @@ const Service = Platform.OS === 'web'
 
 ### API Integration Patterns
 
-All indexer API calls now require signature authentication:
+Use consistent patterns for API client integration:
 
 ```typescript
-// Protected endpoint pattern
-async protectedCall(walletAddress: string, signature: string, message: string) {
-  return this.client.post('/api/protected-endpoint', {
-    walletAddress,
-    signature,
-    message,
-    // ... other data
+// Authenticated endpoint pattern
+async authenticatedCall(authToken: string, data: RequestData) {
+  return this.client.post('/api/endpoint', data, {
+    headers: {
+      'Authorization': `Bearer ${authToken}`,
+      'Content-Type': 'application/json'
+    }
   });
 }
 
-// Points API endpoints
-/api/points/balance/:walletAddress
-/api/points/history/:walletAddress
-/api/points/leaderboard
-
-// Solana endpoints
-/api/solana/balance/:walletAddress
-/api/solana/transactions/:walletAddress
+// Configuration-based clients
+interface ClientConfig {
+  apiUrl: string;
+  apiToken: string;
+  options?: RequestOptions;
+}
 ```
 
 ### Testing Patterns

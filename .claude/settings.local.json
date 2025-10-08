@@ -24,7 +24,8 @@
       "Read(//Users/johnhuang/0xmail/di/src/**)",
       "Read(//Users/johnhuang/0xmail/di/**)",
       "Read(//Users/johnhuang/0xmail/wildduck_client/src/types/**)",
-      "Read(//Users/johnhuang/0xmail/wildduck_client/src/**)"
+      "Read(//Users/johnhuang/0xmail/wildduck_client/src/**)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
