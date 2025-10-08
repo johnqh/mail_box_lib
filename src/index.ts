@@ -62,7 +62,6 @@ export {
   AuthBusinessLogic,
   DefaultAnalyticsOperations,
   AnalyticsOperations,
-  IndexerService,
 
   // Wallet Status Management
   getWalletStatus,
@@ -125,18 +124,6 @@ export {
   useWalletDetector,
   UseWalletDetectorReturn,
   WalletInfo,
-
-  // Indexer Hooks
-  useIndexerPoints,
-  useIndexerMail,
-  UseIndexerMailReturn,
-  IndexerMockData,
-  useWalletNames,
-  useResolveNameToAddress,
-  useReferralCode,
-  useReferralShare,
-  useReferralConsumption,
-  useReferralStats,
 
   // Name Service Hooks
   useNameServiceResolution,
@@ -407,8 +394,6 @@ export {
   isErrorResponse,
   isEvmAddress,
   isEvmRecipient,
-  isIndexerErrorResponse,
-  isIndexerSuccessResponse,
   isLeaderboardResponse,
   isMailboxErrorResponse,
   isNonceResponse,
@@ -471,11 +456,6 @@ export {
 
 // Infrastructure - Network clients only
 export {
-  // Indexer Client
-  IndexerClient,
-  createIndexerClient,
-  createIndexerApiConfig,
-
   // WildDuck Client
   WildDuckAPI,
   WildDuckConfig,
@@ -489,13 +469,10 @@ export {
 export {
   // Direct Utils
   AppError,
-  AsyncResult,
   URLSearchParamsLike,
   addDocumentEventListener,
   appendToDocumentHead,
-  clearExpiredCache,
   createDocumentElement,
-  debounceAsync,
   formatCurrency,
   formatFileSize,
   formatPercentage,
@@ -510,13 +487,8 @@ export {
   isWebEnvironment,
   logError,
   retryWithBackoff,
-  safeAsync,
-  safeParallel,
   setDocumentTitle,
-  withCache,
   withErrorBoundary,
-  withLoadingState,
-  withTimeout,
 
   // Auth Utils
   CreateForwardedAddressParams,
@@ -606,39 +578,6 @@ export {
   setGlobalState,
   resetGlobalState,
   clearAllGlobalStates,
-
-  // Indexer Utils
-  AdminBulkCodesResponse,
-  AdminCampaignConfig,
-  AdminFlaggedUser,
-  AdminFlaggedUsers,
-  AdminOverviewStats,
-  AdminPointsAward,
-  AdminUserFlag,
-  IndexerAdminConfig,
-  IndexerAdminHelper,
-  IndexerChainStatistics,
-  IndexerEventLog,
-  IndexerGraphQLConfig,
-  IndexerGraphQLHelper,
-  IndexerUserStatistics,
-  IndexerWebhookConfig,
-  IndexerWebhookHelper,
-  PaginationInput,
-  WebhookEmailSent,
-  WebhookLoginEvent,
-  WebhookLoginResult,
-  WebhookRecipientLogin,
-  WebhookReferralRegistration,
-  WebhookResponse,
-  WhereInput,
-  createIndexerAdmin,
-  createIndexerAdminHelper,
-  createIndexerGraphQL,
-  createIndexerGraphQLHelper,
-  createIndexerHelpers,
-  createIndexerWebhook,
-  createIndexerWebhookHelper,
 } from './utils';
 
 // Types - Selective exports to avoid conflicts (Goal 1)
@@ -659,32 +598,7 @@ export {
   EmailService,
   GraphQLPaginationInput,
   GraphQLWhereInput,
-  IndexerCampaign,
-  IndexerCampaignsResponse,
-  IndexerCampaignStatsResponse,
-  IndexerDelegatedToResponse,
-  IndexerDelegationResponse,
-  IndexerEarnMethod,
-  IndexerEmailResponse,
-  IndexerEntitlementResponse,
-  IndexerHowToEarnResponse,
-  IndexerLeaderboardEntry,
-  IndexerLeaderboardResponse,
-  IndexerMessageResponse,
-  IndexerNonceResponse,
-  IndexerPointsHistoryEntry,
-  IndexerPointsHistoryResponse,
-  IndexerPointsSummary,
-  IndexerPointsSummaryResponse,
-  IndexerPromoCodeResponse,
-  IndexerPromoValidationResponse,
-  IndexerPublicStatsResponse,
-  IndexerRefereeLoginResponse,
-  IndexerReferralResponse,
-  IndexerSignatureRequest,
-  IndexerSignatureVerification,
   isGraphQLResponse,
-  isIndexerEmailResponse,
   // Type guards and validators
   isWildDuckAuthResponse,
   isWildDuckMessage,

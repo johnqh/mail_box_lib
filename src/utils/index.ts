@@ -23,9 +23,6 @@ export * from './nameservice';
 // Smart contract utilities
 export * from './contracts';
 
-// Indexer utilities
-export * from './indexer';
-
 // WildDuck utilities
 export * from './wildduck';
 
@@ -34,7 +31,6 @@ export * from './url-params';
 export * from './document-helpers';
 export * from './errorHandling';
 export * from './formatters';
-export * from './async-helpers';
 
 // React utilities
 export * from './useGlobalState';

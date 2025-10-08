@@ -8,9 +8,6 @@ export * from './core';
 // WildDuck API hooks (includes data hooks moved from /data)
 export * from './wildduck';
 
-// Indexer hooks (includes all TanStack Query hooks)
-export * from './indexer';
-
 // Name Service hooks (ENS/SNS resolution with TanStack Query)
 export * from './nameservice';
 

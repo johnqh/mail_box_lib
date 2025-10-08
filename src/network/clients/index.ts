@@ -3,4 +3,3 @@
  */
 
 export * from './wildduck';
-export * from './indexer';

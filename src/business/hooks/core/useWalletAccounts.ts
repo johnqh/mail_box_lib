@@ -7,7 +7,7 @@
 import { useEffect, useRef } from 'react';
 import { Optional, WalletData } from '@johnqh/types';
 import { useWalletStatus } from './useWalletStatus';
-import { useIndexerMail } from '../indexer/useIndexerMail';
+import { useIndexerMail } from '@johnqh/indexer_client';
 import {
   createGlobalState,
   setGlobalState,
