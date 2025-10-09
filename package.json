@@ -116,17 +116,18 @@
   },
   "dependencies": {
     "@bonfida/spl-name-service": "^3.0.16",
-    "@johnqh/di": "^1.4.1",
-    "@johnqh/indexer_client": "^0.0.7",
+    "@johnqh/di": "^1.4.3",
+    "@johnqh/indexer_client": "^0.0.9",
     "@johnqh/mail_box_contracts": "^1.8.9",
-    "@johnqh/types": "^1.8.17",
-    "@johnqh/wildduck_client": "^0.0.4",
+    "@johnqh/types": "^1.8.20",
+    "@johnqh/wildduck_client": "^0.0.6",
     "@solana/web3.js": "^1.98.4",
     "@tanstack/react-query": "^5.90.1",
     "axios": "^1.12.1",
     "bs58": "^6.0.0",
     "firebase": "^12.3.0",
-    "viem": "^2.38.0"
+    "viem": "^2.38.0",
+    "zustand": "^5.0.8"
   },
   "overrides": {
     "bigint-buffer": "1.1.5"

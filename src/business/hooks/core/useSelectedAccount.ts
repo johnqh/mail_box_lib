@@ -5,8 +5,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Optional, WildDuckConfig } from '@johnqh/types';
-import { useWildduckAuth, WildduckUserAuth } from '@johnqh/wildduck_client';
+import { Optional } from '@johnqh/types';
+import {
+  useWildduckAuth,
+  WildduckConfig,
+  WildduckUserAuth,
+} from '@johnqh/wildduck_client';
 import {
   createGlobalState,
   setGlobalState,
@@ -79,7 +83,7 @@ export function useSelectedAccount(
   const [wildduckAuth, setWildduckAuth] =
     useState<Optional<WildduckUserAuth>>(undefined);
 
-  const config: WildDuckConfig = {
+  const config: WildduckConfig = {
     backendUrl: endpointUrl,
     apiToken,
   };

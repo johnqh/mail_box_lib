@@ -2,10 +2,13 @@ import {
   ChainType,
   EmailFolder,
   FontSize,
+  IndexerWalletAccount,
   Optional,
   Theme,
-  WalletAccount,
 } from '@johnqh/types';
+
+// Re-export with legacy name for backward compatibility
+export type WalletAccount = IndexerWalletAccount;
 
 interface Email {
   id: string;

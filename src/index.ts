@@ -296,15 +296,10 @@ export {
   capitalize,
   contractLogger,
   createAssertion,
-  createAuthenticateRequest,
   createChainStatsId,
-  createCreateMailboxRequest,
   createDelegationId,
   createMultiChainId,
-  createPaginationRequest,
-  createPreAuthRequest,
   createSearchParams,
-  createSubmitMessageRequest,
   createURLSearchParams,
   createUserMultiChainId,
   createValidator,
@@ -536,7 +531,10 @@ export {
 
 // Local business types with extensions
 export { WalletUserData, User, EmailAddress } from './types/email';
-export { WalletAccount } from '@johnqh/types';
+export {
+  IndexerWalletAccount as WalletAccount,
+  IndexerNameServiceAccount as NameServiceAccount,
+} from '@johnqh/types';
 
 // Email transformation utilities
 export {
