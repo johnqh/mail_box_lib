@@ -4,13 +4,15 @@
  * Automatically updates when wallet accounts change
  */
 
-import { useEffect } from 'react';
-import { Optional } from '@johnqh/types';
+import { useEffect, useState } from 'react';
+import { Optional, WildDuckConfig } from '@johnqh/types';
+import { useWildduckAuth, WildduckUserAuth } from '@johnqh/wildduck_client';
 import {
   createGlobalState,
   setGlobalState,
 } from '../../../utils/useGlobalState';
 import { useGlobalWalletAccounts, WildDuckAccount } from './useWalletAccounts';
+import { useWalletStatus } from './useWalletStatus';
 
 /**
  * Global selected account state - shared across all components
@@ -20,22 +22,37 @@ export const useGlobalSelectedAccount = createGlobalState<
 >('selectedAccount', null);
 
 /**
+ * Return type for useSelectedAccount hook
+ */
+export interface UseSelectedAccountReturn {
+  /** The currently selected account (null if none available) */
+  selectedAccount: Optional<WildDuckAccount>;
+  /** WildDuck authentication object (undefined if not authenticated) */
+  wildduckAuth: Optional<WildduckUserAuth>;
+}
+
+/**
  * Hook to manage the currently selected account
  *
  * Observes wallet accounts and automatically:
  * - Sets account to null when no accounts are available
  * - Keeps current account if it's still in the list
  * - Selects first account if current account is not in the list
+ * - Authenticates with WildDuck when account changes
  *
- * @param endpointUrl - Indexer API endpoint URL
- * @param dev - Whether to use dev mode headers
+ * @param endpointUrl - WildDuck API backend URL
+ * @param apiToken - WildDuck API token for authentication
  * @param devMode - Whether to use mock data on errors
- * @returns The currently selected account (null if none available)
+ * @returns Object containing selectedAccount and wildduckAuth
  *
  * @example
  * ```tsx
  * function MyComponent() {
- *   const selectedAccount = useSelectedAccount('https://indexer.example.com', false);
+ *   const { selectedAccount, wildduckAuth } = useSelectedAccount(
+ *     'https://wildduck.example.com',
+ *     'your-api-token',
+ *     false
+ *   );
  *
  *   if (!selectedAccount) {
  *     return <div>No account selected</div>;
@@ -45,19 +62,30 @@ export const useGlobalSelectedAccount = createGlobalState<
  *     <div>
  *       Selected: {selectedAccount.username}
  *       {selectedAccount.entitled ? '✓' : '✗'}
+ *       {wildduckAuth && <span>Authenticated</span>}
  *     </div>
  *   );
  * }
  * ```
  */
 export function useSelectedAccount(
-  _endpointUrl: string,
-  _dev: boolean = false,
-  _devMode: boolean = false
-): Optional<WildDuckAccount> {
+  endpointUrl: string,
+  apiToken: string,
+  devMode: boolean = false
+): UseSelectedAccountReturn {
   const [accounts] = useGlobalWalletAccounts();
   const [selectedAccount] = useGlobalSelectedAccount();
+  const { indexerAuth } = useWalletStatus();
+  const [wildduckAuth, setWildduckAuth] =
+    useState<Optional<WildduckUserAuth>>(undefined);
 
+  const config: WildDuckConfig = {
+    backendUrl: endpointUrl,
+    apiToken,
+  };
+  const { authenticate } = useWildduckAuth(config, devMode);
+
+  // Manage selected account selection
   useEffect(() => {
     // If no accounts, clear selection
     if (accounts.length === 0) {
@@ -85,5 +113,44 @@ export function useSelectedAccount(
     setGlobalState('selectedAccount', accounts[0]);
   }, [accounts, selectedAccount]);
 
-  return selectedAccount;
+  // Authenticate with WildDuck when selected account changes
+  useEffect(() => {
+    if (!selectedAccount || !indexerAuth) {
+      setWildduckAuth(undefined);
+      return;
+    }
+
+    // Call authenticate
+    (async () => {
+      try {
+        const response = await authenticate({
+          username: selectedAccount.username,
+          message: indexerAuth.message,
+          signature: indexerAuth.signature,
+        });
+
+        if (response && response.success) {
+          const token = response.token;
+          const userId = response.id;
+          if (token && userId) {
+            // Construct WildduckUserAuth from response
+            const auth: WildduckUserAuth = {
+              userId,
+              accessToken: token,
+            };
+            setWildduckAuth(auth);
+          } else {
+            setWildduckAuth(undefined);
+          }
+        } else {
+          setWildduckAuth(undefined);
+        }
+      } catch (error) {
+        console.error('WildDuck authentication failed:', error);
+        setWildduckAuth(undefined);
+      }
+    })();
+  }, [selectedAccount, indexerAuth, authenticate]);
+
+  return { selectedAccount, wildduckAuth };
 }

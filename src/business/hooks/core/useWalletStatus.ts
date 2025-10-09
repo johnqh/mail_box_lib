@@ -4,7 +4,7 @@
  * Now uses createGlobalState for React Native compatibility
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   ChainType,
   isWalletConnected as checkWalletConnected,
@@ -14,6 +14,7 @@ import {
   Optional,
   WalletStatus,
 } from '@johnqh/types';
+import { IndexerUserAuth } from '@johnqh/indexer_client';
 import {
   createGlobalState,
   getGlobalState,
@@ -171,6 +172,8 @@ export interface UseWalletStatusReturn {
   isConnected: boolean;
   /** Whether wallet is verified */
   isVerified: boolean;
+  /** Indexer authentication object (undefined if not verified) */
+  indexerAuth: Optional<IndexerUserAuth>;
   /** Connect wallet with address */
   connectWallet: (walletAddress: string, chainType: ChainType) => void;
   /** Verify wallet with message and signature */
@@ -278,12 +281,50 @@ export const useWalletStatus = (): UseWalletStatusReturn => {
   const isConnected = checkWalletConnected(status);
   const isVerified = checkWalletVerified(status);
 
+  // Create indexerAuth object when wallet is verified
+  const indexerAuth = useMemo<Optional<IndexerUserAuth>>(() => {
+    if (!status?.message || !status?.signature || !status?.chainType) {
+      return undefined;
+    }
+
+    let signature: string;
+
+    // Only base64 encode for EVM chains
+    // For Solana, use the signature as-is
+    if (status.chainType === ChainType.EVM) {
+      // Convert signature string to byte array, then to base64
+      // The signature is hex string, need to convert to bytes then base64
+      const signatureBytes = new Uint8Array(
+        status.signature.match(/.{1,2}/g)?.map(byte => parseInt(byte, 16)) || []
+      );
+
+      // Cross-platform base64 encoding
+      if (typeof Buffer !== 'undefined') {
+        // Node.js/React Native environment
+        signature = Buffer.from(signatureBytes).toString('base64');
+      } else {
+        // Browser environment
+        // eslint-disable-next-line no-undef
+        signature = btoa(String.fromCharCode(...Array.from(signatureBytes)));
+      }
+    } else {
+      // Solana - use signature as-is
+      signature = status.signature;
+    }
+
+    return {
+      message: status.message,
+      signature,
+    };
+  }, [status?.message, status?.signature, status?.chainType]);
+
   const result: UseWalletStatusReturn = {
     status,
     walletAddress: status?.walletAddress,
     connectionState,
     isConnected,
     isVerified,
+    indexerAuth,
     connectWallet: connectWalletCallback,
     verifyWallet: verifyWalletCallback,
     disconnectWallet: disconnectWalletCallback,

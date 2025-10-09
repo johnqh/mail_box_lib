@@ -4,10 +4,13 @@
  * Uses global state for React Native compatibility
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { Optional, WalletData } from '@johnqh/types';
 import { useWalletStatus } from './useWalletStatus';
-import { useIndexerMail } from '@johnqh/indexer_client';
+import {
+  IndexerUserAuth,
+  useIndexerGetWalletAccounts,
+} from '@johnqh/indexer_client';
 import {
   createGlobalState,
   setGlobalState,
@@ -31,17 +34,26 @@ export const useGlobalWalletAccounts = createGlobalState<WildDuckAccount[]>(
 );
 
 /**
+ * Return type for useWalletAccounts hook
+ */
+export interface UseWalletAccountsReturn {
+  /** Array of WildDuck accounts */
+  accounts: WildDuckAccount[];
+  /** Indexer authentication object (passthrough from useWalletStatus) */
+  indexerAuth: Optional<IndexerUserAuth>;
+}
+
+/**
  * Hook to manage wallet accounts based on wallet status
  *
  * @param endpointUrl - Indexer API endpoint URL
- * @param dev - Whether to use dev mode headers
  * @param devMode - Whether to use mock data on errors
- * @returns Array of WildDuck accounts
+ * @returns Object containing accounts array and indexerAuth
  *
  * @example
  * ```tsx
  * function MyComponent() {
- *   const accounts = useWalletAccounts('https://indexer.example.com', false);
+ *   const { accounts, indexerAuth } = useWalletAccounts('https://indexer.example.com', false);
  *
  *   return (
  *     <ul>
@@ -57,31 +69,22 @@ export const useGlobalWalletAccounts = createGlobalState<WildDuckAccount[]>(
  */
 export function useWalletAccounts(
   endpointUrl: string,
-  dev: boolean = false,
   devMode: boolean = false
-): WildDuckAccount[] {
-  const { status } = useWalletStatus();
+): UseWalletAccountsReturn {
+  const { status, indexerAuth } = useWalletStatus();
   const [accounts] = useGlobalWalletAccounts();
-  const abortControllerRef = useRef<Optional<AbortController>>(undefined);
-  const { getWalletAccounts } = useIndexerMail(endpointUrl, dev, devMode);
+
+  // useIndexerGetWalletAccounts now requires walletAddress and auth upfront
+  const walletAddress = status?.walletAddress || '';
+  const auth = indexerAuth || { message: '', signature: '' };
+  const queryResult = useIndexerGetWalletAccounts(
+    endpointUrl,
+    devMode,
+    walletAddress,
+    auth
+  );
 
   useEffect(() => {
-    // Cancel any outstanding request when effect cleanup runs
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        abortControllerRef.current = undefined;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    // Cancel previous request if it exists
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      abortControllerRef.current = undefined;
-    }
-
     // Check if wallet is verified (has message and signature)
     const isVerified =
       status?.walletAddress && status?.message && status?.signature;
@@ -111,82 +114,51 @@ export function useWalletAccounts(
       ]);
     }
 
-    // Create abort controller for this request
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
+    // Process query result when data is available
+    if (queryResult.data && queryResult.data.success && queryResult.data.data) {
+      const flattenedAccounts: WildDuckAccount[] = [];
 
-    // Fetch wallet accounts
-    (async () => {
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const signature = status.signature!;
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const message = status.message!;
+      for (const walletAccount of queryResult.data.data.accounts) {
+        // Add wallet account (always entitled)
+        // walletAddress -> username, entitled -> true
+        flattenedAccounts.push({
+          walletAddress: walletAccount.walletAddress,
+          chainType: walletAccount.chainType,
+          username: walletAccount.walletAddress,
+          entitled: true,
+        });
 
-        const response = await getWalletAccounts(
-          walletAddress,
-          signature,
-          message,
-          undefined // referralCode
-        );
-
-        // Check if request was aborted
-        if (abortController.signal.aborted) {
-          return;
-        }
-
-        // Flatten the response data
-        if (response && response.success && response.data) {
-          const flattenedAccounts: WildDuckAccount[] = [];
-
-          for (const walletAccount of response.data.accounts) {
-            // Add wallet account (always entitled)
-            // walletAddress -> username, entitled -> true
+        // Add name accounts with their entitlement status from parent wallet
+        // parent wallet's walletAddress -> walletAddress
+        // parent wallet's chainType -> chainType
+        // name -> username
+        // entitled -> entitled
+        if (walletAccount.names) {
+          for (const nameAccount of walletAccount.names) {
             flattenedAccounts.push({
               walletAddress: walletAccount.walletAddress,
               chainType: walletAccount.chainType,
-              username: walletAccount.walletAddress,
-              entitled: true,
+              username: nameAccount.name,
+              entitled: nameAccount.entitled,
             });
-
-            // Add name accounts with their entitlement status from parent wallet
-            // parent wallet's walletAddress -> walletAddress
-            // parent wallet's chainType -> chainType
-            // name -> username
-            // entitled -> entitled
-            if (walletAccount.names) {
-              for (const nameAccount of walletAccount.names) {
-                flattenedAccounts.push({
-                  walletAddress: walletAccount.walletAddress,
-                  chainType: walletAccount.chainType,
-                  username: nameAccount.name,
-                  entitled: nameAccount.entitled,
-                });
-              }
-            }
           }
-
-          setGlobalState('walletAccounts', flattenedAccounts);
-        } else {
-          setGlobalState('walletAccounts', []);
-        }
-      } catch (error) {
-        // Check if error was due to abort
-        if (error instanceof Error && error.name === 'AbortError') {
-          return;
-        }
-
-        // Log other errors and set accounts to empty
-        console.error('Error fetching wallet accounts:', error);
-        setGlobalState('walletAccounts', []);
-      } finally {
-        // Clear abort controller reference if it's still the current one
-        if (abortControllerRef.current === abortController) {
-          abortControllerRef.current = undefined;
         }
       }
-    })();
-  }, [status, getWalletAccounts]);
 
-  return accounts;
+      setGlobalState('walletAccounts', flattenedAccounts);
+    } else if (queryResult.isError) {
+      // Log error and set accounts to empty
+      console.error('Error fetching wallet accounts:', queryResult.error);
+      setGlobalState('walletAccounts', []);
+    }
+  }, [
+    status,
+    indexerAuth,
+    queryResult.data,
+    queryResult.isError,
+    queryResult.error,
+    accounts.length,
+  ]);
+
+  return { accounts, indexerAuth };
 }

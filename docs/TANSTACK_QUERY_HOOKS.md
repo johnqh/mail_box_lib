@@ -58,6 +58,8 @@ import { useWildduckHealthQuery } from '@johnqh/wildduck_client';
 import { useIndexerPointsLeaderboard } from '@johnqh/indexer_client';
 ```
 
+**Note:** Hooks from `@johnqh/indexer_client` now use the `useIndexer` prefix (e.g., `useIndexerPointsLeaderboard`).
+
 ## Benefits of Package Separation
 
 1. **Smaller Bundle Size**: Only import the packages you need
