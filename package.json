@@ -116,7 +116,7 @@
   "peerDependencies": {
     "@bonfida/spl-name-service": "^3.0.16",
     "@johnqh/di": "^1.4.5",
-    "@johnqh/indexer_client": "^0.0.14",
+    "@johnqh/indexer_client": "^0.0.15",
     "@johnqh/mail_box_contracts": "^1.9.0",
     "@johnqh/types": "^1.8.20",
     "@johnqh/wildduck_client": "^0.0.10",

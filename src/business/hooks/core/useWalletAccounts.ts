@@ -76,7 +76,7 @@ export function useWalletAccounts(
 
   // useIndexerGetWalletAccounts now requires walletAddress and auth upfront
   const walletAddress = status?.walletAddress || '';
-  const auth = indexerAuth || { message: '', signature: '' };
+  const auth = indexerAuth || { message: '', signature: '', signer: '' };
   const queryResult = useIndexerGetWalletAccounts(
     endpointUrl,
     devMode,

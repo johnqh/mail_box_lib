@@ -114,6 +114,9 @@ export {
   useSelectedAccount,
   useGlobalSelectedAccount,
   useGlobalWildduckAuth,
+  useGlobalWalletAccounts,
+  useAccountMailboxes,
+  UseAccountMailboxesReturn,
 
   // Contract Hooks
   useContractConfig,

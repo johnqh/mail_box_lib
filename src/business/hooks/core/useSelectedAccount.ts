@@ -4,13 +4,13 @@
  * Automatically updates when wallet accounts change
  */
 
-import { useEffect } from 'react';
 import { Optional } from '@johnqh/types';
 import {
   useWildduckAuth,
   WildduckConfig,
   WildduckUserAuth,
 } from '@johnqh/wildduck_client';
+import { useEffect } from 'react';
 import {
   createGlobalState,
   setGlobalState,
@@ -133,10 +133,15 @@ export function useSelectedAccount(
     // Call authenticate
     (async () => {
       try {
+        console.log(
+          'useSelectedAccount: authenticating with indexerAuth:',
+          indexerAuth
+        );
         const response = await authenticate({
           username: selectedAccount.username,
           message: indexerAuth.message,
           signature: indexerAuth.signature,
+          signer: indexerAuth.signer,
         });
 
         if (response && response.success) {

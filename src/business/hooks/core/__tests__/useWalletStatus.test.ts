@@ -26,7 +26,7 @@ describe('useWalletStatus', () => {
   const testAddress = '0x742d35Cc6e3c05652aA6E10f35F74c29C5881398';
   const testChainType = ChainType.EVM;
   const testMessage = 'Authenticate with 0xMail';
-  const testSignature = '0x1234567890abcdef';
+  const testSignature = 'EjRWeJCrze8='; // base64-encoded signature (caller's responsibility)
 
   describe('Initial State', () => {
     it('should start with undefined status', () => {
@@ -60,16 +60,16 @@ describe('useWalletStatus', () => {
 
     it('should update when wallet is verified', () => {
       const { result } = renderHook(() => useWalletStatus());
-      
+
       act(() => {
         result.current.verifyWallet(testAddress, testChainType, testMessage, testSignature);
       });
-      
+
       expect(result.current.status).toEqual({
         walletAddress: testAddress,
         chainType: testChainType,
         message: testMessage,
-        signature: testSignature,
+        signature: testSignature, // Signature stored as-is
       });
       expect(result.current.connectionState).toBe(ConnectionState.VERIFIED);
       expect(result.current.isConnected).toBe(true);
@@ -117,7 +117,7 @@ describe('useWalletStatus', () => {
 
       expect(result.current.isVerified).toBe(true);
       expect(result.current.status?.message).toBe(testMessage);
-      expect(result.current.status?.signature).toBe(testSignature);
+      expect(result.current.status?.signature).toBe(testSignature); // Signature stored as-is
     });
   });
 
@@ -125,21 +125,21 @@ describe('useWalletStatus', () => {
     it('should update wallet address while preserving verification', () => {
       const { result } = renderHook(() => useWalletStatus());
       const newAddress = '0x8ba1f109551bD432803012645Hac136c';
-      
+
       // First verify wallet
       act(() => {
         result.current.verifyWallet(testAddress, testChainType, testMessage, testSignature);
       });
       expect(result.current.isVerified).toBe(true);
-      
+
       // Update address
       act(() => {
         result.current.updateWalletAddress(newAddress, testChainType);
       });
-      
+
       expect(result.current.walletAddress).toBe(newAddress);
       expect(result.current.status?.message).toBe(testMessage);
-      expect(result.current.status?.signature).toBe(testSignature);
+      expect(result.current.status?.signature).toBe(testSignature); // Signature stored as-is
       expect(result.current.isVerified).toBe(true);
     });
 

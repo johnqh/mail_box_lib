@@ -85,6 +85,9 @@ export const connectWallet = (
 
 /**
  * Verify wallet with message and signature
+ * Note: Signature should already be properly formatted:
+ * - EVM chains: base64-encoded
+ * - Solana chains: base58-encoded
  */
 export const verifyWallet = (
   walletAddress: string,
@@ -101,6 +104,8 @@ export const verifyWallet = (
   if (!signature || signature.trim() === '') {
     throw new Error('Signature is required for verification');
   }
+
+  console.log('verifyWallet: received signature:', signature.trim());
 
   const newStatus: WalletStatus = {
     walletAddress: walletAddress.trim(),
@@ -282,41 +287,18 @@ export const useWalletStatus = (): UseWalletStatusReturn => {
   const isVerified = checkWalletVerified(status);
 
   // Create indexerAuth object when wallet is verified
+  // Signature is already properly formatted (base64 for EVM, base58 for Solana)
   const indexerAuth = useMemo<Optional<IndexerUserAuth>>(() => {
-    if (!status?.message || !status?.signature || !status?.chainType) {
+    if (!status?.message || !status?.signature || !status?.walletAddress) {
       return undefined;
-    }
-
-    let signature: string;
-
-    // Only base64 encode for EVM chains
-    // For Solana, use the signature as-is
-    if (status.chainType === ChainType.EVM) {
-      // Convert signature string to byte array, then to base64
-      // The signature is hex string, need to convert to bytes then base64
-      const signatureBytes = new Uint8Array(
-        status.signature.match(/.{1,2}/g)?.map(byte => parseInt(byte, 16)) || []
-      );
-
-      // Cross-platform base64 encoding
-      if (typeof Buffer !== 'undefined') {
-        // Node.js/React Native environment
-        signature = Buffer.from(signatureBytes).toString('base64');
-      } else {
-        // Browser environment
-        // eslint-disable-next-line no-undef
-        signature = btoa(String.fromCharCode(...Array.from(signatureBytes)));
-      }
-    } else {
-      // Solana - use signature as-is
-      signature = status.signature;
     }
 
     return {
       message: status.message,
-      signature,
+      signature: status.signature,
+      signer: status.walletAddress,
     };
-  }, [status?.message, status?.signature, status?.chainType]);
+  }, [status?.message, status?.signature, status?.walletAddress]);
 
   const result: UseWalletStatusReturn = {
     status,
