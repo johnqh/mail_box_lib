@@ -3,6 +3,7 @@ import typescript from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
 import prettier from 'eslint-plugin-prettier';
 import prettierConfig from 'eslint-config-prettier';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 export default [
   js.configs.recommended,
@@ -42,11 +43,15 @@ export default [
     plugins: {
       '@typescript-eslint': typescript,
       prettier: prettier,
+      'react-hooks': reactHooks,
     },
     rules: {
       ...typescript.configs.recommended.rules,
       ...prettierConfig.rules,
-      
+
+      // React Hooks - only enable exhaustive-deps
+      'react-hooks/exhaustive-deps': 'warn',
+
       // Prettier integration
       'prettier/prettier': 'error',
       

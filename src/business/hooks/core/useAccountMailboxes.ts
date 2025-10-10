@@ -4,7 +4,7 @@
  * Fetches email address and mailboxes from WildDuck when authenticated
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Optional } from '@johnqh/types';
 import {
   useWildduckAddresses,
@@ -121,17 +121,33 @@ export function useAccountMailboxes(
 
   const mailboxesHook = useWildduckMailboxes(config, authResponse, devMode);
 
+  // Track the last fetched userId to prevent re-fetching for the same user
+  const lastFetchedUserIdRef = useRef<Optional<string>>(null);
+
   // Fetch addresses when wildduckAuth becomes available
   useEffect(() => {
     if (!wildduckAuth || !selectedAccount) {
       setEmailAddress(null);
       setError(null);
+      lastFetchedUserIdRef.current = null;
       return;
     }
+
+    // Skip if we've already fetched for this userId
+    if (lastFetchedUserIdRef.current === wildduckAuth.userId) {
+      return;
+    }
+
+    // Mark this userId as being fetched
+    lastFetchedUserIdRef.current = wildduckAuth.userId;
 
     (async () => {
       try {
         setError(null);
+
+        console.log(
+          `useAccountMailboxes: Fetching addresses for userId: ${wildduckAuth.userId}`
+        );
 
         // Fetch addresses for the user
         const addresses = await addressesHook.getUserAddresses(
@@ -156,32 +172,39 @@ export function useAccountMailboxes(
 
         const address = firstAddress.address;
 
-        // Validate the address format: {username}@{emailDomain}
-        const expectedAddress = `${selectedAccount.username}@${emailDomain}`;
-        if (address !== expectedAddress) {
+        // Validate the username part (before '@') matches the selected account
+        const [username] = address.split('@');
+        if (username !== selectedAccount.username) {
           throw new Error(
-            `Expected email address ${expectedAddress}, but found ${address}`
+            `Expected username ${selectedAccount.username}, but found ${username} in address ${address}`
           );
         }
 
+        console.log(
+          `✅ useAccountMailboxes: Email address validated: ${address} (username: ${username})`
+        );
         setEmailAddress(address);
 
         // Fetch mailboxes now that we have a valid address
+        console.log(
+          `useAccountMailboxes: Fetching mailboxes for userId: ${wildduckAuth.userId}`
+        );
         await mailboxesHook.refresh(wildduckAuth.userId);
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to load email data';
+        console.error('❌ useAccountMailboxes: Error:', errorMessage);
         setError(errorMessage);
         setEmailAddress(null);
+        // Reset the ref so we can retry on next change
+        lastFetchedUserIdRef.current = null;
       }
     })();
-  }, [
-    wildduckAuth,
-    selectedAccount,
-    emailDomain,
-    addressesHook,
-    mailboxesHook,
-  ]);
+    // CRITICAL FIX: Only depend on primitive values, not hook objects
+    // The addressesHook and mailboxesHook are recreated on every render,
+    // but we only want to re-fetch when the userId or username actually changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wildduckAuth?.userId, selectedAccount?.username, emailDomain]);
 
   // Update local state and cache when mailboxes change
   useEffect(() => {

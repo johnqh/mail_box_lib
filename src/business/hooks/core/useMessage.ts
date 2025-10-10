@@ -165,6 +165,7 @@ export function useMessage(
         setIsLoadingMessage(false);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wildduckAuth, selectedMessageId, messagesHook, cacheMessage]);
 
   const isLoading = messagesHook.isLoading || isLoadingMessage;

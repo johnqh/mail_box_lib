@@ -86,6 +86,7 @@ function useAsync<T = unknown>(
     if (immediate) {
       execute();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [immediate]); // Only run on mount when immediate is true
 
   const reset = useCallback(() => {

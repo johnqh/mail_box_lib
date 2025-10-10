@@ -19,6 +19,13 @@ import { useGlobalWalletAccounts, WildDuckAccount } from './useWalletAccounts';
 import { useWalletStatus } from './useWalletStatus';
 
 /**
+ * Global authentication tracking to prevent duplicate authentication calls
+ * across multiple component instances
+ */
+let authenticationInProgress: Optional<string> = null;
+let lastAuthenticatedKey: Optional<string> = null;
+
+/**
  * Global selected account state - shared across all components
  */
 export const useGlobalSelectedAccount = createGlobalState<
@@ -124,21 +131,45 @@ export function useSelectedAccount(
   }, [accounts, selectedAccount]);
 
   // Authenticate with WildDuck when selected account changes
+  // SINGLETON PATTERN: Only one component instance should perform authentication
   useEffect(() => {
     if (!selectedAccount || !indexerAuth) {
-      setWildduckAuthGlobal(undefined);
+      // Clear authentication if prerequisites are missing
+      if (wildduckAuth) {
+        setWildduckAuthGlobal(undefined);
+      }
+      authenticationInProgress = null;
+      lastAuthenticatedKey = null;
       return;
     }
 
-    // Create a stable key to detect actual changes (not just object reference changes)
+    // Create a stable key to detect actual changes
     const authKey = `${selectedAccount.username}:${indexerAuth.message}:${indexerAuth.signature}`;
+
+    // Skip if we've already authenticated for this key
+    if (lastAuthenticatedKey === authKey) {
+      console.log(
+        `✅ useSelectedAccount: Already authenticated for ${selectedAccount.username}, skipping`
+      );
+      return;
+    }
+
+    // Skip if another component instance is currently authenticating
+    if (authenticationInProgress === authKey) {
+      console.log(
+        `⏳ useSelectedAccount: Authentication already in progress for ${selectedAccount.username}, skipping`
+      );
+      return;
+    }
+
+    // Mark authentication as in progress
+    authenticationInProgress = authKey;
 
     // Call authenticate only once per unique account/signature combination
     (async () => {
       try {
         console.log(
-          'useSelectedAccount: authenticating with indexerAuth:',
-          indexerAuth
+          `🔐 useSelectedAccount: Starting authentication for ${selectedAccount.username}`
         );
         const response = await authenticate({
           username: selectedAccount.username,
@@ -158,16 +189,17 @@ export function useSelectedAccount(
               accessToken: token,
             };
             console.log(
-              '✅ useSelectedAccount: WildDuck auth successful, setting wildduckAuth:',
-              auth
+              `✅ useSelectedAccount: WildDuck auth successful for ${selectedAccount.username}`
             );
             setWildduckAuthGlobal(auth);
+            lastAuthenticatedKey = authKey;
           } else {
             console.warn(
               '⚠️ useSelectedAccount: Missing token or userId in response:',
               { token, userId }
             );
             setWildduckAuthGlobal(undefined);
+            lastAuthenticatedKey = null;
           }
         } else {
           console.warn(
@@ -175,10 +207,15 @@ export function useSelectedAccount(
             response
           );
           setWildduckAuthGlobal(undefined);
+          lastAuthenticatedKey = null;
         }
       } catch (error) {
         console.error('WildDuck authentication failed:', error);
         setWildduckAuthGlobal(undefined);
+        lastAuthenticatedKey = null;
+      } finally {
+        // Clear the in-progress flag
+        authenticationInProgress = null;
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
