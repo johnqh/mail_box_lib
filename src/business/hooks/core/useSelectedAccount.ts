@@ -130,7 +130,10 @@ export function useSelectedAccount(
       return;
     }
 
-    // Call authenticate
+    // Create a stable key to detect actual changes (not just object reference changes)
+    const authKey = `${selectedAccount.username}:${indexerAuth.message}:${indexerAuth.signature}`;
+
+    // Call authenticate only once per unique account/signature combination
     (async () => {
       try {
         console.log(
@@ -142,6 +145,7 @@ export function useSelectedAccount(
           message: indexerAuth.message,
           signature: indexerAuth.signature,
           signer: indexerAuth.signer,
+          token: true,
         });
 
         if (response && response.success) {
@@ -153,11 +157,23 @@ export function useSelectedAccount(
               userId,
               accessToken: token,
             };
+            console.log(
+              '✅ useSelectedAccount: WildDuck auth successful, setting wildduckAuth:',
+              auth
+            );
             setWildduckAuthGlobal(auth);
           } else {
+            console.warn(
+              '⚠️ useSelectedAccount: Missing token or userId in response:',
+              { token, userId }
+            );
             setWildduckAuthGlobal(undefined);
           }
         } else {
+          console.warn(
+            '⚠️ useSelectedAccount: WildDuck authenticate failed or unsuccessful:',
+            response
+          );
           setWildduckAuthGlobal(undefined);
         }
       } catch (error) {
@@ -165,7 +181,13 @@ export function useSelectedAccount(
         setWildduckAuthGlobal(undefined);
       }
     })();
-  }, [selectedAccount, indexerAuth, authenticate, setWildduckAuthGlobal]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    selectedAccount?.username,
+    indexerAuth?.message,
+    indexerAuth?.signature,
+    indexerAuth?.signer,
+  ]);
 
   return { selectedAccount, wildduckAuth };
 }
