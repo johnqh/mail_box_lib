@@ -113,6 +113,7 @@ export {
   useWalletAccounts,
   useSelectedAccount,
   useGlobalSelectedAccount,
+  useGlobalWildduckAuth,
 
   // Contract Hooks
   useContractConfig,

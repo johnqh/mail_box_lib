@@ -4,7 +4,7 @@
  * Automatically updates when wallet accounts change
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Optional } from '@johnqh/types';
 import {
   useWildduckAuth,
@@ -24,6 +24,13 @@ import { useWalletStatus } from './useWalletStatus';
 export const useGlobalSelectedAccount = createGlobalState<
   Optional<WildDuckAccount>
 >('selectedAccount', null);
+
+/**
+ * Global WildDuck authentication state - shared across all components
+ */
+export const useGlobalWildduckAuth = createGlobalState<
+  Optional<WildduckUserAuth>
+>('wildduckAuth', undefined);
 
 /**
  * Return type for useSelectedAccount hook
@@ -80,8 +87,7 @@ export function useSelectedAccount(
   const [accounts] = useGlobalWalletAccounts();
   const [selectedAccount] = useGlobalSelectedAccount();
   const { indexerAuth } = useWalletStatus();
-  const [wildduckAuth, setWildduckAuth] =
-    useState<Optional<WildduckUserAuth>>(undefined);
+  const [wildduckAuth, setWildduckAuthGlobal] = useGlobalWildduckAuth();
 
   const config: WildduckConfig = {
     backendUrl: endpointUrl,
@@ -120,7 +126,7 @@ export function useSelectedAccount(
   // Authenticate with WildDuck when selected account changes
   useEffect(() => {
     if (!selectedAccount || !indexerAuth) {
-      setWildduckAuth(undefined);
+      setWildduckAuthGlobal(undefined);
       return;
     }
 
@@ -142,19 +148,19 @@ export function useSelectedAccount(
               userId,
               accessToken: token,
             };
-            setWildduckAuth(auth);
+            setWildduckAuthGlobal(auth);
           } else {
-            setWildduckAuth(undefined);
+            setWildduckAuthGlobal(undefined);
           }
         } else {
-          setWildduckAuth(undefined);
+          setWildduckAuthGlobal(undefined);
         }
       } catch (error) {
         console.error('WildDuck authentication failed:', error);
-        setWildduckAuth(undefined);
+        setWildduckAuthGlobal(undefined);
       }
     })();
-  }, [selectedAccount, indexerAuth, authenticate]);
+  }, [selectedAccount, indexerAuth, authenticate, setWildduckAuthGlobal]);
 
   return { selectedAccount, wildduckAuth };
 }
