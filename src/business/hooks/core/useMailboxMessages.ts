@@ -247,7 +247,10 @@ export function useMailboxMessages(
       setTotalMessages(0);
       setCurrentPage(1);
     }
-  }, [wildduckAuth, selectedMailboxId, loadPage]);
+    // loadPage is intentionally omitted from dependencies to prevent infinite loop
+    // We only want to trigger when wildduckAuth or selectedMailboxId changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wildduckAuth, selectedMailboxId]);
 
   // Load more messages (next page)
   const loadMore = useCallback(async () => {
