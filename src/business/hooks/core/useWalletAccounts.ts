@@ -4,7 +4,7 @@
  * Uses global state for React Native compatibility
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Optional, WalletData } from '@johnqh/types';
 import { useWalletStatus } from './useWalletStatus';
 import {
@@ -160,5 +160,10 @@ export function useWalletAccounts(
     accounts.length,
   ]);
 
-  return { accounts, indexerAuth };
+  // Memoize the return object to prevent unnecessary re-renders
+  // Only recreate when accounts or indexerAuth actually change
+  return useMemo<UseWalletAccountsReturn>(
+    () => ({ accounts, indexerAuth }),
+    [accounts, indexerAuth]
+  );
 }

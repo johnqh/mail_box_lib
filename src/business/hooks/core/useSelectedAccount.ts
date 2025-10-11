@@ -10,7 +10,7 @@ import {
   WildduckConfig,
   WildduckUserAuth,
 } from '@johnqh/wildduck_client';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   createGlobalState,
   setGlobalState,
@@ -226,5 +226,10 @@ export function useSelectedAccount(
     indexerAuth?.signer,
   ]);
 
-  return { selectedAccount, wildduckAuth };
+  // Memoize the return object to prevent unnecessary re-renders
+  // Only recreate when selectedAccount or wildduckAuth actually change
+  return useMemo<UseSelectedAccountReturn>(
+    () => ({ selectedAccount, wildduckAuth }),
+    [selectedAccount, wildduckAuth]
+  );
 }

@@ -4,7 +4,7 @@
  * Fetches email address and mailboxes from WildDuck when authenticated
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Optional } from '@johnqh/types';
 import {
   useWildduckAddresses,
@@ -223,11 +223,18 @@ export function useAccountMailboxes(
     addressesHook.isLoading ||
     mailboxesHook.isLoading;
 
-  return {
-    emailAddress,
-    mailboxes,
-    wildduckAuth,
-    isLoading,
-    error: error || addressesHook.error || mailboxesHook.error,
-  };
+  const combinedError = error || addressesHook.error || mailboxesHook.error;
+
+  // Memoize the return object to prevent unnecessary re-renders
+  // Only recreate when any of the properties actually change
+  return useMemo<UseAccountMailboxesReturn>(
+    () => ({
+      emailAddress,
+      mailboxes,
+      wildduckAuth,
+      isLoading,
+      error: combinedError,
+    }),
+    [emailAddress, mailboxes, wildduckAuth, isLoading, combinedError]
+  );
 }

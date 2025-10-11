@@ -300,26 +300,35 @@ export const useWalletStatus = (): UseWalletStatusReturn => {
     };
   }, [status?.message, status?.signature, status?.walletAddress]);
 
-  const result: UseWalletStatusReturn = {
-    status,
-    walletAddress: status?.walletAddress,
-    connectionState,
-    isConnected,
-    isVerified,
-    indexerAuth,
-    connectWallet: connectWalletCallback,
-    verifyWallet: verifyWalletCallback,
-    disconnectWallet: disconnectWalletCallback,
-    updateWalletAddress: updateWalletAddressCallback,
-    clearVerification: clearVerificationCallback,
-  };
-
-  // Add walletAddress only if it exists
-  if (status?.walletAddress) {
-    result.walletAddress = status.walletAddress;
-  }
-
-  return result;
+  // Memoize the return object to prevent unnecessary re-renders
+  // Only recreate when any of the properties actually change
+  return useMemo<UseWalletStatusReturn>(
+    () => ({
+      status,
+      walletAddress: status?.walletAddress,
+      connectionState,
+      isConnected,
+      isVerified,
+      indexerAuth,
+      connectWallet: connectWalletCallback,
+      verifyWallet: verifyWalletCallback,
+      disconnectWallet: disconnectWalletCallback,
+      updateWalletAddress: updateWalletAddressCallback,
+      clearVerification: clearVerificationCallback,
+    }),
+    [
+      status,
+      connectionState,
+      isConnected,
+      isVerified,
+      indexerAuth,
+      connectWalletCallback,
+      verifyWalletCallback,
+      disconnectWalletCallback,
+      updateWalletAddressCallback,
+      clearVerificationCallback,
+    ]
+  );
 };
 
 /**

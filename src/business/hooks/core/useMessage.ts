@@ -3,7 +3,7 @@
  * Manages a single message with full payload fetching from WildDuck
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Optional } from '@johnqh/types';
 import { useWildduckMessages, WildduckConfig } from '@johnqh/wildduck_client';
 import { useSelectedAccount } from './useSelectedAccount';
@@ -169,12 +169,18 @@ export function useMessage(
   }, [wildduckAuth, selectedMessageId, messagesHook, cacheMessage]);
 
   const isLoading = messagesHook.isLoading || isLoadingMessage;
+  const combinedError = error || messagesHook.error;
 
-  return {
-    selectedMessageId,
-    selectMessage,
-    message,
-    isLoading,
-    error: error || messagesHook.error,
-  };
+  // Memoize the return object to prevent unnecessary re-renders
+  // Only recreate when any of the properties actually change
+  return useMemo<UseMessageReturn>(
+    () => ({
+      selectedMessageId,
+      selectMessage,
+      message,
+      isLoading,
+      error: combinedError,
+    }),
+    [selectedMessageId, selectMessage, message, isLoading, combinedError]
+  );
 }
