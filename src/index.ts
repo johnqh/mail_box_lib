@@ -290,10 +290,7 @@ export {
   Optional,
 
   // Business interfaces
-  Email,
   EmailFolder,
-  Folder,
-  MailBox,
 
   // Utility functions
   addDays,
