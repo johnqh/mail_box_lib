@@ -173,8 +173,12 @@ export function useAccountMailboxes(
         const address = firstAddress.address;
 
         // Validate the username part (before '@') matches the selected account
+        // Use case-insensitive comparison for wallet addresses
         const [username] = address.split('@');
-        if (username !== selectedAccount.username) {
+        if (!username) {
+          throw new Error(`Invalid email address format: ${address}`);
+        }
+        if (username.toLowerCase() !== selectedAccount.username.toLowerCase()) {
           throw new Error(
             `Expected username ${selectedAccount.username}, but found ${username} in address ${address}`
           );
