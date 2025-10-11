@@ -3,6 +3,4 @@
  */
 
 export * from './mailboxStore';
-export * from './messagesStore';
-export * from './messageStore';
 export * from './unifiedMessagesStore';
