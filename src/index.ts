@@ -170,6 +170,11 @@ export {
   ParsedEmailAddress,
   ServiceKeys,
   UserProperties,
+
+  // Message Types
+  Message,
+  messageFromListItem,
+  messageFromDetailedResponse,
 } from './business';
 
 // Platform Types (from container/dependency-container)
