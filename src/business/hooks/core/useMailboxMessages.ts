@@ -40,6 +40,8 @@ export interface UseMailboxMessagesReturn {
   hasMore: boolean;
   /** Load more messages (next page) */
   loadMore: () => Promise<void>;
+  /** Refresh messages (reload from first page) */
+  refresh: () => Promise<void>;
   /** Error message if any */
   error: Optional<string>;
 }
@@ -74,6 +76,7 @@ export interface UseMailboxMessagesReturn {
  *     isLoading,
  *     hasMore,
  *     loadMore,
+ *     refresh,
  *     error
  *   } = useMailboxMessages(
  *     'https://wildduck.example.com',
@@ -85,6 +88,7 @@ export interface UseMailboxMessagesReturn {
  *
  *   return (
  *     <div>
+ *       <button onClick={refresh} disabled={isLoading}>Refresh</button>
  *       {messages.map(msg => (
  *         <div key={msg.id}>
  *           <strong>{msg.from?.address}</strong>: {msg.subject}
@@ -257,6 +261,17 @@ export function useMailboxMessages(
 
   const isLoading = messagesHook.isLoading || isLoadingMore;
 
+  // Refresh function to reload messages from the first page
+  const refresh = useCallback(async () => {
+    if (!wildduckAuth || !selectedMailboxId) {
+      return;
+    }
+    // Reset state and reload first page
+    setMessages([]);
+    setCurrentPage(1);
+    await loadPage(1);
+  }, [wildduckAuth, selectedMailboxId, loadPage]);
+
   return {
     selectedMailboxId,
     selectMailbox,
@@ -265,6 +280,7 @@ export function useMailboxMessages(
     isLoading,
     hasMore,
     loadMore,
+    refresh,
     error: error || messagesHook.error,
   };
 }

@@ -4,7 +4,7 @@
  * Fetches email address and mailboxes from WildDuck when authenticated
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Optional } from '@johnqh/types';
 import {
   useWildduckAddresses,
@@ -30,6 +30,8 @@ export interface UseAccountMailboxesReturn {
   isLoading: boolean;
   /** Error message if any */
   error: Optional<string>;
+  /** Function to refresh mailboxes */
+  refresh: () => Promise<void>;
 }
 
 /**
@@ -229,6 +231,17 @@ export function useAccountMailboxes(
 
   const combinedError = error || addressesHook.error || mailboxesHook.error;
 
+  // Refresh function to manually refetch mailboxes
+  const refresh = useCallback(async () => {
+    if (!wildduckAuth) {
+      return;
+    }
+    // Reset the ref so the useEffect will re-run
+    lastFetchedUserIdRef.current = null;
+    // Trigger a refresh by calling the mailboxes hook's refresh method
+    await mailboxesHook.refresh(wildduckAuth.userId);
+  }, [wildduckAuth, mailboxesHook]);
+
   // Memoize the return object to prevent unnecessary re-renders
   // Only recreate when any of the properties actually change
   return useMemo<UseAccountMailboxesReturn>(
@@ -238,7 +251,8 @@ export function useAccountMailboxes(
       wildduckAuth,
       isLoading,
       error: combinedError,
+      refresh,
     }),
-    [emailAddress, mailboxes, wildduckAuth, isLoading, combinedError]
+    [emailAddress, mailboxes, wildduckAuth, isLoading, combinedError, refresh]
   );
 }

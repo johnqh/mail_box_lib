@@ -4,7 +4,7 @@
  * Uses global state for React Native compatibility
  */
 
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { Optional, WalletData } from '@johnqh/types';
 import { useWalletStatus } from './useWalletStatus';
 import {
@@ -41,6 +41,8 @@ export interface UseWalletAccountsReturn {
   accounts: WildDuckAccount[];
   /** Indexer authentication object (passthrough from useWalletStatus) */
   indexerAuth: Optional<IndexerUserAuth>;
+  /** Function to refresh wallet accounts */
+  refresh: () => Promise<void>;
 }
 
 /**
@@ -160,10 +162,17 @@ export function useWalletAccounts(
     accounts.length,
   ]);
 
+  // Refresh function to manually refetch wallet accounts
+  const refresh = useCallback(async () => {
+    if (queryResult.refetch) {
+      await queryResult.refetch();
+    }
+  }, [queryResult]);
+
   // Memoize the return object to prevent unnecessary re-renders
   // Only recreate when accounts or indexerAuth actually change
   return useMemo<UseWalletAccountsReturn>(
-    () => ({ accounts, indexerAuth }),
-    [accounts, indexerAuth]
+    () => ({ accounts, indexerAuth, refresh }),
+    [accounts, indexerAuth, refresh]
   );
 }
