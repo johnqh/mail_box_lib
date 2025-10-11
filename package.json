@@ -119,8 +119,8 @@
     "@johnqh/di": "^1.4.5",
     "@johnqh/indexer_client": "^0.0.18",
     "@johnqh/mail_box_contracts": "^1.9.0",
-    "@johnqh/types": "^1.8.20",
-    "@johnqh/wildduck_client": "^0.0.11",
+    "@johnqh/types": "^1.8.21",
+    "@johnqh/wildduck_client": "^0.0.12",
     "@tanstack/react-query": "^5.90.1",
     "react": "^19.2.0",
     "viem": "^2.38.0"
