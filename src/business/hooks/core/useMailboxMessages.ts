@@ -183,6 +183,12 @@ export function useMailboxMessages(
         // Transform WildduckMessage[] to Message[]
         const transformedMessages = result.map(msg => messageFromListItem(msg));
 
+        // Stop if no messages returned
+        if (transformedMessages.length === 0) {
+          setIsLoadingMore(false);
+          return;
+        }
+
         // Update total from the hook
         const total = messagesHook.totalMessages;
         setTotalMessages(total);
