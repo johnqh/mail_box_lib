@@ -117,6 +117,10 @@ export {
   useGlobalWalletAccounts,
   useAccountMailboxes,
   UseAccountMailboxesReturn,
+  useReferralCode,
+  UseReferralCodeReturn,
+  useReferralShare,
+  UseReferralShareReturn,
 
   // Contract Hooks
   useContractConfig,
