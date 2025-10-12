@@ -1,4 +1,4 @@
-import { Optional } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
 // import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
 
 // Create connection to Solana mainnet

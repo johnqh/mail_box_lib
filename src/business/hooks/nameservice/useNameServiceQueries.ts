@@ -1,4 +1,4 @@
-import { Optional } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
 /**
  * TanStack Query hooks for Name Service resolution (ENS/SNS)
  *

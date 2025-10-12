@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Optional } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
 
 /**
  * Generic async operation hook with loading, error, and data states

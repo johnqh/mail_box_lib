@@ -2,7 +2,7 @@
  * Platform-agnostic authentication business logic
  */
 
-import { AuthStatus, ChainType, Optional } from '@johnqh/types';
+import { AuthStatus, ChainType, Optional } from '@sudobility/types';
 import { EmailAddress } from '../../../types/email';
 
 /**

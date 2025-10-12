@@ -4,8 +4,11 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Optional } from '@johnqh/types';
-import { useWildduckMessages, WildduckConfig } from '@johnqh/wildduck_client';
+import { Optional } from '@sudobility/types';
+import {
+  useWildduckMessages,
+  WildduckConfig,
+} from '@sudobility/wildduck_client';
 import { useSelectedAccount } from './useSelectedAccount';
 import {
   createGlobalState,

@@ -5,12 +5,12 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
-import { Optional, WalletData } from '@johnqh/types';
+import { Optional, WalletData } from '@sudobility/types';
 import { useWalletStatus } from './useWalletStatus';
 import {
   IndexerUserAuth,
   useIndexerGetWalletAccounts,
-} from '@johnqh/indexer_client';
+} from '@sudobility/indexer_client';
 import {
   createGlobalState,
   setGlobalState,

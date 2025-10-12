@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { DefaultAuthBusinessLogic, DefaultEmailAddressBusinessLogic, AddressHelper } from '../auth-business-logic';
 import { WalletUserData } from '../../../../types/email';
-import { ChainType, AuthStatus } from '@johnqh/types';
+import { ChainType, AuthStatus } from '@sudobility/types';
 
 describe('DefaultAuthBusinessLogic', () => {
   let authLogic: DefaultAuthBusinessLogic;

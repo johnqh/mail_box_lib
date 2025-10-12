@@ -5,14 +5,14 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Optional } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
 import {
   useWildduckAddresses,
   useWildduckMailboxes,
   WildduckConfig,
   WildduckMailbox,
   WildduckUserAuth,
-} from '@johnqh/wildduck_client';
+} from '@sudobility/wildduck_client';
 import { useSelectedAccount } from './useSelectedAccount';
 import { useMailboxStore } from '../../stores/mailboxStore';
 

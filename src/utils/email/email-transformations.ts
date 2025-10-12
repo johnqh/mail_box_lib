@@ -3,7 +3,7 @@
  * Transforms wallet account data into email address formats for UI consumption
  */
 
-import { ChainType, IndexerNameServiceAccount } from '@johnqh/types';
+import { ChainType, IndexerNameServiceAccount } from '@sudobility/types';
 import { WildDuckAccount } from '../../business/hooks/core/useWalletAccounts';
 
 // Re-export with legacy name for backward compatibility

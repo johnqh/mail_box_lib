@@ -15,7 +15,7 @@ import {
   verifyWallet,
   clearVerification,
 } from '../useWalletStatus';
-import { ChainType, ConnectionState } from '@johnqh/types';
+import { ChainType, ConnectionState } from '@sudobility/types';
 
 describe('useWalletStatus', () => {
   // Reset wallet state before each test

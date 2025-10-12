@@ -9,7 +9,7 @@ import {
   EmailAction,
   EmailFolder,
   SubscriptionAction,
-} from '@johnqh/types';
+} from '@sudobility/types';
 import { WalletType } from '../../../di';
 
 interface AnalyticsEventData {

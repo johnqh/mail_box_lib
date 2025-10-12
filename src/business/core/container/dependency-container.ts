@@ -3,7 +3,7 @@
  * Manages all services and their dependencies
  */
 
-import { PlatformType } from '@johnqh/types';
+import { PlatformType } from '@sudobility/types';
 import {
   ServiceKeys as DIServiceKeys,
   PlatformAnalytics,
@@ -11,7 +11,7 @@ import {
   PlatformNotifications,
   PlatformStorage,
   PlatformTheme,
-} from '@johnqh/di';
+} from '@sudobility/di';
 import { EmailService, MailboxService } from '../../../types/services';
 import {
   AuthBusinessLogic,
@@ -103,10 +103,10 @@ class ServiceContainer {
 
 /**
  * Service keys for type-safe service resolution
- * Extends platform service keys from @johnqh/di with app-specific keys
+ * Extends platform service keys from @sudobility/di with app-specific keys
  */
 const ServiceKeys = {
-  // Platform services (from @johnqh/di)
+  // Platform services (from @sudobility/di)
   ...DIServiceKeys,
 
   // Business logic

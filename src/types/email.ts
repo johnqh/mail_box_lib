@@ -5,7 +5,7 @@ import {
   IndexerWalletAccount,
   Optional,
   Theme,
-} from '@johnqh/types';
+} from '@sudobility/types';
 
 // Re-export with legacy name for backward compatibility
 export type WalletAccount = IndexerWalletAccount;

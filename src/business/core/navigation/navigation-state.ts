@@ -2,7 +2,7 @@
  * Platform-agnostic navigation and UI state business logic
  */
 
-import { MediumView, MobileView, Optional } from '@johnqh/types';
+import { MediumView, MobileView, Optional } from '@sudobility/types';
 
 interface NavigationState {
   // Mobile navigation

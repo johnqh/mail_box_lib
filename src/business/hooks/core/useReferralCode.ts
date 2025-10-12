@@ -5,9 +5,9 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { Optional } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
 import { useSelectedAccount } from './useSelectedAccount';
-import { useIndexerReferralCode } from '@johnqh/indexer_client';
+import { useIndexerReferralCode } from '@sudobility/indexer_client';
 import {
   createGlobalState,
   setGlobalState,

@@ -29,7 +29,7 @@ const getGlobalQueryClient = (): QueryClient => {
  *
  * Usage:
  * ```tsx
- * import { QueryClientProvider, getQueryClient } from '@johnqh/lib';
+ * import { QueryClientProvider, getQueryClient } from '@sudobility/lib';
  *
  * function App() {
  *   return (

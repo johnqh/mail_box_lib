@@ -4,7 +4,7 @@
  * Provides type-safe, consistent query keys for all API endpoints.
  * Following TanStack Query best practices for key structure.
  *
- * Note: WildDuck query keys have been moved to @johnqh/wildduck_client
+ * Note: WildDuck query keys have been moved to @sudobility/wildduck_client
  */
 
 const queryKeys = {

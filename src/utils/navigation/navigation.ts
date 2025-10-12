@@ -10,7 +10,7 @@ import {
   NavigationOptions,
   NavigationService,
 } from '../../di';
-import { Optional } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
 
 let navigationService: NavigationService;
 

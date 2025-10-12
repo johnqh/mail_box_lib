@@ -1,4 +1,4 @@
-import { Optional } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
 /**
  * Platform-agnostic URLSearchParams wrapper
  * Provides URLSearchParams functionality with React Native compatibility

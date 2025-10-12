@@ -1,5 +1,5 @@
-import { Optional } from '@johnqh/types';
-import { ERROR_MESSAGES, logger } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
+import { ERROR_MESSAGES, logger } from '@sudobility/types';
 // import { EnvUtils } from '../../di'; // TODO: Implement proper DI setup
 
 // Platform-specific global

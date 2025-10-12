@@ -6,7 +6,7 @@
  */
 
 import { create } from 'zustand';
-import { Optional } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
 import { Message } from '../types/message';
 
 /**

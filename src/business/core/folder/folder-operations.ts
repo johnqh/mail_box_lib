@@ -7,7 +7,7 @@ import {
   EmailFolderUtils,
   MailboxType,
   Optional,
-} from '@johnqh/types';
+} from '@sudobility/types';
 
 interface FolderInfo {
   name: EmailFolder;

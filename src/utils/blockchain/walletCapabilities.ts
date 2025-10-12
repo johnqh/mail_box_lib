@@ -2,7 +2,7 @@
  * Utility to detect wallet capabilities and supported chains
  */
 
-import { ChainType } from '@johnqh/types';
+import { ChainType } from '@sudobility/types';
 
 interface WalletCapability {
   name: string;

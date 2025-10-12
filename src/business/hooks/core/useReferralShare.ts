@@ -4,7 +4,7 @@
  */
 
 import { useMemo } from 'react';
-import { Optional } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
 import { useReferralCode } from './useReferralCode';
 
 /**

@@ -12,7 +12,7 @@ import {
   type InitiateKYCRequest,
   type InitiateKYCResponse,
   type KYCVerificationLevel,
-} from '@johnqh/types';
+} from '@sudobility/types';
 
 interface SignedData {
   signature: string;

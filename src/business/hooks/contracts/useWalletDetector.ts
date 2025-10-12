@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import { ChainType, Optional } from '@johnqh/types';
+import { ChainType, Optional } from '@sudobility/types';
 
 interface WalletInfo {
   address: string;

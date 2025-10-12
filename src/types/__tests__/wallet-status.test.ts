@@ -9,7 +9,7 @@ import {
   isWalletConnected,
   isWalletVerified,
   getWalletConnectionState
-} from '@johnqh/types';
+} from '@sudobility/types';
 
 describe('Wallet Status Types and Utilities', () => {
   const testAddress = '0x742d35Cc6e3c05652aA6E10f35F74c29C5881398';

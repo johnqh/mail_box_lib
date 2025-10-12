@@ -1,5 +1,5 @@
 /**
- * @johnqh/lib - Shared utilities and common functions for 0xmail.box projects
+ * @sudobility/lib - Shared utilities and common functions for 0xmail.box projects
  */
 
 // Business Logic - Core business operations and enums (Goal 4)
@@ -236,7 +236,7 @@ export type {
 // Re-export enums from local di module
 export { WalletType, StorageType, NetworkError } from './di';
 
-// Re-export ALL exports from @johnqh/types as named exports
+// Re-export ALL exports from @sudobility/types as named exports
 export {
   // Constants
   ANIMATION,
@@ -406,13 +406,10 @@ export {
   validateDomain,
   validateEventArgs,
   validateMessage,
-} from '@johnqh/types';
+} from '@sudobility/types';
 
-// Re-export from @johnqh/mail_box_contracts as named exports
-export {
-  OnchainMailerClient,
-  WalletDetector,
-} from '@johnqh/mail_box_contracts';
+// Re-export from @sudobility/contracts as named exports
+export { OnchainMailerClient, WalletDetector } from '@sudobility/contracts';
 
 // Infrastructure - Network clients moved to dedicated packages
 
@@ -550,7 +547,7 @@ export { WalletUserData, User, EmailAddress } from './types/email';
 export {
   IndexerWalletAccount as WalletAccount,
   IndexerNameServiceAccount as NameServiceAccount,
-} from '@johnqh/types';
+} from '@sudobility/types';
 
 // Email transformation utilities
 export {

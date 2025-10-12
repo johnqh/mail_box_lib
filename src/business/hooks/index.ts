@@ -8,7 +8,7 @@ export * from './core';
 // Name Service hooks (ENS/SNS resolution with TanStack Query)
 export * from './nameservice';
 
-// Contract hooks for @johnqh/mail_box_contracts
+// Contract hooks for @sudobility/contracts
 export * from './contracts';
 
 // KYC verification hooks

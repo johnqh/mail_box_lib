@@ -32,4 +32,4 @@ export * from './formatters';
 // React utilities
 export * from './useGlobalState';
 
-// Type validation utilities now in @johnqh/types
+// Type validation utilities now in @sudobility/types

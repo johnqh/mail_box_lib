@@ -10,7 +10,7 @@
  * - Compatible with both REST and GraphQL APIs
  */
 
-import { ChainType, Optional } from '@johnqh/types';
+import { ChainType, Optional } from '@sudobility/types';
 
 // =============================================================================
 // COMMON AUTHENTICATION TYPES

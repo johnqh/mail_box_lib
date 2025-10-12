@@ -2,7 +2,7 @@
  * Wallet debugging utilities to help diagnose signing issues
  */
 
-import { ChainType, Optional } from '@johnqh/types';
+import { ChainType, Optional } from '@sudobility/types';
 
 interface WalletDebugInfo {
   chainType: ChainType;

@@ -8,8 +8,8 @@ import type {
   ChainConfig,
   EVMConfig,
   SolanaConfig,
-} from '@johnqh/mail_box_contracts';
-import { ChainType } from '@johnqh/types';
+} from '@sudobility/contracts';
+import { ChainType } from '@sudobility/types';
 
 interface UseContractConfigReturn {
   // Current configurations

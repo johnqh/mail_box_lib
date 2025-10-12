@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Optional } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
 import { getErrorMessage } from '../../../utils/errorHandling';
 
 interface UseAsyncState<T> {

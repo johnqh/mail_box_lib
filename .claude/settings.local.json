@@ -27,7 +27,9 @@
       "Read(//Users/johnhuang/0xmail/wildduck_client/src/**)",
       "Bash(find:*)",
       "Bash(npm outdated)",
-      "Bash(npm outdated:*)"
+      "Bash(npm outdated:*)",
+      "Bash(npm audit:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nrefactor: remove obsolete message stores\n\nRemove Dead Code:\n- Delete messageStore.ts (89 lines)\n  - Replaced by useUnifiedMessagesStore\n  - Used WildduckMessageDetail type (old API)\n  - No imports found in codebase\n  \n- Delete messagesStore.ts (146 lines)\n  - Replaced by useUnifiedMessagesStore\n  - Used WildduckMessage type (old API)\n  - No imports found in codebase\n\n- Update stores/index.ts\n  - Remove exports for deleted stores\n  - Keep mailboxStore and unifiedMessagesStore\n\nImpact:\n- Removed 235 lines of unused code\n- Reduced bundle size\n- Eliminated confusion from duplicate store implementations\n- All functionality preserved in useUnifiedMessagesStore\n\nVerification:\n- All tests passing (90 tests)\n- No lint errors\n- TypeScript compilation successful\n- No imports of removed stores found anywhere\n\nVersion: 3.4.15\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

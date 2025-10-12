@@ -12,8 +12,8 @@ import {
   OnchainMailerClient,
   type UnifiedTransaction,
   type UnifiedWallet,
-} from '@johnqh/mail_box_contracts';
-import { ChainType, Optional } from '@johnqh/types';
+} from '@sudobility/contracts';
+import { ChainType, Optional } from '@sudobility/types';
 
 interface UseMailerClientOptions {
   wallet?: UnifiedWallet;

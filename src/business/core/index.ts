@@ -6,7 +6,7 @@
  * dependencies and focus purely on business rules and data transformations.
  */
 
-// Note: Core enums now exported from @johnqh/types
+// Note: Core enums now exported from @sudobility/types
 
 // Analytics operations
 export * from './analytics';
@@ -110,7 +110,7 @@ function createBusinessLogicServicesSync() {
  *   DefaultEmailOperations,
  *   DefaultMailboxOperations,
  *   NavigationStateManager
- * } from '@johnqh/lib';
+ * } from '@sudobility/lib';
  *
  * const emailOps = new DefaultEmailOperations();
  * const mailboxOps = new DefaultMailboxOperations();

@@ -8,7 +8,7 @@ import {
   TransactionReceipt,
 } from 'viem';
 import { mainnet } from 'viem/chains';
-import { logger } from '@johnqh/types';
+import { logger } from '@sudobility/types';
 
 // MailService contract configuration for delegation (separate from Mailer)
 // TODO: Replace with actual contract address when deployed

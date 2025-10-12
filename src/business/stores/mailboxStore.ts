@@ -4,7 +4,7 @@
  */
 
 import { create } from 'zustand';
-import { WildduckMailbox } from '@johnqh/wildduck_client';
+import { WildduckMailbox } from '@sudobility/wildduck_client';
 
 /**
  * Mailbox cache entry

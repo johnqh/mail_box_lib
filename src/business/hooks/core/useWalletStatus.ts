@@ -13,8 +13,8 @@ import {
   getWalletConnectionState as getConnectionStateFromStatus,
   Optional,
   WalletStatus,
-} from '@johnqh/types';
-import { IndexerUserAuth } from '@johnqh/indexer_client';
+} from '@sudobility/types';
+import { IndexerUserAuth } from '@sudobility/indexer_client';
 import {
   createGlobalState,
   getGlobalState,

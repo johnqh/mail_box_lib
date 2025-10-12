@@ -1,10 +1,10 @@
-import { Optional } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
 /**
  * Platform-agnostic persistence service interface
  * Handles data persistence across different storage mechanisms
  */
 
-import { RequestStatus } from '@johnqh/types';
+import { RequestStatus } from '@sudobility/types';
 import { StorageType } from '../../di';
 
 interface PersistenceOptions {

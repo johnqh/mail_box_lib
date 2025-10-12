@@ -1,5 +1,5 @@
 /**
- * Contract hooks for interacting with @johnqh/mail_box_contracts
+ * Contract hooks for interacting with @sudobility/contracts
  * Provides React hooks for OnchainMailerClient and related utilities
  */
 
@@ -22,4 +22,4 @@ export type {
   MessageResult,
   DomainResult,
   DelegationResult as ContractDelegationResult,
-} from '@johnqh/mail_box_contracts';
+} from '@sudobility/contracts';

@@ -1,5 +1,5 @@
 /**
- * Centralized type exports for @johnqh/lib
+ * Centralized type exports for @sudobility/lib
  * All interfaces and types are consolidated here
  */
 
@@ -80,5 +80,5 @@ export * from './mailbox';
 // Common types and validation utilities
 export * from './common';
 
-// IndexerClient API response types are now in @johnqh/types
-// WildDuck types are now in @johnqh/wildduck_client
+// IndexerClient API response types are now in @sudobility/types
+// WildDuck types are now in @sudobility/wildduck_client

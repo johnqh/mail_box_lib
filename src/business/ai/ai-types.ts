@@ -4,7 +4,7 @@
  */
 
 import { Email } from '../../types/email';
-import { ChainType } from '@johnqh/types';
+import { ChainType } from '@sudobility/types';
 
 interface EmailCategory {
   primary:

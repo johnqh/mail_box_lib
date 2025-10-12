@@ -4,7 +4,7 @@
  */
 
 import { TransactionAnalysis } from './ai-types';
-import { ChainType } from '@johnqh/types';
+import { ChainType } from '@sudobility/types';
 
 interface AIWeb3Service {
   analyzeTransaction(

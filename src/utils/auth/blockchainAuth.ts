@@ -3,10 +3,10 @@
  * Compatible with WildDuck's blockchain authentication system
  */
 
-import { AddressType, ChainType, getAddressType } from '@johnqh/types';
+import { AddressType, ChainType, getAddressType } from '@sudobility/types';
 
 // Re-export for convenience
-export { getAddressType as detectAddressType } from '@johnqh/types';
+export { getAddressType as detectAddressType } from '@sudobility/types';
 
 interface SigninMessage {
   domain: string;

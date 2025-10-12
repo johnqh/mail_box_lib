@@ -10,7 +10,7 @@ import {
   isBoolean,
   isObject,
   isString,
-} from '@johnqh/types';
+} from '@sudobility/types';
 
 /**
  * Base API response interface

@@ -6,7 +6,7 @@
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
 import { isAddress } from 'viem';
-import { Optional } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
 import {
   AddressHelper,
   AddressType,

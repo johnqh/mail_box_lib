@@ -4,12 +4,12 @@
  * Automatically updates when wallet accounts change
  */
 
-import { Optional } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
 import {
   useWildduckAuth,
   WildduckConfig,
   WildduckUserAuth,
-} from '@johnqh/wildduck_client';
+} from '@sudobility/wildduck_client';
 import { useEffect, useMemo } from 'react';
 import {
   createGlobalState,

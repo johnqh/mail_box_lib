@@ -9,13 +9,13 @@
  * - Both hooks share the same Zustand cache using this unified type
  */
 
-import { Optional } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
 import {
   WildduckMessage,
   WildduckMessageAddress,
   WildduckMessageAttachment,
   WildduckMessageDetail,
-} from '@johnqh/wildduck_client';
+} from '@sudobility/wildduck_client';
 
 /**
  * Unified message type that combines list and detail views
