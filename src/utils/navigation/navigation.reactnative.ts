@@ -4,10 +4,10 @@
  */
 
 import {
-  NavigationService,
-  NavigationOptions,
-  NavigationState,
   NavigationConfig,
+  NavigationOptions,
+  NavigationService,
+  NavigationState,
 } from '../../di';
 
 const DEFAULT_CONFIG: NavigationConfig = {
@@ -80,7 +80,7 @@ export class ReactNativeNavigationService implements NavigationService {
       if (this.canGoBack()) {
         // Mock going back
         this.updateCurrentState(
-          this.currentState.previousPath || this.config.fallbackPath || '/',
+          this.currentState.previousPath || this.config.fallbackPath || '/'
         );
         this.notifyListeners();
 
@@ -180,11 +180,9 @@ export class ReactNativeNavigationService implements NavigationService {
   }
 
   isSupported(): boolean {
-    // In React Native, you would check:
-    // return this.navigationRef !== null;
-
-    // For development, assume it's supported in React Native environment
-    return typeof window === 'undefined';
+    // Check if navigation ref is set or if we're in React Native environment
+    // In production, this would check: return this.navigationRef !== null;
+    return this.navigationRef !== null || typeof window === 'undefined';
   }
 
   private buildCurrentState(): NavigationState {
@@ -206,7 +204,7 @@ export class ReactNativeNavigationService implements NavigationService {
   }
 
   private notifyListeners(): void {
-    this.listeners.forEach((listener) => {
+    this.listeners.forEach(listener => {
       try {
         listener(this.currentState);
       } catch (error) {
@@ -219,7 +217,7 @@ export class ReactNativeNavigationService implements NavigationService {
     // In a real app, you would integrate with your analytics service here
     console.debug(
       `[RN Navigation Analytics] ${type}:`,
-      path || this.currentState.currentPath,
+      path || this.currentState.currentPath
     );
   }
 }
@@ -228,7 +226,7 @@ export class ReactNativeNavigationService implements NavigationService {
  * Create a React Native navigation service instance
  */
 export function createReactNativeNavigationService(
-  config?: Partial<NavigationConfig>,
+  config?: Partial<NavigationConfig>
 ): NavigationService {
   return new ReactNativeNavigationService(config);
 }
@@ -241,10 +239,7 @@ export const reactNativeNavigationHelpers = {
    * Initialize React Navigation integration
    * This would be called from your navigation container
    */
-  initializeNavigation: (
-    navigationRef: any,
-    service: NavigationService,
-  ) => {
+  initializeNavigation: (navigationRef: any, service: NavigationService) => {
     const rnService = service as ReactNativeNavigationService;
     rnService.setNavigationRef(navigationRef);
   },

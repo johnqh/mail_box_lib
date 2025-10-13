@@ -4,10 +4,10 @@
  */
 
 import {
-  NavigationService,
-  NavigationOptions,
-  NavigationState,
   NavigationConfig,
+  NavigationOptions,
+  NavigationService,
+  NavigationState,
 } from '../../di';
 
 const DEFAULT_CONFIG: NavigationConfig = {
@@ -194,7 +194,7 @@ export class WebNavigationService implements NavigationService {
   }
 
   private notifyListeners(): void {
-    this.listeners.forEach((listener) => {
+    this.listeners.forEach(listener => {
       try {
         listener(this.currentState);
       } catch (error) {
@@ -207,7 +207,7 @@ export class WebNavigationService implements NavigationService {
     // In a real app, you would integrate with your analytics service here
     console.debug(
       `[Navigation Analytics] ${type}:`,
-      path || this.currentState.currentPath,
+      path || this.currentState.currentPath
     );
   }
 }
@@ -216,7 +216,7 @@ export class WebNavigationService implements NavigationService {
  * Create a web navigation service instance
  */
 export function createWebNavigationService(
-  config?: Partial<NavigationConfig>,
+  config?: Partial<NavigationConfig>
 ): NavigationService {
   return new WebNavigationService(config);
 }
