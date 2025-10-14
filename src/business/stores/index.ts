@@ -4,3 +4,5 @@
 
 export * from './mailboxStore';
 export * from './unifiedMessagesStore';
+export * from './mailTemplatesStore';
+export * from './mailWebhooksStore';

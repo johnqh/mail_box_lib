@@ -127,6 +127,12 @@ export {
   UseReferralCodeReturn,
   useReferralShare,
   UseReferralShareReturn,
+  useMailTemplates,
+  UseMailTemplatesConfig,
+  UseMailTemplatesReturn,
+  useMailWebhooks,
+  UseMailWebhooksConfig,
+  UseMailWebhooksReturn,
 
   // Contract Hooks
   useContractConfig,
@@ -137,6 +143,9 @@ export {
   useWalletDetector,
   UseWalletDetectorReturn,
   WalletInfo,
+  useClaimableRewards,
+  UseClaimableRewardsConfig,
+  UseClaimableRewardsReturn,
 
   // Name Service Hooks
   useNameServiceResolution,
@@ -540,6 +549,9 @@ export {
   validateObjectId,
   validateWalletAddress,
   ValidationError,
+  // Blockchain types
+  ClaimableReward,
+  ClaimRewardResult,
 } from './types';
 
 // Local business types with extensions

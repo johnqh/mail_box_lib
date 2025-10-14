@@ -12,6 +12,9 @@ export * from './useWalletDetector';
 // Contract configuration management
 export * from './useContractConfig';
 
+// Claimable rewards management
+export * from './useClaimableRewards';
+
 // Re-export types from the contracts package for convenience
 export type {
   UnifiedTransaction,

@@ -80,5 +80,8 @@ export * from './mailbox';
 // Common types and validation utilities
 export * from './common';
 
+// Blockchain types
+export * from './blockchain';
+
 // IndexerClient API response types are now in @sudobility/types
 // WildDuck types are now in @sudobility/wildduck_client

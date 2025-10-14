@@ -23,3 +23,5 @@ export * from './useMailboxMessages';
 export * from './useMessage';
 export * from './useReferralCode';
 export * from './useReferralShare';
+export * from './useMailTemplates';
+export * from './useMailWebhooks';
