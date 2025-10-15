@@ -127,18 +127,19 @@ export const useMailTemplates = (
 
   // Get Zustand store methods
   const {
-    getTemplates: getCachedTemplates,
-    getCacheEntry,
     setTemplates: setCachedTemplates,
     clearTemplates: clearCachedTemplates,
   } = useMailTemplatesStore();
 
-  // Get cached data
-  const cachedData = walletAddress ? getCacheEntry(walletAddress) : undefined;
+  // Subscribe directly to cached data for this wallet address
+  // This ensures component re-renders when cache updates
+  const cachedData = useMailTemplatesStore((state) =>
+    walletAddress ? state.cache[walletAddress.toLowerCase()] : undefined
+  );
 
   const cachedTemplates = useMemo(
-    () => (walletAddress ? getCachedTemplates(walletAddress) || [] : []),
-    [walletAddress, getCachedTemplates]
+    () => cachedData?.templates || [],
+    [cachedData]
   );
 
   /**

@@ -107,18 +107,19 @@ export const useMailWebhooks = (
 
   // Get Zustand store methods
   const {
-    getWebhooks: getCachedWebhooks,
-    getCacheEntry,
     setWebhooks: setCachedWebhooks,
     clearWebhooks: clearCachedWebhooks,
   } = useMailWebhooksStore();
 
-  // Get cached data
-  const cachedData = walletAddress ? getCacheEntry(walletAddress) : undefined;
+  // Subscribe directly to cached data for this wallet address
+  // This ensures component re-renders when cache updates
+  const cachedData = useMailWebhooksStore((state) =>
+    walletAddress ? state.cache[walletAddress.toLowerCase()] : undefined
+  );
 
   const cachedWebhooks = useMemo(
-    () => (walletAddress ? getCachedWebhooks(walletAddress) || [] : []),
-    [walletAddress, getCachedWebhooks]
+    () => cachedData?.webhooks || [],
+    [cachedData]
   );
 
   /**
