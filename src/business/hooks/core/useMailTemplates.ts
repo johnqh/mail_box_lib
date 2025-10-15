@@ -7,10 +7,10 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useIndexerMailTemplates } from '@sudobility/indexer_client';
 import type {
-  IndexerTemplateData,
   IndexerTemplateCreateRequest,
+  IndexerTemplateData,
   IndexerTemplateUpdateRequest,
-  Optional
+  Optional,
 } from '@sudobility/types';
 import { useWalletStatus } from './useWalletStatus';
 import { useMailTemplatesStore } from '../../stores/mailTemplatesStore';
