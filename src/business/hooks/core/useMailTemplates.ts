@@ -6,7 +6,12 @@
 
 import { useCallback, useEffect, useMemo } from 'react';
 import { useIndexerMailTemplates } from '@sudobility/indexer_client';
-import type { IndexerTemplateData, Optional } from '@sudobility/types';
+import type {
+  IndexerTemplateData,
+  IndexerTemplateCreateRequest,
+  IndexerTemplateUpdateRequest,
+  Optional
+} from '@sudobility/types';
 import { useWalletStatus } from './useWalletStatus';
 import { useMailTemplatesStore } from '../../stores/mailTemplatesStore';
 
@@ -16,22 +21,14 @@ import { useMailTemplatesStore } from '../../stores/mailTemplatesStore';
 export type MailTemplate = IndexerTemplateData;
 
 /**
- * Request type for creating a new mail template
+ * Request type for creating a new mail template - re-export from @sudobility/types
  */
-export interface MailTemplateCreateRequest {
-  templateName: string;
-  subject: string;
-  bodyContent: string;
-}
+export type MailTemplateCreateRequest = IndexerTemplateCreateRequest;
 
 /**
- * Request type for updating an existing mail template
+ * Request type for updating an existing mail template - re-export from @sudobility/types
  */
-export interface MailTemplateUpdateRequest {
-  templateName?: string;
-  subject?: string;
-  bodyContent?: string;
-}
+export type MailTemplateUpdateRequest = IndexerTemplateUpdateRequest;
 
 /**
  * Configuration for useMailTemplates hook
