@@ -15,6 +15,9 @@ export * from './useContractConfig';
 // Claimable rewards management
 export * from './useClaimableRewards';
 
+// Recipient revenue claims (modern RpcHelpers-based)
+export * from './useRecipientClaims';
+
 // Re-export types from the contracts package for convenience
 export type {
   UnifiedTransaction,

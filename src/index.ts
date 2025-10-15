@@ -133,6 +133,12 @@ export {
   useMailWebhooks,
   UseMailWebhooksConfig,
   UseMailWebhooksReturn,
+  usePoints,
+  UsePointsConfig,
+  UsePointsReturn,
+  LeaderboardEntry,
+  SiteStats,
+  UserPointsBalance,
 
   // Contract Hooks
   useContractConfig,
@@ -146,6 +152,10 @@ export {
   useClaimableRewards,
   UseClaimableRewardsConfig,
   UseClaimableRewardsReturn,
+  useRecipientClaims,
+  UseRecipientClaimsConfig,
+  UseRecipientClaimsReturn,
+  ChainClaimInfo,
 
   // Name Service Hooks
   useNameServiceResolution,

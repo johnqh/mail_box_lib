@@ -133,7 +133,7 @@ export const useMailTemplates = (
 
   // Subscribe directly to cached data for this wallet address
   // This ensures component re-renders when cache updates
-  const cachedData = useMailTemplatesStore((state) =>
+  const cachedData = useMailTemplatesStore(state =>
     walletAddress ? state.cache[walletAddress.toLowerCase()] : undefined
   );
 

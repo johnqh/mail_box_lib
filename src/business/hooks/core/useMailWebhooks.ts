@@ -106,14 +106,12 @@ export const useMailWebhooks = (
   const indexerHook = useIndexerMailWebhooks(endpointUrl, dev);
 
   // Get Zustand store methods
-  const {
-    setWebhooks: setCachedWebhooks,
-    clearWebhooks: clearCachedWebhooks,
-  } = useMailWebhooksStore();
+  const { setWebhooks: setCachedWebhooks, clearWebhooks: clearCachedWebhooks } =
+    useMailWebhooksStore();
 
   // Subscribe directly to cached data for this wallet address
   // This ensures component re-renders when cache updates
-  const cachedData = useMailWebhooksStore((state) =>
+  const cachedData = useMailWebhooksStore(state =>
     walletAddress ? state.cache[walletAddress.toLowerCase()] : undefined
   );
 

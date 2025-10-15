@@ -72,8 +72,12 @@ describe('useMailWebhooks', () => {
   const mockDeleteWebhook = vi.fn();
   const mockClearError = vi.fn();
 
+  // Mock store cache state
+  let mockStoreCache: Record<string, any> = {};
+
   beforeEach(() => {
     vi.clearAllMocks();
+    mockStoreCache = {}; // Reset cache
 
     // Setup default mocks
     (useWalletStatus as any).mockReturnValue({
@@ -93,11 +97,20 @@ describe('useMailWebhooks', () => {
       clearError: mockClearError,
     });
 
-    (useMailWebhooksStore as any).mockReturnValue({
-      getWebhooks: mockGetWebhooks,
-      getCacheEntry: mockGetCacheEntry,
-      setWebhooks: mockSetWebhooks,
-      clearWebhooks: mockClearWebhooks,
+    // Mock Zustand store to support both selector and direct calls
+    (useMailWebhooksStore as any).mockImplementation((selector?: any) => {
+      // If called with a selector function, execute it with the mock state
+      if (typeof selector === 'function') {
+        return selector({ cache: mockStoreCache });
+      }
+      // If called without selector, return the full state with actions
+      return {
+        cache: mockStoreCache,
+        getWebhooks: mockGetWebhooks,
+        getCacheEntry: mockGetCacheEntry,
+        setWebhooks: mockSetWebhooks,
+        clearWebhooks: mockClearWebhooks,
+      };
     });
 
     mockGetWebhooks.mockReturnValue([]);
@@ -135,8 +148,8 @@ describe('useMailWebhooks', () => {
         isVerified: true,
       });
 
-      mockGetWebhooks.mockReturnValue([mockWebhook1, mockWebhook2]);
-      mockGetCacheEntry.mockReturnValue(mockCacheEntry);
+      // Set up the cache in mockStoreCache
+      mockStoreCache[walletAddress.toLowerCase()] = mockCacheEntry;
 
       const { result } = renderHook(() => useMailWebhooks(mockConfig));
 
@@ -220,7 +233,8 @@ describe('useMailWebhooks', () => {
         isVerified: true,
       });
 
-      mockGetCacheEntry.mockReturnValue(mockCacheEntry);
+      // Set up the cache in mockStoreCache
+      mockStoreCache[walletAddress.toLowerCase()] = mockCacheEntry;
 
       renderHook(() =>
         useMailWebhooks({
@@ -675,7 +689,8 @@ describe('useMailWebhooks', () => {
         isVerified: true,
       });
 
-      mockGetCacheEntry.mockReturnValue(mockCacheEntry);
+      // Set up the cache in mockStoreCache
+      mockStoreCache[walletAddress.toLowerCase()] = mockCacheEntry;
 
       (useIndexerMailWebhooks as any).mockReturnValue({
         webhooks: null,
@@ -701,7 +716,14 @@ describe('useMailWebhooks', () => {
         cachedAt: Date.now(),
       };
 
-      mockGetCacheEntry.mockReturnValue(mockCacheEntry);
+      (useWalletStatus as any).mockReturnValue({
+        walletAddress,
+        indexerAuth: mockIndexerAuth,
+        isVerified: true,
+      });
+
+      // Set up the cache in mockStoreCache
+      mockStoreCache[walletAddress.toLowerCase()] = mockCacheEntry;
 
       (useIndexerMailWebhooks as any).mockReturnValue({
         webhooks: null,
@@ -720,7 +742,7 @@ describe('useMailWebhooks', () => {
     });
 
     it('should be false when no cache exists', () => {
-      mockGetCacheEntry.mockReturnValue(undefined);
+      // mockStoreCache is empty by default, no need to set anything
 
       const { result } = renderHook(() => useMailWebhooks(mockConfig));
 

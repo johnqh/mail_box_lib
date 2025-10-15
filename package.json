@@ -89,7 +89,8 @@
   "author": "0xmail.box team",
   "license": "MIT",
   "devDependencies": {
-    "@sudobility/contracts": "^1.10.1",
+    "@sudobility/configs": "^0.0.2",
+    "@sudobility/contracts": "^1.10.2",
     "@sudobility/di": "^1.4.6",
     "@sudobility/indexer_client": "^0.0.24",
     "@sudobility/types": "^1.8.23",
@@ -121,7 +122,8 @@
   },
   "peerDependencies": {
     "@bonfida/spl-name-service": "^3.0.16",
-    "@sudobility/contracts": "^1.10.1",
+    "@sudobility/configs": "^0.0.2",
+    "@sudobility/contracts": "^1.10.2",
     "@sudobility/di": "^1.4.6",
     "@sudobility/indexer_client": "^0.0.24",
     "@sudobility/types": "^1.8.23",
