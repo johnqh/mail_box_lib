@@ -53,7 +53,14 @@ const createQueryClient = (): QueryClient => {
         // Retry configuration
         retry: (failureCount, error: any) => {
           // Don't retry on 4xx errors (client errors)
-          if (error?.statusCode >= 400 && error?.statusCode < 500) {
+          // Check both 'status' (NetworkError) and 'statusCode' (other error formats)
+          const statusCode = error?.status ?? error?.statusCode;
+          if (statusCode >= 400 && statusCode < 500) {
+            return false;
+          }
+
+          // Don't retry on CORS or network errors (status 0)
+          if (statusCode === 0) {
             return false;
           }
 
@@ -76,7 +83,14 @@ const createQueryClient = (): QueryClient => {
         // Mutation retry logic
         retry: (failureCount, error: any) => {
           // Don't retry mutations on client errors
-          if (error?.statusCode >= 400 && error?.statusCode < 500) {
+          // Check both 'status' (NetworkError) and 'statusCode' (other error formats)
+          const statusCode = error?.status ?? error?.statusCode;
+          if (statusCode >= 400 && statusCode < 500) {
+            return false;
+          }
+
+          // Don't retry on CORS or network errors (status 0)
+          if (statusCode === 0) {
             return false;
           }
 
