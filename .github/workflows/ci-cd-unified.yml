@@ -42,7 +42,20 @@ jobs:
         run: |
           # Workaround for Rollup optional dependencies issue
           # https://github.com/npm/cli/issues/4828
-          npm ci --force || (rm -rf node_modules package-lock.json && npm install)
+          rm -rf node_modules package-lock.json
+          npm install
+          # Explicitly install Rollup platform-specific binaries
+          npm install @rollup/rollup-linux-x64-gnu --save-optional --no-save
+
+      - name: Verify Rollup installation
+        run: |
+          if [ -d "node_modules/@rollup/rollup-linux-x64-gnu" ]; then
+            echo "✅ Rollup linux binaries installed successfully"
+            ls -la node_modules/@rollup/rollup-linux-x64-gnu
+          else
+            echo "❌ Rollup linux binaries NOT found"
+            exit 1
+          fi
 
       - name: Run linting
         run: npm run lint
