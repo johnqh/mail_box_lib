@@ -128,7 +128,7 @@
     "@sudobility/indexer_client": "^0.0.25",
     "@sudobility/types": "^1.8.26",
     "@sudobility/wildduck_client": "^0.0.15",
-    "@tanstack/react-query": "^5.90.1",
+    "@tanstack/react-query": "^5.90.5",
     "react": "^19.2.0",
     "viem": "^2.38.0"
   },

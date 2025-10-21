@@ -111,12 +111,18 @@ export function useMessage(
   const [isLoadingMessage, setIsLoadingMessage] = useState(false);
   const [error, setError] = useState<Optional<string>>(null);
 
-  const config: WildduckConfig = {
-    backendUrl: endpointUrl,
-    apiToken,
-  };
+  // Memoize config to prevent getMessage from being recreated
+  const config = useMemo<WildduckConfig>(
+    () => ({
+      backendUrl: endpointUrl,
+      apiToken,
+    }),
+    [endpointUrl, apiToken]
+  );
 
   const messagesHook = useWildduckMessages(config, devMode);
+  // Extract getMessage to prevent useEffect from triggering on messagesHook state changes
+  const { getMessage } = messagesHook;
 
   // Function to select a message
   const selectMessage = useCallback((messageId: string) => {
@@ -134,12 +140,17 @@ export function useMessage(
       return;
     }
 
+    // Don't re-fetch if we're already loading
+    if (isLoadingMessage) {
+      return;
+    }
+
     (async () => {
       try {
         setIsLoadingMessage(true);
         setError(null);
 
-        const response = await messagesHook.getMessage(
+        const response = await getMessage(
           wildduckAuth.userId,
           selectedMessageId
         );
@@ -169,7 +180,7 @@ export function useMessage(
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wildduckAuth, selectedMessageId, messagesHook, cacheMessage]);
+  }, [wildduckAuth, selectedMessageId]);
 
   const isLoading = messagesHook.isLoading || isLoadingMessage;
   const combinedError = error || messagesHook.error;
