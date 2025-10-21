@@ -101,6 +101,19 @@ export function messageFromDetailedResponse(
   response: WildduckMessageDetail,
   existingMessage?: Optional<Message>
 ): Message {
+  console.log('[messageFromDetailedResponse] Input:', {
+    response,
+    existingMessage,
+  });
+
+  // Generate intro from text if not available in detail response
+  const intro =
+    (response as any).intro ||
+    existingMessage?.intro ||
+    (response.text ? response.text.substring(0, 200) : '');
+
+  console.log('[messageFromDetailedResponse] Generated intro:', intro);
+
   const message: Message = {
     // Preserve list view data if available (but will be overwritten by response fields)
     ...(existingMessage || {}),
@@ -112,7 +125,7 @@ export function messageFromDetailedResponse(
     to: response.to,
     subject: response.subject,
     date: response.date,
-    intro: response.intro,
+    intro,
     size: response.size,
     seen: response.seen,
     deleted: response.deleted,
@@ -144,7 +157,10 @@ export function messageFromDetailedResponse(
     message.bcc = response.bcc;
   }
   if (response.html !== undefined) {
-    message.html = response.html;
+    // Handle html being an array (join into single string) or a string
+    message.html = Array.isArray(response.html)
+      ? response.html.join('')
+      : response.html;
   }
   if (response.text !== undefined) {
     message.text = response.text;
@@ -159,5 +175,9 @@ export function messageFromDetailedResponse(
     message.inReplyTo = response.inReplyTo;
   }
 
+  console.log(
+    '[messageFromDetailedResponse] Final transformed message:',
+    message
+  );
   return message;
 }
