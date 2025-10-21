@@ -16,6 +16,7 @@ import {
 } from '../../../utils/useGlobalState';
 import { useUnifiedMessagesStore } from '../../stores/unifiedMessagesStore';
 import { Message, messageFromDetailedResponse } from '../../types/message';
+import { useGlobalSelectedMailboxId } from './useMailboxMessages';
 
 /**
  * Global selected message ID - shared across all components
@@ -93,6 +94,7 @@ export function useMessage(
   devMode: boolean = false
 ): UseMessageReturn {
   const [selectedMessageId] = useGlobalSelectedMessageId();
+  const [selectedMailboxId] = useGlobalSelectedMailboxId();
   const { wildduckAuth } = useSelectedAccount(endpointUrl, apiToken, devMode);
 
   // Get Zustand store methods
@@ -140,6 +142,13 @@ export function useMessage(
       return;
     }
 
+    // Determine mailboxId: prefer cached message's mailbox, fall back to selected mailbox
+    const mailboxId = cachedMessage?.mailbox || selectedMailboxId;
+    if (!mailboxId) {
+      setError('No mailbox selected');
+      return;
+    }
+
     // Don't re-fetch if we're already loading
     if (isLoadingMessage) {
       return;
@@ -152,6 +161,7 @@ export function useMessage(
 
         const response = await getMessage(
           wildduckAuth.userId,
+          mailboxId,
           selectedMessageId
         );
 
@@ -180,7 +190,12 @@ export function useMessage(
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wildduckAuth, selectedMessageId]);
+  }, [
+    wildduckAuth,
+    selectedMessageId,
+    selectedMailboxId,
+    cachedMessage?.mailbox,
+  ]);
 
   const isLoading = messagesHook.isLoading || isLoadingMessage;
   const combinedError = error || messagesHook.error;
