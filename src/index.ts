@@ -70,16 +70,6 @@ export {
   verifyWallet,
   disconnectWallet,
 
-  // Services and DI
-  ServiceContainer,
-  ServiceContainerConfig,
-  ServiceContainerContext,
-  ServiceResolver,
-  ServiceResolverContext,
-  createServiceContainer,
-  createBusinessLogicServices,
-  createBusinessLogicServicesSync,
-
   // Query Management
   queryKeys,
   createQueryKey,
@@ -100,10 +90,6 @@ export {
   useDebouncedCallback,
   useLocalStorage,
   useOptimizedState,
-  useStorage,
-  useService,
-  useServiceContainer,
-  useServiceResolver,
 
   // Wallet Hooks
   useWalletStatus,
@@ -178,22 +164,10 @@ export {
   useMapState,
   usePrevious,
 
-  // Service Hooks
-  useAnalyticsService,
-  useAppConfig,
-  useAuthenticatedOperation,
-  useFolderOperations,
-  useNetworkService,
-  useNotificationsService,
-  usePersistenceService,
-  useStorageService,
-  useThemeService,
-
   // Helper Types
   EmailAddressBusinessLogic,
   EmailAddressHelper,
   ParsedEmailAddress,
-  ServiceKeys,
   UserProperties,
 
   // Message Types
@@ -202,14 +176,7 @@ export {
   messageFromDetailedResponse,
 } from './business';
 
-// Platform Types (from container/dependency-container)
-export type {
-  PlatformAnalytics,
-  PlatformNetwork,
-  PlatformNotifications,
-  PlatformStorage as PlatformStorageContainer,
-  PlatformTheme,
-} from './business/core/container/dependency-container';
+// Platform Types no longer exported - use direct DI instead
 
 // Dependency Injection - All DI types and interfaces from local di module
 export type {

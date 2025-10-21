@@ -5,6 +5,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Optional } from '@sudobility/types';
+import type { StorageService } from '@sudobility/di';
 import {
   useWildduckMessages,
   WildduckConfig,
@@ -91,11 +92,17 @@ export interface UseMessageReturn {
 export function useMessage(
   endpointUrl: string,
   apiToken: string,
+  storage: StorageService,
   devMode: boolean = false
 ): UseMessageReturn {
   const [selectedMessageId] = useGlobalSelectedMessageId();
   const [selectedMailboxId] = useGlobalSelectedMailboxId();
-  const { wildduckAuth } = useSelectedAccount(endpointUrl, apiToken, devMode);
+  const { wildduckAuth } = useSelectedAccount(
+    endpointUrl,
+    apiToken,
+    storage,
+    devMode
+  );
 
   // Get Zustand store methods
   const { getMessage: getCachedMessage, setMessage: cacheMessage } =

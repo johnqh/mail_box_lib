@@ -6,6 +6,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { Optional } from '@sudobility/types';
+import type { StorageService } from '@sudobility/di';
 import { useSelectedAccount } from './useSelectedAccount';
 import { useIndexerReferralCode } from '@sudobility/indexer_client';
 import {
@@ -69,9 +70,15 @@ export interface UseReferralCodeReturn {
  */
 export function useReferralCode(
   endpointUrl: string,
+  storage: StorageService,
   devMode: boolean = false
 ): UseReferralCodeReturn {
-  const { selectedAccount } = useSelectedAccount(endpointUrl, '', devMode);
+  const { selectedAccount } = useSelectedAccount(
+    endpointUrl,
+    '',
+    storage,
+    devMode
+  );
   const [referralCode] = useGlobalReferralCode();
 
   // Fetch referral code using the indexer hook

@@ -5,6 +5,7 @@
  */
 
 import { Optional } from '@sudobility/types';
+import type { StorageService } from '@sudobility/di';
 import {
   useWildduckAuth,
   WildduckConfig,
@@ -60,15 +61,18 @@ export interface UseSelectedAccountReturn {
  *
  * @param endpointUrl - WildDuck API backend URL
  * @param apiToken - WildDuck API token for authentication
+ * @param storage - Storage service for persisting auth tokens
  * @param devMode - Whether to use mock data on errors
  * @returns Object containing selectedAccount and wildduckAuth
  *
  * @example
  * ```tsx
  * function MyComponent() {
+ *   const storage = useStorageService();
  *   const { selectedAccount, wildduckAuth } = useSelectedAccount(
  *     'https://wildduck.example.com',
  *     'your-api-token',
+ *     storage,
  *     false
  *   );
  *
@@ -89,6 +93,7 @@ export interface UseSelectedAccountReturn {
 export function useSelectedAccount(
   endpointUrl: string,
   apiToken: string,
+  storage: StorageService,
   devMode: boolean = false
 ): UseSelectedAccountReturn {
   const [accounts] = useGlobalWalletAccounts();
@@ -100,7 +105,7 @@ export function useSelectedAccount(
     backendUrl: endpointUrl,
     apiToken,
   };
-  const { authenticate } = useWildduckAuth(config, devMode);
+  const { authenticate } = useWildduckAuth(config, storage, devMode);
 
   // Manage selected account selection
   useEffect(() => {

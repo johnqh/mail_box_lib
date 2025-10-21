@@ -5,6 +5,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Optional } from '@sudobility/types';
+import type { StorageService } from '@sudobility/di';
 import {
   useWildduckMessages,
   WildduckConfig,
@@ -111,6 +112,7 @@ export function useMailboxMessages(
   endpointUrl: string,
   apiToken: string,
   emailDomain: string,
+  storage: StorageService,
   devMode: boolean = false,
   pageSize: number = 50
 ): UseMailboxMessagesReturn {
@@ -119,6 +121,7 @@ export function useMailboxMessages(
     endpointUrl,
     apiToken,
     emailDomain,
+    storage,
     devMode
   );
 

@@ -6,6 +6,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Optional } from '@sudobility/types';
+import type { StorageService } from '@sudobility/di';
 import {
   useWildduckAddresses,
   useWildduckMailboxes,
@@ -82,11 +83,13 @@ export function useAccountMailboxes(
   endpointUrl: string,
   apiToken: string,
   emailDomain: string,
+  storage: StorageService,
   devMode: boolean = false
 ): UseAccountMailboxesReturn {
   const { selectedAccount, wildduckAuth } = useSelectedAccount(
     endpointUrl,
     apiToken,
+    storage,
     devMode
   );
 

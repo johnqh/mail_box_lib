@@ -26,9 +26,6 @@ export * from './navigation/navigation-state';
 // Authentication business logic
 export * from './auth/auth-business-logic';
 
-// Dependency injection container
-export * from './container';
-
 // TanStack Query system
 export * from './query';
 
