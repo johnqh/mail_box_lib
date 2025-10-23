@@ -15,6 +15,7 @@ export * from './useWalletAccounts';
 export * from './useSelectedAccount';
 export * from './useAccountMailboxes';
 export * from './useMailboxMessages';
+export * from './useMessages';
 export * from './useMessage';
 export * from './useReferralCode';
 export * from './useReferralShare';
