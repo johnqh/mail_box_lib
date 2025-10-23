@@ -518,7 +518,9 @@ export {
   // Type guards and validators
   Mailbox,
   MailboxService,
+  MailboxSpecialUse,
   MockDataProvider,
+  WildDuckMailbox,
   PaginationParams,
   PaginationResponse,
   PersistenceOptions,

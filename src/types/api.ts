@@ -140,6 +140,18 @@ interface WildDuckUserResponse {
 }
 
 /**
+ * WildDuck Mailbox Special Use enum
+ * Based on WildDuck server implementation
+ */
+enum MailboxSpecialUse {
+  Inbox = '\\Inbox',
+  Sent = '\\Sent',
+  Trash = '\\Trash',
+  Drafts = '\\Drafts',
+  Junk = '\\Junk',
+}
+
+/**
  * WildDuck Mailbox Types
  * For email folder/mailbox management
  */
@@ -147,9 +159,7 @@ interface WildDuckMailbox {
   id: string;
   name: string;
   path: string;
-  specialUse: Optional<
-    'Inbox' | 'Sent' | 'Trash' | 'Drafts' | 'Junk' | 'Archive'
-  >;
+  specialUse: Optional<MailboxSpecialUse>;
   modifyIndex: number;
   subscribed: boolean;
   hidden: boolean;
@@ -484,6 +494,7 @@ interface ApiClientConfig {
 }
 
 export {
+  MailboxSpecialUse,
   isWildDuckAuthResponse,
   isWildDuckMessage,
   isGraphQLResponse,

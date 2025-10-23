@@ -22,6 +22,7 @@ export {
 
 // API types (with aliased exports to avoid conflicts)
 export {
+  MailboxSpecialUse,
   WalletSignature,
   WalletAuth,
   WildDuckAuthRequest,
