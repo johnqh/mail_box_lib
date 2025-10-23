@@ -192,13 +192,15 @@ export function useMessage(
 
         console.log('[useMessage] API response:', response);
 
-        const messageData = response.data;
-        if (messageData) {
-          console.log('[useMessage] Message data received:', messageData);
+        // The WildDuck API returns the message directly in the response, not nested in a 'data' field
+        // Response structure: { success: true, id, mailbox, html, attachments, ... }
+        if (response && response.success) {
+          console.log('[useMessage] Message data received:', response);
           // Transform the detailed response to Message
           // Merge with existing cached message if available to preserve list view data
+          // The response type from the API is compatible with WildduckMessageDetail
           const transformedMessage = messageFromDetailedResponse(
-            messageData,
+            response as any,
             cachedMessage
           );
           console.log('[useMessage] Transformed message:', transformedMessage);
@@ -211,7 +213,9 @@ export function useMessage(
             transformedMessage
           );
         } else {
-          console.warn('[useMessage] No message data in response');
+          console.warn(
+            '[useMessage] No message data in response or request failed'
+          );
         }
       } catch (err) {
         const errorMessage =
