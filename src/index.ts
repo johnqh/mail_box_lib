@@ -548,3 +548,9 @@ export {
   chainTypeToString,
   WalletEmailGroup,
 } from './utils/email/email-transformations';
+
+// Attachment utilities
+export {
+  convertFileToBase64Attachment,
+  convertFilesToBase64Attachments,
+} from './utils/attachment-utils';
