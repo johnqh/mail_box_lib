@@ -43,9 +43,7 @@ export {
   useQueryClient,
 
   // Types
-  LeaderboardEntry,
   Message,
-  UseMessagesParams,
   UserPoints,
 } from './business';
 
@@ -65,9 +63,6 @@ export type {
   EnvironmentVariables,
   EnvProvider,
 
-  // Navigation
-  NavigationState,
-
   // Notification
   NotificationCapabilities,
   NotificationConfig,
@@ -79,7 +74,6 @@ export type {
   // Storage
   AdvancedPlatformStorage,
   PlatformStorage,
-  SerializedStorageService,
   StorageService,
 } from '@sudobility/di';
 

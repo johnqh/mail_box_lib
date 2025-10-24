@@ -11,9 +11,6 @@
 // Analytics operations
 export * from './analytics';
 
-// Folder operations
-export * from './folder/folder-operations';
-
 // Navigation and UI state
 export * from './navigation/navigation-state';
 

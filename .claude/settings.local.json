@@ -44,7 +44,12 @@
       "Bash(awk:*)",
       "Bash(if [ -f \"node_modules/@sudobility/types/dist/index.d.ts\" ])",
       "Bash(then grep -E \"^export (interface|type|class|enum)\" node_modules/@sudobility/types/dist/index.d.ts)",
-      "Bash(fi:*)"
+      "Bash(fi:*)",
+      "Bash(for dir in \"/Users/johnhuang/0xmail/mail_box_lib/src/types/api\" \"/Users/johnhuang/0xmail/mail_box_lib/src/di\" \"/Users/johnhuang/0xmail/mail_box_lib/src/network/clients/__tests__\" \"/Users/johnhuang/0xmail/mail_box_lib/src/business/core/mailbox/__tests__\" \"/Users/johnhuang/0xmail/mail_box_lib/src/business/core/wallet/__tests__\" \"/Users/johnhuang/0xmail/mail_box_lib/src/business/core/email/__tests__\" \"/Users/johnhuang/0xmail/mail_box_lib/src/business/hooks/wallet\")",
+      "Bash(do)",
+      "Bash(echo:*)",
+      "Bash(ls:*)",
+      "Bash(test -f:*)"
     ],
     "deny": [],
     "ask": []
