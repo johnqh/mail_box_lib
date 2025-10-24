@@ -14,10 +14,10 @@ This library follows a layered architecture with platform abstraction:
 
 ### Business Logic Layer (`src/business/`)
 Pure business logic that works across platforms:
-- **Core Operations**: Domain logic for email, auth, analytics
-- **AI Services**: LLM-powered email processing
-- **React Hooks**: Data fetching and state management
-- **Points System**: Rewards and engagement logic
+- **Core Operations**: Domain logic for folders, auth, analytics, navigation
+- **React Hooks**: Data fetching and state management (TanStack Query integration)
+- **State Management**: Zustand stores for mailboxes and messages
+- **Type Definitions**: Unified message types and transformations
 
 ### Platform Abstraction (`src/`)
 Interface-first design with platform-specific implementations:
@@ -401,7 +401,10 @@ npm test
 ```
 
 ### Publishing
-The library is published as `@johnqh/lib` and should work in both web and React Native environments.
+The library is published as `@sudobility/lib` and should work in both web and React Native environments.
+
+### Current Version
+**v3.6.9** - Updated @sudobility dependencies with type migration to new package structure
 
 ### Version Management
 Follow semantic versioning:

@@ -621,7 +621,7 @@ npm run format    # Format with Prettier
 
 ### Resources
 
-1. **Development Guide**: `DEVELOPMENT.md`
+1. **Development Guide**: `docs/DEVELOPMENT.md`
 2. **API Documentation**: `docs/API.md`
 3. **Type Documentation**: `docs/TYPES.md`
 4. **Templates**: `templates/` directory

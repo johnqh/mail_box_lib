@@ -1,239 +1,344 @@
 # AI-Assisted Development Guide
 
-## Quick Start for AI Developers
+**Version: 3.6.9**
+**Package: @sudobility/lib**
 
-### Understanding the Project
-This is a React Native-compatible library that follows strict architectural patterns:
-- **Interface-first design**: Every service has a TypeScript interface
-- **Platform abstraction**: Code works on both web and React Native
-- **Clean architecture**: Business logic is separate from platform concerns
-- **Dependency injection**: Services are configurable and testable
+This guide provides AI assistants with essential context and patterns for working on this React Native-compatible shared utilities library.
 
-### Common AI Assistant Tasks
+## 🎯 Quick Reference
 
-#### 1. Adding a New Service
+### Essential Commands
 ```bash
-# Step 1: Define the interface
-touch src/types/services/my-service.interface.ts
+# Validation (run before committing)
+npm run check-all           # Lint + TypeCheck + Tests
 
-# Step 2: Create business operations
-mkdir -p src/business/core/my-service
-touch src/business/core/my-service/my-service-operations.ts
-touch src/business/core/my-service/index.ts
+# Development
+npm run typecheck           # TypeScript validation (fastest check)
+npm test                    # Run all 116 tests
+npm run lint:fix            # Auto-fix linting issues
+npm run build               # Build to dist/
 
-# Step 3: Platform implementations
-mkdir -p src/utils/my-service
-touch src/utils/my-service/my-service.web.ts
-touch src/utils/my-service/my-service.reactnative.ts
-touch src/utils/my-service/index.ts
-
-# Step 4: React hooks (if needed)
-mkdir -p src/business/hooks/my-service
-touch src/business/hooks/my-service/useMyService.ts
-touch src/business/hooks/my-service/index.ts
-
-# Step 5: Tests
-mkdir -p src/business/core/my-service/__tests__
-touch src/business/core/my-service/__tests__/my-service-operations.test.ts
+# Watch modes
+npm run build:watch         # Watch TypeScript compilation
+npm run test:watch          # Watch tests
+npm run typecheck:watch     # Watch type checking
 ```
 
-#### 2. Updating API Clients
-When backend APIs change:
-1. Update the client in `src/network/clients/`
-2. Update corresponding hooks in `src/business/hooks/`
-3. Run `npm run typecheck` to catch signature mismatches
-4. Update tests to reflect new behavior
+### Current State (v3.6.9)
+- **Tests**: 116 passing across 7 test files
+- **Dependencies**: Updated @sudobility packages (di, types, indexer_client, wildduck_client)
+- **Type System**: Uses `Optional<T>` pattern from @sudobility/types
+- **Architecture**: Platform-agnostic business logic with TanStack Query integration
 
-**Note:** WildDuck and Indexer API clients are now in separate packages:
-- `@johnqh/wildduck_client` for email server operations
-- `@johnqh/indexer_client` for blockchain indexing
+## 📁 Project Structure
 
-#### 3. Platform-Specific Implementations
-```typescript
-// Example: src/utils/storage/storage.web.ts
-export class WebStorageService implements StorageService {
-  async set(key: string, value: string): Promise<void> {
-    localStorage.setItem(key, value);
-  }
-}
-
-// Example: src/utils/storage/storage.reactnative.ts
-export class ReactNativeStorageService implements StorageService {
-  async set(key: string, value: string): Promise<void> {
-    await AsyncStorage.setItem(key, value);
-  }
-}
+```
+src/
+├── business/                # Core business logic (platform-agnostic)
+│   ├── core/               # Domain operations (auth, analytics, folders, navigation)
+│   ├── hooks/              # React hooks with TanStack Query
+│   ├── stores/             # Zustand state management (mailboxes, messages, webhooks)
+│   └── types/              # Business type definitions
+├── di/                     # Dependency injection (from @sudobility/di)
+├── network/                # HTTP clients
+├── types/                  # TypeScript type definitions
+│   ├── api.ts             # API types
+│   ├── email.ts           # Email and user types
+│   ├── blockchain/        # Blockchain types
+│   └── services/          # Service interfaces
+└── utils/                  # Platform-specific utilities
+    ├── auth/              # Authentication utilities
+    ├── blockchain/        # Blockchain utilities
+    ├── contracts/         # Smart contract utilities
+    └── email/             # Email transformation utilities
 ```
 
-### API Signature Patterns
+## 🔧 Key Patterns
 
-#### Authentication Patterns
-API clients should follow consistent authentication patterns:
+### Optional<T> Type Pattern (REQUIRED)
+**Always use `Optional<T>` for nullable values**
 
 ```typescript
-// Configuration-based authentication
-interface APIConfig {
-  apiUrl: string;
-  apiToken: string;
-  options?: RequestOptions;
-}
+import { Optional } from '@sudobility/types';
 
-// Token-based authentication
-const headers = {
-  'Authorization': `Bearer ${apiToken}`,
-  'Content-Type': 'application/json'
+// ❌ WRONG
+const value: string | null | undefined;
+function getValue(): string | null { }
+
+// ✅ CORRECT
+const value: Optional<string>;
+function getValue(): Optional<string> { }
+```
+
+### Type Import Locations (v3.6.9)
+After recent refactoring, types are now imported from their source packages:
+
+```typescript
+// Core types from @sudobility/types
+import {
+  Optional,
+  WalletType,
+  StorageType,
+  NetworkClient,
+  NetworkResponse,
+  AnalyticsService,
+} from '@sudobility/types';
+
+// Wildduck types from @sudobility/types
+import {
+  WildduckConfig,
+  WildduckMailbox,
+  WildduckUserAuth,
+  WildduckMessage,
+  WildduckMessageDetail,
+} from '@sudobility/types';
+
+// DI types from @sudobility/di
+import type { StorageService } from '@sudobility/di';
+
+// Contracts from @sudobility/contracts
+import { OnchainMailerClient, WalletDetector } from '@sudobility/contracts';
+```
+
+### Hook Pattern with TanStack Query
+```typescript
+import { useQuery } from '@tanstack/react-query';
+import { Optional } from '@sudobility/types';
+
+export const useFeature = (config: FeatureConfig) => {
+  const [error, setError] = useState<Optional<string>>(null);
+
+  const query = useQuery({
+    queryKey: ['feature', config.id],
+    queryFn: async () => {
+      // Implementation
+    },
+  });
+
+  return {
+    data: query.data,
+    isLoading: query.isLoading,
+    error: error || query.error?.message,
+  };
 };
 ```
 
-### Testing Patterns
-
-#### Business Logic Tests
+### Zustand Store Pattern
 ```typescript
-// Focus on testing business operations, not platform implementations
-describe('EmailOperations', () => {
-  it('should parse email addresses correctly', () => {
-    const operations = new EmailOperations(mockEmailService);
-    const result = operations.parseAddresses('test@example.com');
-    expect(result).toEqual([{ email: 'test@example.com', type: 'primary' }]);
+import { create } from 'zustand';
+import { Optional } from '@sudobility/types';
+
+interface StoreState {
+  data: Optional<Data>;
+  setData: (data: Data) => void;
+}
+
+export const useStore = create<StoreState>((set) => ({
+  data: null,
+  setData: (data) => set({ data }),
+}));
+```
+
+## 🚫 Don't Re-export Deep Dependencies
+
+**Rule**: Only re-export from direct dependencies or peerDependencies, never from transitive dependencies.
+
+```typescript
+// ✅ CORRECT - Re-exporting from peer dependencies
+export { WalletType, StorageType } from '@sudobility/types';
+export { OnchainMailerClient } from '@sudobility/contracts';
+
+// ❌ WRONG - Re-exporting from deep dependencies
+// Don't export anything from packages that are dependencies of our dependencies
+```
+
+## 📝 Adding New Features
+
+### 1. Define Types First
+```typescript
+// src/types/services/my-service.interface.ts
+import { Optional } from '@sudobility/types';
+
+export interface MyService {
+  doSomething(input: string): Promise<Optional<Result>>;
+}
+```
+
+### 2. Create Business Logic
+```typescript
+// src/business/core/my-feature/my-operations.ts
+export class MyOperations {
+  constructor(private service: MyService) {}
+
+  async execute(input: string): Promise<Optional<Result>> {
+    // Pure business logic - NO platform imports
+    return this.service.doSomething(input);
+  }
+}
+```
+
+### 3. Create React Hook
+```typescript
+// src/business/hooks/core/useMyFeature.ts
+import { useState, useCallback } from 'react';
+import { Optional } from '@sudobility/types';
+
+export const useMyFeature = (config: Config) => {
+  const [data, setData] = useState<Optional<Data>>(null);
+  const [error, setError] = useState<Optional<string>>(null);
+
+  // Implementation
+
+  return { data, error };
+};
+```
+
+### 4. Export from Index Files
+```typescript
+// src/types/services/index.ts
+export * from './my-service.interface';
+
+// src/business/core/index.ts
+export * from './my-feature/my-operations';
+
+// src/business/hooks/core/index.ts
+export { useMyFeature } from './useMyFeature';
+```
+
+## 🧪 Testing Guidelines
+
+### Test Structure
+```typescript
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+describe('MyFeature', () => {
+  let mockService: MockService;
+
+  beforeEach(() => {
+    mockService = createMockService();
+  });
+
+  it('should handle success case', async () => {
+    // Arrange
+    mockService.doSomething.mockResolvedValue(result);
+
+    // Act
+    const output = await feature.execute(input);
+
+    // Assert
+    expect(output).toEqual(expected);
+  });
+
+  it('should handle error case', async () => {
+    // Test error handling
   });
 });
 ```
 
-#### Hook Tests
-```typescript
-// Use React Testing Library for hooks
-import { renderHook, act } from '@testing-library/react';
-
-describe('useFeature', () => {
-  it('should handle operations correctly', async () => {
-    const { result } = renderHook(() => useFeature(config));
-    await act(async () => {
-      await result.current.executeAction(param);
-    });
-    expect(result.current.error).toBeNull();
-  });
-});
+### Running Tests
+```bash
+npm test                    # Run all tests
+npm run test:watch          # Watch mode
+npm run test:coverage       # With coverage report
+npm test -- path/to/test    # Run specific test
 ```
 
-### Code Quality Standards
+## 🐛 Common Issues
 
-#### TypeScript Guidelines
-- Use strict typing: no `any` types unless absolutely necessary
-- Define interfaces before implementations
-- Export types alongside implementations
-- Use generics for reusable code
-
-#### File Organization
-- Keep related files together in feature directories
-- Use `index.ts` files for clean exports
-- Follow naming conventions consistently
-- Separate interfaces from implementations
-
-#### Error Handling
+### Type Errors After Dependency Update
+**Solution**: Types moved to @sudobility/types
 ```typescript
-// Create custom error types
-export class IndexerApiError extends Error {
-  constructor(
-    message: string,
-    public statusCode: number,
-    public endpoint: string
-  ) {
-    super(message);
-    this.name = 'IndexerApiError';
-  }
-}
+// Update imports from
+import { WalletType } from '@sudobility/di';
+// To
+import { WalletType } from '@sudobility/types';
+```
 
-// Use consistent error handling in operations
-try {
-  const result = await apiCall();
-  return result;
-} catch (error) {
-  if (error instanceof IndexerApiError) {
-    // Handle API-specific errors
-    throw new BusinessLogicError(`API Error: ${error.message}`);
-  }
-  // Re-throw unexpected errors
-  throw error;
+### StorageService Compatibility
+**Issue**: @sudobility/di and @sudobility/wildduck_client had incompatible StorageService interfaces
+**Solution**: Updated to wildduck_client v1.0.5 which uses StorageService from @sudobility/di
+
+### Optional<T> Not Used
+**Issue**: Using `| null | undefined` instead of `Optional<T>`
+**Solution**: Import and use `Optional<T>` from @sudobility/types
+
+## 📦 Dependency Management
+
+### Peer Dependencies
+```json
+{
+  "@sudobility/contracts": "^1.11.0",
+  "@sudobility/di": "^1.4.7",
+  "@sudobility/types": "^1.8.29",
+  "@sudobility/indexer_client": "^0.0.28",
+  "@sudobility/wildduck_client": "^1.0.5",
+  "@tanstack/react-query": "^5.90.5"
 }
 ```
 
-### Debugging Checklist
+### Direct Dependency
+```json
+{
+  "zustand": "^5.0.8"
+}
+```
 
-When things go wrong, check these in order:
+## 🔍 Code Search Patterns
 
-1. **TypeScript Errors**: Run `npm run typecheck`
-2. **Linting Issues**: Run `npm run lint`
-3. **Platform Detection**: Verify correct implementation is loaded
-4. **API Signatures**: Check if backend API has changed
-5. **Environment Config**: Validate configuration values
-6. **Dependency Injection**: Check service registration
-7. **Interface Compliance**: Ensure implementations match interfaces
+```bash
+# Find all hooks
+find src/business/hooks -name "use*.ts"
 
-### Performance Considerations
+# Find all interfaces
+find src/types -name "*.interface.ts"
 
-#### Code Splitting
-- Use dynamic imports for platform-specific code
-- Lazy load heavy dependencies
-- Tree-shake unused exports
+# Find all stores
+find src/business/stores -name "*Store.ts"
 
-#### Memory Management
-- Avoid memory leaks in React hooks
-- Clean up subscriptions and timers
-- Use React.memo for expensive components
+# Find tests
+find src -name "*.test.ts"
 
-### Security Guidelines
+# Search for type usage
+grep -r "Optional<" src/
+```
 
-#### Sensitive Data
-- Never log sensitive information (private keys, signatures)
-- Use secure storage for credentials
-- Validate all inputs and API responses
-- Sanitize data before displaying to users
+## ✅ Pre-Commit Checklist
 
-#### API Security
-- All wallet operations require signature verification
-- Use HTTPS for all network requests
-- Validate server certificates
-- Handle rate limiting gracefully
+Before committing code changes:
 
-### Common Pitfalls
+- [ ] `npm run typecheck` passes
+- [ ] `npm test` passes (all 116 tests)
+- [ ] `npm run lint` passes
+- [ ] `npm run build` succeeds
+- [ ] Used `Optional<T>` for all nullable types
+- [ ] No platform-specific imports in business logic
+- [ ] Updated exports in index.ts files
+- [ ] Tests added/updated for new functionality
 
-1. **Platform Mixing**: Don't use platform-specific APIs in business logic
-2. **Interface Violations**: Always implement all interface methods
-3. **Missing Exports**: Update index files when adding new modules
-4. **Test Coverage**: Write tests for all business logic
-5. **Type Safety**: Avoid `any` types, use proper TypeScript
-6. **Error Swallowing**: Don't catch and ignore errors silently
+## 📚 Additional Resources
 
-### External Dependencies
+- **CLAUDE.md**: Comprehensive project context for Claude AI (root directory)
+- **docs/DEVELOPMENT.md**: Full development guide
+- **docs/API.md**: API documentation
+- **docs/TYPES.md**: Type system documentation
+- **docs/SECURITY.md**: Security policy and vulnerability reporting
 
-#### Separated Packages
-- `@johnqh/wildduck_client` → WildDuck email server integration
-- `@johnqh/indexer_client` → Blockchain indexer integration
+## 🔄 Recent Changes (v3.6.9)
 
-These are now separate npm packages with their own documentation.
+### Dependency Updates
+- @sudobility/di: 1.4.6 → 1.4.7
+- @sudobility/indexer_client: 0.0.27 → 0.0.28
+- @sudobility/wildduck_client: 1.0.2 → 1.0.5
 
-#### Key Libraries
-- `@solana/web3.js` - Solana blockchain integration
-- `viem` - Ethereum and EVM chain integration
-- `@noble/hashes` - Cryptographic hashing
-- `bs58` - Base58 encoding for addresses
-- `firebase` - Backend services
+### Type Migration
+- All types now imported from their source packages (@sudobility/types)
+- Removed local re-exports of types from deep dependencies
+- Fixed StorageService compatibility with wildduck_client
 
-### Development Workflow
+### Removed Features
+- AI email services (ai-email.service.ts, ai-search.service.ts, ai-web3.service.ts)
+- Email and mailbox operations (replaced by WildduckClient integration)
 
-1. **Before starting**: Read relevant documentation and existing code
-2. **Interface first**: Define TypeScript interfaces
-3. **Business logic**: Implement pure domain logic
-4. **Platform code**: Create platform-specific implementations
-5. **Integration**: Add React hooks if needed
-6. **Testing**: Write comprehensive tests
-7. **Quality**: Run lint, typecheck, and format
-8. **Documentation**: Update relevant docs
+---
 
-### Getting Help
-
-- Check `CLAUDE.md` for project-specific instructions
-- Review `DEVELOPMENT.md` for detailed development info
-- Look at existing implementations for patterns
-- Check `templates/` directory for code examples
-- Review test files to understand expected behavior
+**For detailed project context, see CLAUDE.md**

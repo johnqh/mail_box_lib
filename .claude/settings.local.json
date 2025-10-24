@@ -33,7 +33,13 @@
       "Bash(npm test:*)",
       "Bash(xargs:*)",
       "Bash(npm run lint:fix:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(npm run validate:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(git reset:*)",
+      "Bash(for pkg in configs contracts di indexer_client types wildduck_client)",
+      "Bash(do echo \"=== @sudobility/$pkg ===\")",
+      "Bash(node -e:*)"
     ],
     "deny": [],
     "ask": []
