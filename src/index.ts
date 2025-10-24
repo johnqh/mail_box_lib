@@ -4,35 +4,6 @@
 
 // Business Logic - Core business operations and enums (Goal 4)
 export {
-  // AI Services
-  aiEmailService,
-  aiSearchService,
-  aiWeb3Service,
-
-  // AI Types
-  AIEmailService,
-  AISearchService,
-  AIWeb3Service,
-  AIInsight,
-  AIProcessingOptions,
-  ContractExplanation,
-  EmailCategory,
-  EmailEntities,
-  EmailIndex,
-  EmailSummary,
-  NFTAnalysis,
-  ProtocolExplanation,
-  ScamAnalysis,
-  SearchCategory,
-  SearchInsights,
-  SearchQuery,
-  SearchResult,
-  SmartReply,
-  TokenAnalysis,
-  TransactionAnalysis,
-  UserBehaviorPattern,
-  Web3Entity,
-
   // Points System
   pointsService,
   PointsService,
@@ -47,14 +18,9 @@ export {
   getQueryClient,
 
   // Core Business Logic
-  DefaultEmailOperations,
-  EmailOperations,
   DefaultFolderOperations,
   FolderInfo,
   FolderOperations,
-  DefaultMailboxOperations,
-  MailboxOperations,
-  DefaultFolder,
   DefaultNavigationOperations,
   NavigationOperations,
   NavigationStateManager,
@@ -509,20 +475,12 @@ export {
   ChainInfo,
   // UI types
   DocSection,
-  EmailListOptions,
-  // Service interface types (email and persistence only)
-  EmailService,
   GraphQLPaginationInput,
   GraphQLWhereInput,
   isGraphQLResponse,
   // Type guards and validators
-  Mailbox,
-  MailboxService,
   MailboxSpecialUse,
-  MockDataProvider,
   WildduckMailbox,
-  PaginationParams,
-  PaginationResponse,
   PersistenceOptions,
   PersistenceResult,
   PersistenceService,

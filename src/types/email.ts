@@ -1,6 +1,5 @@
 import {
   ChainType,
-  EmailFolder,
   FontSize,
   IndexerWalletAccount,
   Optional,
@@ -9,27 +8,6 @@ import {
 
 // Re-export with legacy name for backward compatibility
 export type WalletAccount = IndexerWalletAccount;
-
-interface Email {
-  id: string;
-  from: string;
-  to: string;
-  subject: string;
-  body: string;
-  date: Date;
-  read: boolean;
-  starred: boolean;
-  important?: Optional<boolean>;
-  folder: EmailFolder;
-  labels?: Optional<string[]>;
-  attachments?: Optional<string[]>;
-}
-
-interface Folder {
-  name: string;
-  count: number;
-  unreadCount: number;
-}
 
 interface EmailAddress {
   id: string;
@@ -62,4 +40,4 @@ export interface WalletUserData {
 // Re-export types from enums for backward compatibility
 export { Theme, FontSize };
 
-export { type Email, type Folder, type EmailAddress, type User };
+export { type EmailAddress, type User };

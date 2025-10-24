@@ -7,21 +7,11 @@
 export * from './environment';
 
 // Email types (primary email interface)
-export {
-  Email,
-  EmailAddress,
-  Folder,
-  User,
-  WalletUserData,
-  Theme,
-  FontSize,
-} from './email';
+export { EmailAddress, User, WalletUserData, Theme, FontSize } from './email';
 
 // API types (with aliased exports to avoid conflicts)
 export {
   MailboxSpecialUse,
-  WalletSignature,
-  WalletAuth,
   WildduckAuthenticateRequest,
   WildduckAuthResponse,
   WildduckPreAuthRequest,
@@ -47,12 +37,7 @@ export {
   GraphQLPaginationInput,
   GraphQLWhereInput,
   ApiResponse,
-  PaginationParams,
-  PaginationResponse,
   ChainInfo,
-  Email as ApiEmail,
-  EmailAddress as ApiEmailAddress,
-  Mailbox as ApiMailbox,
   isWildduckAuthResponse,
   isWildduckMessage,
   isGraphQLResponse,
@@ -71,9 +56,6 @@ export * from './services';
 
 // Business domain types
 export * from './business/ui';
-
-// Mailbox types
-export * from './mailbox';
 
 // Common types and validation utilities
 export * from './common';

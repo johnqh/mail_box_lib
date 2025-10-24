@@ -11,12 +11,6 @@
 // Analytics operations
 export * from './analytics';
 
-// Email operations
-export * from './email/email-operations';
-
-// Mailbox operations
-export * from './mailbox/mailbox-operations';
-
 // Folder operations
 export * from './folder/folder-operations';
 
@@ -33,8 +27,6 @@ export * from './query';
 export * from './wallet';
 
 // Direct imports for sync function
-import { DefaultEmailOperations } from './email/email-operations';
-import { DefaultMailboxOperations } from './mailbox/mailbox-operations';
 import { DefaultNavigationOperations } from './navigation/navigation-state';
 import {
   DefaultAuthBusinessLogic,
@@ -45,24 +37,7 @@ import {
  * Factory function to create all business logic operations with default implementations
  */
 export async function createBusinessLogicServices() {
-  // Create mock services for business operations
-  const mockPersistence = {
-    save: async () => true,
-    load: async () => null,
-    delete: async () => true,
-    exists: async () => false,
-  };
-  const mockAnalytics = {
-    track: () => {},
-  };
-
   return {
-    emailOps: new (
-      await import('./email/email-operations')
-    ).DefaultEmailOperations(mockPersistence, mockAnalytics),
-    mailboxOps: new (
-      await import('./mailbox/mailbox-operations')
-    ).DefaultMailboxOperations(),
     navigationOps: new (
       await import('./navigation/navigation-state')
     ).DefaultNavigationOperations(),
@@ -79,19 +54,7 @@ export async function createBusinessLogicServices() {
  * Sync version of factory function for immediate use
  */
 function createBusinessLogicServicesSync() {
-  const mockPersistence = {
-    save: async () => true,
-    load: async () => null,
-    delete: async () => true,
-    exists: async () => false,
-  };
-  const mockAnalytics = {
-    track: () => {},
-  };
-
   return {
-    emailOps: new DefaultEmailOperations(mockPersistence, mockAnalytics),
-    mailboxOps: new DefaultMailboxOperations(),
     navigationOps: new DefaultNavigationOperations(),
     authOps: new DefaultAuthBusinessLogic(),
     emailAddressOps: new DefaultEmailAddressBusinessLogic(),
@@ -104,18 +67,13 @@ function createBusinessLogicServicesSync() {
  * ```typescript
  * // In your React Native app
  * import {
- *   DefaultEmailOperations,
- *   DefaultMailboxOperations,
  *   NavigationStateManager
  * } from '@sudobility/lib';
  *
- * const emailOps = new DefaultEmailOperations();
- * const mailboxOps = new DefaultMailboxOperations();
  * const navManager = new NavigationStateManager();
  *
  * // Use in your components
- * const formattedDate = emailOps.formatEmailDate(email.date);
- * const folderIcon = mailboxOps.getMailboxIconId(folder.id);
+ * // The business logic is completely separated from UI frameworks
  * ```
  *
  * The business logic is completely separated from UI frameworks,

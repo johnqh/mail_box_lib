@@ -37,32 +37,6 @@ import {
   WildduckUser,
 } from '@sudobility/types';
 
-// =============================================================================
-// COMMON AUTHENTICATION TYPES
-// =============================================================================
-
-/**
- * Wallet signature data structure
- */
-interface WalletSignature {
-  /** The wallet address that signed the message */
-  signerAddress: string;
-  /** The message that was signed */
-  message: string;
-  /** The cryptographic signature */
-  signature: string;
-}
-
-/**
- * Wallet authentication data structure
- */
-interface WalletAuth {
-  /** The wallet address (optional) */
-  walletAddress: Optional<string>;
-  /** The wallet signature (optional) */
-  signature: Optional<WalletSignature>;
-}
-
 /**
  * GraphQL Types
  */
@@ -116,24 +90,6 @@ interface ApiResponse<T = any> {
 }
 
 /**
- * Pagination Types
- */
-interface PaginationParams {
-  page: Optional<number>;
-  limit: Optional<number>;
-  offset: Optional<number>;
-}
-
-interface PaginationResponse {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
-}
-
-/**
  * Chain and Address Types
  */
 
@@ -143,45 +99,6 @@ interface ChainInfo {
   type: ChainType;
   rpcUrl: Optional<string>;
   explorerUrl: Optional<string>;
-}
-
-/**
- * Email Types (Frontend)
- * These match the frontend Email interface
- */
-interface Email {
-  id: string;
-  from: string;
-  to: string;
-  subject: string;
-  body: string;
-  date: Date;
-  read: boolean;
-  starred: boolean;
-  folder: 'inbox' | 'sent' | 'drafts' | 'trash' | 'archive' | string;
-  attachments: Optional<string[]>;
-}
-
-/**
- * Email Address Types (Frontend)
- */
-interface EmailAddress {
-  id: string;
-  email: string;
-  name: string;
-  isPrimary: boolean;
-  isActive: boolean;
-}
-
-/**
- * Mailbox Types (Frontend)
- */
-interface Mailbox {
-  id: string;
-  name: string;
-  count: number;
-  unreadCount: number;
-  icon: Optional<string>;
 }
 
 // =============================================================================
@@ -297,18 +214,11 @@ export {
   ApiError,
   AuthenticationError,
   ValidationError,
-  type WalletSignature,
-  type WalletAuth,
   type GraphQLResponse,
   type GraphQLPaginationInput,
   type GraphQLWhereInput,
   type ApiResponse,
-  type PaginationParams,
-  type PaginationResponse,
   type ChainInfo,
-  type Email,
-  type EmailAddress,
-  type Mailbox,
   type ApiClientConfig,
   type ChainType,
   type ApiInterceptor,
