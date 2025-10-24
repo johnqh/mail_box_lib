@@ -3,9 +3,6 @@
  * All interfaces and types are consolidated here
  */
 
-// Environment types
-export * from './environment';
-
 // Email types (primary email interface)
 export { EmailAddress, User, WalletUserData } from './email';
 

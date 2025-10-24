@@ -39,7 +39,12 @@
       "Bash(git reset:*)",
       "Bash(for pkg in configs contracts di indexer_client types wildduck_client)",
       "Bash(do echo \"=== @sudobility/$pkg ===\")",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(git push)",
+      "Bash(awk:*)",
+      "Bash(if [ -f \"node_modules/@sudobility/types/dist/index.d.ts\" ])",
+      "Bash(then grep -E \"^export (interface|type|class|enum)\" node_modules/@sudobility/types/dist/index.d.ts)",
+      "Bash(fi:*)"
     ],
     "deny": [],
     "ask": []
