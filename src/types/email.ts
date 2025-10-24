@@ -9,7 +9,7 @@ import {
 // Re-export with legacy name for backward compatibility
 export type WalletAccount = IndexerWalletAccount;
 
-interface EmailAddress {
+export interface EmailAddress {
   id: string;
   address: string;
   verified: boolean;
@@ -18,7 +18,7 @@ interface EmailAddress {
   updatedAt?: Optional<Date>;
 }
 
-interface User {
+export interface User {
   id: string;
   name: string;
   email: string;
@@ -39,5 +39,3 @@ export interface WalletUserData {
 
 // Re-export types from enums for backward compatibility
 export { Theme, FontSize };
-
-export { type EmailAddress, type User };

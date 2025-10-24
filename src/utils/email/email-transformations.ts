@@ -9,13 +9,14 @@ import { WildDuckAccount } from '../../business/hooks/core/useWalletAccounts';
 // Re-export with legacy name for backward compatibility
 export type NameServiceAccount = IndexerNameServiceAccount;
 
-export interface WalletAccount {
+// Local transformation type for email utilities
+export interface TransformationWalletAccount {
   walletAddress: string;
   chainType: ChainType;
   names: NameServiceAccount[];
 }
 
-export interface EmailAddress {
+export interface TransformationEmailAddress {
   address: string;
   name: string;
   type: 'primary' | 'ens' | 'sns';
@@ -27,16 +28,16 @@ export interface EmailAddress {
 export interface WalletEmailGroup {
   walletAddress: string;
   addressType: 'evm' | 'solana';
-  primaryEmail: EmailAddress;
-  domainEmails: EmailAddress[];
+  primaryEmail: TransformationEmailAddress;
+  domainEmails: TransformationEmailAddress[];
 }
 
 /**
- * Transform WalletAccount[] to WalletEmailGroup[] for email selection UI
+ * Transform TransformationWalletAccount[] to WalletEmailGroup[] for email selection UI
  * Separates primary wallet addresses from domain names (ENS/SNS)
  */
 export function transformWalletAccountsToEmailGroups(
-  walletAccounts: WalletAccount[]
+  walletAccounts: TransformationWalletAccount[]
 ): WalletEmailGroup[] {
   if (!walletAccounts || walletAccounts.length === 0) return [];
 
@@ -82,16 +83,16 @@ export function transformWalletAccountsToEmailGroups(
 }
 
 /**
- * Transform WildDuckAccount[] to WalletAccount[] for email selection UI
+ * Transform WildDuckAccount[] to TransformationWalletAccount[] for email selection UI
  * Groups accounts by wallet address and collects names
  */
 export function transformWildDuckAccountsToWalletAccounts(
   wildDuckAccounts: WildDuckAccount[]
-): WalletAccount[] {
+): TransformationWalletAccount[] {
   if (!wildDuckAccounts || wildDuckAccounts.length === 0) return [];
 
   // Group accounts by walletAddress
-  const walletMap = new Map<string, WalletAccount>();
+  const walletMap = new Map<string, TransformationWalletAccount>();
 
   for (const account of wildDuckAccounts) {
     const { walletAddress, chainType, username, entitled } = account;
@@ -124,8 +125,10 @@ export function transformWildDuckAccountsToWalletAccounts(
  * Flatten WalletEmailGroup[] to a flat array of all email addresses
  * Useful for searching or displaying all addresses in a single list
  */
-export function flattenEmailGroups(groups: WalletEmailGroup[]): EmailAddress[] {
-  const allEmails: EmailAddress[] = [];
+export function flattenEmailGroups(
+  groups: WalletEmailGroup[]
+): TransformationEmailAddress[] {
+  const allEmails: TransformationEmailAddress[] = [];
 
   groups.forEach(group => {
     allEmails.push(group.primaryEmail);
