@@ -11,11 +11,6 @@ import { useWalletStatus } from './useWalletStatus';
 import { useMailWebhooksStore } from '../../stores/mailWebhooksStore';
 
 /**
- * Mail webhook type alias for cleaner code
- */
-export type Webhook = IndexerWebhookData;
-
-/**
  * Request type for creating a new mail webhook
  */
 export interface WebhookCreateRequest {
@@ -39,7 +34,7 @@ export interface UseMailWebhooksConfig {
  */
 export interface UseMailWebhooksReturn {
   /** Array of mail webhooks for the current wallet */
-  webhooks: Webhook[];
+  webhooks: IndexerWebhookData[];
   /** Total number of webhooks */
   total: number;
   /** Whether there are more webhooks available */

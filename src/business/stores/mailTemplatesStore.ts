@@ -7,16 +7,11 @@ import { create } from 'zustand';
 import type { IndexerTemplateData } from '@sudobility/types';
 
 /**
- * Mail template type alias
- */
-type MailTemplate = IndexerTemplateData;
-
-/**
  * Mail templates cache entry
  */
 interface MailTemplatesCacheEntry {
   /** Array of mail templates for this wallet */
-  templates: MailTemplate[];
+  templates: IndexerTemplateData[];
   /** Total number of templates */
   total: number;
   /** Whether there are more templates available */
@@ -34,12 +29,12 @@ interface MailTemplatesStoreState {
   /** Set mail templates for a specific wallet address */
   setTemplates: (
     walletAddress: string,
-    templates: MailTemplate[],
+    templates: IndexerTemplateData[],
     total: number,
     hasMore: boolean
   ) => void;
   /** Get mail templates for a specific wallet address */
-  getTemplates: (walletAddress: string) => MailTemplate[] | undefined;
+  getTemplates: (walletAddress: string) => IndexerTemplateData[] | undefined;
   /** Get cache entry for a specific wallet address */
   getCacheEntry: (walletAddress: string) => MailTemplatesCacheEntry | undefined;
   /** Clear mail templates for a specific wallet address */
@@ -57,7 +52,7 @@ export const useMailTemplatesStore = create<MailTemplatesStoreState>(
 
     setTemplates: (
       walletAddress: string,
-      templates: MailTemplate[],
+      templates: IndexerTemplateData[],
       total: number,
       hasMore: boolean
     ) =>

@@ -6,14 +6,11 @@
 import { ChainType, IndexerNameServiceAccount } from '@sudobility/types';
 import { WildDuckAccount } from '../../business/hooks/core/useWalletAccounts';
 
-// Re-export with legacy name for backward compatibility
-export type NameServiceAccount = IndexerNameServiceAccount;
-
 // Local transformation type for email utilities
 export interface TransformationWalletAccount {
   walletAddress: string;
   chainType: ChainType;
-  names: NameServiceAccount[];
+  names: IndexerNameServiceAccount[];
 }
 
 export interface TransformationEmailAddress {
@@ -59,7 +56,7 @@ export function transformWalletAccountsToEmailGroups(
       },
       // Domain names (ENS/SNS) with their entitled status from the API
       domainEmails: walletAccount.names.map(
-        (nameServiceAccount: NameServiceAccount) => {
+        (nameServiceAccount: IndexerNameServiceAccount) => {
           const domainName = nameServiceAccount.name;
           const isSNS = domainName.endsWith('.sol');
           const isENS = domainName.endsWith('.eth');

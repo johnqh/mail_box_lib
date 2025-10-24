@@ -7,7 +7,7 @@
 export * from './environment';
 
 // Email types (primary email interface)
-export { EmailAddress, User, WalletUserData, Theme, FontSize } from './email';
+export { EmailAddress, User, WalletUserData } from './email';
 
 // API types (with aliased exports to avoid conflicts)
 export {

@@ -16,21 +16,6 @@ import { useWalletStatus } from './useWalletStatus';
 import { useMailTemplatesStore } from '../../stores/mailTemplatesStore';
 
 /**
- * Mail template type alias for cleaner code
- */
-export type MailTemplate = IndexerTemplateData;
-
-/**
- * Request type for creating a new mail template - re-export from @sudobility/types
- */
-export type MailTemplateCreateRequest = IndexerTemplateCreateRequest;
-
-/**
- * Request type for updating an existing mail template - re-export from @sudobility/types
- */
-export type MailTemplateUpdateRequest = IndexerTemplateUpdateRequest;
-
-/**
  * Configuration for useMailTemplates hook
  */
 export interface UseMailTemplatesConfig {
@@ -47,7 +32,7 @@ export interface UseMailTemplatesConfig {
  */
 export interface UseMailTemplatesReturn {
   /** Array of mail templates for the current wallet */
-  templates: MailTemplate[];
+  templates: IndexerTemplateData[];
   /** Total number of templates */
   total: number;
   /** Whether there are more templates available */
@@ -63,11 +48,11 @@ export interface UseMailTemplatesReturn {
   /** Fetch templates for the current wallet */
   fetchTemplates: () => Promise<void>;
   /** Create a new template */
-  createTemplate: (templateData: MailTemplateCreateRequest) => Promise<void>;
+  createTemplate: (templateData: IndexerTemplateCreateRequest) => Promise<void>;
   /** Update an existing template */
   updateTemplate: (
     templateId: string,
-    updates: MailTemplateUpdateRequest
+    updates: IndexerTemplateUpdateRequest
   ) => Promise<void>;
   /** Delete a template */
   deleteTemplate: (templateId: string) => Promise<void>;
@@ -181,7 +166,7 @@ export const useMailTemplates = (
    * Create a new template
    */
   const createTemplate = useCallback(
-    async (templateData: MailTemplateCreateRequest) => {
+    async (templateData: IndexerTemplateCreateRequest) => {
       if (!walletAddress || !indexerAuth) {
         throw new Error('Wallet not verified');
       }
@@ -202,7 +187,7 @@ export const useMailTemplates = (
    * Update an existing template
    */
   const updateTemplate = useCallback(
-    async (templateId: string, updates: MailTemplateUpdateRequest) => {
+    async (templateId: string, updates: IndexerTemplateUpdateRequest) => {
       if (!walletAddress || !indexerAuth) {
         throw new Error('Wallet not verified');
       }

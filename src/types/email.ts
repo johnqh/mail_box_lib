@@ -1,13 +1,4 @@
-import {
-  ChainType,
-  FontSize,
-  IndexerWalletAccount,
-  Optional,
-  Theme,
-} from '@sudobility/types';
-
-// Re-export with legacy name for backward compatibility
-export type WalletAccount = IndexerWalletAccount;
+import { ChainType, IndexerWalletAccount, Optional } from '@sudobility/types';
 
 export interface EmailAddress {
   id: string;
@@ -23,7 +14,7 @@ export interface User {
   name: string;
   email: string;
   avatar?: Optional<string>;
-  emailAddresses: WalletAccount[];
+  emailAddresses: IndexerWalletAccount[];
 }
 
 // WalletUserData interface for wallet-based user information
@@ -34,8 +25,5 @@ export interface WalletUserData {
   displayName?: Optional<string>;
   avatar?: Optional<string>;
   metadata?: Optional<Record<string, any>>;
-  emailAddresses?: Optional<WalletAccount[]>;
+  emailAddresses?: Optional<IndexerWalletAccount[]>;
 }
-
-// Re-export types from enums for backward compatibility
-export { Theme, FontSize };

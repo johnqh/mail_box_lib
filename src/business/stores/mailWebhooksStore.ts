@@ -7,16 +7,11 @@ import { create } from 'zustand';
 import type { IndexerWebhookData } from '@sudobility/types';
 
 /**
- * Mail webhook type alias
- */
-type Webhook = IndexerWebhookData;
-
-/**
  * Mail webhooks cache entry
  */
 interface MailWebhooksCacheEntry {
   /** Array of mail webhooks for this wallet */
-  webhooks: Webhook[];
+  webhooks: IndexerWebhookData[];
   /** Total number of webhooks */
   total: number;
   /** Whether there are more webhooks available */
@@ -34,12 +29,12 @@ interface MailWebhooksStoreState {
   /** Set mail webhooks for a specific wallet address */
   setWebhooks: (
     walletAddress: string,
-    webhooks: Webhook[],
+    webhooks: IndexerWebhookData[],
     total: number,
     hasMore: boolean
   ) => void;
   /** Get mail webhooks for a specific wallet address */
-  getWebhooks: (walletAddress: string) => Webhook[] | undefined;
+  getWebhooks: (walletAddress: string) => IndexerWebhookData[] | undefined;
   /** Get cache entry for a specific wallet address */
   getCacheEntry: (walletAddress: string) => MailWebhooksCacheEntry | undefined;
   /** Clear mail webhooks for a specific wallet address */
@@ -57,7 +52,7 @@ export const useMailWebhooksStore = create<MailWebhooksStoreState>(
 
     setWebhooks: (
       walletAddress: string,
-      webhooks: Webhook[],
+      webhooks: IndexerWebhookData[],
       total: number,
       hasMore: boolean
     ) =>

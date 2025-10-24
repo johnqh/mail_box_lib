@@ -188,15 +188,21 @@ export {
   createMailServiceContract,
   // Notification Utils
   createNotificationHelper,
+  // URL/Search Params Utils
+  createSearchParams,
   createSIWEMessage,
   createSolanaSignMessage,
+  createURLSearchParams,
   DelegationResult,
   detectAddressType,
   // Name Service Utils
   ENSName,
   formatCurrency,
+  formatEmailDate,
   formatFileSize,
+  formatNumber,
   formatPercentage,
+  formatWalletAddress,
   generateWalletDiagnostics,
   getDisplayTextForResolution,
   getDocumentElement,
@@ -231,12 +237,14 @@ export {
   NameResolutionResult,
   navigationHelper,
   needsChainSelection,
+  parseSearchParams,
   resetGlobalState,
   resolveENSName,
   resolveNameOrAddress,
   resolveSNSDomain,
   resolveSNSName,
   retryWithBackoff,
+  searchParamsToString,
   setDocumentTitle,
   setGlobalState,
   // Auth Utils
@@ -295,7 +303,6 @@ export { EmailAddress, User, WalletUserData } from './types/email';
 
 // Email transformation utilities
 export type {
-  NameServiceAccount,
   TransformationEmailAddress,
   TransformationWalletAccount,
   WalletEmailGroup,
