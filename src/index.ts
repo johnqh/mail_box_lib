@@ -151,12 +151,9 @@ export {
 export type {
   AdvancedPlatformStorage,
   AnalyticsClient,
-  AnalyticsConfig,
   AnalyticsContextProvider,
   AnalyticsEventData,
   AnalyticsEventProperties,
-  // Analytics types
-  AnalyticsService,
   AppConfig,
   EnvironmentVariables,
   // Environment types
@@ -168,10 +165,6 @@ export type {
   // Navigation types
   NavigationService,
   NavigationState,
-  // Network types
-  NetworkClient,
-  NetworkResponse,
-  NetworkRequestOptions,
   NotificationCapabilities,
   NotificationClient,
   NotificationConfig,
@@ -188,8 +181,15 @@ export type {
   StorageService,
 } from './di';
 
-// Re-export enums from local di module
-export { WalletType, StorageType, NetworkError } from './di';
+// Network and Analytics types from @sudobility/types
+export type {
+  NetworkClient,
+  NetworkResponse,
+  AnalyticsService,
+} from '@sudobility/types';
+
+// Re-export enums from @sudobility/types
+export { WalletType, StorageType } from '@sudobility/types';
 
 // Re-export ALL exports from @sudobility/types as named exports
 export {

@@ -1,11 +1,9 @@
-import { Optional } from '@sudobility/types';
 /**
  * Platform-agnostic persistence service interface
  * Handles data persistence across different storage mechanisms
  */
 
-import { RequestStatus } from '@sudobility/types';
-import { StorageType } from '../../di';
+import { Optional, RequestStatus, StorageType } from '@sudobility/types';
 
 interface PersistenceOptions {
   ttl?: number; // Time to live in milliseconds

@@ -4,12 +4,9 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Optional } from '@sudobility/types';
+import { Optional, WildduckConfig } from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
-import {
-  useWildduckMessages,
-  WildduckConfig,
-} from '@sudobility/wildduck_client';
+import { useWildduckMessages } from '@sudobility/wildduck_client';
 import { useSelectedAccount } from './useSelectedAccount';
 import {
   createGlobalState,

@@ -9,8 +9,8 @@ import {
   EmailAction,
   EmailFolder,
   SubscriptionAction,
+  WalletType,
 } from '@sudobility/types';
-import { WalletType } from '../../../di';
 
 interface AnalyticsEventData {
   name: AnalyticsEvent | string;

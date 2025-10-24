@@ -4,13 +4,9 @@
  * Automatically updates when wallet accounts change
  */
 
-import { Optional } from '@sudobility/types';
+import { Optional, WildduckConfig, WildduckUserAuth } from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
-import {
-  useWildduckAuth,
-  WildduckConfig,
-  WildduckUserAuth,
-} from '@sudobility/wildduck_client';
+import { useWildduckAuth } from '@sudobility/wildduck_client';
 import { useEffect, useMemo } from 'react';
 import {
   createGlobalState,
