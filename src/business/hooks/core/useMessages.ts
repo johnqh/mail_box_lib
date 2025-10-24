@@ -181,7 +181,7 @@ export function useMessages({
         },
       });
 
-      if (response.ok && response.data.results) {
+      if (response.ok && response.data?.results) {
         return response.data.results;
       }
 
