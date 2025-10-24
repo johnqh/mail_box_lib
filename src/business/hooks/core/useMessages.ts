@@ -15,7 +15,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Optional } from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
-import type { NetworkClient } from '../../../types/infrastructure/network';
+import type { NetworkClient } from '@sudobility/types';
 import { useMailboxMessages } from './useMailboxMessages';
 import { Message } from '../../types/message';
 

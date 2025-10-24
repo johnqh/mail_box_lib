@@ -6,9 +6,6 @@
 // Environment types
 export * from './environment';
 
-// Infrastructure types
-export * from './infrastructure/network';
-
 // Email types (primary email interface)
 export {
   Email,
