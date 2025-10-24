@@ -135,7 +135,7 @@ export {
 
 // Platform Types no longer exported - use direct DI instead
 
-// Dependency Injection - All DI types and interfaces from local di module
+// Dependency Injection - All DI types and interfaces directly from @sudobility/di
 export type {
   AdvancedPlatformStorage,
   AnalyticsClient,
@@ -167,7 +167,7 @@ export type {
   SerializedStorageService,
   StorageProvider,
   StorageService,
-} from './di';
+} from '@sudobility/di';
 
 // Infrastructure - Network clients moved to dedicated packages
 
@@ -286,7 +286,8 @@ export {
   GraphQLWhereInput,
   isGraphQLResponse,
   // Type guards and validators
-  MailboxSpecialUse,
+  isWildduckAuthResponse,
+  isWildduckMessage,
   PersistenceOptions,
   PersistenceResult,
   PersistenceService,
@@ -295,7 +296,6 @@ export {
   validateObjectId,
   validateWalletAddress,
   ValidationError,
-  WildduckMailbox,
 } from './types';
 
 // Local business types with extensions

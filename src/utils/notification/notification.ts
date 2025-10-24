@@ -3,7 +3,7 @@
  * Uses dependency injection - the NotificationService implementation must be provided by the consumer
  */
 
-import { NotificationService } from '../../di';
+import type { NotificationService } from '@sudobility/di';
 
 /**
  * Create notification helper utilities for a given NotificationService implementation
@@ -123,14 +123,5 @@ function createNotificationHelper(notificationService: NotificationService) {
     },
   };
 }
-
-// Re-export types for convenience
-export type {
-  NotificationService,
-  NotificationOptions,
-  NotificationResult,
-  NotificationPermissionResult,
-  NotificationCapabilities,
-} from '../../di';
 
 export { createNotificationHelper };

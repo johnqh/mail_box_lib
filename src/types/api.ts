@@ -10,32 +10,7 @@
  * - Compatible with both REST and GraphQL APIs
  */
 
-import {
-  ChainType,
-  MailboxSpecialUse,
-  Optional,
-  WildduckAddress,
-  WildduckAddressResponse,
-  WildduckAuthenticateRequest,
-  WildduckAuthResponse,
-  WildduckCreateMailboxRequest,
-  WildduckCreateUserRequest,
-  WildduckMailbox,
-  WildduckMailboxResponse,
-  WildduckMessage,
-  WildduckMessageAddress,
-  WildduckMessageAttachment,
-  WildduckMessageBase,
-  WildduckMessageDetail,
-  WildduckMessageResponse,
-  WildduckMessagesResponse,
-  WildduckPreAuthRequest,
-  WildduckPreAuthResponse,
-  WildduckSimpleUserResponse,
-  WildduckSubmitMessageRequest,
-  WildduckUpdateUserRequest,
-  WildduckUser,
-} from '@sudobility/types';
+import { ChainType, Optional } from '@sudobility/types';
 
 /**
  * GraphQL Types
@@ -105,11 +80,22 @@ interface ChainInfo {
 // TYPE GUARDS AND VALIDATION HELPERS
 // =============================================================================
 
+import {
+  isWildduckAuthResponse as isWDAuthResponse,
+  isWildduckMessage as isWDMessage,
+} from '@sudobility/types';
+
 /**
  * Type guards for runtime type checking
- * Re-exporting from @sudobility/types
+ * Local wrappers around @sudobility/types functions
  */
-export { isWildduckAuthResponse, isWildduckMessage } from '@sudobility/types';
+export const isWildduckAuthResponse = (obj: any): boolean => {
+  return isWDAuthResponse(obj);
+};
+
+export const isWildduckMessage = (obj: any): boolean => {
+  return isWDMessage(obj);
+};
 
 const isGraphQLResponse = (obj: any): obj is GraphQLResponse => {
   return obj && (obj.data !== undefined || obj.errors !== undefined);
@@ -183,29 +169,6 @@ interface ApiClientConfig {
 }
 
 export {
-  // Re-export WildDuck types from @sudobility/types
-  MailboxSpecialUse,
-  WildduckAddress,
-  WildduckAddressResponse,
-  WildduckAuthenticateRequest,
-  WildduckAuthResponse,
-  WildduckCreateMailboxRequest,
-  WildduckCreateUserRequest,
-  WildduckMailbox,
-  WildduckMailboxResponse,
-  WildduckMessage,
-  WildduckMessageAddress,
-  WildduckMessageAttachment,
-  WildduckMessageBase,
-  WildduckMessageDetail,
-  WildduckMessageResponse,
-  WildduckMessagesResponse,
-  WildduckPreAuthRequest,
-  WildduckPreAuthResponse,
-  WildduckSimpleUserResponse,
-  WildduckSubmitMessageRequest,
-  WildduckUpdateUserRequest,
-  WildduckUser,
   // Local types and utilities
   isGraphQLResponse,
   validateObjectId,

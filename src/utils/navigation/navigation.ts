@@ -9,7 +9,7 @@ import {
   NavigationHook,
   NavigationOptions,
   NavigationService,
-} from '../../di';
+} from '@sudobility/di';
 import { Optional } from '@sudobility/types';
 
 let navigationService: NavigationService;

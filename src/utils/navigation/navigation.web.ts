@@ -8,7 +8,7 @@ import {
   NavigationOptions,
   NavigationService,
   NavigationState,
-} from '../../di';
+} from '@sudobility/di';
 
 const DEFAULT_CONFIG: NavigationConfig = {
   enableBackGesture: false, // Not applicable to web

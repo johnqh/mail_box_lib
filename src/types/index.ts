@@ -9,30 +9,8 @@ export * from './environment';
 // Email types (primary email interface)
 export { EmailAddress, User, WalletUserData } from './email';
 
-// API types (with aliased exports to avoid conflicts)
+// API types (local types only - no re-exports from external packages)
 export {
-  MailboxSpecialUse,
-  WildduckAuthenticateRequest,
-  WildduckAuthResponse,
-  WildduckPreAuthRequest,
-  WildduckPreAuthResponse,
-  WildduckUser,
-  WildduckCreateUserRequest,
-  WildduckUpdateUserRequest,
-  WildduckSimpleUserResponse,
-  WildduckMailbox,
-  WildduckMailboxResponse,
-  WildduckCreateMailboxRequest,
-  WildduckMessageAddress,
-  WildduckMessageAttachment,
-  WildduckMessageBase,
-  WildduckMessage,
-  WildduckMessageDetail,
-  WildduckMessagesResponse,
-  WildduckMessageResponse,
-  WildduckSubmitMessageRequest,
-  WildduckAddress,
-  WildduckAddressResponse,
   GraphQLResponse,
   GraphQLPaginationInput,
   GraphQLWhereInput,

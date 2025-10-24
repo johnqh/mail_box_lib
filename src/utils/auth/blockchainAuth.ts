@@ -5,8 +5,13 @@
 
 import { AddressType, ChainType, getAddressType } from '@sudobility/types';
 
-// Re-export for convenience
-export { getAddressType as detectAddressType } from '@sudobility/types';
+/**
+ * Detect address type from a given address string
+ * This is a local wrapper around getAddressType from @sudobility/types
+ */
+export const detectAddressType = (address: string): AddressType => {
+  return getAddressType(address);
+};
 
 interface SigninMessage {
   domain: string;
