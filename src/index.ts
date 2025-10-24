@@ -1,307 +1,165 @@
 /**
  * @sudobility/lib - Shared utilities and common functions for 0xmail.box projects
+ *
+ * This file exports only the symbols that are actively used by consumer projects.
+ * Unused exports have been removed to reduce bundle size and improve tree-shaking.
  */
 
-// Business Logic - Core business operations and enums (Goal 4)
+// ============================================================================
+// BUSINESS LOGIC EXPORTS
+// ============================================================================
+
+// Core business operations and hooks
 export {
-  AnalyticsOperations,
-  AuthBusinessLogic,
-  ChainClaimInfo,
-  ClaimablePoints,
+  // Wallet operations
   connectWallet,
-  createQueryClient,
-  createQueryKey,
-  DefaultAnalyticsOperations,
-  DefaultAuthBusinessLogic,
-  // Core Business Logic
-  DefaultFolderOperations,
-  DefaultNavigationOperations,
   disconnectWallet,
-  // Helper Types
-  EmailAddressBusinessLogic,
-  EmailAddressHelper,
-  ENSResolutionResponse,
-  FolderInfo,
-  FolderOperations,
-  getGlobalQueryClient,
-  getQueryClient,
-  getServiceKeys,
-  getWalletAddress,
-  // Wallet Status Management
-  getWalletStatus,
-  initializeQueryClient,
-  LeaderboardEntry,
-  // Message Types
-  Message,
-  messageFromDetailedResponse,
-  messageFromListItem,
-  NavigationOperations,
-  NavigationStateManager,
-  ParsedEmailAddress,
-  PointsAction,
-  // Points System
-  pointsService,
-  PointsService,
-  queryClient,
-  // Context
-  QueryClientProvider,
-  QueryKey,
-  // Query Management
-  queryKeys,
-  ReferralLink,
-  SiteStats,
-  SNSResolutionResponse,
-  STALE_TIMES,
-  useAccountMailboxes,
-  UseAccountMailboxesReturn,
-  // Utility Hooks
-  useArrayState,
-  // Core Hooks
-  useAsync,
-  useAsyncOperation,
-  UseAsyncOperationOptions,
-  UseAsyncOperationReturn,
-  useBatchedState,
-  useChangedValues,
-  useClaimableRewards,
-  UseClaimableRewardsConfig,
-  UseClaimableRewardsReturn,
-  // Contract Hooks
-  useContractConfig,
-  UseContractConfigReturn,
-  useDebounce,
-  useDebouncedCallback,
-  useDebouncedState,
-  useENSFromWallet,
-  useGlobalSelectedAccount,
-  useGlobalSelectedMailboxId,
-  useGlobalSelectedMessageId,
-  useGlobalWalletAccounts,
-  useGlobalWildduckAuth,
-  // KYC Hooks
-  useKYC,
-  useLocalStorage,
-  useMailboxMessages,
-  UseMailboxMessagesReturn,
-  useMailerClient,
-  UseMailerClientOptions,
-  UseMailerClientReturn,
-  useMailTemplates,
-  UseMailTemplatesConfig,
-  UseMailTemplatesReturn,
-  useMailWebhooks,
-  UseMailWebhooksConfig,
-  UseMailWebhooksReturn,
-  useMapState,
-  useMessage,
-  UseMessageReturn,
-  useMessages,
-  UseMessagesParams,
-  UseMessagesReturn,
-  // Name Service Hooks
-  useNameServiceResolution,
-  useOptimizedState,
-  usePoints,
-  UsePointsConfig,
-  UsePointsReturn,
-  usePrevious,
-  useQueryClient,
-  useRecipientClaims,
-  UseRecipientClaimsConfig,
-  UseRecipientClaimsReturn,
-  useReferralCode,
-  UseReferralCodeReturn,
-  useReferralShare,
-  UseReferralShareReturn,
-  UserPoints,
-  UserPointsBalance,
-  UserProperties,
-  useSelectedAccount,
-  useSNSFromWallet,
-  useWalletAccounts,
-  useWalletAddress,
-  useWalletConnectionState,
-  useWalletDetector,
-  UseWalletDetectorReturn,
-  useWalletFromENS,
-  useWalletFromSNS,
-  // Wallet Hooks
-  useWalletStatus,
-  UseWalletStatusReturn,
   verifyWallet,
-  WalletInfo,
-  WalletResolutionResponse,
+
+  // Points system
+  pointsService,
+
+  // Query management
+  queryClient,
+
+  // Core hooks
+  useAccountMailboxes,
+  useGlobalWalletAccounts,
+  useKYC,
+  useMailTemplates,
+  useMailWebhooks,
+  useMessage,
+  useMessages,
+  usePoints,
+  useRecipientClaims,
+  useSelectedAccount,
+  useWalletAccounts,
+  useWalletDetector,
+  useWalletStatus,
+
+  // React Query
+  QueryClientProvider,
+  STALE_TIMES,
+  useQueryClient,
+
+  // Types
+  LeaderboardEntry,
+  Message,
+  UseMessagesParams,
+  UserPoints,
 } from './business';
 
-// Platform Types no longer exported - use direct DI instead
+// ============================================================================
+// DEPENDENCY INJECTION EXPORTS (from @sudobility/di)
+// ============================================================================
 
-// Dependency Injection - All DI types and interfaces directly from @sudobility/di
 export type {
-  AdvancedPlatformStorage,
+  // Analytics
   AnalyticsClient,
   AnalyticsContextProvider,
   AnalyticsEventData,
   AnalyticsEventProperties,
+
+  // Configuration
   AppConfig,
   EnvironmentVariables,
-  // Environment types
   EnvProvider,
-  LocationHook,
-  NavigationConfig,
-  NavigationHook,
-  NavigationOptions,
-  // Navigation types
-  NavigationService,
+
+  // Navigation
   NavigationState,
+
+  // Notification
   NotificationCapabilities,
-  NotificationClient,
   NotificationConfig,
-  NotificationContextProvider,
   NotificationOptions,
   NotificationPermissionResult,
   NotificationResult,
-  // Notification types
   NotificationService,
-  // Storage types
+
+  // Storage
+  AdvancedPlatformStorage,
   PlatformStorage,
   SerializedStorageService,
-  StorageProvider,
   StorageService,
 } from '@sudobility/di';
 
-// Infrastructure - Network clients moved to dedicated packages
+// ============================================================================
+// UTILITY EXPORTS
+// ============================================================================
 
-// Utilities - General utility functions
 export {
-  addDocumentEventListener,
-  appendToDocumentHead,
-  // Direct Utils
-  AppError,
-  // Contract Utils
-  ClaimableInfo,
-  clearAllGlobalStates,
+  // Authentication utilities
   createAuthMessage,
-  createDocumentElement,
-  // React Utils
-  createGlobalState,
-  createMailerContract,
-  createMailServiceContract,
-  // Notification Utils
-  createNotificationHelper,
-  // URL/Search Params Utils
-  createSearchParams,
   createSIWEMessage,
   createSolanaSignMessage,
-  createURLSearchParams,
-  DelegationResult,
+
+  // Address detection and validation
   detectAddressType,
-  // Name Service Utils
+  isValidAddress,
+  isValidBlockchainUsername,
+
+  // Name resolution
   ENSName,
-  formatCurrency,
-  formatEmailDate,
+  resolveNameOrAddress,
+  SNSName,
+
+  // Smart contract utilities
+  createMailServiceContract,
+
+  // Format utilities
   formatFileSize,
   formatNumber,
   formatPercentage,
   formatWalletAddress,
-  generateWalletDiagnostics,
-  getDisplayTextForResolution,
+
+  // URL/Search params
+  createSearchParams,
+
+  // Document/DOM utilities
+  addDocumentEventListener,
   getDocumentElement,
-  getDocumentElementById,
-  getDocumentHead,
   getDocumentTitle,
-  getENSNames,
-  getErrorMessage,
-  getGlobalState,
-  getMailerContract,
-  getMailServiceContract,
-  // Navigation Utils
-  getNavigationService,
-  getSNSNames,
-  getWalletCapabilities,
-  handleApiError,
-  isAppError,
-  isDOMSupported,
-  isValidAddress,
-  isValidBlockchainUsername,
+
+  // Notification utilities
+  createNotificationHelper,
+
+  // Global state management
+  createGlobalState,
+
+  // Wallet utilities
   isWalletAvailable,
-  isWebEnvironment,
-  logError,
   logWalletDiagnostics,
-  MAIL_SERVICE_ABI,
-  MAIL_SERVICE_CONTRACT_ADDRESS,
-  MAILER_ABI,
-  MAILER_CONTRACT_ADDRESS,
-  MailerContract,
-  MailResult,
-  MailServiceContract,
-  NameResolutionResult,
-  navigationHelper,
-  needsChainSelection,
-  parseSearchParams,
-  resetGlobalState,
-  resolveENSName,
-  resolveNameOrAddress,
-  resolveSNSDomain,
-  resolveSNSName,
-  retryWithBackoff,
-  searchParamsToString,
-  setDocumentTitle,
-  setGlobalState,
-  // Auth Utils
-  SigninMessage,
-  SNSName,
-  testENSResolution,
-  URLSearchParamsLike,
-  USDC_ABI,
-  USDC_CONTRACT_ADDRESS,
+
+  // Navigation hooks
   useLocation,
-  useNavigation,
   useSearchParams,
-  validateENSName,
-  validateNameOrAddressInput,
-  validateSNSName,
-  // Blockchain Utils
-  WalletCapability,
-  WalletDebugInfo,
-  withErrorBoundary,
 } from './utils';
 
-// Types - Selective exports to avoid conflicts (Goal 1)
-// Export main email/API types but let business logic take precedence for enums
+// ============================================================================
+// TYPE EXPORTS
+// ============================================================================
+
 export {
-  ApiClientConfig,
-  // Error types
-  ApiError,
-  // Configuration types
-  ApiInterceptor,
-  ApiResponse,
-  AuthenticationError,
-  ChainInfo,
-  // Blockchain types
-  ClaimableReward,
-  ClaimRewardResult,
   // UI types
   DocSection,
-  GraphQLPaginationInput,
-  GraphQLWhereInput,
-  isGraphQLResponse,
-  // Type guards and validators
-  isWildduckAuthResponse,
-  isWildduckMessage,
+
+  // Validation
+  validateWalletAddress,
+
+  // Persistence
   PersistenceOptions,
   PersistenceResult,
   PersistenceService,
   StorageInfo,
-  validateEmailAddress,
-  validateObjectId,
-  validateWalletAddress,
-  ValidationError,
 } from './types';
 
 // Local business types with extensions
-export { EmailAddress, User, WalletUserData } from './types/email';
+export { User, WalletUserData } from './types/email';
 
-// Email transformation utilities
+// ============================================================================
+// EMAIL TRANSFORMATION EXPORTS
+// ============================================================================
+
 export type {
   TransformationEmailAddress,
   TransformationWalletAccount,
@@ -312,11 +170,10 @@ export {
   chainTypeToString,
   flattenEmailGroups,
   transformWalletAccountsToEmailGroups,
-  transformWildDuckAccountsToWalletAccounts,
 } from './utils/email/email-transformations';
 
-// Attachment utilities
-export {
-  convertFilesToBase64Attachments,
-  convertFileToBase64Attachment,
-} from './utils/attachment-utils';
+// ============================================================================
+// ATTACHMENT UTILITIES
+// ============================================================================
+
+export { convertFileToBase64Attachment } from './utils/attachment-utils';
