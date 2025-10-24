@@ -10,7 +10,32 @@
  * - Compatible with both REST and GraphQL APIs
  */
 
-import { ChainType, Optional } from '@sudobility/types';
+import {
+  ChainType,
+  MailboxSpecialUse,
+  Optional,
+  WildduckAddress,
+  WildduckAddressResponse,
+  WildduckAuthenticateRequest,
+  WildduckAuthResponse,
+  WildduckCreateMailboxRequest,
+  WildduckCreateUserRequest,
+  WildduckMailbox,
+  WildduckMailboxResponse,
+  WildduckMessage,
+  WildduckMessageAddress,
+  WildduckMessageAttachment,
+  WildduckMessageBase,
+  WildduckMessageDetail,
+  WildduckMessageResponse,
+  WildduckMessagesResponse,
+  WildduckPreAuthRequest,
+  WildduckPreAuthResponse,
+  WildduckSimpleUserResponse,
+  WildduckSubmitMessageRequest,
+  WildduckUpdateUserRequest,
+  WildduckUser,
+} from '@sudobility/types';
 
 // =============================================================================
 // COMMON AUTHENTICATION TYPES
@@ -36,254 +61,6 @@ interface WalletAuth {
   walletAddress: Optional<string>;
   /** The wallet signature (optional) */
   signature: Optional<WalletSignature>;
-}
-
-// =============================================================================
-// WILDDUCK API TYPES
-// =============================================================================
-
-/**
- * WildDuck Authentication Types
- * Used for blockchain-based authentication with wallet signatures
- */
-interface WildDuckAuthRequest {
-  username: string;
-  signature: string;
-  nonce: string;
-  scope: Optional<string>;
-  token: Optional<boolean>;
-  protocol: Optional<string>;
-  sess: Optional<string>;
-  ip: Optional<string>;
-}
-
-interface WildDuckAuthResponse {
-  success: boolean;
-  id: Optional<string>;
-  username: Optional<string>;
-  address: Optional<string>;
-  scope: Optional<string[]>;
-  token: Optional<string>;
-  require2fa: Optional<string[]>;
-  requirePasswordChange: Optional<boolean>;
-  message: Optional<string>;
-  error: Optional<string>;
-}
-
-interface WildDuckPreAuthRequest {
-  username: string;
-  scope?: string;
-  sess?: string;
-  ip?: string;
-}
-
-interface WildDuckPreAuthResponse {
-  success: boolean;
-  id: Optional<string>;
-  username: Optional<string>;
-  address: Optional<string>;
-  scope: Optional<string[]>;
-  require2fa: Optional<string[]>;
-  requirePasswordChange: Optional<boolean>;
-  message: Optional<string>;
-  nonce: Optional<string>;
-}
-
-/**
- * WildDuck User Management Types
- * For user account creation, updates, and management
- */
-interface WildDuckUser {
-  id: string;
-  username: string;
-  name: Optional<string>;
-  address: Optional<string>;
-  language: Optional<string>;
-  retention: Optional<number>;
-  quota: Optional<{
-    allowed: number;
-    used: number;
-  }>;
-  disabled: boolean;
-  suspended: boolean;
-  tags: Optional<string[]>;
-  hasPasswordSet: Optional<boolean>;
-  activated: Optional<boolean>;
-  created: Optional<string>;
-}
-
-interface WildDuckCreateUserRequest {
-  username: string;
-  password: Optional<string>;
-  address: Optional<string>;
-  name: Optional<string>;
-  quota: Optional<number>;
-  language: Optional<string>;
-  retention: Optional<number>;
-  tags: Optional<string[]>;
-}
-
-interface WildDuckUpdateUserRequest {
-  name: Optional<string>;
-  quota: Optional<number>;
-  language: Optional<string>;
-  retention: Optional<number>;
-  disabled: Optional<boolean>;
-  suspended: Optional<boolean>;
-  tags: Optional<string[]>;
-}
-
-interface WildDuckUserResponse {
-  success: boolean;
-  id: Optional<string>;
-  error: Optional<string>;
-}
-
-/**
- * WildDuck Mailbox Special Use enum
- * Based on WildDuck server implementation
- */
-enum MailboxSpecialUse {
-  Inbox = '\\Inbox',
-  Sent = '\\Sent',
-  Trash = '\\Trash',
-  Drafts = '\\Drafts',
-  Junk = '\\Junk',
-}
-
-/**
- * WildDuck Mailbox Types
- * For email folder/mailbox management
- */
-interface WildDuckMailbox {
-  id: string;
-  name: string;
-  path: string;
-  specialUse: Optional<MailboxSpecialUse>;
-  modifyIndex: number;
-  subscribed: boolean;
-  hidden: boolean;
-  total: Optional<number>;
-  unseen: Optional<number>;
-  size: Optional<number>;
-}
-
-interface WildDuckMailboxResponse {
-  success: boolean;
-  results: WildDuckMailbox[];
-  error: Optional<string>;
-}
-
-interface WildDuckCreateMailboxRequest {
-  path: string;
-  hidden: Optional<boolean>;
-  retention: Optional<number>;
-}
-
-/**
- * WildDuck Message Types
- * For email message handling and operations
- */
-interface WildDuckMessageAddress {
-  name: Optional<string>;
-  address: string;
-}
-
-interface WildDuckMessageAttachment {
-  id: string;
-  filename: string;
-  contentType: string;
-  size: number;
-  hash: Optional<string>;
-}
-
-interface WildDuckMessageBase {
-  id: string;
-  mailbox: string;
-  thread: string;
-  from: Optional<WildDuckMessageAddress>;
-  to: WildDuckMessageAddress[];
-  cc: Optional<WildDuckMessageAddress[]>;
-  bcc: Optional<WildDuckMessageAddress[]>;
-  subject: string;
-  date: string;
-  intro: string;
-  seen: boolean;
-  deleted: boolean;
-  flagged: boolean;
-  draft: boolean;
-  answered: boolean;
-  size: number;
-  ha: boolean; // has attachments
-}
-
-interface WildDuckMessage extends WildDuckMessageBase {
-  attachments: boolean;
-}
-
-interface WildDuckMessageDetail extends WildDuckMessageBase {
-  user: string;
-  html: Optional<string>;
-  text: Optional<string>;
-  headers: Optional<Record<string, string | string[]>>;
-  attachments: WildDuckMessageAttachment[];
-  references: Optional<string[]>;
-  inReplyTo: Optional<string>;
-}
-
-interface WildDuckMessagesResponse {
-  success: boolean;
-  total: number;
-  page: number;
-  previousCursor: Optional<string>;
-  nextCursor: Optional<string>;
-  results: WildDuckMessage[];
-  error?: string;
-}
-
-interface WildDuckMessageResponse {
-  success: boolean;
-  data: Optional<WildDuckMessageDetail>;
-  error: Optional<string>;
-}
-
-interface WildDuckSendMessageRequest {
-  from: Optional<string>;
-  to: WildDuckMessageAddress[];
-  cc: Optional<WildDuckMessageAddress[]>;
-  bcc: Optional<WildDuckMessageAddress[]>;
-  subject: string;
-  text: Optional<string>;
-  html: Optional<string>;
-  attachments: Optional<
-    Array<{
-      filename: string;
-      content: string | Buffer;
-      contentType: Optional<string>;
-    }>
-  >;
-  inReplyTo: Optional<string>;
-  references: Optional<string[]>;
-}
-
-/**
- * WildDuck Address Types
- * For email address management
- */
-interface WildDuckAddress {
-  id: string;
-  address: string;
-  name: Optional<string>;
-  main: boolean;
-  created: Optional<string>;
-  metaData: Optional<any>;
-  tags: Optional<string[]>;
-}
-
-interface WildDuckAddressResponse {
-  success: boolean;
-  results: Optional<WildDuckAddress[]>;
-  error: Optional<string>;
 }
 
 /**
@@ -413,14 +190,9 @@ interface Mailbox {
 
 /**
  * Type guards for runtime type checking
+ * Re-exporting from @sudobility/types
  */
-const isWildDuckAuthResponse = (obj: any): obj is WildDuckAuthResponse => {
-  return obj && typeof obj.success === 'boolean';
-};
-
-const isWildDuckMessage = (obj: any): obj is WildDuckMessage => {
-  return obj && typeof obj.id === 'string' && typeof obj.subject === 'string';
-};
+export { isWildduckAuthResponse, isWildduckMessage } from '@sudobility/types';
 
 const isGraphQLResponse = (obj: any): obj is GraphQLResponse => {
   return obj && (obj.data !== undefined || obj.errors !== undefined);
@@ -494,9 +266,30 @@ interface ApiClientConfig {
 }
 
 export {
+  // Re-export WildDuck types from @sudobility/types
   MailboxSpecialUse,
-  isWildDuckAuthResponse,
-  isWildDuckMessage,
+  WildduckAddress,
+  WildduckAddressResponse,
+  WildduckAuthenticateRequest,
+  WildduckAuthResponse,
+  WildduckCreateMailboxRequest,
+  WildduckCreateUserRequest,
+  WildduckMailbox,
+  WildduckMailboxResponse,
+  WildduckMessage,
+  WildduckMessageAddress,
+  WildduckMessageAttachment,
+  WildduckMessageBase,
+  WildduckMessageDetail,
+  WildduckMessageResponse,
+  WildduckMessagesResponse,
+  WildduckPreAuthRequest,
+  WildduckPreAuthResponse,
+  WildduckSimpleUserResponse,
+  WildduckSubmitMessageRequest,
+  WildduckUpdateUserRequest,
+  WildduckUser,
+  // Local types and utilities
   isGraphQLResponse,
   validateObjectId,
   validateEmailAddress,
@@ -506,27 +299,6 @@ export {
   ValidationError,
   type WalletSignature,
   type WalletAuth,
-  type WildDuckAuthRequest,
-  type WildDuckAuthResponse,
-  type WildDuckPreAuthRequest,
-  type WildDuckPreAuthResponse,
-  type WildDuckUser,
-  type WildDuckCreateUserRequest,
-  type WildDuckUpdateUserRequest,
-  type WildDuckUserResponse,
-  type WildDuckMailbox,
-  type WildDuckMailboxResponse,
-  type WildDuckCreateMailboxRequest,
-  type WildDuckMessageAddress,
-  type WildDuckMessageAttachment,
-  type WildDuckMessageBase,
-  type WildDuckMessage,
-  type WildDuckMessageDetail,
-  type WildDuckMessagesResponse,
-  type WildDuckMessageResponse,
-  type WildDuckSendMessageRequest,
-  type WildDuckAddress,
-  type WildDuckAddressResponse,
   type GraphQLResponse,
   type GraphQLPaginationInput,
   type GraphQLWhereInput,

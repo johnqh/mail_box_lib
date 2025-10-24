@@ -520,7 +520,7 @@ export {
   MailboxService,
   MailboxSpecialUse,
   MockDataProvider,
-  WildDuckMailbox,
+  WildduckMailbox,
   PaginationParams,
   PaginationResponse,
   PersistenceOptions,
