@@ -139,8 +139,16 @@ export const useRecipientClaims = (
         }
 
         try {
+          if (!chainInfo.alchemyNetwork) {
+            return {
+              index,
+              claimableAmount: null,
+              error: 'No Alchemy network configured for chain',
+            };
+          }
+
           const rpcUrl = RpcHelpers.getRpcUrl(
-            alchemyApiKey,
+            { alchemyApiKey },
             chainInfo.alchemyNetwork as any
           );
 
@@ -254,8 +262,13 @@ export const useRecipientClaims = (
         const provider = await connector.getProvider();
 
         // Get RPC URL for the target chain
+        if (!targetChain.chainInfo.alchemyNetwork) {
+          updateChainError('No Alchemy network configured for chain');
+          throw new Error('No Alchemy network configured for chain');
+        }
+
         const rpcUrl = RpcHelpers.getRpcUrl(
-          alchemyApiKey,
+          { alchemyApiKey },
           targetChain.chainInfo.alchemyNetwork as any
         );
         if (!rpcUrl) {
