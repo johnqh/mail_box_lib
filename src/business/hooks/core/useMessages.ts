@@ -67,6 +67,8 @@ export interface UseMessagesReturn {
   hasMore: boolean;
   /** Load more messages (only for mailbox view) */
   loadMore?: () => Promise<void>;
+  /** Refresh messages */
+  refresh: () => Promise<void>;
 }
 
 /**
@@ -195,6 +197,20 @@ export function useMessages({
   // Return the appropriate data based on whether we're searching
   const isSearching = !!searchText.trim();
 
+  // Refresh function that works for both search and mailbox view
+  const refresh = async () => {
+    console.log('useMessages.refresh called, isSearching:', isSearching);
+    if (isSearching) {
+      // Refetch search results
+      console.log('Refetching search query...');
+      await searchQuery.refetch();
+    } else {
+      // Refresh mailbox messages
+      console.log('Calling mailboxMessages.refresh...');
+      await mailboxMessages.refresh();
+    }
+  };
+
   const result: UseMessagesReturn = {
     messages: isSearching
       ? (searchQuery.data ?? [])
@@ -212,6 +228,7 @@ export function useMessages({
       ? (searchQuery.data?.length ?? 0)
       : mailboxMessages.totalMessages,
     hasMore: isSearching ? false : mailboxMessages.hasMore,
+    refresh,
   };
 
   // Only add loadMore if not searching
