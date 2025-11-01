@@ -14,7 +14,18 @@ import {
   http,
   parseUnits,
 } from 'viem';
-import { mainnet, sepolia, polygon, polygonAmoy, arbitrum, arbitrumSepolia, optimism, optimismSepolia, base, baseSepolia } from 'viem/chains';
+import {
+  arbitrum,
+  arbitrumSepolia,
+  base,
+  baseSepolia,
+  mainnet,
+  optimism,
+  optimismSepolia,
+  polygon,
+  polygonAmoy,
+  sepolia,
+} from 'viem/chains';
 import type { Address, Chain } from 'viem';
 
 // Helper function to get viem chain from chainId

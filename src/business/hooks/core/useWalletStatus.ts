@@ -105,8 +105,6 @@ export const verifyWallet = (
     throw new Error('Signature is required for verification');
   }
 
-  console.log('verifyWallet: received signature:', signature.trim());
-
   const newStatus: WalletStatus = {
     walletAddress: walletAddress.trim(),
     chainType,

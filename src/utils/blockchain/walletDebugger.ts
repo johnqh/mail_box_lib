@@ -155,30 +155,20 @@ const generateWalletDiagnostics = (
  * Log detailed wallet diagnostics to console
  */
 const logWalletDiagnostics = (
-  chainType: ChainType,
-  address: Optional<string>,
-  isConnected: boolean,
+  _chainType: ChainType,
+  _address: Optional<string>,
+  _isConnected: boolean,
   error?: Error
 ): void => {
-  const info = generateWalletDiagnostics(
-    chainType,
-    address,
-    isConnected,
-    error
-  );
+  // Generate diagnostics for potential future use
+  // generateWalletDiagnostics(chainType, address, isConnected, error);
 
   console.group('🔍 Wallet Diagnostics');
-  console.log('Chain Type:', info.chainType);
-  console.log('Address:', info.address);
-  console.log('Connected:', info.isConnected);
-  console.log('Provider:', info.walletProvider);
 
   console.group('📊 Diagnostics:');
-  info.diagnostics.forEach(diag => console.log('-', diag));
   console.groupEnd();
 
   console.group('💡 Recommendations:');
-  info.recommendations.forEach(rec => console.log('-', rec));
   console.groupEnd();
 
   if (error) {

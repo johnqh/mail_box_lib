@@ -120,15 +120,12 @@ export interface UsePointsReturn {
  *
  * // Display leaderboard
  * leaderboard.forEach(entry => {
- *   console.log(`${entry.rank}. ${entry.walletAddress}: ${entry.pointsEarned} points (${entry.percentage}%)`);
  * });
  *
  * // Display site stats
- * console.log(`Total: ${siteStats.totalPoints} points from ${siteStats.totalUsers} users`);
  *
  * // Display user's balance (if wallet is verified)
  * if (userBalance) {
- *   console.log(`Your balance: ${userBalance.pointsEarned} points`);
  * }
  * ```
  */

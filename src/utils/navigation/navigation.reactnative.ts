@@ -37,17 +37,14 @@ export class ReactNativeNavigationService implements NavigationService {
     this.navigationRef = ref;
   }
 
-  navigate(path: string, options: NavigationOptions = {}): void {
+  navigate(path: string, _options: NavigationOptions = {}): void {
     if (!this.isSupported()) {
-      console.warn('React Native navigation not configured');
       return;
     }
 
     try {
       // In React Native with React Navigation, you would use:
       // this.navigationRef?.navigate(path, options);
-
-      console.log(`[RN Navigation] Navigate to: ${path}`, options);
 
       // Mock implementation for development
       this.updateCurrentState(path);
@@ -56,14 +53,13 @@ export class ReactNativeNavigationService implements NavigationService {
       if (this.config.enableAnalytics) {
         this.trackNavigation('navigate', path);
       }
-    } catch (error) {
-      console.warn('React Native navigation failed:', error);
+    } catch {
+      // Ignore errors
     }
   }
 
   goBack(fallbackPath?: string): void {
     if (!this.isSupported()) {
-      console.warn('React Native navigation not configured');
       return;
     }
 
@@ -74,8 +70,6 @@ export class ReactNativeNavigationService implements NavigationService {
       // } else if (fallbackPath) {
       //   this.navigate(fallbackPath);
       // }
-
-      console.log(`[RN Navigation] Go back, fallback: ${fallbackPath}`);
 
       if (this.canGoBack()) {
         // Mock going back
@@ -90,27 +84,23 @@ export class ReactNativeNavigationService implements NavigationService {
       } else if (fallbackPath) {
         this.navigate(fallbackPath);
       }
-    } catch (error) {
-      console.warn('React Native go back failed:', error);
+    } catch {
+      // Ignore errors
     }
   }
 
   goForward(): void {
     // React Navigation doesn't typically have a forward concept
-    console.log('[RN Navigation] Go forward not supported in React Navigation');
   }
 
-  replace(path: string, options: NavigationOptions = {}): void {
+  replace(path: string, _options: NavigationOptions = {}): void {
     if (!this.isSupported()) {
-      console.warn('React Native navigation not configured');
       return;
     }
 
     try {
       // In React Native with React Navigation, you would use:
       // this.navigationRef?.replace(path, options);
-
-      console.log(`[RN Navigation] Replace with: ${path}`, options);
 
       // Mock implementation
       this.updateCurrentState(path);
@@ -119,8 +109,8 @@ export class ReactNativeNavigationService implements NavigationService {
       if (this.config.enableAnalytics) {
         this.trackNavigation('replace', path);
       }
-    } catch (error) {
-      console.warn('React Native replace failed:', error);
+    } catch {
+      // Ignore errors
     }
   }
 
@@ -207,18 +197,14 @@ export class ReactNativeNavigationService implements NavigationService {
     this.listeners.forEach(listener => {
       try {
         listener(this.currentState);
-      } catch (error) {
-        console.warn('React Native navigation listener error:', error);
+      } catch {
+        // Ignore errors
       }
     });
   }
 
-  private trackNavigation(type: string, path?: string): void {
+  private trackNavigation(_type: string, _path?: string): void {
     // In a real app, you would integrate with your analytics service here
-    console.debug(
-      `[RN Navigation Analytics] ${type}:`,
-      path || this.currentState.currentPath
-    );
   }
 }
 

@@ -101,18 +101,11 @@ export function messageFromDetailedResponse(
   response: WildduckMessageDetail,
   existingMessage?: Optional<Message>
 ): Message {
-  console.log('[messageFromDetailedResponse] Input:', {
-    response,
-    existingMessage,
-  });
-
   // Generate intro from text if not available in detail response
   const intro =
     (response as any).intro ||
     existingMessage?.intro ||
     (response.text ? response.text.substring(0, 200) : '');
-
-  console.log('[messageFromDetailedResponse] Generated intro:', intro);
 
   const message: Message = {
     // Preserve list view data if available (but will be overwritten by response fields)
@@ -175,9 +168,5 @@ export function messageFromDetailedResponse(
     message.inReplyTo = response.inReplyTo;
   }
 
-  console.log(
-    '[messageFromDetailedResponse] Final transformed message:',
-    message
-  );
   return message;
 }

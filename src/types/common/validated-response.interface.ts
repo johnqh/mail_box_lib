@@ -109,18 +109,15 @@ export const validateApiResponse = <T>(
  * // Basic validation
  * const result = validateUserData(unknownData);
  * if (result.isValid) {
- *   console.log(result.data.email); // TypeScript knows this is UserData
  * }
  *
  * // API response validation
  * const apiValidator = validateApiResponse(isUserData);
  * const apiResult = apiValidator(response);
  * if (apiResult.isValid && apiResult.data.success) {
- *   console.log(apiResult.data.data?.email); // Safely access nested data
  * }
  *
  * // Direct type guards
  * if (isUserData(data)) {
- *   console.log(data.email); // TypeScript narrows type automatically
  * }
  */

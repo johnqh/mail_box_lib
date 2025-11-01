@@ -275,18 +275,10 @@ export function useMailboxMessages(
 
   // Refresh function to reload messages from the first page
   const refresh = useCallback(async () => {
-    console.log(
-      'useMailboxMessages.refresh called, wildduckAuth:',
-      !!wildduckAuth,
-      'selectedMailboxId:',
-      selectedMailboxId
-    );
     if (!wildduckAuth || !selectedMailboxId) {
-      console.log('Skipping refresh - missing auth or mailbox');
       return;
     }
     // Reset state and reload first page
-    console.log('Resetting messages and loading page 1...');
     setMessages([]);
     setCurrentPage(1);
     await loadPage(1);

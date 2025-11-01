@@ -729,7 +729,7 @@ class AddressHelper {
         }
       } catch (allDomainsError) {
         // If getAllDomains fails, continue with just primary domain
-        console.debug(
+        console.warn(
           'getAllDomains failed, using primary domain only:',
           allDomainsError
         );

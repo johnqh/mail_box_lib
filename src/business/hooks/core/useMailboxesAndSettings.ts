@@ -6,13 +6,13 @@
 
 import { useMemo } from 'react';
 import {
+  MailboxSpecialUse,
   Optional,
   WildduckMailbox,
   WildduckUserAuth,
-  MailboxSpecialUse,
 } from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
-import { useAccountMailboxes, UseAccountMailboxesReturn } from './useAccountMailboxes';
+import { useAccountMailboxes } from './useAccountMailboxes';
 
 /**
  * Special mailbox ID for the settings item

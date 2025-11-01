@@ -80,11 +80,9 @@ interface UseClaimableRewardsReturn {
  * });
  *
  * // Display total claimable
- * console.log('Total claimable:', Number(totalClaimable) / 1_000_000, 'USDC');
  *
  * // Claim rewards on a specific chain
  * const result = await claimRewards(ChainType.EVM);
- * console.log('Claimed:', result.amountClaimed);
  * ```
  */
 export const useClaimableRewards = (

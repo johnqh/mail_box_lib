@@ -113,7 +113,6 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
     }
 
     if (!signedData) {
-      console.log('KYC status check skipped - wallet not authenticated yet');
       // Don't set error during auto-fetch, just skip silently
       return;
     }

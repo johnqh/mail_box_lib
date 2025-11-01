@@ -199,14 +199,11 @@ export function useMessages({
 
   // Refresh function that works for both search and mailbox view
   const refresh = async () => {
-    console.log('useMessages.refresh called, isSearching:', isSearching);
     if (isSearching) {
       // Refetch search results
-      console.log('Refetching search query...');
       await searchQuery.refetch();
     } else {
       // Refresh mailbox messages
-      console.log('Calling mailboxMessages.refresh...');
       await mailboxMessages.refresh();
     }
   };

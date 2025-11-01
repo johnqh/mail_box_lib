@@ -35,7 +35,6 @@ export class WebNavigationService implements NavigationService {
 
   navigate(path: string, options: NavigationOptions = {}): void {
     if (!this.isSupported()) {
-      console.warn('Navigation not supported in this environment');
       return;
     }
 
@@ -51,14 +50,13 @@ export class WebNavigationService implements NavigationService {
           this.trackNavigation('navigate', path);
         }
       }
-    } catch (error) {
-      console.warn('Navigation failed:', error);
+    } catch {
+      // Ignore errors
     }
   }
 
   goBack(fallbackPath?: string): void {
     if (!this.isSupported()) {
-      console.warn('Navigation not supported in this environment');
       return;
     }
 
@@ -74,14 +72,13 @@ export class WebNavigationService implements NavigationService {
       } else if (this.config.fallbackPath) {
         this.navigate(this.config.fallbackPath);
       }
-    } catch (error) {
-      console.warn('Go back failed:', error);
+    } catch {
+      // Ignore errors
     }
   }
 
   goForward(): void {
     if (!this.isSupported()) {
-      console.warn('Navigation not supported in this environment');
       return;
     }
 
@@ -97,8 +94,8 @@ export class WebNavigationService implements NavigationService {
           this.trackNavigation('forward');
         }
       }
-    } catch (error) {
-      console.warn('Go forward failed:', error);
+    } catch {
+      // Ignore errors
     }
   }
 
@@ -197,18 +194,14 @@ export class WebNavigationService implements NavigationService {
     this.listeners.forEach(listener => {
       try {
         listener(this.currentState);
-      } catch (error) {
-        console.warn('Navigation listener error:', error);
+      } catch {
+        // Ignore errors
       }
     });
   }
 
-  private trackNavigation(type: string, path?: string): void {
+  private trackNavigation(_type: string, _path?: string): void {
     // In a real app, you would integrate with your analytics service here
-    console.debug(
-      `[Navigation Analytics] ${type}:`,
-      path || this.currentState.currentPath
-    );
   }
 }
 
@@ -232,7 +225,6 @@ export const webNavigationHelpers = {
   getReactRouterNavigate: () => {
     // This would be used in components that still need direct React Router access
     // Returns the useNavigate hook for backward compatibility
-    console.warn('getReactRouterNavigate should only be used during migration');
     return null;
   },
 

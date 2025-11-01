@@ -152,10 +152,6 @@ export function useAccountMailboxes(
       try {
         setError(null);
 
-        console.log(
-          `useAccountMailboxes: Fetching addresses for userId: ${wildduckAuth.userId}`
-        );
-
         // Fetch addresses for the user
         const addresses = await addressesHook.getUserAddresses(
           wildduckAuth.userId
@@ -191,15 +187,9 @@ export function useAccountMailboxes(
           );
         }
 
-        console.log(
-          `✅ useAccountMailboxes: Email address validated: ${address} (username: ${username})`
-        );
         setEmailAddress(address);
 
         // Fetch mailboxes now that we have a valid address
-        console.log(
-          `useAccountMailboxes: Fetching mailboxes for userId: ${wildduckAuth.userId}`
-        );
         await mailboxesHook.refresh(wildduckAuth.userId);
       } catch (err) {
         const errorMessage =

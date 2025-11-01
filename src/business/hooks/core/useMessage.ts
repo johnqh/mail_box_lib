@@ -140,13 +140,6 @@ export function useMessage(
 
   // Load message when messageId or auth changes
   useEffect(() => {
-    console.log('[useMessage] Effect triggered:', {
-      hasAuth: !!wildduckAuth,
-      selectedMessageId,
-      selectedMailboxId,
-      cachedMailbox: cachedMessage?.mailbox,
-    });
-
     if (!wildduckAuth || !selectedMessageId) {
       setMessage(null);
       setError(null);
@@ -155,7 +148,6 @@ export function useMessage(
 
     // Determine mailboxId: prefer cached message's mailbox, fall back to selected mailbox
     const mailboxId = cachedMessage?.mailbox || selectedMailboxId;
-    console.log('[useMessage] Determined mailboxId:', mailboxId);
     if (!mailboxId) {
       console.error('[useMessage] No mailbox ID available!', {
         cachedMailbox: cachedMessage?.mailbox,
@@ -175,24 +167,15 @@ export function useMessage(
         setIsLoadingMessage(true);
         setError(null);
 
-        console.log('[useMessage] Fetching message:', {
-          userId: wildduckAuth.userId,
-          mailboxId,
-          messageId: selectedMessageId,
-        });
-
         const response = await getMessage(
           wildduckAuth.userId,
           mailboxId,
           selectedMessageId
         );
 
-        console.log('[useMessage] API response:', response);
-
         // The WildDuck API returns the message directly in the response, not nested in a 'data' field
         // Response structure: { success: true, id, mailbox, html, attachments, ... }
         if (response && response.success) {
-          console.log('[useMessage] Message data received:', response);
           // Transform the detailed response to Message
           // Merge with existing cached message if available to preserve list view data
           // The response type from the API is compatible with WildduckMessageDetail
@@ -200,9 +183,7 @@ export function useMessage(
             response as any,
             cachedMessage
           );
-          console.log('[useMessage] Transformed message:', transformedMessage);
           setMessage(transformedMessage);
-          console.log('[useMessage] Message state set successfully');
           // Cache the message - this will also update any list cache that contains it
           cacheMessage(
             wildduckAuth.userId,

@@ -59,8 +59,8 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
           address,
         });
       }
-    } catch (ensError) {
-      console.warn('Primary ENS lookup failed:', ensError);
+    } catch {
+      // Ignore errors
     }
 
     // Method 2: Skip ENS Vision API as it's not accessible
@@ -80,8 +80,8 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
           ensNames.push(domain);
         }
       });
-    } catch (subgraphError) {
-      console.warn('ENS subgraph query failed:', subgraphError);
+    } catch {
+      // Ignore errors
     }
 
     // Method 4: Try to check for .box domains on both mainnet and Optimism
@@ -180,8 +180,8 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
       } catch {
         // Silently ignore Optimism reverse resolution failures
       }
-    } catch (boxError) {
-      console.warn('Direct .box domain check failed:', boxError);
+    } catch {
+      // Ignore errors
     }
 
     // Cache the result
@@ -238,7 +238,6 @@ async function queryENSSubgraph(address: string): Promise<ENSName[]> {
     });
 
     if (!response.ok) {
-      console.warn('ENS subgraph query failed with status:', response.status);
       return [];
     }
 

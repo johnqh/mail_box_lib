@@ -60,8 +60,7 @@ export const useMailerClient = (
     if (options.wallet && options.config) {
       try {
         return new OnchainMailerClient(options.wallet, options.config);
-      } catch (error) {
-        console.warn('Failed to initialize OnchainMailerClient:', error);
+      } catch {
         return null;
       }
     }

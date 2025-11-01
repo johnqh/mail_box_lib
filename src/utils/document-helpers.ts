@@ -40,8 +40,8 @@ function getDocumentElementById(id: string): Element | null {
   if (typeof document !== 'undefined' && document.getElementById) {
     try {
       return document.getElementById(id);
-    } catch (error) {
-      console.warn('Failed to get element by ID:', error);
+    } catch {
+      // Ignore errors
     }
   }
   return null;
@@ -56,8 +56,8 @@ function createDocumentElement(tagName: string): HTMLElement | null {
   if (typeof document !== 'undefined' && document.createElement) {
     try {
       return document.createElement(tagName);
-    } catch (error) {
-      console.warn('Failed to create element:', error);
+    } catch {
+      // Ignore errors
     }
   }
   return null;
@@ -85,8 +85,8 @@ function appendToDocumentHead(element: Node): boolean {
     try {
       head.appendChild(element);
       return true;
-    } catch (error) {
-      console.warn('Failed to append to document head:', error);
+    } catch {
+      // Ignore errors
     }
   }
   return false;
@@ -123,8 +123,8 @@ function setDocumentTitle(title: string): void {
   if (typeof document !== 'undefined') {
     try {
       document.title = title;
-    } catch (error) {
-      console.warn('Failed to set document title:', error);
+    } catch {
+      // Ignore errors
     }
   }
 }

@@ -149,17 +149,11 @@ export function useSelectedAccount(
 
     // Skip if we've already authenticated for this key
     if (lastAuthenticatedKey === authKey) {
-      console.log(
-        `✅ useSelectedAccount: Already authenticated for ${selectedAccount.username}, skipping`
-      );
       return;
     }
 
     // Skip if another component instance is currently authenticating
     if (authenticationInProgress === authKey) {
-      console.log(
-        `⏳ useSelectedAccount: Authentication already in progress for ${selectedAccount.username}, skipping`
-      );
       return;
     }
 
@@ -169,9 +163,6 @@ export function useSelectedAccount(
     // Call authenticate only once per unique account/signature combination
     (async () => {
       try {
-        console.log(
-          `🔐 useSelectedAccount: Starting authentication for ${selectedAccount.username}`
-        );
         const response = await authenticate({
           username: selectedAccount.username,
           message: indexerAuth.message,
@@ -189,9 +180,6 @@ export function useSelectedAccount(
               userId,
               accessToken: token,
             };
-            console.log(
-              `✅ useSelectedAccount: WildDuck auth successful for ${selectedAccount.username}`
-            );
             setWildduckAuthGlobal(auth);
             lastAuthenticatedKey = authKey;
           } else {
