@@ -9,7 +9,6 @@ import {
   Optional,
   WildduckMailbox,
   WildduckUserAuth,
-  MailboxType,
   MailboxSpecialUse,
 } from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
@@ -56,9 +55,8 @@ export interface UseMailboxesAndSettingsReturn {
  * The Settings item appears as a mailbox with:
  * - Special ID: SETTINGS_MAILBOX_ID
  * - Name: "Settings"
- * - Type: MailboxType.SPECIAL
- * - Special use: MailboxSpecialUse.SETTINGS
- * - isSettings flag: true
+ * - Special Use: MailboxSpecialUse.Settings
+ * - isSettings flag: true (for easy identification)
  *
  * @param endpointUrl - WildDuck API backend URL
  * @param apiToken - WildDuck API token for authentication
@@ -117,7 +115,7 @@ export function useMailboxesAndSettings(
       id: SETTINGS_MAILBOX_ID,
       name: 'Settings',
       path: 'Settings',
-      // specialUse is omitted since Settings is not a standard mailbox type
+      specialUse: MailboxSpecialUse.Settings,
       modifyIndex: 0,
       subscribed: true,
       hidden: false,
