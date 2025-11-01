@@ -49,7 +49,8 @@
       "Bash(do)",
       "Bash(echo:*)",
       "Bash(ls:*)",
-      "Bash(test -f:*)"
+      "Bash(test -f:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []

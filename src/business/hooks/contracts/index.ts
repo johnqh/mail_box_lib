@@ -18,6 +18,9 @@ export * from './useClaimableRewards';
 // Recipient revenue claims (modern RpcHelpers-based)
 export * from './useRecipientClaims';
 
+// USDC approval management for Mailer contracts
+export * from './useMailerContractApproval';
+
 // Re-export types from the contracts package for convenience
 export type {
   UnifiedTransaction,

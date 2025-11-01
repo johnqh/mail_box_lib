@@ -26,6 +26,7 @@ export {
   useAccountMailboxes,
   useGlobalWalletAccounts,
   useKYC,
+  useMailerContractApproval,
   useMailTemplates,
   useMailWebhooks,
   useMessage,

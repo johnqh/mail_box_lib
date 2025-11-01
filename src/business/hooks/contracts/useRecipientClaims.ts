@@ -7,7 +7,31 @@ import { useCallback, useEffect, useState } from 'react';
 import { type ChainInfo, RpcHelpers } from '@sudobility/configs';
 import { ChainType, Optional } from '@sudobility/types';
 import { createPublicClient, createWalletClient, custom, http } from 'viem';
-import { mainnet } from 'viem/chains';
+import { mainnet, sepolia, polygon, polygonAmoy, arbitrum, arbitrumSepolia, optimism, optimismSepolia, base, baseSepolia } from 'viem/chains';
+import type { Chain } from 'viem';
+
+// Helper function to get viem chain from chainId
+const getViemChain = (chainId: number): Chain => {
+  const chainMap: Record<number, Chain> = {
+    1: mainnet,
+    11155111: sepolia,
+    137: polygon,
+    80002: polygonAmoy,
+    42161: arbitrum,
+    421614: arbitrumSepolia,
+    10: optimism,
+    11155420: optimismSepolia,
+    8453: base,
+    84532: baseSepolia,
+  };
+
+  const chain = chainMap[chainId];
+  if (!chain) {
+    throw new Error(`Unsupported chain ID: ${chainId}`);
+  }
+
+  return chain;
+};
 
 export interface ChainClaimInfo {
   /** Chain information from RpcHelpers */
@@ -160,8 +184,11 @@ export const useRecipientClaims = (
             };
           }
 
+          // Get the correct chain for this chainId
+          const viemChain = getViemChain(chainInfo.chainId);
+
           const publicClient = createPublicClient({
-            chain: mainnet,
+            chain: viemChain,
             transport: http(rpcUrl),
           });
 
@@ -276,14 +303,17 @@ export const useRecipientClaims = (
           throw new Error('Unable to connect to blockchain RPC');
         }
 
+        // Get the correct viem chain for the target chainId
+        const targetViemChain = getViemChain(targetChainId);
+
         // Create clients for the target chain
         const publicClient = createPublicClient({
-          chain: mainnet,
+          chain: targetViemChain,
           transport: http(rpcUrl),
         });
 
         const walletClient = createWalletClient({
-          chain: mainnet,
+          chain: targetViemChain,
           transport: custom(provider),
         });
 
