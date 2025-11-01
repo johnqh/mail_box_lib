@@ -26,6 +26,8 @@ export {
   useAccountMailboxes,
   useGlobalWalletAccounts,
   useKYC,
+  useMailAccountSettings,
+  useMailboxesAndSettings,
   useMailerContractApproval,
   useMailTemplates,
   useMailWebhooks,
@@ -37,6 +39,9 @@ export {
   useWalletAccounts,
   useWalletDetector,
   useWalletStatus,
+
+  // Constants
+  SETTINGS_MAILBOX_ID,
 
   // React Query
   QueryClientProvider,

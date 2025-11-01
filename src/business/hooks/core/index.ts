@@ -14,6 +14,8 @@ export * from './useWalletStatus';
 export * from './useWalletAccounts';
 export * from './useSelectedAccount';
 export * from './useAccountMailboxes';
+export * from './useMailboxesAndSettings';
+export * from './useMailAccountSettings';
 export * from './useMailboxMessages';
 export * from './useMessages';
 export * from './useMessage';
