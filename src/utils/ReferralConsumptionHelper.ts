@@ -100,17 +100,4 @@ export class ReferralConsumptionHelper {
     const code = storage.getItem(REFERRAL_CODE_KEY);
     return !!code;
   }
-
-  /**
-   * Clear any pending referral code without consuming it
-   */
-  static clear(): void {
-    const storage = getStorage();
-    if (!storage) {
-      return;
-    }
-
-    console.log('🗑️ [ReferralHelper] Clearing referral code');
-    storage.removeItem(REFERRAL_CODE_KEY);
-  }
 }

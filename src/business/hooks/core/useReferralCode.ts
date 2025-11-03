@@ -1,135 +1,117 @@
 /**
  * useReferralCode Hook
- * Observes selected account and fetches referral code from indexer
- * Uses global state for React Native compatibility
+ * High-level hook for managing referral codes
+ * Automatically fetches referral code when wallet and auth are available
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { Optional } from '@sudobility/types';
-import type { StorageService } from '@sudobility/di';
-import { useSelectedAccount } from './useSelectedAccount';
 import { useIndexerReferralCode } from '@sudobility/indexer_client';
-import {
-  createGlobalState,
-  setGlobalState,
-} from '../../../utils/useGlobalState';
+import { useWalletStatus } from './useWalletStatus';
 
-/**
- * Global referral code state - shared across all components
- */
-export const useGlobalReferralCode = createGlobalState<Optional<string>>(
-  'referralCode',
-  null
-);
+export interface UseReferralCodeConfig {
+  endpointUrl: string;
+  walletAddress: Optional<string>;
+  dev?: boolean;
+}
 
-/**
- * Return type for useReferralCode hook
- */
 export interface UseReferralCodeReturn {
-  /** The referral code for the selected account */
+  /** The referral code string */
   referralCode: Optional<string>;
-  /** Whether the referral code is currently loading */
+  /** Whether the referral code is being fetched */
   isLoading: boolean;
-  /** Error message if any */
+  /** Error message if fetch failed */
   error: Optional<string>;
+  /** Manually refetch the referral code */
+  refetch: () => Promise<void>;
 }
 
 /**
- * Hook to manage referral code for the currently selected account
+ * Hook to get user's referral code from the indexer
+ * Automatically fetches when wallet address and auth are available
  *
- * Observes selectedAccount from useSelectedAccount and:
- * - Fetches referral code from indexer when account is selected
- * - Caches referral code in global state
- * - Uses memoization to prevent unnecessary updates
- * - Returns null when no account is selected
- *
- * @param endpointUrl - Indexer API endpoint URL
- * @param devMode - Whether to use mock data on errors
- * @returns Object containing referralCode, isLoading, and error
+ * @param config - Configuration object
+ * @returns Referral code state
  *
  * @example
  * ```tsx
- * function ReferralDisplay() {
- *   const { referralCode, isLoading, error } = useReferralCode(
- *     'https://indexer.example.com',
- *     false
- *   );
+ * const { referralCode, isLoading, error } = useReferralCode({
+ *   endpointUrl: 'https://indexer.0xmail.box',
+ *   walletAddress: '0x123...',
+ *   dev: false,
+ * });
  *
- *   if (isLoading) return <div>Loading...</div>;
- *   if (error) return <div>Error: {error}</div>;
- *   if (!referralCode) return <div>No referral code</div>;
- *
- *   return (
- *     <div>
- *       <h2>Your Referral Code</h2>
- *       <code>{referralCode}</code>
- *     </div>
- *   );
+ * if (referralCode) {
+ *   console.log(`https://0xmail.box?referral=${referralCode}`);
  * }
  * ```
  */
 export function useReferralCode(
-  endpointUrl: string,
-  storage: StorageService,
-  devMode: boolean = false
+  config: UseReferralCodeConfig
 ): UseReferralCodeReturn {
-  const { selectedAccount } = useSelectedAccount(
-    endpointUrl,
-    '',
-    storage,
-    devMode
-  );
-  const [referralCode] = useGlobalReferralCode();
+  const { endpointUrl, walletAddress, dev = false } = config;
+  const { indexerAuth } = useWalletStatus();
 
-  // Fetch referral code using the indexer hook
-  const indexerHook = useIndexerReferralCode(endpointUrl, devMode);
+  // Use the low-level indexer client hook
+  const {
+    referralCode: referralCodeData,
+    isLoading,
+    error,
+    fetchReferralCode,
+  } = useIndexerReferralCode(endpointUrl, dev);
 
+  // State to track if we've already fetched
+  const [hasFetched, setHasFetched] = useState(false);
+
+  // Extract the actual referral code string
+  const referralCode = referralCodeData?.data?.referralCode;
+
+  // Auto-fetch when wallet address and auth are available
   useEffect(() => {
-    // Clear referral code if no account is selected
-    if (!selectedAccount) {
-      setGlobalState('referralCode', null);
+    if (!walletAddress || !indexerAuth || hasFetched) {
       return;
     }
 
-    // Process referral code from hook when available
-    // ReferralCodeResponse has a specific structure - extract the referral code string
-    const response = indexerHook.referralCode;
-    const code = response
-      ? typeof response === 'string'
-        ? response
-        : String(response)
-      : null;
+    const fetch = async () => {
+      try {
+        console.log(
+          `🎫 [useReferralCode] Fetching referral code for ${walletAddress}`
+        );
+        await fetchReferralCode(walletAddress, {
+          signature: indexerAuth.signature,
+          message: indexerAuth.message,
+          signer: indexerAuth.signer,
+        });
+        setHasFetched(true);
+      } catch (err) {
+        console.error('Failed to fetch referral code:', err);
+      }
+    };
 
-    // Only update if the referral code has actually changed
-    if (code !== referralCode) {
-      setGlobalState('referralCode', code);
+    fetch();
+  }, [walletAddress, indexerAuth, hasFetched, fetchReferralCode]);
+
+  // Manual refetch function
+  const refetch = async () => {
+    if (!walletAddress || !indexerAuth) {
+      throw new Error(
+        'Wallet address and auth required to fetch referral code'
+      );
     }
 
-    // Log error if any
-    if (indexerHook.error) {
-      console.error('Error fetching referral code:', indexerHook.error);
-    }
-  }, [
-    selectedAccount,
-    indexerHook.referralCode,
-    indexerHook.error,
+    setHasFetched(false);
+    await fetchReferralCode(walletAddress, {
+      signature: indexerAuth.signature,
+      message: indexerAuth.message,
+      signer: indexerAuth.signer,
+    });
+    setHasFetched(true);
+  };
+
+  return {
     referralCode,
-  ]);
-
-  const isLoading = indexerHook.isLoading;
-  const error = indexerHook.error;
-
-  // Memoize the referral code to prevent unnecessary updates
-  const memoizedReferralCode = useMemo(() => referralCode, [referralCode]);
-
-  // Memoize the return object to prevent unnecessary re-renders
-  // Only recreate when referralCode, isLoading, or error actually change
-  return useMemo<UseReferralCodeReturn>(
-    () => ({
-      referralCode: memoizedReferralCode,
-      isLoading,
-      error,
-    }),
-    [memoizedReferralCode, isLoading, error]
-  );
+    isLoading,
+    error,
+    refetch,
+  };
 }

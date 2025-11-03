@@ -14,13 +14,18 @@ import {
 } from '../../../utils/useGlobalState';
 import { useGlobalWalletAccounts, WildDuckAccount } from './useWalletAccounts';
 import { useWalletStatus } from './useWalletStatus';
+import { ReferralConsumptionHelper } from '../../../utils/ReferralConsumptionHelper';
 
 /**
  * Global authentication tracking to prevent duplicate authentication calls
  * across multiple component instances
+ *
+ * We track by username only - not by message/signature - because:
+ * 1. Once authenticated for a username, we don't need to re-authenticate
+ * 2. Different account objects with same username shouldn't trigger re-auth
  */
 let authenticationInProgress: Optional<string> = null;
-let lastAuthenticatedKey: Optional<string> = null;
+let lastAuthenticatedUsername: Optional<string> = null;
 
 /**
  * Global selected account state - shared across all components
@@ -140,35 +145,70 @@ export function useSelectedAccount(
         setWildduckAuthGlobal(undefined);
       }
       authenticationInProgress = null;
-      lastAuthenticatedKey = null;
+      lastAuthenticatedUsername = null;
       return;
     }
 
-    // Create a stable key to detect actual changes
-    const authKey = `${selectedAccount.username}:${indexerAuth.message}:${indexerAuth.signature}`;
+    // Normalize username to lowercase to handle case differences
+    const normalizedUsername = selectedAccount.username.toLowerCase();
 
-    // Skip if we've already authenticated for this key
-    if (lastAuthenticatedKey === authKey) {
+    // Skip if we've already authenticated for this username
+    // BUT: If there's a pending referral code, allow re-authentication to include it
+    const hasPendingReferral = ReferralConsumptionHelper.hasPending();
+    if (
+      lastAuthenticatedUsername === normalizedUsername &&
+      !hasPendingReferral
+    ) {
+      console.log(
+        `✅ [useSelectedAccount] Skipping duplicate authentication for: ${normalizedUsername}`
+      );
       return;
     }
 
-    // Skip if another component instance is currently authenticating
-    if (authenticationInProgress === authKey) {
+    // If there's a pending referral code for an already-authenticated user, log it
+    if (
+      lastAuthenticatedUsername === normalizedUsername &&
+      hasPendingReferral
+    ) {
+      console.log(
+        `🎁 [useSelectedAccount] Re-authenticating ${normalizedUsername} to include referral code`
+      );
+      // Clear the last authenticated username so authentication proceeds
+      lastAuthenticatedUsername = null;
+    }
+
+    console.log(
+      `🔐 [useSelectedAccount] Authenticating with username: ${normalizedUsername}`
+    );
+
+    // Skip if another component instance is currently authenticating this username
+    if (authenticationInProgress === normalizedUsername) {
+      console.log(
+        `⏳ [useSelectedAccount] Authentication already in progress for: ${normalizedUsername}`
+      );
       return;
     }
 
-    // Mark authentication as in progress
-    authenticationInProgress = authKey;
+    // Mark authentication as in progress for this username
+    authenticationInProgress = normalizedUsername;
 
     // Call authenticate only once per unique account/signature combination
     (async () => {
       try {
+        // Get referral code if available (consume removes it from storage)
+        const referralCode = ReferralConsumptionHelper.consume();
+        console.log(
+          `🔍 [useSelectedAccount] Referral code from ReferralConsumptionHelper.consume():`,
+          referralCode
+        );
+
         const response = await authenticate({
           username: selectedAccount.username,
           message: indexerAuth.message,
           signature: indexerAuth.signature,
           signer: indexerAuth.signer,
           token: true,
+          ...(referralCode && { referralCode }), // Include referral code if available
         });
 
         if (response && response.success) {
@@ -181,14 +221,36 @@ export function useSelectedAccount(
               accessToken: token,
             };
             setWildduckAuthGlobal(auth);
-            lastAuthenticatedKey = authKey;
+            lastAuthenticatedUsername = normalizedUsername;
+
+            // Clean URL parameter if referral code was consumed
+            if (referralCode) {
+              console.log(
+                '🧹 [useSelectedAccount] Cleaning referral code from URL after successful authentication'
+              );
+              try {
+                const urlParams = new URLSearchParams(window.location.search);
+                urlParams.delete('referral');
+                const newSearch = urlParams.toString();
+                const newUrl = newSearch
+                  ? `${window.location.pathname}?${newSearch}`
+                  : window.location.pathname;
+                window.history.replaceState({}, '', newUrl);
+                console.log('✅ [useSelectedAccount] URL cleaned:', newUrl);
+              } catch (error) {
+                console.warn(
+                  '⚠️ [useSelectedAccount] Failed to clean URL:',
+                  error
+                );
+              }
+            }
           } else {
             console.warn(
               '⚠️ useSelectedAccount: Missing token or userId in response:',
               { token, userId }
             );
             setWildduckAuthGlobal(undefined);
-            lastAuthenticatedKey = null;
+            lastAuthenticatedUsername = null;
           }
         } else {
           console.warn(
@@ -196,12 +258,12 @@ export function useSelectedAccount(
             response
           );
           setWildduckAuthGlobal(undefined);
-          lastAuthenticatedKey = null;
+          lastAuthenticatedUsername = null;
         }
       } catch (error) {
         console.error('WildDuck authentication failed:', error);
         setWildduckAuthGlobal(undefined);
-        lastAuthenticatedKey = null;
+        lastAuthenticatedUsername = null;
       } finally {
         // Clear the in-progress flag
         authenticationInProgress = null;

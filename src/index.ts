@@ -35,6 +35,7 @@ export {
   useMessages,
   usePoints,
   useRecipientClaims,
+  useReferralCode,
   useSelectedAccount,
   useWalletAccounts,
   useWalletDetector,

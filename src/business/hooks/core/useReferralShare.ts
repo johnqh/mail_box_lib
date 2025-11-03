@@ -5,7 +5,6 @@
 
 import { useMemo } from 'react';
 import { Optional } from '@sudobility/types';
-import type { StorageService } from '@sudobility/di';
 import { useReferralCode } from './useReferralCode';
 
 /**
@@ -59,15 +58,15 @@ export interface UseReferralShareReturn {
 export function useReferralShare(
   url: string,
   endpointUrl: string,
-  storage: StorageService,
+  walletAddress: Optional<string>,
   devMode: boolean = false,
   paramName: string = 'ref'
 ): UseReferralShareReturn {
-  const { referralCode, isLoading, error } = useReferralCode(
+  const { referralCode, isLoading, error } = useReferralCode({
     endpointUrl,
-    storage,
-    devMode
-  );
+    walletAddress,
+    dev: devMode,
+  });
 
   // Memoize the referral URL generation
   const referralUrl = useMemo(() => {

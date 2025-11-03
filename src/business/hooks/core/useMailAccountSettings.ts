@@ -32,18 +32,28 @@ export interface UseMailAccountSettingsReturn {
 }
 
 /**
+ * Translation function type
+ */
+export type TranslationFunction = (
+  key: string,
+  defaultValue?: string
+) => string;
+
+/**
  * Hook to get available settings sections for an email account
  *
  * Returns a list of settings sections that are appropriate for the
- * current account type. Wallet addresses get additional "Claim" section.
+ * current account type. Wallet addresses get additional "Points" and "Claim" sections.
  *
  * @param walletAddress - The wallet address to check (optional)
+ * @param t - Optional translation function for localizing section titles
  * @returns Object containing sections array and canClaim flag
  *
  * @example
  * ```tsx
  * function SettingsList() {
- *   const { sections, canClaim } = useMailAccountSettings(walletAddress);
+ *   const { t } = useTranslation('accountSettings');
+ *   const { sections, canClaim } = useMailAccountSettings(walletAddress, t);
  *
  *   return (
  *     <ul>
@@ -56,7 +66,8 @@ export interface UseMailAccountSettingsReturn {
  * ```
  */
 export function useMailAccountSettings(
-  walletAddress: Optional<string>
+  walletAddress: Optional<string>,
+  t?: TranslationFunction
 ): UseMailAccountSettingsReturn {
   /**
    * Helper function to check if account is a wallet address
@@ -81,70 +92,94 @@ export function useMailAccountSettings(
     () => [
       {
         id: 'general',
-        title: 'General',
+        title: t ? t('sections.general', 'General') : 'General',
         icon: 'cog',
-        description: 'Account information and general settings',
+        description: t
+          ? t('general.description', 'Account information and general settings')
+          : 'Account information and general settings',
       },
       {
         id: 'forwarding',
-        title: 'Forwarding',
+        title: t ? t('sections.forwarding', 'Forwarding') : 'Forwarding',
         icon: 'arrow-right',
-        description: 'Forward emails to another address',
+        description: t
+          ? t('forwarding.description', 'Forward emails to another address')
+          : 'Forward emails to another address',
       },
       {
         id: 'spam',
-        title: 'Spam',
+        title: t ? t('sections.spam', 'Spam') : 'Spam',
         icon: 'shield',
-        description: 'Spam filtering and management',
+        description: t
+          ? t('spam.description', 'Spam filtering and management')
+          : 'Spam filtering and management',
       },
       {
         id: 'autoreply',
-        title: 'Auto-Reply',
+        title: t ? t('sections.autoreply', 'Auto-Reply') : 'Auto-Reply',
         icon: 'reply',
-        description: 'Automatic email responses',
+        description: t
+          ? t('autoreply.description', 'Automatic email responses')
+          : 'Automatic email responses',
       },
       {
         id: 'filters',
-        title: 'Filters',
+        title: t ? t('sections.filters', 'Filters') : 'Filters',
         icon: 'filter',
-        description: 'Email filtering rules',
+        description: t
+          ? t('filters.description', 'Email filtering rules')
+          : 'Email filtering rules',
       },
       {
         id: 'integration',
-        title: 'Integrations',
+        title: t ? t('sections.integrations', 'Integration') : 'Integration',
         icon: 'plug',
-        description: 'Third-party integrations',
+        description: t
+          ? t('integration.description', 'Third-party integrations')
+          : 'Third-party integrations',
       },
       {
         id: 'advanced',
-        title: 'Advanced',
+        title: t ? t('sections.advanced', 'Advanced') : 'Advanced',
         icon: 'adjustments',
-        description: 'Advanced account settings',
+        description: t
+          ? t('advanced.description', 'Advanced account settings')
+          : 'Advanced account settings',
       },
     ],
-    []
+    [t]
   );
 
   /**
    * All settings sections including conditional ones
-   * Adds "Claim" section for wallet addresses
+   * Adds "Points" and "Claim" sections for wallet addresses
    */
   const sections = useMemo<SettingSection[]>(() => {
-    // If it's a wallet address, add the claim section
+    // If it's a wallet address, add the points and claim sections
     if (isWalletAddress) {
       return [
         ...baseSettingsSections,
         {
+          id: 'points',
+          title: t ? t('sections.points', 'Points') : 'Points',
+          icon: 'star',
+          description: t
+            ? t('points.description', 'View and manage your points')
+            : 'View and manage your points',
+        },
+        {
           id: 'claim',
-          title: 'Claim',
+          title: t ? t('sections.claim', 'Claim') : 'Claim',
           icon: 'currency-dollar',
-          description: 'Claim recipient revenue shares',
+          description: t
+            ? t('claim.description', 'Claim recipient revenue shares')
+            : 'Claim recipient revenue shares',
         },
       ];
     }
 
     return baseSettingsSections;
-  }, [baseSettingsSections, isWalletAddress]);
+  }, [baseSettingsSections, isWalletAddress, t]);
 
   return {
     sections,
