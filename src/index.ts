@@ -133,6 +133,9 @@ export {
   // Navigation hooks
   useLocation,
   useSearchParams,
+
+  // Referral code management
+  ReferralConsumptionHelper,
 } from './utils';
 
 // ============================================================================

@@ -25,6 +25,7 @@ export * from './url-params';
 export * from './document-helpers';
 export * from './errorHandling';
 export * from './formatters';
+export * from './ReferralConsumptionHelper';
 
 // React utilities
 export * from './useGlobalState';
