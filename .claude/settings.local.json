@@ -50,7 +50,8 @@
       "Bash(echo:*)",
       "Bash(ls:*)",
       "Bash(test -f:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(for pkg in configs contracts indexer_client types wildduck_client)"
     ],
     "deny": [],
     "ask": []
