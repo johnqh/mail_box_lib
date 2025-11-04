@@ -34,6 +34,7 @@ export {
   useMessage,
   useMessages,
   usePoints,
+  useWalletPoints,
   useRecipientClaims,
   useReferralCode,
   useSelectedAccount,
@@ -48,6 +49,10 @@ export {
   QueryClientProvider,
   STALE_TIMES,
   useQueryClient,
+
+  // Network Context
+  NetworkProvider,
+  useNetwork,
 
   // Types
   Message,
@@ -69,6 +74,9 @@ export type {
   AppConfig,
   EnvironmentVariables,
   EnvProvider,
+
+  // Network
+  PlatformNetwork,
 
   // Notification
   NotificationCapabilities,

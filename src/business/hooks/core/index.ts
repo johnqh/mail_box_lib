@@ -24,3 +24,4 @@ export * from './useReferralShare';
 export * from './useMailTemplates';
 export * from './useMailWebhooks';
 export * from './usePoints';
+export * from './useWalletPoints';

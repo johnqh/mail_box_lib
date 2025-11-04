@@ -177,10 +177,6 @@ export function useSelectedAccount(
       lastAuthenticatedUsername = null;
     }
 
-    console.log(
-      `🔐 [useSelectedAccount] Authenticating with username: ${normalizedUsername}`
-    );
-
     // Skip if another component instance is currently authenticating this username
     if (authenticationInProgress === normalizedUsername) {
       console.log(
@@ -200,6 +196,14 @@ export function useSelectedAccount(
         console.log(
           `🔍 [useSelectedAccount] Referral code from ReferralConsumptionHelper.consume():`,
           referralCode
+        );
+
+        console.log(
+          `🔐 [useSelectedAccount] Authenticating with username: ${normalizedUsername}${
+            referralCode
+              ? ` [with referral code: ${referralCode}]`
+              : ' [no referral code]'
+          }`
         );
 
         const response = await authenticate({
