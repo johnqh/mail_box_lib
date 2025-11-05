@@ -11,6 +11,7 @@ import {
   useIndexerGetDelegatedTo,
 } from '@sudobility/indexer_client';
 import { ChainType } from '@sudobility/types';
+import type { ChainInfo } from '@sudobility/configs';
 
 // Mock dependencies
 vi.mock('@sudobility/contracts', () => ({
@@ -30,16 +31,16 @@ describe('useMailerDelegations', () => {
     signature: 'Test signature',
     signer: mockWalletAddress,
   };
-  const mockWallet = { request: vi.fn() };
-  const mockConfig = {
-    evm: {
-      rpc: 'https://test-rpc.com',
-      chainId: 1,
-      contracts: {
-        mailer: '0x1234567890123456789012345678901234567890',
-        usdc: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd',
-      },
-    },
+  const mockConnectedWallet = {
+    walletClient: { address: mockWalletAddress },
+  };
+  const mockChainInfo: ChainInfo = {
+    chainType: ChainType.EVM,
+    chainId: 1,
+    name: 'Ethereum Mainnet',
+    isDev: false,
+    usdcAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+    mailerAddress: '0x1234567890123456789012345678901234567890',
   };
 
   const mockDelegatedTo = {
@@ -79,7 +80,7 @@ describe('useMailerDelegations', () => {
     mockRefetchTo = vi.fn();
     mockRefetchFrom = vi.fn();
 
-    // Mock OnchainMailerClient constructor
+    // Mock OnchainMailerClient constructor (stateless - no constructor parameters)
     (OnchainMailerClient as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       function (this: any) {
         this.delegateTo = mockDelegateTo;
@@ -121,8 +122,8 @@ describe('useMailerDelegations', () => {
           endpointUrl: mockEndpointUrl,
           walletAddress: mockWalletAddress,
           auth: mockAuth,
-          wallet: mockWallet,
-          config: mockConfig,
+          connectedWallet: mockConnectedWallet as any,
+          chainInfo: mockChainInfo,
         })
       );
 
@@ -199,8 +200,8 @@ describe('useMailerDelegations', () => {
           endpointUrl: mockEndpointUrl,
           walletAddress: mockWalletAddress,
           auth: mockAuth,
-          wallet: mockWallet,
-          config: mockConfig,
+          connectedWallet: mockConnectedWallet as any,
+          chainInfo: mockChainInfo,
         })
       );
 
@@ -209,7 +210,11 @@ describe('useMailerDelegations', () => {
         delegateResult = await result.current.delegate(targetAddress);
       });
 
-      expect(mockDelegateTo).toHaveBeenCalledWith(targetAddress);
+      expect(mockDelegateTo).toHaveBeenCalledWith(
+        mockConnectedWallet,
+        mockChainInfo,
+        targetAddress
+      );
       expect(delegateResult).toEqual(mockResult);
       expect(mockRefetchTo).toHaveBeenCalled();
       expect(mockRefetchFrom).toHaveBeenCalled();
@@ -221,7 +226,7 @@ describe('useMailerDelegations', () => {
           endpointUrl: mockEndpointUrl,
           walletAddress: mockWalletAddress,
           auth: mockAuth,
-          // No wallet or config provided
+          // No connectedWallet or chainInfo provided
         })
       );
 
@@ -229,7 +234,7 @@ describe('useMailerDelegations', () => {
         act(async () => {
           await result.current.delegate('0xTarget');
         })
-      ).rejects.toThrow('Mailer client not initialized');
+      ).rejects.toThrow('Wallet and chain info are required for delegation operations');
     });
 
     it('should throw error if delegating with empty address', async () => {
@@ -238,8 +243,8 @@ describe('useMailerDelegations', () => {
           endpointUrl: mockEndpointUrl,
           walletAddress: mockWalletAddress,
           auth: mockAuth,
-          wallet: mockWallet,
-          config: mockConfig,
+          connectedWallet: mockConnectedWallet as any,
+          chainInfo: mockChainInfo,
         })
       );
 
@@ -259,8 +264,8 @@ describe('useMailerDelegations', () => {
           endpointUrl: mockEndpointUrl,
           walletAddress: mockWalletAddress,
           auth: mockAuth,
-          wallet: mockWallet,
-          config: mockConfig,
+          connectedWallet: mockConnectedWallet as any,
+          chainInfo: mockChainInfo,
         })
       );
 
@@ -296,8 +301,8 @@ describe('useMailerDelegations', () => {
           endpointUrl: mockEndpointUrl,
           walletAddress: mockWalletAddress,
           auth: mockAuth,
-          wallet: mockWallet,
-          config: mockConfig,
+          connectedWallet: mockConnectedWallet as any,
+          chainInfo: mockChainInfo,
         })
       );
 
@@ -307,6 +312,8 @@ describe('useMailerDelegations', () => {
       });
 
       expect(mockDelegateTo).toHaveBeenCalledWith(
+        mockConnectedWallet,
+        mockChainInfo,
         '0x0000000000000000000000000000000000000000'
       );
       expect(revokeResult).toEqual(mockResult);
@@ -327,7 +334,7 @@ describe('useMailerDelegations', () => {
         act(async () => {
           await result.current.revoke();
         })
-      ).rejects.toThrow('Mailer client not initialized');
+      ).rejects.toThrow('Wallet and chain info are required for delegation operations');
     });
   });
 
@@ -348,8 +355,8 @@ describe('useMailerDelegations', () => {
           endpointUrl: mockEndpointUrl,
           walletAddress: mockWalletAddress,
           auth: mockAuth,
-          wallet: mockWallet,
-          config: mockConfig,
+          connectedWallet: mockConnectedWallet as any,
+          chainInfo: mockChainInfo,
         })
       );
 
@@ -358,7 +365,11 @@ describe('useMailerDelegations', () => {
         rejectResult = await result.current.reject(delegatorAddress);
       });
 
-      expect(mockRejectDelegation).toHaveBeenCalledWith(delegatorAddress);
+      expect(mockRejectDelegation).toHaveBeenCalledWith(
+        mockConnectedWallet,
+        mockChainInfo,
+        delegatorAddress
+      );
       expect(rejectResult).toEqual(mockResult);
       expect(mockRefetchTo).toHaveBeenCalled();
       expect(mockRefetchFrom).toHaveBeenCalled();
@@ -377,7 +388,7 @@ describe('useMailerDelegations', () => {
         act(async () => {
           await result.current.reject('0xDelegator');
         })
-      ).rejects.toThrow('Mailer client not initialized');
+      ).rejects.toThrow('Wallet and chain info are required for delegation operations');
     });
 
     it('should throw error if rejecting with empty address', async () => {
@@ -386,8 +397,8 @@ describe('useMailerDelegations', () => {
           endpointUrl: mockEndpointUrl,
           walletAddress: mockWalletAddress,
           auth: mockAuth,
-          wallet: mockWallet,
-          config: mockConfig,
+          connectedWallet: mockConnectedWallet as any,
+          chainInfo: mockChainInfo,
         })
       );
 
@@ -407,8 +418,8 @@ describe('useMailerDelegations', () => {
           endpointUrl: mockEndpointUrl,
           walletAddress: mockWalletAddress,
           auth: mockAuth,
-          wallet: mockWallet,
-          config: mockConfig,
+          connectedWallet: mockConnectedWallet as any,
+          chainInfo: mockChainInfo,
         })
       );
 
@@ -459,8 +470,8 @@ describe('useMailerDelegations', () => {
           endpointUrl: mockEndpointUrl,
           walletAddress: mockWalletAddress,
           auth: mockAuth,
-          wallet: mockWallet,
-          config: mockConfig,
+          connectedWallet: mockConnectedWallet as any,
+          chainInfo: mockChainInfo,
         })
       );
 
@@ -645,8 +656,8 @@ describe('useMailerDelegations', () => {
           endpointUrl: mockEndpointUrl,
           walletAddress: mockWalletAddress,
           auth: mockAuth,
-          wallet: mockWallet,
-          config: mockConfig,
+          connectedWallet: mockConnectedWallet as any,
+          chainInfo: mockChainInfo,
         })
       );
 
@@ -674,8 +685,8 @@ describe('useMailerDelegations', () => {
           endpointUrl: mockEndpointUrl,
           walletAddress: mockWalletAddress,
           auth: mockAuth,
-          wallet: mockWallet,
-          config: mockConfig,
+          connectedWallet: mockConnectedWallet as any,
+          chainInfo: mockChainInfo,
         })
       );
 
@@ -704,8 +715,8 @@ describe('useMailerDelegations', () => {
           endpointUrl: mockEndpointUrl,
           walletAddress: mockWalletAddress,
           auth: mockAuth,
-          wallet: mockWallet,
-          config: mockConfig,
+          connectedWallet: mockConnectedWallet as any,
+          chainInfo: mockChainInfo,
         })
       );
 
@@ -728,8 +739,8 @@ describe('useMailerDelegations', () => {
           endpointUrl: mockEndpointUrl,
           walletAddress: mockWalletAddress,
           auth: mockAuth,
-          wallet: mockWallet,
-          config: mockConfig,
+          connectedWallet: mockConnectedWallet as any,
+          chainInfo: mockChainInfo,
         })
       );
 

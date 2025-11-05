@@ -27,11 +27,13 @@ export * from './useMailerDelegations';
 // Re-export types from the contracts package for convenience
 export type {
   UnifiedTransaction,
-  UnifiedWallet,
   ChainConfig,
   EVMConfig,
   SolanaConfig,
   MessageResult,
   DomainResult,
   DelegationResult as ContractDelegationResult,
+  Wallet,
+  EVMWallet,
+  SolanaWallet,
 } from '@sudobility/contracts';

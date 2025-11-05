@@ -7,6 +7,8 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useMailerPermissions } from '../useMailerPermissions';
 import { IndexerClient } from '@sudobility/indexer_client';
 import { OnchainMailerClient } from '@sudobility/contracts';
+import { ChainType } from '@sudobility/types';
+import type { ChainInfo } from '@sudobility/configs';
 
 // Mock IndexerClient
 vi.mock('@sudobility/indexer_client', () => ({
@@ -421,8 +423,17 @@ describe('useMailerPermissions', () => {
   describe('Permission Management', () => {
     let mockSetPermission: ReturnType<typeof vi.fn>;
     let mockRemovePermission: ReturnType<typeof vi.fn>;
-    const mockWallet = { address: mockWalletAddress };
-    const mockConfig = { evm: { rpc: 'https://eth.example.com', chainId: 1 } };
+    const mockConnectedWallet = {
+      walletClient: { address: mockWalletAddress },
+    };
+    const mockChainInfo: ChainInfo = {
+      chainType: ChainType.EVM,
+      chainId: 1,
+      name: 'Ethereum Mainnet',
+      isDev: false,
+      usdcAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+      mailerAddress: '0x1234567890123456789012345678901234567890',
+    };
     const mockContractAddress = '0x1111111111111111111111111111111111111111';
     const mockTransaction = { hash: '0xabc123' };
 
@@ -430,7 +441,7 @@ describe('useMailerPermissions', () => {
       mockSetPermission = vi.fn();
       mockRemovePermission = vi.fn();
 
-      // Mock OnchainMailerClient constructor
+      // Mock OnchainMailerClient constructor (stateless - no constructor parameters)
       (
         OnchainMailerClient as unknown as ReturnType<typeof vi.fn>
       ).mockImplementation(
@@ -460,8 +471,8 @@ describe('useMailerPermissions', () => {
           useMailerPermissions(mockEndpointUrl, false, {
             walletAddress: mockWalletAddress,
             chainId: mockChainId,
-            wallet: mockWallet as any,
-            config: mockConfig as any,
+            connectedWallet: mockConnectedWallet as any,
+            chainInfo: mockChainInfo,
           })
         );
 
@@ -474,7 +485,11 @@ describe('useMailerPermissions', () => {
           expect(result.current.isLoading).toBe(false);
         });
 
-        expect(mockSetPermission).toHaveBeenCalledWith(mockContractAddress);
+        expect(mockSetPermission).toHaveBeenCalledWith(
+          mockConnectedWallet,
+          mockChainInfo,
+          mockContractAddress
+        );
         expect(mockGetWalletPermissions).toHaveBeenCalled();
         expect(transaction).toEqual(mockTransaction);
         expect(result.current.permissions).toContain(mockContractAddress);
@@ -486,7 +501,7 @@ describe('useMailerPermissions', () => {
           useMailerPermissions(mockEndpointUrl, false, {
             walletAddress: mockWalletAddress,
             chainId: mockChainId,
-            // No wallet or config provided
+            // No connectedWallet or chainInfo provided
           })
         );
 
@@ -494,7 +509,7 @@ describe('useMailerPermissions', () => {
           await act(async () => {
             await result.current.addPermission(mockContractAddress);
           });
-        }).rejects.toThrow('Mailer client not initialized');
+        }).rejects.toThrow('Wallet and chain info are required for permission operations');
       });
 
       it('should throw error when contract address is empty', async () => {
@@ -502,8 +517,8 @@ describe('useMailerPermissions', () => {
           useMailerPermissions(mockEndpointUrl, false, {
             walletAddress: mockWalletAddress,
             chainId: mockChainId,
-            wallet: mockWallet as any,
-            config: mockConfig as any,
+            connectedWallet: mockConnectedWallet as any,
+            chainInfo: mockChainInfo,
           })
         );
 
@@ -522,8 +537,8 @@ describe('useMailerPermissions', () => {
           useMailerPermissions(mockEndpointUrl, false, {
             walletAddress: mockWalletAddress,
             chainId: mockChainId,
-            wallet: mockWallet as any,
-            config: mockConfig as any,
+            connectedWallet: mockConnectedWallet as any,
+            chainInfo: mockChainInfo,
           })
         );
 
@@ -554,8 +569,8 @@ describe('useMailerPermissions', () => {
           useMailerPermissions(mockEndpointUrl, false, {
             walletAddress: mockWalletAddress,
             chainId: mockChainId,
-            wallet: mockWallet as any,
-            config: mockConfig as any,
+            connectedWallet: mockConnectedWallet as any,
+            chainInfo: mockChainInfo,
           })
         );
 
@@ -599,8 +614,8 @@ describe('useMailerPermissions', () => {
           useMailerPermissions(mockEndpointUrl, false, {
             walletAddress: mockWalletAddress,
             chainId: mockChainId,
-            wallet: mockWallet as any,
-            config: mockConfig as any,
+            connectedWallet: mockConnectedWallet as any,
+            chainInfo: mockChainInfo,
           })
         );
 
@@ -614,7 +629,11 @@ describe('useMailerPermissions', () => {
           expect(result.current.isLoading).toBe(false);
         });
 
-        expect(mockRemovePermission).toHaveBeenCalledWith(mockContractAddress);
+        expect(mockRemovePermission).toHaveBeenCalledWith(
+          mockConnectedWallet,
+          mockChainInfo,
+          mockContractAddress
+        );
         expect(mockGetWalletPermissions).toHaveBeenCalled();
         expect(transaction).toEqual(mockTransaction);
         expect(result.current.permissions).not.toContain(mockContractAddress);
@@ -626,7 +645,7 @@ describe('useMailerPermissions', () => {
           useMailerPermissions(mockEndpointUrl, false, {
             walletAddress: mockWalletAddress,
             chainId: mockChainId,
-            // No wallet or config provided
+            // No connectedWallet or chainInfo provided
           })
         );
 
@@ -634,7 +653,7 @@ describe('useMailerPermissions', () => {
           await act(async () => {
             await result.current.removePermission(mockContractAddress);
           });
-        }).rejects.toThrow('Mailer client not initialized');
+        }).rejects.toThrow('Wallet and chain info are required for permission operations');
       });
 
       it('should throw error when contract address is empty', async () => {
@@ -642,8 +661,8 @@ describe('useMailerPermissions', () => {
           useMailerPermissions(mockEndpointUrl, false, {
             walletAddress: mockWalletAddress,
             chainId: mockChainId,
-            wallet: mockWallet as any,
-            config: mockConfig as any,
+            connectedWallet: mockConnectedWallet as any,
+            chainInfo: mockChainInfo,
           })
         );
 
@@ -662,8 +681,8 @@ describe('useMailerPermissions', () => {
           useMailerPermissions(mockEndpointUrl, false, {
             walletAddress: mockWalletAddress,
             chainId: mockChainId,
-            wallet: mockWallet as any,
-            config: mockConfig as any,
+            connectedWallet: mockConnectedWallet as any,
+            chainInfo: mockChainInfo,
           })
         );
 
@@ -694,8 +713,8 @@ describe('useMailerPermissions', () => {
           useMailerPermissions(mockEndpointUrl, false, {
             walletAddress: mockWalletAddress,
             chainId: mockChainId,
-            wallet: mockWallet as any,
-            config: mockConfig as any,
+            connectedWallet: mockConnectedWallet as any,
+            chainInfo: mockChainInfo,
           })
         );
 

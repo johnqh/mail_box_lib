@@ -7,11 +7,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  type ChainConfig,
   type DelegationResult,
   OnchainMailerClient,
   type UnifiedTransaction,
-  type UnifiedWallet,
+  type Wallet,
 } from '@sudobility/contracts';
 import {
   IndexerUserAuth,
@@ -19,9 +18,12 @@ import {
   useIndexerGetDelegatedTo,
 } from '@sudobility/indexer_client';
 import { type IndexerDelegateData, Optional } from '@sudobility/types';
+import type { ChainInfo } from '@sudobility/configs';
 
 /**
  * Hook configuration options
+ *
+ * Note: Uses stateless OnchainMailerClient API
  */
 export interface UseMailerDelegationsOptions {
   /** Indexer API endpoint URL */
@@ -32,10 +34,10 @@ export interface UseMailerDelegationsOptions {
   walletAddress: Optional<string>;
   /** Indexer authentication credentials */
   auth: Optional<IndexerUserAuth>;
-  /** Wallet instance for smart contract operations */
-  wallet?: UnifiedWallet;
-  /** Chain configuration for smart contract operations */
-  config?: ChainConfig;
+  /** Connected wallet instance for smart contract operations */
+  connectedWallet?: Wallet;
+  /** Chain info for smart contract operations */
+  chainInfo?: ChainInfo;
   /** Whether to automatically fetch delegation data */
   autoFetch?: boolean;
 }
@@ -77,10 +79,13 @@ const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
  *
  * @example
  * ```tsx
+ * import { RpcHelpers } from '@sudobility/configs';
+ * import { Chain } from '@sudobility/types';
+ *
  * function DelegationManager() {
  *   const { walletAddress, auth } = useWalletStatus();
- *   const wallet = useWallet(); // Your wallet instance
- *   const config = useChainConfig(); // Your chain config
+ *   const connectedWallet = useWallet(); // Your wallet instance
+ *   const chainInfo = RpcHelpers.getChainInfo(Chain.ETH_MAINNET);
  *
  *   const {
  *     delegatedToMe,
@@ -94,8 +99,8 @@ const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
  *     endpointUrl: 'https://indexer.example.com',
  *     walletAddress,
  *     auth,
- *     wallet,
- *     config,
+ *     connectedWallet,
+ *     chainInfo,
  *     autoFetch: true
  *   });
  *
@@ -133,25 +138,15 @@ export function useMailerDelegations(
     devMode = false,
     walletAddress,
     auth,
-    wallet,
-    config,
+    connectedWallet,
+    chainInfo,
   } = options;
 
   const [error, setError] = useState<Optional<string>>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Initialize OnchainMailerClient if wallet and config are provided
-  const mailerClient = useMemo(() => {
-    if (wallet && config) {
-      try {
-        return new OnchainMailerClient(wallet, config);
-      } catch (err) {
-        console.error('Failed to initialize OnchainMailerClient:', err);
-        return null;
-      }
-    }
-    return null;
-  }, [wallet, config]);
+  // Create stateless OnchainMailerClient instance
+  const mailerClient = useMemo(() => new OnchainMailerClient(), []);
 
   // Fetch delegation data from indexer
   const delegatedToQuery = useIndexerGetDelegatedTo(
@@ -230,9 +225,9 @@ export function useMailerDelegations(
    */
   const delegate = useCallback(
     async (targetAddress: string): Promise<DelegationResult> => {
-      if (!mailerClient) {
+      if (!connectedWallet || !chainInfo) {
         throw new Error(
-          'Mailer client not initialized. Provide wallet and config.'
+          'Wallet and chain info are required for delegation operations'
         );
       }
 
@@ -244,7 +239,11 @@ export function useMailerDelegations(
       setError(null);
 
       try {
-        const result = await mailerClient.delegateTo(targetAddress);
+        const result = await mailerClient.delegateTo(
+          connectedWallet,
+          chainInfo,
+          targetAddress
+        );
 
         // Refresh indexer data after successful delegation
         await refresh();
@@ -259,16 +258,16 @@ export function useMailerDelegations(
         setIsProcessing(false);
       }
     },
-    [mailerClient, refresh]
+    [mailerClient, connectedWallet, chainInfo, refresh]
   );
 
   /**
    * Revoke delegation by delegating to 0x0 address
    */
   const revoke = useCallback(async (): Promise<DelegationResult> => {
-    if (!mailerClient) {
+    if (!connectedWallet || !chainInfo) {
       throw new Error(
-        'Mailer client not initialized. Provide wallet and config.'
+        'Wallet and chain info are required for delegation operations'
       );
     }
 
@@ -276,7 +275,11 @@ export function useMailerDelegations(
     setError(null);
 
     try {
-      const result = await mailerClient.delegateTo(ZERO_ADDRESS);
+      const result = await mailerClient.delegateTo(
+        connectedWallet,
+        chainInfo,
+        ZERO_ADDRESS
+      );
 
       // Refresh indexer data after successful revocation
       await refresh();
@@ -290,16 +293,16 @@ export function useMailerDelegations(
     } finally {
       setIsProcessing(false);
     }
-  }, [mailerClient, refresh]);
+  }, [mailerClient, connectedWallet, chainInfo, refresh]);
 
   /**
    * Reject a delegation from a target wallet address
    */
   const reject = useCallback(
     async (delegatorAddress: string): Promise<UnifiedTransaction> => {
-      if (!mailerClient) {
+      if (!connectedWallet || !chainInfo) {
         throw new Error(
-          'Mailer client not initialized. Provide wallet and config.'
+          'Wallet and chain info are required for delegation operations'
         );
       }
 
@@ -311,7 +314,11 @@ export function useMailerDelegations(
       setError(null);
 
       try {
-        const result = await mailerClient.rejectDelegation(delegatorAddress);
+        const result = await mailerClient.rejectDelegation(
+          connectedWallet,
+          chainInfo,
+          delegatorAddress
+        );
 
         // Refresh indexer data after successful rejection
         await refresh();
@@ -326,7 +333,7 @@ export function useMailerDelegations(
         setIsProcessing(false);
       }
     },
-    [mailerClient, refresh]
+    [mailerClient, connectedWallet, chainInfo, refresh]
   );
 
   /**

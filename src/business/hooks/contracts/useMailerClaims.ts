@@ -1,24 +1,26 @@
 /**
  * React hook for fetching mailer claims across multiple chains
  * Provides functionality to query and claim rewards from configured blockchain networks
+ *
+ * Note: Uses stateless OnchainMailerClient API
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  type ChainConfig,
   OnchainMailerClient,
   type UnifiedTransaction,
-  type UnifiedWallet,
+  type Wallet,
 } from '@sudobility/contracts';
 import { ChainType, Optional } from '@sudobility/types';
+import type { ChainInfo } from '@sudobility/configs';
 import type { ClaimableReward, ClaimRewardResult } from '../../../types';
 
 interface UseMailerClaimsConfig {
-  /** Unified wallet instance */
-  wallet: UnifiedWallet;
+  /** Connected wallet instance */
+  connectedWallet: Wallet;
 
-  /** Array of chain configurations to check for claimable rewards */
-  chainConfigs: ChainConfig[];
+  /** Array of chain info to check for claimable rewards */
+  chainInfos: ChainInfo[];
 
   /** Optional address to check claimable rewards for (defaults to connected wallet) */
   address?: string;
@@ -61,28 +63,20 @@ interface UseMailerClaimsReturn {
  *
  * @example
  * ```typescript
+ * import { RpcHelpers } from '@sudobility/configs';
+ * import { Chain } from '@sudobility/types';
+ *
+ * const ethChainInfo = RpcHelpers.getChainInfo(Chain.ETH_MAINNET);
+ * const solanaChainInfo = RpcHelpers.getChainInfo(Chain.SOLANA_MAINNET);
+ *
  * const { rewards, totalClaimable, claimRewards, fetchRewards } = useMailerClaims({
- *   wallet: myWallet,
- *   chainConfigs: [
- *     {
- *       evm: {
- *         rpc: 'https://eth-mainnet.alchemyapi.io/...',
- *         chainId: 1,
- *         contracts: { mailer: '0x...', usdc: '0x...' }
- *       }
- *     },
- *     {
- *       solana: {
- *         rpc: 'https://api.mainnet-beta.solana.com',
- *         usdcMint: 'EPjF...',
- *         programs: { mailer: '9FLk...' }
- *       }
- *     }
- *   ],
+ *   connectedWallet: myWallet,
+ *   chainInfos: [ethChainInfo, solanaChainInfo],
  *   autoFetch: true
  * });
  *
- * // Display total claimable
+ * // Display total claimable amount
+ * console.log(`Total claimable: ${totalClaimable}`);
  *
  * // Claim rewards on a specific chain
  * const result = await claimRewards(ChainType.EVM);
@@ -91,7 +85,10 @@ interface UseMailerClaimsReturn {
 export const useMailerClaims = (
   config: UseMailerClaimsConfig
 ): UseMailerClaimsReturn => {
-  const { wallet, chainConfigs, address, autoFetch = false } = config;
+  const { connectedWallet, chainInfos, address, autoFetch = false } = config;
+
+  // Create stateless client instance
+  const client = useMemo(() => new OnchainMailerClient(), []);
 
   const [rewards, setRewards] = useState<ClaimableReward[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -103,46 +100,10 @@ export const useMailerClaims = (
   }, []);
 
   /**
-   * Get chain type from config
-   */
-  const getChainTypeFromConfig = (chainConfig: ChainConfig): ChainType => {
-    if (chainConfig.evm) {
-      return ChainType.EVM;
-    } else if (chainConfig.solana) {
-      return ChainType.SOLANA;
-    }
-    throw new Error('Invalid chain configuration');
-  };
-
-  /**
-   * Get chain identifier from config
-   */
-  const getChainId = (chainConfig: ChainConfig): number | string => {
-    if (chainConfig.evm) {
-      return chainConfig.evm.chainId;
-    } else if (chainConfig.solana) {
-      return 'solana';
-    }
-    return 'unknown';
-  };
-
-  /**
-   * Get RPC endpoint from config
-   */
-  const getRpcEndpoint = (chainConfig: ChainConfig): string => {
-    if (chainConfig.evm) {
-      return chainConfig.evm.rpc;
-    } else if (chainConfig.solana) {
-      return chainConfig.solana.rpc;
-    }
-    return '';
-  };
-
-  /**
    * Fetch claimable rewards from all configured chains
    */
   const fetchRewards = useCallback(async () => {
-    if (!wallet || chainConfigs.length === 0) {
+    if (!connectedWallet || chainInfos.length === 0) {
       setError('Wallet or chain configurations not provided');
       return;
     }
@@ -151,36 +112,50 @@ export const useMailerClaims = (
     setError(null);
 
     try {
-      const rewardPromises = chainConfigs.map(async chainConfig => {
+      const rewardPromises = chainInfos.map(async chainInfo => {
         try {
-          const client = new OnchainMailerClient(wallet, chainConfig);
-          const claimableAmount = await client.getClaimableAmount(address);
+          // Determine recipient address - must be provided in config
+          if (!address) {
+            console.warn('No recipient address provided for chain:', chainInfo);
+            return null;
+          }
+
+          const claimableInfo = await client.getRecipientClaimable(
+            address,
+            chainInfo
+          );
+
+          if (!claimableInfo) {
+            return null;
+          }
 
           const reward: ClaimableReward = {
-            chainType: getChainTypeFromConfig(chainConfig),
-            claimableAmount,
-            chainId: getChainId(chainConfig),
-            rpcEndpoint: getRpcEndpoint(chainConfig),
+            chainType: chainInfo.chainType,
+            claimableAmount: claimableInfo.amount,
+            chainId: chainInfo.chainId,
+            rpcEndpoint: chainInfo.name, // Use chain name as identifier
           };
 
           return reward;
         } catch (err) {
           console.warn(
             `Failed to fetch claimable amount for chain:`,
-            chainConfig,
+            chainInfo,
             err
           );
           // Return zero claimable for failed chains
           return {
-            chainType: getChainTypeFromConfig(chainConfig),
+            chainType: chainInfo.chainType,
             claimableAmount: BigInt(0),
-            chainId: getChainId(chainConfig),
-            rpcEndpoint: getRpcEndpoint(chainConfig),
+            chainId: chainInfo.chainId,
+            rpcEndpoint: chainInfo.name,
           };
         }
       });
 
-      const fetchedRewards = await Promise.all(rewardPromises);
+      const fetchedRewards = (await Promise.all(rewardPromises)).filter(
+        (r): r is ClaimableReward => r !== null
+      );
       setRewards(fetchedRewards);
     } catch (err) {
       const errorMessage =
@@ -192,7 +167,7 @@ export const useMailerClaims = (
     } finally {
       setIsLoading(false);
     }
-  }, [wallet, chainConfigs, address]);
+  }, [client, connectedWallet, chainInfos, address]);
 
   // Alias for consistency with other hooks
   const refresh = fetchRewards;
@@ -202,18 +177,14 @@ export const useMailerClaims = (
    */
   const claimRewards = useCallback(
     async (chainType: ChainType): Promise<ClaimRewardResult> => {
-      if (!wallet) {
+      if (!connectedWallet) {
         throw new Error('Wallet not provided');
       }
 
-      // Find the chain config for the specified chain type
-      const chainConfig = chainConfigs.find(config => {
-        if (chainType === ChainType.EVM && config.evm) return true;
-        if (chainType === ChainType.SOLANA && config.solana) return true;
-        return false;
-      });
+      // Find the chain info for the specified chain type
+      const chainInfo = chainInfos.find(info => info.chainType === chainType);
 
-      if (!chainConfig) {
+      if (!chainInfo) {
         throw new Error(`No configuration found for chain type: ${chainType}`);
       }
 
@@ -229,8 +200,10 @@ export const useMailerClaims = (
       setError(null);
 
       try {
-        const client = new OnchainMailerClient(wallet, chainConfig);
-        const transaction: UnifiedTransaction = await client.claimRevenue();
+        const transaction: UnifiedTransaction = await client.claimRevenue(
+          connectedWallet,
+          chainInfo
+        );
 
         const result: ClaimRewardResult = {
           chainType,
@@ -252,15 +225,15 @@ export const useMailerClaims = (
         setIsClaiming(false);
       }
     },
-    [wallet, chainConfigs, rewards, refresh]
+    [client, connectedWallet, chainInfos, rewards, refresh]
   );
 
   // Auto-fetch rewards on mount if configured
   useEffect(() => {
-    if (autoFetch && wallet && chainConfigs.length > 0) {
+    if (autoFetch && connectedWallet && chainInfos.length > 0) {
       fetchRewards();
     }
-  }, [autoFetch, wallet, chainConfigs.length, fetchRewards]);
+  }, [autoFetch, connectedWallet, chainInfos.length, fetchRewards]);
 
   // Calculate total claimable across all chains
   const totalClaimable = rewards.reduce(

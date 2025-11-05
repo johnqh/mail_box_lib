@@ -14,42 +14,40 @@ vi.mock('@sudobility/contracts', () => ({
 }));
 
 describe('useMailerClaims', () => {
-  const mockWallet = { address: '0x742d35Cc6e3c05652aA6E10f35F74c29C5881398' };
-  const mockChainConfigs = [
+  const mockWallet = { walletClient: { address: '0x742d35Cc6e3c05652aA6E10f35F74c29C5881398' } };
+  const mockAddress = '0x742d35Cc6e3c05652aA6E10f35F74c29C5881398';
+  const mockChainInfos = [
     {
-      evm: {
-        rpc: 'https://eth-mainnet.example.com',
-        chainId: 1,
-        contracts: {
-          mailer: '0x123...',
-          usdc: '0x456...',
-        },
-      },
+      chainType: ChainType.EVM,
+      chainId: 1,
+      name: 'Ethereum Mainnet',
+      isDev: false,
+      usdcAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+      mailerAddress: '0x123...',
     },
     {
-      solana: {
-        rpc: 'https://api.mainnet-beta.solana.com',
-        usdcMint: 'EPjF...',
-        programs: {
-          mailer: '9FLk...',
-        },
-      },
+      chainType: ChainType.SOLANA,
+      chainId: -1,
+      name: 'Solana Mainnet',
+      isDev: false,
+      usdcAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+      mailerAddress: '9FLk...',
     },
   ];
 
-  let mockGetClaimableAmount: ReturnType<typeof vi.fn>;
+  let mockGetRecipientClaimable: ReturnType<typeof vi.fn>;
   let mockClaimRevenue: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockGetClaimableAmount = vi.fn();
+    mockGetRecipientClaimable = vi.fn();
     mockClaimRevenue = vi.fn();
 
-    // Mock OnchainMailerClient constructor
+    // Mock OnchainMailerClient constructor (stateless - no parameters)
     (OnchainMailerClient as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       function (this: any) {
-        this.getClaimableAmount = mockGetClaimableAmount;
+        this.getRecipientClaimable = mockGetRecipientClaimable;
         this.claimRevenue = mockClaimRevenue;
       } as any
     );
@@ -59,8 +57,9 @@ describe('useMailerClaims', () => {
     it('should start with empty rewards and no loading', () => {
       const { result } = renderHook(() =>
         useMailerClaims({
-          wallet: mockWallet as any,
-          chainConfigs: mockChainConfigs as any,
+          connectedWallet: mockWallet as any,
+          chainInfos: mockChainInfos as any,
+          address: mockAddress,
         })
       );
 
@@ -76,8 +75,9 @@ describe('useMailerClaims', () => {
     it('should be an alias to fetchRewards', () => {
       const { result } = renderHook(() =>
         useMailerClaims({
-          wallet: mockWallet as any,
-          chainConfigs: mockChainConfigs as any,
+          connectedWallet: mockWallet as any,
+          chainInfos: mockChainInfos as any,
+          address: mockAddress,
         })
       );
 
@@ -88,14 +88,15 @@ describe('useMailerClaims', () => {
 
   describe('Fetching Rewards', () => {
     it('should fetch claimable rewards from all chains', async () => {
-      mockGetClaimableAmount
-        .mockResolvedValueOnce(BigInt(1000000)) // EVM chain
-        .mockResolvedValueOnce(BigInt(2000000)); // Solana chain
+      mockGetRecipientClaimable
+        .mockResolvedValueOnce({ amount: BigInt(1000000), expiresAt: BigInt(0), isExpired: false }) // EVM chain
+        .mockResolvedValueOnce({ amount: BigInt(2000000), expiresAt: BigInt(0), isExpired: false }); // Solana chain
 
       const { result } = renderHook(() =>
         useMailerClaims({
-          wallet: mockWallet as any,
-          chainConfigs: mockChainConfigs as any,
+          connectedWallet: mockWallet as any,
+          chainInfos: mockChainInfos as any,
+          address: mockAddress,
         })
       );
 
@@ -113,18 +114,19 @@ describe('useMailerClaims', () => {
       expect(result.current.rewards[1].chainType).toBe(ChainType.SOLANA);
       expect(result.current.rewards[1].claimableAmount).toBe(BigInt(2000000));
       expect(result.current.totalClaimable).toBe(BigInt(3000000));
-      expect(mockGetClaimableAmount).toHaveBeenCalledTimes(2);
+      expect(mockGetRecipientClaimable).toHaveBeenCalledTimes(2);
     });
 
     it('should handle errors from individual chains gracefully', async () => {
-      mockGetClaimableAmount
+      mockGetRecipientClaimable
         .mockRejectedValueOnce(new Error('EVM fetch failed'))
-        .mockResolvedValueOnce(BigInt(2000000));
+        .mockResolvedValueOnce({ amount: BigInt(2000000), expiresAt: BigInt(0), isExpired: false });
 
       const { result } = renderHook(() =>
         useMailerClaims({
-          wallet: mockWallet as any,
-          chainConfigs: mockChainConfigs as any,
+          connectedWallet: mockWallet as any,
+          chainInfos: mockChainInfos as any,
+          address: mockAddress,
         })
       );
 
@@ -146,8 +148,9 @@ describe('useMailerClaims', () => {
     it('should set error when wallet is not provided', async () => {
       const { result } = renderHook(() =>
         useMailerClaims({
-          wallet: null as any,
-          chainConfigs: mockChainConfigs as any,
+          connectedWallet: null as any,
+          chainInfos: mockChainInfos as any,
+          address: mockAddress,
         })
       );
 
@@ -163,8 +166,9 @@ describe('useMailerClaims', () => {
     it('should set error when chain configs are empty', async () => {
       const { result } = renderHook(() =>
         useMailerClaims({
-          wallet: mockWallet as any,
-          chainConfigs: [],
+          connectedWallet: mockWallet as any,
+          chainInfos: [],
+          address: mockAddress,
         })
       );
 
@@ -179,13 +183,13 @@ describe('useMailerClaims', () => {
   });
 
   describe('Claiming Rewards', () => {
-    const mockTransaction = { hash: '0xabc123' };
+    const mockTransaction = { hash: '0xabc123', chainType: ChainType.EVM };
 
     beforeEach(() => {
       // Setup some claimable rewards
-      mockGetClaimableAmount
-        .mockResolvedValueOnce(BigInt(1000000))
-        .mockResolvedValueOnce(BigInt(2000000));
+      mockGetRecipientClaimable
+        .mockResolvedValueOnce({ amount: BigInt(1000000), expiresAt: BigInt(0), isExpired: false })
+        .mockResolvedValueOnce({ amount: BigInt(2000000), expiresAt: BigInt(0), isExpired: false });
     });
 
     it('should claim rewards and automatically refresh', async () => {
@@ -193,8 +197,9 @@ describe('useMailerClaims', () => {
 
       const { result } = renderHook(() =>
         useMailerClaims({
-          wallet: mockWallet as any,
-          chainConfigs: mockChainConfigs as any,
+          connectedWallet: mockWallet as any,
+          chainInfos: mockChainInfos as any,
+          address: mockAddress,
         })
       );
 
@@ -208,10 +213,10 @@ describe('useMailerClaims', () => {
       });
 
       // Reset mock to track refresh call
-      mockGetClaimableAmount.mockClear();
-      mockGetClaimableAmount
-        .mockResolvedValueOnce(BigInt(0)) // After claiming, balance is 0
-        .mockResolvedValueOnce(BigInt(2000000));
+      mockGetRecipientClaimable.mockClear();
+      mockGetRecipientClaimable
+        .mockResolvedValueOnce({ amount: BigInt(0), expiresAt: BigInt(0), isExpired: false }) // After claiming, balance is 0
+        .mockResolvedValueOnce({ amount: BigInt(2000000), expiresAt: BigInt(0), isExpired: false });
 
       // Now claim rewards for EVM chain
       let claimResult;
@@ -229,8 +234,8 @@ describe('useMailerClaims', () => {
       expect(claimResult.transactionHash).toBe(mockTransaction.hash);
       expect(claimResult.chainType).toBe(ChainType.EVM);
 
-      // Verify refresh was called (getClaimableAmount should be called again)
-      expect(mockGetClaimableAmount).toHaveBeenCalledTimes(2);
+      // Verify refresh was called (getRecipientClaimable should be called again)
+      expect(mockGetRecipientClaimable).toHaveBeenCalledTimes(2);
 
       // Verify rewards were updated
       expect(result.current.rewards[0].claimableAmount).toBe(BigInt(0));
@@ -239,8 +244,9 @@ describe('useMailerClaims', () => {
     it('should throw error when trying to claim with no wallet', async () => {
       const { result } = renderHook(() =>
         useMailerClaims({
-          wallet: null as any,
-          chainConfigs: mockChainConfigs as any,
+          connectedWallet: null as any,
+          chainInfos: mockChainInfos as any,
+          address: mockAddress,
         })
       );
 
@@ -253,24 +259,23 @@ describe('useMailerClaims', () => {
 
     it('should throw error when chain config not found', async () => {
       // Use a config that only has Solana, not EVM
-      const solannaOnlyConfig = [
+      const solanaOnlyConfig = [
         {
-          solana: {
-            rpc: 'https://api.mainnet-beta.solana.com',
-            usdcMint: 'EPjF...',
-            programs: {
-              mailer: '9FLk...',
-            },
-          },
+          chainType: ChainType.SOLANA,
+          chainId: -1,
+          name: 'Solana Mainnet',
+          isDev: false,
+          usdcAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
         },
       ];
 
-      mockGetClaimableAmount.mockResolvedValueOnce(BigInt(1000000));
+      mockGetRecipientClaimable.mockResolvedValueOnce({ amount: BigInt(1000000), expiresAt: BigInt(0), isExpired: false });
 
       const { result } = renderHook(() =>
         useMailerClaims({
-          wallet: mockWallet as any,
-          chainConfigs: solannaOnlyConfig as any,
+          connectedWallet: mockWallet as any,
+          chainInfos: solanaOnlyConfig as any,
+          address: mockAddress,
         })
       );
 
@@ -292,12 +297,12 @@ describe('useMailerClaims', () => {
 
     it('should throw error when no claimable rewards found', async () => {
       // Reset ALL mocks completely and set up zero amounts
-      mockGetClaimableAmount.mockReset();
+      mockGetRecipientClaimable.mockReset();
       mockClaimRevenue.mockReset();
 
-      mockGetClaimableAmount
-        .mockResolvedValueOnce(BigInt(0))
-        .mockResolvedValueOnce(BigInt(0));
+      mockGetRecipientClaimable
+        .mockResolvedValueOnce({ amount: BigInt(0), expiresAt: BigInt(0), isExpired: false })
+        .mockResolvedValueOnce({ amount: BigInt(0), expiresAt: BigInt(0), isExpired: false });
 
       // Mock claimRevenue to throw if somehow called (it shouldn't be)
       mockClaimRevenue.mockRejectedValue(
@@ -306,8 +311,9 @@ describe('useMailerClaims', () => {
 
       const { result } = renderHook(() =>
         useMailerClaims({
-          wallet: mockWallet as any,
-          chainConfigs: mockChainConfigs as any,
+          connectedWallet: mockWallet as any,
+          chainInfos: mockChainInfos as any,
+          address: mockAddress,
         })
       );
 
@@ -342,8 +348,9 @@ describe('useMailerClaims', () => {
 
       const { result } = renderHook(() =>
         useMailerClaims({
-          wallet: mockWallet as any,
-          chainConfigs: mockChainConfigs as any,
+          connectedWallet: mockWallet as any,
+          chainInfos: mockChainInfos as any,
+          address: mockAddress,
         })
       );
 
@@ -374,14 +381,15 @@ describe('useMailerClaims', () => {
 
   describe('Auto-fetch', () => {
     it('should auto-fetch when enabled', async () => {
-      mockGetClaimableAmount
-        .mockResolvedValueOnce(BigInt(1000000))
-        .mockResolvedValueOnce(BigInt(2000000));
+      mockGetRecipientClaimable
+        .mockResolvedValueOnce({ amount: BigInt(1000000), expiresAt: BigInt(0), isExpired: false })
+        .mockResolvedValueOnce({ amount: BigInt(2000000), expiresAt: BigInt(0), isExpired: false });
 
       const { result } = renderHook(() =>
         useMailerClaims({
-          wallet: mockWallet as any,
-          chainConfigs: mockChainConfigs as any,
+          connectedWallet: mockWallet as any,
+          chainInfos: mockChainInfos as any,
+          address: mockAddress,
           autoFetch: true,
         })
       );
@@ -391,14 +399,15 @@ describe('useMailerClaims', () => {
       });
 
       expect(result.current.rewards).toHaveLength(2);
-      expect(mockGetClaimableAmount).toHaveBeenCalledTimes(2);
+      expect(mockGetRecipientClaimable).toHaveBeenCalledTimes(2);
     });
 
     it('should not auto-fetch when disabled', async () => {
       const { result } = renderHook(() =>
         useMailerClaims({
-          wallet: mockWallet as any,
-          chainConfigs: mockChainConfigs as any,
+          connectedWallet: mockWallet as any,
+          chainInfos: mockChainInfos as any,
+          address: mockAddress,
           autoFetch: false,
         })
       );
@@ -407,7 +416,7 @@ describe('useMailerClaims', () => {
       await new Promise(resolve => setTimeout(resolve, 100));
 
       expect(result.current.rewards).toEqual([]);
-      expect(mockGetClaimableAmount).not.toHaveBeenCalled();
+      expect(mockGetRecipientClaimable).not.toHaveBeenCalled();
     });
   });
 
@@ -415,8 +424,9 @@ describe('useMailerClaims', () => {
     it('should clear error when clearError is called', async () => {
       const { result } = renderHook(() =>
         useMailerClaims({
-          wallet: null as any,
-          chainConfigs: mockChainConfigs as any,
+          connectedWallet: null as any,
+          chainInfos: mockChainInfos as any,
+          address: mockAddress,
         })
       );
 
@@ -438,14 +448,15 @@ describe('useMailerClaims', () => {
 
   describe('Total Claimable', () => {
     it('should calculate total claimable across all chains', async () => {
-      mockGetClaimableAmount
-        .mockResolvedValueOnce(BigInt(1500000))
-        .mockResolvedValueOnce(BigInt(2500000));
+      mockGetRecipientClaimable
+        .mockResolvedValueOnce({ amount: BigInt(1500000), expiresAt: BigInt(0), isExpired: false })
+        .mockResolvedValueOnce({ amount: BigInt(2500000), expiresAt: BigInt(0), isExpired: false });
 
       const { result } = renderHook(() =>
         useMailerClaims({
-          wallet: mockWallet as any,
-          chainConfigs: mockChainConfigs as any,
+          connectedWallet: mockWallet as any,
+          chainInfos: mockChainInfos as any,
+          address: mockAddress,
         })
       );
 

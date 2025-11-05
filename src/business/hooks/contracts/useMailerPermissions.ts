@@ -10,11 +10,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Optional } from '@sudobility/types';
 import { IndexerClient } from '@sudobility/indexer_client';
 import {
-  type ChainConfig,
   OnchainMailerClient,
   type UnifiedTransaction,
-  type UnifiedWallet,
+  type Wallet,
 } from '@sudobility/contracts';
+import type { ChainInfo } from '@sudobility/configs';
 
 /**
  * Wallet permissions response data structure
@@ -38,6 +38,8 @@ export interface WalletPermissionsResponse {
 
 /**
  * Hook configuration options
+ *
+ * Note: Uses stateless OnchainMailerClient API
  */
 export interface UseMailerPermissionsOptions {
   /** Wallet address to fetch permissions for */
@@ -48,10 +50,10 @@ export interface UseMailerPermissionsOptions {
   testNet?: boolean;
   /** Whether to automatically fetch on mount */
   autoFetch?: boolean;
-  /** Wallet instance for smart contract operations (optional) */
-  wallet?: UnifiedWallet;
-  /** Chain configuration for smart contract operations (optional) */
-  config?: ChainConfig;
+  /** Connected wallet instance for smart contract operations (optional) */
+  connectedWallet?: Wallet;
+  /** Chain info for smart contract operations (optional) */
+  chainInfo?: ChainInfo;
 }
 
 /**
@@ -113,9 +115,12 @@ export interface UseMailerPermissionsReturn {
  *
  * @example With Permission Management
  * ```tsx
+ * import { RpcHelpers } from '@sudobility/configs';
+ * import { Chain } from '@sudobility/types';
+ *
  * function PermissionManager() {
- *   const wallet = useWallet(); // Your wallet instance
- *   const config = useChainConfig(); // Your chain config
+ *   const connectedWallet = useWallet(); // Your wallet instance
+ *   const chainInfo = RpcHelpers.getChainInfo(Chain.ETH_MAINNET);
  *
  *   const {
  *     permissions,
@@ -130,8 +135,8 @@ export interface UseMailerPermissionsReturn {
  *     {
  *       walletAddress: '0x123...',
  *       chainId: 1,
- *       wallet,
- *       config,
+ *       connectedWallet,
+ *       chainInfo,
  *       autoFetch: true
  *     }
  *   );
@@ -179,8 +184,8 @@ export function useMailerPermissions(
     chainId,
     testNet = false,
     autoFetch = false,
-    wallet,
-    config,
+    connectedWallet,
+    chainInfo,
   } = options;
 
   const [permissions, setPermissions] = useState<string[]>([]);
@@ -188,18 +193,8 @@ export function useMailerPermissions(
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<Optional<string>>(null);
 
-  // Initialize OnchainMailerClient if wallet and config are provided
-  const mailerClient = useMemo(() => {
-    if (wallet && config) {
-      try {
-        return new OnchainMailerClient(wallet, config);
-      } catch (err) {
-        console.error('Failed to initialize OnchainMailerClient:', err);
-        return null;
-      }
-    }
-    return null;
-  }, [wallet, config]);
+  // Create stateless OnchainMailerClient instance
+  const mailerClient = useMemo(() => new OnchainMailerClient(), []);
 
   /**
    * Fetch wallet permissions from the indexer
@@ -253,9 +248,9 @@ export function useMailerPermissions(
    */
   const addPermission = useCallback(
     async (contractAddress: string): Promise<UnifiedTransaction> => {
-      if (!mailerClient) {
+      if (!connectedWallet || !chainInfo) {
         throw new Error(
-          'Mailer client not initialized. Provide wallet and config.'
+          'Wallet and chain info are required for permission operations'
         );
       }
 
@@ -267,7 +262,11 @@ export function useMailerPermissions(
       setError(null);
 
       try {
-        const result = await mailerClient.setPermission(contractAddress);
+        const result = await mailerClient.setPermission(
+          connectedWallet,
+          chainInfo,
+          contractAddress
+        );
 
         // Refresh permissions after successful addition
         await fetchPermissions();
@@ -282,7 +281,7 @@ export function useMailerPermissions(
         setIsProcessing(false);
       }
     },
-    [mailerClient, fetchPermissions]
+    [mailerClient, connectedWallet, chainInfo, fetchPermissions]
   );
 
   /**
@@ -290,9 +289,9 @@ export function useMailerPermissions(
    */
   const removePermission = useCallback(
     async (contractAddress: string): Promise<UnifiedTransaction> => {
-      if (!mailerClient) {
+      if (!connectedWallet || !chainInfo) {
         throw new Error(
-          'Mailer client not initialized. Provide wallet and config.'
+          'Wallet and chain info are required for permission operations'
         );
       }
 
@@ -304,7 +303,11 @@ export function useMailerPermissions(
       setError(null);
 
       try {
-        const result = await mailerClient.removePermission(contractAddress);
+        const result = await mailerClient.removePermission(
+          connectedWallet,
+          chainInfo,
+          contractAddress
+        );
 
         // Refresh permissions after successful removal
         await fetchPermissions();
@@ -319,7 +322,7 @@ export function useMailerPermissions(
         setIsProcessing(false);
       }
     },
-    [mailerClient, fetchPermissions]
+    [mailerClient, connectedWallet, chainInfo, fetchPermissions]
   );
 
   /**
