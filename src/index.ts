@@ -28,6 +28,7 @@ export {
   useKYC,
   useMailAccountSettings,
   useMailboxesAndSettings,
+  useMailerClaims,
   useMailerContractApproval,
   useMailTemplates,
   useMailWebhooks,
