@@ -31,11 +31,12 @@ export {
   useMailerContractApproval,
   useMailTemplates,
   useMailWebhooks,
+  useMailerDelegations,
   useMessage,
   useMessages,
+  useMailerPermissions,
   usePoints,
   useWalletPoints,
-  useRecipientClaims,
   useReferralCode,
   useSelectedAccount,
   useWalletAccounts,
@@ -111,9 +112,6 @@ export {
   ENSName,
   resolveNameOrAddress,
   SNSName,
-
-  // Smart contract utilities
-  createMailServiceContract,
 
   // Format utilities
   formatFileSize,

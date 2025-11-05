@@ -1,5 +1,5 @@
 /**
- * React hook for fetching claimable rewards across multiple chains
+ * React hook for fetching mailer claims across multiple chains
  * Provides functionality to query and claim rewards from configured blockchain networks
  */
 
@@ -13,7 +13,7 @@ import {
 import { ChainType, Optional } from '@sudobility/types';
 import type { ClaimableReward, ClaimRewardResult } from '../../../types';
 
-interface UseClaimableRewardsConfig {
+interface UseMailerClaimsConfig {
   /** Unified wallet instance */
   wallet: UnifiedWallet;
 
@@ -27,7 +27,7 @@ interface UseClaimableRewardsConfig {
   autoFetch?: boolean;
 }
 
-interface UseClaimableRewardsReturn {
+interface UseMailerClaimsReturn {
   /** Array of claimable rewards across all configured chains */
   rewards: ClaimableReward[];
 
@@ -46,6 +46,9 @@ interface UseClaimableRewardsReturn {
   /** Manually fetch claimable rewards */
   fetchRewards: () => Promise<void>;
 
+  /** Refresh claimable rewards (alias for fetchRewards) */
+  refresh: () => Promise<void>;
+
   /** Claim rewards on a specific chain */
   claimRewards: (chainType: ChainType) => Promise<ClaimRewardResult>;
 
@@ -54,11 +57,11 @@ interface UseClaimableRewardsReturn {
 }
 
 /**
- * Hook for managing claimable rewards across multiple blockchain networks
+ * Hook for managing mailer claims across multiple blockchain networks
  *
  * @example
  * ```typescript
- * const { rewards, totalClaimable, claimRewards, fetchRewards } = useClaimableRewards({
+ * const { rewards, totalClaimable, claimRewards, fetchRewards } = useMailerClaims({
  *   wallet: myWallet,
  *   chainConfigs: [
  *     {
@@ -85,9 +88,9 @@ interface UseClaimableRewardsReturn {
  * const result = await claimRewards(ChainType.EVM);
  * ```
  */
-export const useClaimableRewards = (
-  config: UseClaimableRewardsConfig
-): UseClaimableRewardsReturn => {
+export const useMailerClaims = (
+  config: UseMailerClaimsConfig
+): UseMailerClaimsReturn => {
   const { wallet, chainConfigs, address, autoFetch = false } = config;
 
   const [rewards, setRewards] = useState<ClaimableReward[]>([]);
@@ -191,6 +194,9 @@ export const useClaimableRewards = (
     }
   }, [wallet, chainConfigs, address]);
 
+  // Alias for consistency with other hooks
+  const refresh = fetchRewards;
+
   /**
    * Claim rewards on a specific chain
    */
@@ -234,7 +240,7 @@ export const useClaimableRewards = (
         };
 
         // Refresh rewards after claiming
-        await fetchRewards();
+        await refresh();
 
         return result;
       } catch (err) {
@@ -246,7 +252,7 @@ export const useClaimableRewards = (
         setIsClaiming(false);
       }
     },
-    [wallet, chainConfigs, rewards, fetchRewards]
+    [wallet, chainConfigs, rewards, refresh]
   );
 
   // Auto-fetch rewards on mount if configured
@@ -269,9 +275,10 @@ export const useClaimableRewards = (
     isClaiming,
     error,
     fetchRewards,
+    refresh,
     claimRewards,
     clearError,
   };
 };
 
-export type { UseClaimableRewardsConfig, UseClaimableRewardsReturn };
+export type { UseMailerClaimsConfig, UseMailerClaimsReturn };

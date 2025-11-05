@@ -12,14 +12,17 @@ export * from './useWalletDetector';
 // Contract configuration management
 export * from './useContractConfig';
 
-// Claimable rewards management
-export * from './useClaimableRewards';
-
-// Recipient revenue claims (modern RpcHelpers-based)
-export * from './useRecipientClaims';
+// Mailer claims management
+export * from './useMailerClaims';
 
 // USDC approval management for Mailer contracts
 export * from './useMailerContractApproval';
+
+// Mailer permissions management
+export * from './useMailerPermissions';
+
+// Mailer delegations management
+export * from './useMailerDelegations';
 
 // Re-export types from the contracts package for convenience
 export type {

@@ -96,7 +96,7 @@ import {
   OnchainMailerClient,
   WalletDetector,
   useContractConfig,
-  useClaimableRewards
+  useMailerClaims
 } from '@sudobility/lib';
 
 // Contract interaction
@@ -104,7 +104,7 @@ const { config } = useContractConfig(chainId);
 const mailer = new OnchainMailerClient(config);
 
 // Reward claiming
-const { rewards, claim } = useClaimableRewards({
+const { rewards, claim } = useMailerClaims({
   indexerUrl: 'https://indexer.example.com',
   contracts: contractConfig,
 });
