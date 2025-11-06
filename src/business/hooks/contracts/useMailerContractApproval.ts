@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { RpcHelpers } from '@sudobility/configs';
+import { type ApiKeys, RpcHelpers } from '@sudobility/configs';
 import { Chain, Optional } from '@sudobility/types';
 import {
   createPublicClient,
@@ -74,15 +74,6 @@ const ERC20_ABI = [
     type: 'function',
   },
 ] as const;
-
-export interface ApiKeys {
-  /** Alchemy API key for RPC access */
-  alchemyApiKey?: string;
-  /** Ankr API key for RPC access */
-  ankrApiKey?: string;
-  /** Metamask/Infura API key for RPC access */
-  metamaskApiKey?: string;
-}
 
 export interface UseMailerContractApprovalReturn {
   /** Current approved USDC amount (in USDC units, not micro-units) */
