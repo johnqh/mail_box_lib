@@ -41,6 +41,7 @@ export {
   useWalletPoints,
   useReferralCode,
   useSelectedAccount,
+  useSelectedChain,
   useWalletAccounts,
   useWalletDetector,
   useWalletStatus,
