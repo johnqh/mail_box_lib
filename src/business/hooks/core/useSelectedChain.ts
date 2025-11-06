@@ -62,30 +62,12 @@ export function useSelectedChain({
   chainId,
   isDev,
 }: UseSelectedChainParams): UseSelectedChainReturn {
-  // Create mapping from chainId to Chain enum (only once)
-  const chainIdToChainMap = useMemo(() => {
-    const map = new Map<number, Chain>();
-    Object.values(Chain).forEach(chain => {
-      try {
-        const id = RpcHelpers.getChainId(chain);
-        map.set(id, chain);
-      } catch {
-        // Skip chains that don't have a chainId
-      }
-    });
-    return map;
-  }, []);
-
-  // Get list of visible chains with Chain enum augmented
+  // Get list of visible chains with Chain enum
   const chains = useMemo<ChainInfoWithEnum[]>(() => {
     const visibleChains = RpcHelpers.getVisibleChains(undefined, isDev);
-    return visibleChains
-      .map(info => {
-        const chain = chainIdToChainMap.get(info.chainId);
-        return chain ? { ...info, chain } : null;
-      })
-      .filter((c): c is ChainInfoWithEnum => c !== null);
-  }, [isDev, chainIdToChainMap]);
+    // getVisibleChains already returns objects with chain property
+    return visibleChains as ChainInfoWithEnum[];
+  }, [isDev]);
 
   // Track if this is the first render (for chainId initialization)
   const [isFirstRender, setIsFirstRender] = useState(true);
@@ -110,17 +92,25 @@ export function useSelectedChain({
 
   // Helper to get default chain (non-testnet first, then first available)
   const getDefaultChain = useCallback((): Chain => {
-    // Try to find first non-testnet chain, then first available chain
-    const defaultChainInfo = chains.find(c => !c.isTestNet) ?? chains[0];
-
-    if (defaultChainInfo) {
-      return defaultChainInfo.chain;
+    // Try to find first non-testnet chain
+    const nonTestnetChain = chains.find(c => !c.isTestNet);
+    if (nonTestnetChain) {
+      return nonTestnetChain.chain;
     }
 
-    // Final fallback if no chains available
-    console.warn('No valid chains available, falling back to ETH_MAINNET');
-    return Chain.ETH_MAINNET;
-  }, [chains]);
+    // Fall back to first available chain (even if testnet)
+    const firstChain = chains[0];
+    if (firstChain) {
+      return firstChain.chain;
+    }
+
+    // Final fallback if no chains available - this should never happen
+    const fallback = isDev ? Chain.ETH_SEPOLIA : Chain.ETH_MAINNET;
+    console.warn(
+      `No valid chains available, falling back to ${fallback}. This indicates a configuration issue.`
+    );
+    return fallback;
+  }, [chains, isDev]);
 
   // Use local storage to persist selection
   const [storedChain, setStoredChain] = useLocalStorage<Optional<Chain>>(
@@ -157,7 +147,7 @@ export function useSelectedChain({
     getDefaultChain,
   ]);
 
-  // Mark first render as complete after initial chain determination
+  // Persist selected chain on first render
   useEffect(() => {
     if (isFirstRender) {
       setIsFirstRender(false);
@@ -166,7 +156,9 @@ export function useSelectedChain({
         setStoredChain(selectedChain);
       }
     }
-  }, [isFirstRender, selectedChain, storedChain, setStoredChain]);
+    // Only respond to first render flag changes, not selectedChain changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFirstRender, storedChain, setStoredChain]);
 
   // Function to update selected chain (with validation)
   const setSelectedChain = useCallback(
@@ -174,10 +166,10 @@ export function useSelectedChain({
       // Only allow setting chains that exist in the current chains list
       const isValidChain = chains.some(c => c.chain === newChain);
       if (!isValidChain) {
-        console.warn(
-          `Attempted to set invalid chain: ${newChain}. Chain not found in visible chains list.`
+        const availableChains = chains.map(c => c.chain).join(', ');
+        throw new Error(
+          `Invalid chain selection: ${newChain}. Must be one of: ${availableChains}`
         );
-        return;
       }
 
       setStoredChain(newChain);

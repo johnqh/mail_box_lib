@@ -159,29 +159,20 @@ export function useSelectedAccount(
       lastAuthenticatedUsername === normalizedUsername &&
       !hasPendingReferral
     ) {
-      console.log(
-        `✅ [useSelectedAccount] Skipping duplicate authentication for: ${normalizedUsername}`
-      );
       return;
     }
 
-    // If there's a pending referral code for an already-authenticated user, log it
+    // If there's a pending referral code for an already-authenticated user
     if (
       lastAuthenticatedUsername === normalizedUsername &&
       hasPendingReferral
     ) {
-      console.log(
-        `🎁 [useSelectedAccount] Re-authenticating ${normalizedUsername} to include referral code`
-      );
       // Clear the last authenticated username so authentication proceeds
       lastAuthenticatedUsername = null;
     }
 
     // Skip if another component instance is currently authenticating this username
     if (authenticationInProgress === normalizedUsername) {
-      console.log(
-        `⏳ [useSelectedAccount] Authentication already in progress for: ${normalizedUsername}`
-      );
       return;
     }
 
@@ -193,18 +184,6 @@ export function useSelectedAccount(
       try {
         // Get referral code if available (consume removes it from storage)
         const referralCode = ReferralConsumptionHelper.consume();
-        console.log(
-          `🔍 [useSelectedAccount] Referral code from ReferralConsumptionHelper.consume():`,
-          referralCode
-        );
-
-        console.log(
-          `🔐 [useSelectedAccount] Authenticating with username: ${normalizedUsername}${
-            referralCode
-              ? ` [with referral code: ${referralCode}]`
-              : ' [no referral code]'
-          }`
-        );
 
         const response = await authenticate({
           username: selectedAccount.username,
@@ -229,9 +208,6 @@ export function useSelectedAccount(
 
             // Clean URL parameter if referral code was consumed
             if (referralCode) {
-              console.log(
-                '🧹 [useSelectedAccount] Cleaning referral code from URL after successful authentication'
-              );
               try {
                 const urlParams = new URLSearchParams(window.location.search);
                 urlParams.delete('referral');
@@ -240,12 +216,8 @@ export function useSelectedAccount(
                   ? `${window.location.pathname}?${newSearch}`
                   : window.location.pathname;
                 window.history.replaceState({}, '', newUrl);
-                console.log('✅ [useSelectedAccount] URL cleaned:', newUrl);
               } catch (error) {
-                console.warn(
-                  '⚠️ [useSelectedAccount] Failed to clean URL:',
-                  error
-                );
+                console.warn('Failed to clean referral URL parameter:', error);
               }
             }
           } else {

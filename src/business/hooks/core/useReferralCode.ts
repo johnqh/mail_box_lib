@@ -74,9 +74,6 @@ export function useReferralCode(
 
     const fetch = async () => {
       try {
-        console.log(
-          `🎫 [useReferralCode] Fetching referral code for ${walletAddress}`
-        );
         await fetchReferralCode(walletAddress, {
           signature: indexerAuth.signature,
           message: indexerAuth.message,

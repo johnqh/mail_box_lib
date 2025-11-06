@@ -95,30 +95,21 @@ export function NetworkProvider({
 }: NetworkProviderProps): React.ReactElement {
   // Initialize with current network status
   const [isOnline, setIsOnline] = useState<boolean>(() => {
-    const initialStatus = networkService.isOnline();
-    console.log('[NetworkProvider] Initial network status:', initialStatus);
-    return initialStatus;
+    return networkService.isOnline();
   });
 
   useEffect(() => {
-    console.log('[NetworkProvider] Setting up network watcher');
     // Subscribe to network status changes
     const unsubscribe = networkService.watchNetworkStatus(online => {
-      console.log('[NetworkProvider] Network status changed to:', online);
       setIsOnline(online);
     });
 
     // Update initial state in case it changed during render
     const currentStatus = networkService.isOnline();
-    console.log(
-      '[NetworkProvider] Current status after subscription:',
-      currentStatus
-    );
     setIsOnline(currentStatus);
 
     // Cleanup subscription on unmount
     return () => {
-      console.log('[NetworkProvider] Cleaning up network watcher');
       unsubscribe();
     };
   }, [networkService]);

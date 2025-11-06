@@ -60,7 +60,6 @@ export class ReferralConsumptionHelper {
       return;
     }
 
-    console.log('📝 [ReferralHelper] Recording referral code:', referralCode);
     storage.setItem(REFERRAL_CODE_KEY, referralCode);
   }
 
@@ -78,12 +77,10 @@ export class ReferralConsumptionHelper {
     const code = storage.getItem(REFERRAL_CODE_KEY);
 
     if (code) {
-      console.log('✅ [ReferralHelper] Consuming referral code:', code);
       storage.removeItem(REFERRAL_CODE_KEY);
       return code;
     }
 
-    console.log('ℹ️ [ReferralHelper] No referral code to consume');
     return undefined;
   }
 
