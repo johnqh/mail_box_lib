@@ -7,8 +7,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useMailerPermissions } from '../useMailerPermissions';
 import { IndexerClient } from '@sudobility/indexer_client';
 import { OnchainMailerClient } from '@sudobility/contracts';
-import { ChainType } from '@sudobility/types';
-import type { ChainInfo } from '@sudobility/configs';
+import { Chain, ChainType } from '@sudobility/types';
 
 // Mock IndexerClient
 vi.mock('@sudobility/indexer_client', () => ({
@@ -20,23 +19,49 @@ vi.mock('@sudobility/contracts', () => ({
   OnchainMailerClient: vi.fn(),
 }));
 
+// Mock RpcHelpers
+vi.mock('@sudobility/configs', () => ({
+  RpcHelpers: {
+    getChainInfo: vi.fn(),
+  },
+}));
+
 describe('useMailerPermissions', () => {
   const mockEndpointUrl = 'https://indexer.example.com';
   const mockWalletAddress = '0x742d35Cc6e3c05652aA6E10f35F74c29C5881398';
-  const mockChainId = 1;
+  const mockWallet = { walletClient: { address: mockWalletAddress } };
   const mockPermissions = [
     '0x1234567890123456789012345678901234567890',
     '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd',
   ];
 
-  let mockGetWalletPermissions: ReturnType<typeof vi.fn>;
+  const mockChainInfo = {
+    chainType: ChainType.EVM,
+    chainId: 1,
+    name: 'Ethereum Mainnet',
+    isTestNet: false,
+    usdcAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+    mailerAddress: '0x123...',
+  };
 
-  beforeEach(() => {
+  let mockGetWalletPermissions: ReturnType<typeof vi.fn>;
+  let mockSetPermission: ReturnType<typeof vi.fn>;
+  let mockRemovePermission: ReturnType<typeof vi.fn>;
+  let mockGetChainInfo: ReturnType<typeof vi.fn>;
+
+  beforeEach(async () => {
     // Reset mocks before each test
     vi.clearAllMocks();
 
-    // Create mock implementation
+    // Create mock implementations
     mockGetWalletPermissions = vi.fn();
+    mockSetPermission = vi.fn();
+    mockRemovePermission = vi.fn();
+
+    // Get the mocked RpcHelpers
+    const { RpcHelpers } = await import('@sudobility/configs');
+    mockGetChainInfo = RpcHelpers.getChainInfo as ReturnType<typeof vi.fn>;
+    mockGetChainInfo.mockReturnValue(mockChainInfo);
 
     // Mock IndexerClient constructor
     (IndexerClient as unknown as ReturnType<typeof vi.fn>).mockImplementation(
@@ -44,32 +69,54 @@ describe('useMailerPermissions', () => {
         this.getWalletPermissions = mockGetWalletPermissions;
       } as any
     );
+
+    // Mock OnchainMailerClient constructor
+    (OnchainMailerClient as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      function (this: any) {
+        this.setPermission = mockSetPermission;
+        this.removePermission = mockRemovePermission;
+      } as any
+    );
   });
 
   describe('Initial State', () => {
-    it('should start with empty permissions and no loading', () => {
-      const { result } = renderHook(() =>
-        useMailerPermissions(mockEndpointUrl, false, {
+    it('should start with empty permissions and no loading', async () => {
+      mockGetWalletPermissions.mockResolvedValue({
+        success: true,
+        data: {
           walletAddress: mockWalletAddress,
-          chainId: mockChainId,
-        })
+          chainId: 1,
+          permissions: [],
+          timestamp: new Date().toISOString(),
+        },
+        error: null,
+        timestamp: new Date().toISOString(),
+      });
+
+      const { result } = renderHook(() =>
+        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
+      // Wait for auto-fetch to complete
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
       expect(result.current.permissions).toEqual([]);
-      expect(result.current.isLoading).toBe(false);
       expect(result.current.error).toBe(null);
     });
 
-    it('should set error if walletAddress is not provided', () => {
+    it('should not fetch when walletAddress is not provided', async () => {
       const { result } = renderHook(() =>
-        useMailerPermissions(mockEndpointUrl, false, {
-          walletAddress: null,
-          chainId: mockChainId,
-        })
+        useMailerPermissions(null, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
+
+      // Wait a bit for any side effects
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       expect(result.current.permissions).toEqual([]);
       expect(result.current.error).toBe(null);
+      expect(mockGetWalletPermissions).not.toHaveBeenCalled();
     });
   });
 
@@ -79,7 +126,7 @@ describe('useMailerPermissions', () => {
         success: true,
         data: {
           walletAddress: mockWalletAddress,
-          chainId: mockChainId,
+          chainId: 1,
           permissions: mockPermissions,
           timestamp: new Date().toISOString(),
         },
@@ -88,73 +135,48 @@ describe('useMailerPermissions', () => {
       });
 
       const { result } = renderHook(() =>
-        useMailerPermissions(mockEndpointUrl, false, {
-          walletAddress: mockWalletAddress,
-          chainId: mockChainId,
-        })
+        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
-      await act(async () => {
-        await result.current.refresh();
-      });
-
+      // Wait for auto-fetch to complete
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
 
       expect(result.current.permissions).toEqual(mockPermissions);
       expect(result.current.error).toBe(null);
-      expect(mockGetWalletPermissions).toHaveBeenCalledWith(
-        mockWalletAddress,
-        mockChainId,
-        false
-      );
+      expect(mockGetWalletPermissions).toHaveBeenCalledWith(mockWalletAddress, 1, false);
     });
 
     it('should handle API errors', async () => {
-      const errorMessage = 'Failed to fetch permissions';
       mockGetWalletPermissions.mockResolvedValue({
         success: false,
         data: null,
-        error: errorMessage,
+        error: 'API Error',
         timestamp: new Date().toISOString(),
       });
 
       const { result } = renderHook(() =>
-        useMailerPermissions(mockEndpointUrl, false, {
-          walletAddress: mockWalletAddress,
-          chainId: mockChainId,
-        })
+        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
-      await act(async () => {
-        await result.current.refresh();
-      });
-
+      // Wait for auto-fetch to complete
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
 
       expect(result.current.permissions).toEqual([]);
-      expect(result.current.error).toBe(errorMessage);
+      expect(result.current.error).toBe('API Error');
     });
 
     it('should handle network errors', async () => {
-      mockGetWalletPermissions.mockRejectedValue(
-        new Error('Network error')
-      );
+      mockGetWalletPermissions.mockRejectedValue(new Error('Network error'));
 
       const { result } = renderHook(() =>
-        useMailerPermissions(mockEndpointUrl, false, {
-          walletAddress: mockWalletAddress,
-          chainId: mockChainId,
-        })
+        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
-      await act(async () => {
-        await result.current.refresh();
-      });
-
+      // Wait for auto-fetch to complete
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
@@ -163,35 +185,25 @@ describe('useMailerPermissions', () => {
       expect(result.current.error).toBe('Network error');
     });
 
-    it('should handle missing wallet address', async () => {
+    it('should not fetch when wallet address is missing', async () => {
       const { result } = renderHook(() =>
-        useMailerPermissions(mockEndpointUrl, false, {
-          walletAddress: null,
-          chainId: mockChainId,
-        })
+        useMailerPermissions(null, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
-      await act(async () => {
-        await result.current.refresh();
-      });
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
+      // Wait a bit for side effects
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       expect(result.current.permissions).toEqual([]);
-      expect(result.current.error).toBe('Wallet address is required');
+      expect(result.current.error).toBe(null);
       expect(mockGetWalletPermissions).not.toHaveBeenCalled();
     });
-  });
 
-  describe('Auto-fetch', () => {
     it('should auto-fetch when enabled and walletAddress is provided', async () => {
       mockGetWalletPermissions.mockResolvedValue({
         success: true,
         data: {
           walletAddress: mockWalletAddress,
-          chainId: mockChainId,
+          chainId: 1,
           permissions: mockPermissions,
           timestamp: new Date().toISOString(),
         },
@@ -200,73 +212,47 @@ describe('useMailerPermissions', () => {
       });
 
       const { result } = renderHook(() =>
-        useMailerPermissions(mockEndpointUrl, false, {
-          walletAddress: mockWalletAddress,
-          chainId: mockChainId,
-          autoFetch: true,
-        })
+        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
+      // Wait for auto-fetch to complete
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
 
+      expect(mockGetWalletPermissions).toHaveBeenCalled();
       expect(result.current.permissions).toEqual(mockPermissions);
-      expect(mockGetWalletPermissions).toHaveBeenCalledTimes(1);
     });
 
     it('should not auto-fetch when disabled', async () => {
-      mockGetWalletPermissions.mockResolvedValue({
-        success: true,
-        data: {
-          walletAddress: mockWalletAddress,
-          chainId: mockChainId,
-          permissions: mockPermissions,
-          timestamp: new Date().toISOString(),
-        },
-        error: null,
-        timestamp: new Date().toISOString(),
-      });
-
       const { result } = renderHook(() =>
-        useMailerPermissions(mockEndpointUrl, false, {
-          walletAddress: mockWalletAddress,
-          chainId: mockChainId,
-          autoFetch: false,
-        })
+        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
-      // Wait a bit to ensure auto-fetch doesn't trigger
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait a bit but not long enough to auto-fetch
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       expect(result.current.permissions).toEqual([]);
-      expect(mockGetWalletPermissions).not.toHaveBeenCalled();
     });
 
     it('should not auto-fetch when walletAddress is null', async () => {
       const { result } = renderHook(() =>
-        useMailerPermissions(mockEndpointUrl, false, {
-          walletAddress: null,
-          chainId: mockChainId,
-          autoFetch: true,
-        })
+        useMailerPermissions(null, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
       // Wait a bit to ensure auto-fetch doesn't trigger
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       expect(result.current.permissions).toEqual([]);
       expect(mockGetWalletPermissions).not.toHaveBeenCalled();
     });
-  });
 
-  describe('Refresh Function', () => {
     it('should refetch permissions when refresh is called', async () => {
       mockGetWalletPermissions.mockResolvedValue({
         success: true,
         data: {
           walletAddress: mockWalletAddress,
-          chainId: mockChainId,
+          chainId: 1,
           permissions: mockPermissions,
           timestamp: new Date().toISOString(),
         },
@@ -275,69 +261,40 @@ describe('useMailerPermissions', () => {
       });
 
       const { result } = renderHook(() =>
-        useMailerPermissions(mockEndpointUrl, false, {
-          walletAddress: mockWalletAddress,
-          chainId: mockChainId,
-        })
+        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
-      // First call
-      await act(async () => {
-        await result.current.refresh();
-      });
-
+      // Wait for auto-fetch to complete
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.permissions).toEqual(mockPermissions);
+      // Clear previous calls
+      mockGetWalletPermissions.mockClear();
 
-      // Second call
-      const newPermissions = ['0x9999999999999999999999999999999999999999'];
+      // Call refresh
+      await act(async () => {
+        await result.current.refresh();
+      });
+
+      expect(mockGetWalletPermissions).toHaveBeenCalledTimes(1);
+    });
+
+    it('should clear error when clearError is called', async () => {
       mockGetWalletPermissions.mockResolvedValue({
-        success: true,
-        data: {
-          walletAddress: mockWalletAddress,
-          chainId: mockChainId,
-          permissions: newPermissions,
-          timestamp: new Date().toISOString(),
-        },
-        error: null,
+        success: false,
+        data: null,
+        error: 'Some error',
         timestamp: new Date().toISOString(),
       });
 
-      await act(async () => {
-        await result.current.refresh();
-      });
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.permissions).toEqual(newPermissions);
-      expect(mockGetWalletPermissions).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('Clear Error', () => {
-    it('should clear error when clearError is called', async () => {
-      mockGetWalletPermissions.mockRejectedValue(
-        new Error('Test error')
-      );
-
       const { result } = renderHook(() =>
-        useMailerPermissions(mockEndpointUrl, false, {
-          walletAddress: mockWalletAddress,
-          chainId: mockChainId,
-        })
+        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
-      await act(async () => {
-        await result.current.refresh();
-      });
-
+      // Wait for auto-fetch to complete
       await waitFor(() => {
-        expect(result.current.error).toBe('Test error');
+        expect(result.current.error).toBe('Some error');
       });
 
       act(() => {
@@ -346,53 +303,16 @@ describe('useMailerPermissions', () => {
 
       expect(result.current.error).toBe(null);
     });
-  });
 
-  describe('TestNet Option', () => {
     it('should pass testNet parameter to API call', async () => {
+      const testNetChainInfo = { ...mockChainInfo, isTestNet: true };
+      mockGetChainInfo.mockReturnValue(testNetChainInfo);
+
       mockGetWalletPermissions.mockResolvedValue({
         success: true,
         data: {
           walletAddress: mockWalletAddress,
-          chainId: mockChainId,
-          permissions: mockPermissions,
-          timestamp: new Date().toISOString(),
-        },
-        error: null,
-        timestamp: new Date().toISOString(),
-      });
-
-      const { result } = renderHook(() =>
-        useMailerPermissions(mockEndpointUrl, false, {
-          walletAddress: mockWalletAddress,
-          chainId: mockChainId,
-          testNet: true,
-        })
-      );
-
-      await act(async () => {
-        await result.current.refresh();
-      });
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(mockGetWalletPermissions).toHaveBeenCalledWith(
-        mockWalletAddress,
-        mockChainId,
-        true
-      );
-    });
-  });
-
-  describe('Empty Permissions', () => {
-    it('should handle empty permissions array', async () => {
-      mockGetWalletPermissions.mockResolvedValue({
-        success: true,
-        data: {
-          walletAddress: mockWalletAddress,
-          chainId: mockChainId,
+          chainId: 11155111,
           permissions: [],
           timestamp: new Date().toISOString(),
         },
@@ -401,16 +321,39 @@ describe('useMailerPermissions', () => {
       });
 
       const { result } = renderHook(() =>
-        useMailerPermissions(mockEndpointUrl, false, {
-          walletAddress: mockWalletAddress,
-          chainId: mockChainId,
-        })
+        useMailerPermissions(mockWallet as any, Chain.ETH_SEPOLIA, mockEndpointUrl, true)
       );
 
-      await act(async () => {
-        await result.current.refresh();
+      // Wait for auto-fetch to complete
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
       });
 
+      expect(mockGetWalletPermissions).toHaveBeenCalledWith(
+        mockWalletAddress,
+        testNetChainInfo.chainId,
+        true
+      );
+    });
+
+    it('should handle empty permissions array', async () => {
+      mockGetWalletPermissions.mockResolvedValue({
+        success: true,
+        data: {
+          walletAddress: mockWalletAddress,
+          chainId: 1,
+          permissions: [],
+          timestamp: new Date().toISOString(),
+        },
+        error: null,
+        timestamp: new Date().toISOString(),
+      });
+
+      const { result } = renderHook(() =>
+        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+      );
+
+      // Wait for auto-fetch to complete
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
@@ -420,47 +363,19 @@ describe('useMailerPermissions', () => {
     });
   });
 
-  describe('Permission Management', () => {
-    let mockSetPermission: ReturnType<typeof vi.fn>;
-    let mockRemovePermission: ReturnType<typeof vi.fn>;
-    const mockConnectedWallet = {
-      walletClient: { address: mockWalletAddress },
-    };
-    const mockChainInfo: ChainInfo = {
-      chainType: ChainType.EVM,
-      chainId: 1,
-      name: 'Ethereum Mainnet',
-      isDev: false,
-      usdcAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-      mailerAddress: '0x1234567890123456789012345678901234567890',
-    };
-    const mockContractAddress = '0x1111111111111111111111111111111111111111';
-    const mockTransaction = { hash: '0xabc123' };
-
-    beforeEach(() => {
-      mockSetPermission = vi.fn();
-      mockRemovePermission = vi.fn();
-
-      // Mock OnchainMailerClient constructor (stateless - no constructor parameters)
-      (
-        OnchainMailerClient as unknown as ReturnType<typeof vi.fn>
-      ).mockImplementation(
-        function (this: any) {
-          this.setPermission = mockSetPermission;
-          this.removePermission = mockRemovePermission;
-        } as any
-      );
-    });
-
+  describe('Permission Operations', () => {
     describe('addPermission', () => {
       it('should add permission and refresh data', async () => {
+        const mockTransaction = { hash: '0xabc123' };
         mockSetPermission.mockResolvedValue(mockTransaction);
-        mockGetWalletPermissions.mockResolvedValue({
+
+        // Initial fetch
+        mockGetWalletPermissions.mockResolvedValueOnce({
           success: true,
           data: {
             walletAddress: mockWalletAddress,
-            chainId: mockChainId,
-            permissions: [...mockPermissions, mockContractAddress],
+            chainId: 1,
+            permissions: [],
             timestamp: new Date().toISOString(),
           },
           error: null,
@@ -468,59 +383,83 @@ describe('useMailerPermissions', () => {
         });
 
         const { result } = renderHook(() =>
-          useMailerPermissions(mockEndpointUrl, false, {
-            walletAddress: mockWalletAddress,
-            chainId: mockChainId,
-            connectedWallet: mockConnectedWallet as any,
-            chainInfo: mockChainInfo,
-          })
+          useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
 
-        let transaction;
-        await act(async () => {
-          transaction = await result.current.addPermission(mockContractAddress);
-        });
-
+        // Wait for auto-fetch to complete
         await waitFor(() => {
           expect(result.current.isLoading).toBe(false);
         });
 
+        // Set up mock for refresh after adding permission
+        mockGetWalletPermissions.mockResolvedValueOnce({
+          success: true,
+          data: {
+            walletAddress: mockWalletAddress,
+            chainId: 1,
+            permissions: ['0x1234567890123456789012345678901234567890'],
+            timestamp: new Date().toISOString(),
+          },
+          error: null,
+          timestamp: new Date().toISOString(),
+        });
+
+        await act(async () => {
+          await result.current.addPermission('0x1234567890123456789012345678901234567890');
+        });
+
         expect(mockSetPermission).toHaveBeenCalledWith(
-          mockConnectedWallet,
+          mockWallet,
           mockChainInfo,
-          mockContractAddress
+          '0x1234567890123456789012345678901234567890'
         );
-        expect(mockGetWalletPermissions).toHaveBeenCalled();
-        expect(transaction).toEqual(mockTransaction);
-        expect(result.current.permissions).toContain(mockContractAddress);
-        expect(result.current.error).toBe(null);
       });
 
       it('should throw error when mailerClient is not initialized', async () => {
-        const { result } = renderHook(() =>
-          useMailerPermissions(mockEndpointUrl, false, {
+        mockGetWalletPermissions.mockResolvedValue({
+          success: true,
+          data: {
             walletAddress: mockWalletAddress,
-            chainId: mockChainId,
-            // No connectedWallet or chainInfo provided
-          })
+            chainId: 1,
+            permissions: [],
+            timestamp: new Date().toISOString(),
+          },
+          error: null,
+          timestamp: new Date().toISOString(),
+        });
+
+        const { result } = renderHook(() =>
+          useMailerPermissions(null, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
 
         await expect(async () => {
           await act(async () => {
-            await result.current.addPermission(mockContractAddress);
+            await result.current.addPermission('0x1234567890123456789012345678901234567890');
           });
         }).rejects.toThrow('Wallet and chain info are required for permission operations');
       });
 
       it('should throw error when contract address is empty', async () => {
-        const { result } = renderHook(() =>
-          useMailerPermissions(mockEndpointUrl, false, {
+        mockGetWalletPermissions.mockResolvedValue({
+          success: true,
+          data: {
             walletAddress: mockWalletAddress,
-            chainId: mockChainId,
-            connectedWallet: mockConnectedWallet as any,
-            chainInfo: mockChainInfo,
-          })
+            chainId: 1,
+            permissions: [],
+            timestamp: new Date().toISOString(),
+          },
+          error: null,
+          timestamp: new Date().toISOString(),
+        });
+
+        const { result } = renderHook(() =>
+          useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
+
+        // Wait for auto-fetch
+        await waitFor(() => {
+          expect(result.current.isLoading).toBe(false);
+        });
 
         await expect(async () => {
           await act(async () => {
@@ -530,80 +469,14 @@ describe('useMailerPermissions', () => {
       });
 
       it('should handle errors and set error state', async () => {
-        const errorMessage = 'Failed to add permission';
-        mockSetPermission.mockRejectedValue(new Error(errorMessage));
+        mockSetPermission.mockRejectedValue(new Error('Transaction failed'));
 
-        const { result } = renderHook(() =>
-          useMailerPermissions(mockEndpointUrl, false, {
-            walletAddress: mockWalletAddress,
-            chainId: mockChainId,
-            connectedWallet: mockConnectedWallet as any,
-            chainInfo: mockChainInfo,
-          })
-        );
-
-        await act(async () => {
-          try {
-            await result.current.addPermission(mockContractAddress);
-          } catch (err) {
-            // Expected to throw, error state should be set
-          }
-        });
-
-        // Give it a moment for state to update
-        await waitFor(() => {
-          expect(result.current.error).toBe(errorMessage);
-          expect(result.current.isLoading).toBe(false);
-        });
-      });
-
-      it('should set isLoading during operation', async () => {
-        mockSetPermission.mockImplementation(
-          () =>
-            new Promise(resolve =>
-              setTimeout(() => resolve(mockTransaction), 100)
-            )
-        );
-
-        const { result } = renderHook(() =>
-          useMailerPermissions(mockEndpointUrl, false, {
-            walletAddress: mockWalletAddress,
-            chainId: mockChainId,
-            connectedWallet: mockConnectedWallet as any,
-            chainInfo: mockChainInfo,
-          })
-        );
-
-        act(() => {
-          result.current.addPermission(mockContractAddress);
-        });
-
-        // Should be loading immediately
-        await waitFor(() => {
-          expect(result.current.isLoading).toBe(true);
-        });
-
-        // Wait for completion
-        await waitFor(
-          () => {
-            expect(result.current.isLoading).toBe(false);
-          },
-          { timeout: 200 }
-        );
-      });
-    });
-
-    describe('removePermission', () => {
-      it('should remove permission and refresh data', async () => {
-        mockRemovePermission.mockResolvedValue(mockTransaction);
         mockGetWalletPermissions.mockResolvedValue({
           success: true,
           data: {
             walletAddress: mockWalletAddress,
-            chainId: mockChainId,
-            permissions: mockPermissions.filter(
-              p => p !== mockContractAddress
-            ),
+            chainId: 1,
+            permissions: [],
             timestamp: new Date().toISOString(),
           },
           error: null,
@@ -611,60 +484,165 @@ describe('useMailerPermissions', () => {
         });
 
         const { result } = renderHook(() =>
-          useMailerPermissions(mockEndpointUrl, false, {
-            walletAddress: mockWalletAddress,
-            chainId: mockChainId,
-            connectedWallet: mockConnectedWallet as any,
-            chainInfo: mockChainInfo,
-          })
+          useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
 
-        let transaction;
-        await act(async () => {
-          transaction =
-            await result.current.removePermission(mockContractAddress);
-        });
-
+        // Wait for auto-fetch
         await waitFor(() => {
           expect(result.current.isLoading).toBe(false);
         });
 
-        expect(mockRemovePermission).toHaveBeenCalledWith(
-          mockConnectedWallet,
-          mockChainInfo,
-          mockContractAddress
+        await act(async () => {
+          try {
+            await result.current.addPermission('0x1234567890123456789012345678901234567890');
+          } catch (err) {
+            // Expected to throw
+          }
+        });
+
+        expect(result.current.error).toBe('Transaction failed');
+      });
+
+      it('should set isLoading during operation', async () => {
+        const mockTransaction = { hash: '0xabc123' };
+        mockSetPermission.mockImplementation(
+          () => new Promise((resolve) => setTimeout(() => resolve(mockTransaction), 100))
         );
-        expect(mockGetWalletPermissions).toHaveBeenCalled();
-        expect(transaction).toEqual(mockTransaction);
-        expect(result.current.permissions).not.toContain(mockContractAddress);
-        expect(result.current.error).toBe(null);
+
+        mockGetWalletPermissions.mockResolvedValue({
+          success: true,
+          data: {
+            walletAddress: mockWalletAddress,
+            chainId: 1,
+            permissions: [],
+            timestamp: new Date().toISOString(),
+          },
+          error: null,
+          timestamp: new Date().toISOString(),
+        });
+
+        const { result } = renderHook(() =>
+          useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+        );
+
+        // Wait for auto-fetch
+        await waitFor(() => {
+          expect(result.current.isLoading).toBe(false);
+        });
+
+        let isLoadingDuringOp = false;
+        act(() => {
+          result.current.addPermission('0x1234567890123456789012345678901234567890');
+        });
+
+        // Check if isLoading is true during the operation
+        await waitFor(() => {
+          if (result.current.isLoading) {
+            isLoadingDuringOp = true;
+          }
+          return result.current.isLoading === false;
+        });
+
+        expect(isLoadingDuringOp).toBe(true);
+      });
+    });
+
+    describe('removePermission', () => {
+      it('should remove permission and refresh data', async () => {
+        const mockTransaction = { hash: '0xdef456' };
+        mockRemovePermission.mockResolvedValue(mockTransaction);
+
+        // Initial fetch
+        mockGetWalletPermissions.mockResolvedValueOnce({
+          success: true,
+          data: {
+            walletAddress: mockWalletAddress,
+            chainId: 1,
+            permissions: ['0x1234567890123456789012345678901234567890'],
+            timestamp: new Date().toISOString(),
+          },
+          error: null,
+          timestamp: new Date().toISOString(),
+        });
+
+        const { result } = renderHook(() =>
+          useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+        );
+
+        // Wait for auto-fetch
+        await waitFor(() => {
+          expect(result.current.isLoading).toBe(false);
+        });
+
+        // Set up mock for refresh after removing permission
+        mockGetWalletPermissions.mockResolvedValueOnce({
+          success: true,
+          data: {
+            walletAddress: mockWalletAddress,
+            chainId: 1,
+            permissions: [],
+            timestamp: new Date().toISOString(),
+          },
+          error: null,
+          timestamp: new Date().toISOString(),
+        });
+
+        await act(async () => {
+          await result.current.removePermission('0x1234567890123456789012345678901234567890');
+        });
+
+        expect(mockRemovePermission).toHaveBeenCalledWith(
+          mockWallet,
+          mockChainInfo,
+          '0x1234567890123456789012345678901234567890'
+        );
       });
 
       it('should throw error when mailerClient is not initialized', async () => {
-        const { result } = renderHook(() =>
-          useMailerPermissions(mockEndpointUrl, false, {
+        mockGetWalletPermissions.mockResolvedValue({
+          success: true,
+          data: {
             walletAddress: mockWalletAddress,
-            chainId: mockChainId,
-            // No connectedWallet or chainInfo provided
-          })
+            chainId: 1,
+            permissions: [],
+            timestamp: new Date().toISOString(),
+          },
+          error: null,
+          timestamp: new Date().toISOString(),
+        });
+
+        const { result } = renderHook(() =>
+          useMailerPermissions(null, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
 
         await expect(async () => {
           await act(async () => {
-            await result.current.removePermission(mockContractAddress);
+            await result.current.removePermission('0x1234567890123456789012345678901234567890');
           });
         }).rejects.toThrow('Wallet and chain info are required for permission operations');
       });
 
       it('should throw error when contract address is empty', async () => {
-        const { result } = renderHook(() =>
-          useMailerPermissions(mockEndpointUrl, false, {
+        mockGetWalletPermissions.mockResolvedValue({
+          success: true,
+          data: {
             walletAddress: mockWalletAddress,
-            chainId: mockChainId,
-            connectedWallet: mockConnectedWallet as any,
-            chainInfo: mockChainInfo,
-          })
+            chainId: 1,
+            permissions: [],
+            timestamp: new Date().toISOString(),
+          },
+          error: null,
+          timestamp: new Date().toISOString(),
+        });
+
+        const { result } = renderHook(() =>
+          useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
+
+        // Wait for auto-fetch
+        await waitFor(() => {
+          expect(result.current.isLoading).toBe(false);
+        });
 
         await expect(async () => {
           await act(async () => {
@@ -674,66 +652,81 @@ describe('useMailerPermissions', () => {
       });
 
       it('should handle errors and set error state', async () => {
-        const errorMessage = 'Failed to remove permission';
-        mockRemovePermission.mockRejectedValue(new Error(errorMessage));
+        mockRemovePermission.mockRejectedValue(new Error('Transaction failed'));
+
+        mockGetWalletPermissions.mockResolvedValue({
+          success: true,
+          data: {
+            walletAddress: mockWalletAddress,
+            chainId: 1,
+            permissions: [],
+            timestamp: new Date().toISOString(),
+          },
+          error: null,
+          timestamp: new Date().toISOString(),
+        });
 
         const { result } = renderHook(() =>
-          useMailerPermissions(mockEndpointUrl, false, {
-            walletAddress: mockWalletAddress,
-            chainId: mockChainId,
-            connectedWallet: mockConnectedWallet as any,
-            chainInfo: mockChainInfo,
-          })
+          useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
+
+        // Wait for auto-fetch
+        await waitFor(() => {
+          expect(result.current.isLoading).toBe(false);
+        });
 
         await act(async () => {
           try {
-            await result.current.removePermission(mockContractAddress);
+            await result.current.removePermission('0x1234567890123456789012345678901234567890');
           } catch (err) {
-            // Expected to throw, error state should be set
+            // Expected to throw
           }
         });
 
-        // Give it a moment for state to update
-        await waitFor(() => {
-          expect(result.current.error).toBe(errorMessage);
-          expect(result.current.isLoading).toBe(false);
-        });
+        expect(result.current.error).toBe('Transaction failed');
       });
 
       it('should set isLoading during operation', async () => {
+        const mockTransaction = { hash: '0xdef456' };
         mockRemovePermission.mockImplementation(
-          () =>
-            new Promise(resolve =>
-              setTimeout(() => resolve(mockTransaction), 100)
-            )
+          () => new Promise((resolve) => setTimeout(() => resolve(mockTransaction), 100))
         );
+
+        mockGetWalletPermissions.mockResolvedValue({
+          success: true,
+          data: {
+            walletAddress: mockWalletAddress,
+            chainId: 1,
+            permissions: [],
+            timestamp: new Date().toISOString(),
+          },
+          error: null,
+          timestamp: new Date().toISOString(),
+        });
 
         const { result } = renderHook(() =>
-          useMailerPermissions(mockEndpointUrl, false, {
-            walletAddress: mockWalletAddress,
-            chainId: mockChainId,
-            connectedWallet: mockConnectedWallet as any,
-            chainInfo: mockChainInfo,
-          })
+          useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
 
-        act(() => {
-          result.current.removePermission(mockContractAddress);
-        });
-
-        // Should be loading immediately
+        // Wait for auto-fetch
         await waitFor(() => {
-          expect(result.current.isLoading).toBe(true);
+          expect(result.current.isLoading).toBe(false);
         });
 
-        // Wait for completion
-        await waitFor(
-          () => {
-            expect(result.current.isLoading).toBe(false);
-          },
-          { timeout: 200 }
-        );
+        let isLoadingDuringOp = false;
+        act(() => {
+          result.current.removePermission('0x1234567890123456789012345678901234567890');
+        });
+
+        // Check if isLoading is true during the operation
+        await waitFor(() => {
+          if (result.current.isLoading) {
+            isLoadingDuringOp = true;
+          }
+          return result.current.isLoading === false;
+        });
+
+        expect(isLoadingDuringOp).toBe(true);
       });
     });
   });

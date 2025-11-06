@@ -17,30 +17,8 @@ import {
   useIndexerGetDelegatedFrom,
   useIndexerGetDelegatedTo,
 } from '@sudobility/indexer_client';
-import { type IndexerDelegateData, Optional } from '@sudobility/types';
-import type { ChainInfo } from '@sudobility/configs';
-
-/**
- * Hook configuration options
- *
- * Note: Uses stateless OnchainMailerClient API
- */
-export interface UseMailerDelegationsOptions {
-  /** Indexer API endpoint URL */
-  endpointUrl: string;
-  /** Development mode flag */
-  devMode?: boolean;
-  /** Wallet address for this user */
-  walletAddress: Optional<string>;
-  /** Indexer authentication credentials */
-  auth: Optional<IndexerUserAuth>;
-  /** Connected wallet instance for smart contract operations */
-  connectedWallet?: Wallet;
-  /** Chain info for smart contract operations */
-  chainInfo?: ChainInfo;
-  /** Whether to automatically fetch delegation data */
-  autoFetch?: boolean;
-}
+import { Chain, type IndexerDelegateData, Optional } from '@sudobility/types';
+import { type ChainInfo, RpcHelpers } from '@sudobility/configs';
 
 /**
  * Return type for useMailerDelegations hook
@@ -79,13 +57,11 @@ const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
  *
  * @example
  * ```tsx
- * import { RpcHelpers } from '@sudobility/configs';
- * import { Chain } from '@sudobility/types';
+ * import { ChainType } from '@sudobility/types';
  *
  * function DelegationManager() {
  *   const { walletAddress, auth } = useWalletStatus();
  *   const connectedWallet = useWallet(); // Your wallet instance
- *   const chainInfo = RpcHelpers.getChainInfo(Chain.ETH_MAINNET);
  *
  *   const {
  *     delegatedToMe,
@@ -100,7 +76,8 @@ const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
  *     walletAddress,
  *     auth,
  *     connectedWallet,
- *     chainInfo,
+ *     chainType: ChainType.EVM,
+ *     chainId: 1,
  *     autoFetch: true
  *   });
  *
@@ -131,34 +108,44 @@ const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
  * ```
  */
 export function useMailerDelegations(
-  options: UseMailerDelegationsOptions
+  connectedWallet: Optional<Wallet>,
+  chain: Chain,
+  auth: Optional<IndexerUserAuth>,
+  indexerEndpoint: string,
+  indexerDevMode: boolean = false
 ): UseMailerDelegationsReturn {
-  const {
-    endpointUrl,
-    devMode = false,
-    walletAddress,
-    auth,
-    connectedWallet,
-    chainInfo,
-  } = options;
-
   const [error, setError] = useState<Optional<string>>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Create stateless OnchainMailerClient instance
   const mailerClient = useMemo(() => new OnchainMailerClient(), []);
 
+  // Get chainInfo using convenient helper
+  const chainInfo = useMemo<Optional<ChainInfo>>(() => {
+    return RpcHelpers.getChainInfo(chain);
+  }, [chain]);
+
+  // Get wallet address from connected wallet
+  const walletAddress = useMemo(() => {
+    if (!connectedWallet) return null;
+    return (
+      (connectedWallet as any).address ||
+      (connectedWallet as any).walletClient?.address ||
+      (connectedWallet as any).publicKey?.toBase58()
+    );
+  }, [connectedWallet]);
+
   // Fetch delegation data from indexer
   const delegatedToQuery = useIndexerGetDelegatedTo(
-    endpointUrl,
-    devMode,
+    indexerEndpoint,
+    indexerDevMode,
     walletAddress || '',
     auth || { message: '', signature: '', signer: '' }
   );
 
   const delegatedFromQuery = useIndexerGetDelegatedFrom(
-    endpointUrl,
-    devMode,
+    indexerEndpoint,
+    indexerDevMode,
     walletAddress || '',
     auth || { message: '', signature: '', signer: '' }
   );

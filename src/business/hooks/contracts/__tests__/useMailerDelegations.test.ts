@@ -10,7 +10,7 @@ import {
   useIndexerGetDelegatedFrom,
   useIndexerGetDelegatedTo,
 } from '@sudobility/indexer_client';
-import { ChainType } from '@sudobility/types';
+import { Chain, ChainType } from '@sudobility/types';
 import type { ChainInfo } from '@sudobility/configs';
 
 // Mock dependencies
@@ -21,6 +21,13 @@ vi.mock('@sudobility/contracts', () => ({
 vi.mock('@sudobility/indexer_client', () => ({
   useIndexerGetDelegatedTo: vi.fn(),
   useIndexerGetDelegatedFrom: vi.fn(),
+}));
+
+// Mock RpcHelpers
+vi.mock('@sudobility/configs', () => ({
+  RpcHelpers: {
+    getChainInfo: vi.fn(),
+  },
 }));
 
 describe('useMailerDelegations', () => {
@@ -38,7 +45,7 @@ describe('useMailerDelegations', () => {
     chainType: ChainType.EVM,
     chainId: 1,
     name: 'Ethereum Mainnet',
-    isDev: false,
+    isTestNet: false,
     usdcAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
     mailerAddress: '0x1234567890123456789012345678901234567890',
   };
@@ -115,16 +122,23 @@ describe('useMailerDelegations', () => {
     });
   });
 
+  beforeEach(async () => {
+    // Get and configure the mocked RpcHelpers
+    const { RpcHelpers } = await import('@sudobility/configs');
+    const mockGetChainInfo = RpcHelpers.getChainInfo as ReturnType<typeof vi.fn>;
+    mockGetChainInfo.mockReturnValue(mockChainInfo);
+  });
+
   describe('Initial State', () => {
     it('should initialize with delegation data from indexer', () => {
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-          connectedWallet: mockConnectedWallet as any,
-          chainInfo: mockChainInfo,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       expect(result.current.delegatedToMe).toEqual(mockDelegatedTo);
@@ -151,11 +165,13 @@ describe('useMailerDelegations', () => {
       });
 
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       expect(result.current.delegatedToMe).toBe(null);
@@ -172,11 +188,13 @@ describe('useMailerDelegations', () => {
       });
 
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       expect(result.current.isLoading).toBe(true);
@@ -196,13 +214,13 @@ describe('useMailerDelegations', () => {
       mockRefetchFrom.mockResolvedValue({});
 
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-          connectedWallet: mockConnectedWallet as any,
-          chainInfo: mockChainInfo,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       let delegateResult;
@@ -220,39 +238,40 @@ describe('useMailerDelegations', () => {
       expect(mockRefetchFrom).toHaveBeenCalled();
     });
 
-    it('should throw error if delegating without mailer client', async () => {
+    it('should throw error if delegating without wallet', async () => {
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-          // No connectedWallet or chainInfo provided
-        })
+        useMailerDelegations(
+          null,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
-      await expect(
-        act(async () => {
+      await expect(async () => {
+        await act(async () => {
           await result.current.delegate('0xTarget');
-        })
-      ).rejects.toThrow('Wallet and chain info are required for delegation operations');
+        });
+      }).rejects.toThrow('Wallet and chain info are required for delegation operations');
     });
 
     it('should throw error if delegating with empty address', async () => {
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-          connectedWallet: mockConnectedWallet as any,
-          chainInfo: mockChainInfo,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
-      await expect(
-        act(async () => {
+      await expect(async () => {
+        await act(async () => {
           await result.current.delegate('');
-        })
-      ).rejects.toThrow('Target address is required');
+        });
+      }).rejects.toThrow('Target address is required');
     });
 
     it('should handle delegation errors', async () => {
@@ -260,13 +279,13 @@ describe('useMailerDelegations', () => {
       mockDelegateTo.mockRejectedValue(new Error(errorMessage));
 
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-          connectedWallet: mockConnectedWallet as any,
-          chainInfo: mockChainInfo,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       let caughtError = false;
@@ -297,13 +316,13 @@ describe('useMailerDelegations', () => {
       mockRefetchFrom.mockResolvedValue({});
 
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-          connectedWallet: mockConnectedWallet as any,
-          chainInfo: mockChainInfo,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       let revokeResult;
@@ -321,20 +340,22 @@ describe('useMailerDelegations', () => {
       expect(mockRefetchFrom).toHaveBeenCalled();
     });
 
-    it('should throw error if revoking without mailer client', async () => {
+    it('should throw error if revoking without wallet', async () => {
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-        })
+        useMailerDelegations(
+          null,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
-      await expect(
-        act(async () => {
+      await expect(async () => {
+        await act(async () => {
           await result.current.revoke();
-        })
-      ).rejects.toThrow('Wallet and chain info are required for delegation operations');
+        });
+      }).rejects.toThrow('Wallet and chain info are required for delegation operations');
     });
   });
 
@@ -351,13 +372,13 @@ describe('useMailerDelegations', () => {
       mockRefetchFrom.mockResolvedValue({});
 
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-          connectedWallet: mockConnectedWallet as any,
-          chainInfo: mockChainInfo,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       let rejectResult;
@@ -375,38 +396,40 @@ describe('useMailerDelegations', () => {
       expect(mockRefetchFrom).toHaveBeenCalled();
     });
 
-    it('should throw error if rejecting without mailer client', async () => {
+    it('should throw error if rejecting without wallet', async () => {
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-        })
+        useMailerDelegations(
+          null,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
-      await expect(
-        act(async () => {
+      await expect(async () => {
+        await act(async () => {
           await result.current.reject('0xDelegator');
-        })
-      ).rejects.toThrow('Wallet and chain info are required for delegation operations');
+        });
+      }).rejects.toThrow('Wallet and chain info are required for delegation operations');
     });
 
     it('should throw error if rejecting with empty address', async () => {
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-          connectedWallet: mockConnectedWallet as any,
-          chainInfo: mockChainInfo,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
-      await expect(
-        act(async () => {
+      await expect(async () => {
+        await act(async () => {
           await result.current.reject('');
-        })
-      ).rejects.toThrow('Delegator address is required');
+        });
+      }).rejects.toThrow('Delegator address is required');
     });
 
     it('should handle rejection errors', async () => {
@@ -414,13 +437,13 @@ describe('useMailerDelegations', () => {
       mockRejectDelegation.mockRejectedValue(new Error(errorMessage));
 
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-          connectedWallet: mockConnectedWallet as any,
-          chainInfo: mockChainInfo,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       let caughtError = false;
@@ -445,11 +468,13 @@ describe('useMailerDelegations', () => {
       mockRefetchFrom.mockResolvedValue({});
 
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       await act(async () => {
@@ -466,13 +491,13 @@ describe('useMailerDelegations', () => {
       mockDelegateTo.mockRejectedValue(new Error('Test error'));
 
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-          connectedWallet: mockConnectedWallet as any,
-          chainInfo: mockChainInfo,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       // Trigger an error
@@ -509,11 +534,13 @@ describe('useMailerDelegations', () => {
       });
 
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       await waitFor(() => {
@@ -532,11 +559,13 @@ describe('useMailerDelegations', () => {
       });
 
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       await waitFor(() => {
@@ -548,12 +577,13 @@ describe('useMailerDelegations', () => {
   describe('Indexer Queries', () => {
     it('should call indexer hooks with correct parameters', () => {
       renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-          autoFetch: true,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       expect(useIndexerGetDelegatedTo).toHaveBeenCalledWith(
@@ -573,12 +603,13 @@ describe('useMailerDelegations', () => {
 
     it('should handle null wallet and auth', () => {
       renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: null,
-          auth: null,
-          autoFetch: false,
-        })
+        useMailerDelegations(
+          null,
+          Chain.ETH_MAINNET,
+          null,
+          mockEndpointUrl,
+          false
+        )
       );
 
       expect(useIndexerGetDelegatedTo).toHaveBeenCalledWith(
@@ -596,11 +627,13 @@ describe('useMailerDelegations', () => {
       mockRefetchFrom.mockResolvedValue({});
 
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       await act(async () => {
@@ -616,11 +649,13 @@ describe('useMailerDelegations', () => {
       mockRefetchFrom.mockResolvedValue({});
 
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       // Set an error manually
@@ -652,13 +687,13 @@ describe('useMailerDelegations', () => {
       mockRefetchFrom.mockResolvedValue({});
 
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-          connectedWallet: mockConnectedWallet as any,
-          chainInfo: mockChainInfo,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       await act(async () => {
@@ -681,13 +716,13 @@ describe('useMailerDelegations', () => {
       mockRefetchFrom.mockResolvedValue({});
 
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-          connectedWallet: mockConnectedWallet as any,
-          chainInfo: mockChainInfo,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       await act(async () => {
@@ -711,13 +746,13 @@ describe('useMailerDelegations', () => {
       mockRefetchFrom.mockResolvedValue({});
 
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-          connectedWallet: mockConnectedWallet as any,
-          chainInfo: mockChainInfo,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       await act(async () => {
@@ -735,13 +770,13 @@ describe('useMailerDelegations', () => {
       mockRefetchFrom.mockResolvedValue({});
 
       const { result } = renderHook(() =>
-        useMailerDelegations({
-          endpointUrl: mockEndpointUrl,
-          walletAddress: mockWalletAddress,
-          auth: mockAuth,
-          connectedWallet: mockConnectedWallet as any,
-          chainInfo: mockChainInfo,
-        })
+        useMailerDelegations(
+          mockConnectedWallet as any,
+          Chain.ETH_MAINNET,
+          mockAuth,
+          mockEndpointUrl,
+          false
+        )
       );
 
       try {

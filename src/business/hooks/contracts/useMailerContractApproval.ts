@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { RpcHelpers } from '@sudobility/configs';
-import { Optional } from '@sudobility/types';
+import { Chain, Optional } from '@sudobility/types';
 import {
   createPublicClient,
   createWalletClient,
@@ -26,11 +26,11 @@ import {
   polygonAmoy,
   sepolia,
 } from 'viem/chains';
-import type { Address, Chain } from 'viem';
+import type { Address, Chain as ViemChain } from 'viem';
 
 // Helper function to get viem chain from chainId
-const getViemChain = (chainId: number): Chain => {
-  const chainMap: Record<number, Chain> = {
+const getViemChain = (chainId: number): ViemChain => {
+  const chainMap: Record<number, ViemChain> = {
     1: mainnet,
     11155111: sepolia,
     137: polygon,
@@ -75,23 +75,13 @@ const ERC20_ABI = [
   },
 ] as const;
 
-export interface UseMailerContractApprovalConfig {
-  /** Chain ID to check approval for */
-  chainId: number;
-  /** Wallet address */
-  walletAddress: string;
-  /** Whether wallet is connected */
-  isConnected: boolean;
-  /** Wallet connector for signing transactions */
-  connector: any;
+export interface ApiKeys {
   /** Alchemy API key for RPC access */
   alchemyApiKey?: string;
   /** Ankr API key for RPC access */
   ankrApiKey?: string;
   /** Metamask/Infura API key for RPC access */
   metamaskApiKey?: string;
-  /** Whether to automatically fetch allowance on mount */
-  autoFetch?: boolean;
 }
 
 export interface UseMailerContractApprovalReturn {
@@ -134,11 +124,10 @@ export interface UseMailerContractApprovalReturn {
  *   revoke,
  *   isLoading
  * } = useMailerContractApproval({
- *   chainId: 1,
- *   walletAddress: '0x...',
- *   isConnected: true,
- *   connector: wagmiConnector,
- *   autoFetch: true
+ *   '0x...',
+ *   Chain.ETH_MAINNET,
+ *   wagmiConnector,
+ *   { alchemyApiKey: 'your-key' }
  * });
  *
  * // Approve 100 USDC
@@ -149,19 +138,11 @@ export interface UseMailerContractApprovalReturn {
  * ```
  */
 export const useMailerContractApproval = (
-  config: UseMailerContractApprovalConfig
+  walletAddress: Optional<string>,
+  chain: Chain,
+  connector: any,
+  apiKeys?: ApiKeys
 ): UseMailerContractApprovalReturn => {
-  const {
-    chainId,
-    walletAddress,
-    isConnected,
-    connector,
-    alchemyApiKey = '',
-    ankrApiKey = '',
-    metamaskApiKey = '',
-    autoFetch = false,
-  } = config;
-
   const [approvedAmount, setApprovedAmount] = useState<Optional<string>>(null);
   const [approvedAmountRaw, setApprovedAmountRaw] =
     useState<Optional<bigint>>(null);
@@ -170,14 +151,17 @@ export const useMailerContractApproval = (
   const [error, setError] = useState<Optional<string>>(null);
   const [successMessage, setSuccessMessage] = useState<Optional<string>>(null);
 
-  // Get chain info by finding it in visible chains
-  const allChains = [
-    ...RpcHelpers.getVisibleChains('evm' as any, false),
-    ...RpcHelpers.getVisibleChains('evm' as any, true),
-  ];
-  const chainInfo = allChains.find(c => c.chainId === chainId);
+  // Get chain info using convenient helper
+  const chainInfo = RpcHelpers.getChainInfo(chain);
+  const chainId = chainInfo?.chainId;
   const usdcAddress = chainInfo?.usdcAddress as Optional<Address>;
   const mailerAddress = chainInfo?.mailerAddress as Optional<Address>;
+
+  // Extract API keys with defaults
+  const alchemyApiKey = apiKeys?.alchemyApiKey || '';
+  const ankrApiKey = apiKeys?.ankrApiKey || '';
+  const metamaskApiKey = apiKeys?.metamaskApiKey || '';
+  const isConnected = !!walletAddress && !!connector;
 
   /**
    * Fetch current USDC allowance for the mailer contract
@@ -273,6 +257,9 @@ export const useMailerContractApproval = (
         const provider = await connector.getProvider();
 
         // Get the correct viem chain for the target chainId
+        if (!chainId) {
+          throw new Error('Chain ID not available');
+        }
         const targetChain = getViemChain(chainId);
 
         // Create wallet client with the correct chain
@@ -366,6 +353,9 @@ export const useMailerContractApproval = (
       const provider = await connector.getProvider();
 
       // Get the correct viem chain for the target chainId
+      if (!chainId) {
+        throw new Error('Chain ID not available');
+      }
       const targetChain = getViemChain(chainId);
 
       // Create wallet client with the correct chain
@@ -441,12 +431,12 @@ export const useMailerContractApproval = (
     setSuccessMessage(null);
   }, []);
 
-  // Auto-fetch allowance on mount if enabled
+  // Always auto-fetch allowance on mount if wallet is connected
   useEffect(() => {
-    if (autoFetch && isConnected) {
+    if (isConnected) {
       fetchAllowance();
     }
-  }, [autoFetch, isConnected, fetchAllowance]);
+  }, [isConnected, fetchAllowance]);
 
   return {
     approvedAmount,

@@ -29,6 +29,7 @@ export {
   useMailAccountSettings,
   useMailboxesAndSettings,
   useMailerClaims,
+  useMailerClient,
   useMailerContractApproval,
   useMailTemplates,
   useMailWebhooks,
@@ -59,6 +60,7 @@ export {
   // Types
   Message,
   UserPoints,
+  type Wallet,
 } from './business';
 
 // ============================================================================

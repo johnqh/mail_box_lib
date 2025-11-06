@@ -7,14 +7,14 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Optional } from '@sudobility/types';
+import { Chain, Optional } from '@sudobility/types';
 import { IndexerClient } from '@sudobility/indexer_client';
 import {
   OnchainMailerClient,
   type UnifiedTransaction,
   type Wallet,
 } from '@sudobility/contracts';
-import type { ChainInfo } from '@sudobility/configs';
+import { type ChainInfo, RpcHelpers } from '@sudobility/configs';
 
 /**
  * Wallet permissions response data structure
@@ -34,26 +34,6 @@ export interface WalletPermissionsResponse {
   data: WalletPermissionsData;
   error: Optional<string>;
   timestamp: string;
-}
-
-/**
- * Hook configuration options
- *
- * Note: Uses stateless OnchainMailerClient API
- */
-export interface UseMailerPermissionsOptions {
-  /** Wallet address to fetch permissions for */
-  walletAddress: Optional<string>;
-  /** Chain ID for the network */
-  chainId: number;
-  /** Whether to use testnet (optional) */
-  testNet?: boolean;
-  /** Whether to automatically fetch on mount */
-  autoFetch?: boolean;
-  /** Connected wallet instance for smart contract operations (optional) */
-  connectedWallet?: Wallet;
-  /** Chain info for smart contract operations (optional) */
-  chainInfo?: ChainInfo;
 }
 
 /**
@@ -79,48 +59,18 @@ export interface UseMailerPermissionsReturn {
 /**
  * Hook to fetch and manage wallet permissions from the indexer
  *
- * @param endpointUrl - Indexer API endpoint URL
- * @param devMode - Whether to use development mode
- * @param options - Configuration options
+ * @param connectedWallet - Connected wallet instance
+ * @param chain - Chain for smart contract operations
+ * @param indexerEndpoint - Indexer API endpoint URL
+ * @param indexerDevMode - Whether to use development mode for indexer (default: false)
  * @returns Object containing permissions array and control functions
  *
- * @example Basic Usage (Read-only)
+ * @example
  * ```tsx
- * function MyComponent() {
- *   const { permissions, isLoading, refresh } = useMailerPermissions(
- *     'https://indexer.example.com',
- *     false,
- *     {
- *       walletAddress: '0x123...',
- *       chainId: 1,
- *       autoFetch: true
- *     }
- *   );
- *
- *   if (isLoading) return <div>Loading...</div>;
- *
- *   return (
- *     <div>
- *       <h3>Permissioned Contracts:</h3>
- *       <ul>
- *         {permissions.map(address => (
- *           <li key={address}>{address}</li>
- *         ))}
- *       </ul>
- *       <button onClick={refresh}>Refresh</button>
- *     </div>
- *   );
- * }
- * ```
- *
- * @example With Permission Management
- * ```tsx
- * import { RpcHelpers } from '@sudobility/configs';
  * import { Chain } from '@sudobility/types';
  *
  * function PermissionManager() {
  *   const connectedWallet = useWallet(); // Your wallet instance
- *   const chainInfo = RpcHelpers.getChainInfo(Chain.ETH_MAINNET);
  *
  *   const {
  *     permissions,
@@ -130,15 +80,9 @@ export interface UseMailerPermissionsReturn {
  *     refresh,
  *     error
  *   } = useMailerPermissions(
- *     'https://indexer.example.com',
- *     false,
- *     {
- *       walletAddress: '0x123...',
- *       chainId: 1,
- *       connectedWallet,
- *       chainInfo,
- *       autoFetch: true
- *     }
+ *     connectedWallet,
+ *     Chain.ETH_MAINNET,
+ *     'https://indexer.example.com'
  *   );
  *
  *   const handleAddPermission = async (contractAddress: string) => {
@@ -147,15 +91,6 @@ export interface UseMailerPermissionsReturn {
  *       console.log('Permission added:', result.hash);
  *     } catch (err) {
  *       console.error('Failed to add permission:', err);
- *     }
- *   };
- *
- *   const handleRemovePermission = async (contractAddress: string) => {
- *     try {
- *       const result = await removePermission(contractAddress);
- *       console.log('Permission removed:', result.hash);
- *     } catch (err) {
- *       console.error('Failed to remove permission:', err);
  *     }
  *   };
  *
@@ -175,19 +110,11 @@ export interface UseMailerPermissionsReturn {
  * ```
  */
 export function useMailerPermissions(
-  endpointUrl: string,
-  devMode: boolean = false,
-  options: UseMailerPermissionsOptions
+  connectedWallet: Optional<Wallet>,
+  chain: Chain,
+  indexerEndpoint: string,
+  indexerDevMode: boolean = false
 ): UseMailerPermissionsReturn {
-  const {
-    walletAddress,
-    chainId,
-    testNet = false,
-    autoFetch = false,
-    connectedWallet,
-    chainInfo,
-  } = options;
-
   const [permissions, setPermissions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -196,13 +123,28 @@ export function useMailerPermissions(
   // Create stateless OnchainMailerClient instance
   const mailerClient = useMemo(() => new OnchainMailerClient(), []);
 
+  // Get chainInfo using convenient helper
+  const chainInfo = useMemo<Optional<ChainInfo>>(() => {
+    return RpcHelpers.getChainInfo(chain);
+  }, [chain]);
+
+  // Get wallet address from connected wallet
+  const walletAddress = useMemo(() => {
+    if (!connectedWallet) return null;
+    return (
+      (connectedWallet as any).address ||
+      (connectedWallet as any).walletClient?.address ||
+      (connectedWallet as any).publicKey?.toBase58()
+    );
+  }, [connectedWallet]);
+
   /**
    * Fetch wallet permissions from the indexer
    */
   const fetchPermissions = useCallback(async () => {
-    if (!walletAddress) {
+    if (!walletAddress || !chainInfo) {
       setPermissions([]);
-      setError('Wallet address is required');
+      setError('Wallet address or chain info not available');
       return;
     }
 
@@ -210,11 +152,11 @@ export function useMailerPermissions(
       setIsLoading(true);
       setError(null);
 
-      const client = new IndexerClient(endpointUrl, devMode);
+      const client = new IndexerClient(indexerEndpoint, indexerDevMode);
       const response = await client.getWalletPermissions(
         walletAddress,
-        chainId,
-        testNet
+        chainInfo.chainId,
+        chainInfo.isTestNet
       );
 
       // The response is typed as 'any' in IndexerClient
@@ -241,7 +183,7 @@ export function useMailerPermissions(
     } finally {
       setIsLoading(false);
     }
-  }, [walletAddress, chainId, testNet, endpointUrl, devMode]);
+  }, [walletAddress, chainInfo, indexerEndpoint, indexerDevMode]);
 
   /**
    * Add permission for a contract address using smart contract
@@ -332,12 +274,12 @@ export function useMailerPermissions(
     setError(null);
   }, []);
 
-  // Auto-fetch on mount if enabled and walletAddress is available
+  // Always auto-fetch on mount if wallet is available
   useEffect(() => {
-    if (autoFetch && walletAddress) {
+    if (walletAddress && chainInfo) {
       fetchPermissions();
     }
-  }, [autoFetch, walletAddress, fetchPermissions]);
+  }, [walletAddress, chainInfo, fetchPermissions]);
 
   return {
     permissions,
