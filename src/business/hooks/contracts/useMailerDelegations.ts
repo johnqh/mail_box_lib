@@ -135,20 +135,63 @@ export function useMailerDelegations(
     );
   }, [connectedWallet]);
 
+  // Debug logging
+  console.log('[useMailerDelegations] Parameters:', {
+    walletAddress,
+    chain,
+    indexerEndpoint,
+    indexerDevMode,
+    hasAuth: !!auth,
+    authDetails: auth
+      ? {
+          hasMessage: !!auth.message,
+          hasSignature: !!auth.signature,
+          hasSigner: !!auth.signer,
+          messageLength: auth.message?.length || 0,
+          signatureLength: auth.signature?.length || 0,
+        }
+      : 'no auth',
+    enabled: !!walletAddress,
+  });
+
   // Fetch delegation data from indexer
+  // For read-only operations, pass enabled option to allow queries without auth
   const delegatedToQuery = useIndexerGetDelegatedTo(
     indexerEndpoint,
     indexerDevMode,
     walletAddress || '',
-    auth || { message: '', signature: '', signer: '' }
+    auth || { message: '', signature: '', signer: '' },
+    {
+      enabled: !!walletAddress, // Only require walletAddress, not auth for read operations
+    }
   );
 
   const delegatedFromQuery = useIndexerGetDelegatedFrom(
     indexerEndpoint,
     indexerDevMode,
     walletAddress || '',
-    auth || { message: '', signature: '', signer: '' }
+    auth || { message: '', signature: '', signer: '' },
+    {
+      enabled: !!walletAddress, // Only require walletAddress, not auth for read operations
+    }
   );
+
+  console.log('[useMailerDelegations] Query states:', {
+    delegatedTo: {
+      isLoading: delegatedToQuery.isLoading,
+      isError: delegatedToQuery.isError,
+      isFetching: delegatedToQuery.isFetching,
+      hasData: !!delegatedToQuery.data,
+      error: delegatedToQuery.error,
+    },
+    delegatedFrom: {
+      isLoading: delegatedFromQuery.isLoading,
+      isError: delegatedFromQuery.isError,
+      isFetching: delegatedFromQuery.isFetching,
+      hasData: !!delegatedFromQuery.data,
+      error: delegatedFromQuery.error,
+    },
+  });
 
   // Extract delegation data
   const delegatedToMe = useMemo<Optional<IndexerDelegateData>>(() => {
@@ -160,7 +203,17 @@ export function useMailerDelegations(
 
   const delegatedFromMe = useMemo<IndexerDelegateData[]>(() => {
     if (delegatedFromQuery.data?.success && delegatedFromQuery.data.data) {
-      return delegatedFromQuery.data.data.from || [];
+      // Handle both API response formats:
+      // 1. data.data.from (type definition)
+      // 2. data.data as array (actual API response)
+      const responseData = delegatedFromQuery.data.data as any;
+      if (Array.isArray(responseData)) {
+        // API returns data as direct array
+        return responseData;
+      } else if (responseData.from && Array.isArray(responseData.from)) {
+        // API returns data wrapped in { from: [...] }
+        return responseData.from;
+      }
     }
     return [];
   }, [delegatedFromQuery.data]);
@@ -232,7 +285,18 @@ export function useMailerDelegations(
           targetAddress
         );
 
-        // Refresh indexer data after successful delegation
+        // Wait for transaction to be mined and confirmed
+        if (result.transactionHash && (connectedWallet as any).publicClient) {
+          const publicClient = (connectedWallet as any).publicClient;
+          await publicClient.waitForTransactionReceipt({
+            hash: result.transactionHash,
+          });
+
+          // Wait additional time for indexer to process the event
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+
+        // Refresh indexer data after transaction is confirmed
         await refresh();
 
         return result;
@@ -307,7 +371,16 @@ export function useMailerDelegations(
           delegatorAddress
         );
 
-        // Refresh indexer data after successful rejection
+        // Wait for transaction to be mined and confirmed
+        if (result.hash && (connectedWallet as any).publicClient) {
+          const publicClient = (connectedWallet as any).publicClient;
+          await publicClient.waitForTransactionReceipt({ hash: result.hash });
+
+          // Wait additional time for indexer to process the event
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+
+        // Refresh indexer data after transaction is confirmed
         await refresh();
 
         return result;

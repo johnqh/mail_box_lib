@@ -6,9 +6,9 @@
  * Returns a list of permissioned contract addresses for a given wallet
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Chain, Optional } from '@sudobility/types';
-import { IndexerClient } from '@sudobility/indexer_client';
+import { useIndexerGetWalletPermissions } from '@sudobility/indexer_client';
 import {
   OnchainMailerClient,
   type UnifiedTransaction,
@@ -115,8 +115,6 @@ export function useMailerPermissions(
   indexerEndpoint: string,
   indexerDevMode: boolean = false
 ): UseMailerPermissionsReturn {
-  const [permissions, setPermissions] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<Optional<string>>(null);
 
@@ -138,52 +136,67 @@ export function useMailerPermissions(
     );
   }, [connectedWallet]);
 
-  /**
-   * Fetch wallet permissions from the indexer
-   */
-  const fetchPermissions = useCallback(async () => {
-    if (!walletAddress || !chainInfo) {
-      setPermissions([]);
-      setError('Wallet address or chain info not available');
-      return;
+  // Debug logging
+  console.log('[useMailerPermissions] Parameters:', {
+    walletAddress,
+    chain,
+    chainId: chainInfo?.chainId,
+    isTestNet: chainInfo?.isTestNet,
+    indexerEndpoint,
+    indexerDevMode,
+    enabled: !!walletAddress && !!chainInfo,
+  });
+
+  // Fetch wallet permissions from indexer using React Query
+  const permissionsQuery = useIndexerGetWalletPermissions(
+    indexerEndpoint,
+    indexerDevMode,
+    walletAddress || '',
+    chainInfo?.chainId || 0,
+    chainInfo?.isTestNet || false,
+    {
+      enabled: !!walletAddress && !!chainInfo, // Only fetch when wallet and chain are available
     }
+  );
 
-    try {
-      setIsLoading(true);
-      setError(null);
+  console.log('[useMailerPermissions] Query state:', {
+    isLoading: permissionsQuery.isLoading,
+    isError: permissionsQuery.isError,
+    isFetching: permissionsQuery.isFetching,
+    hasData: !!permissionsQuery.data,
+    error: permissionsQuery.error,
+  });
 
-      const client = new IndexerClient(indexerEndpoint, indexerDevMode);
-      const response = await client.getWalletPermissions(
-        walletAddress,
-        chainInfo.chainId,
-        chainInfo.isTestNet
+  // Extract permissions from query data
+  const permissions = useMemo<string[]>(() => {
+    if (permissionsQuery.data?.success && permissionsQuery.data.data) {
+      return permissionsQuery.data.data.permissions || [];
+    }
+    return [];
+  }, [permissionsQuery.data]);
+
+  // Handle query errors
+  const queryError = useMemo<Optional<string>>(() => {
+    if (permissionsQuery.isError) {
+      return permissionsQuery.error instanceof Error
+        ? permissionsQuery.error.message
+        : 'Failed to fetch wallet permissions';
+    }
+    if (permissionsQuery.data && !permissionsQuery.data.success) {
+      return (
+        permissionsQuery.data.error || 'Failed to fetch wallet permissions'
       );
-
-      // The response is typed as 'any' in IndexerClient
-      // We need to validate the structure
-      if (response && typeof response === 'object') {
-        const typedResponse = response as WalletPermissionsResponse;
-
-        if (typedResponse.success && typedResponse.data) {
-          setPermissions(typedResponse.data.permissions || []);
-        } else {
-          throw new Error(
-            typedResponse.error || 'Failed to fetch wallet permissions'
-          );
-        }
-      } else {
-        throw new Error('Invalid response from indexer');
-      }
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to fetch permissions';
-      setError(errorMessage);
-      setPermissions([]);
-      console.error('Error fetching wallet permissions:', err);
-    } finally {
-      setIsLoading(false);
     }
-  }, [walletAddress, chainInfo, indexerEndpoint, indexerDevMode]);
+    return null;
+  }, [permissionsQuery.isError, permissionsQuery.error, permissionsQuery.data]);
+
+  /**
+   * Manually refresh permissions from indexer
+   */
+  const refresh = useCallback(async () => {
+    setError(null);
+    await permissionsQuery.refetch();
+  }, [permissionsQuery]);
 
   /**
    * Add permission for a contract address using smart contract
@@ -211,7 +224,7 @@ export function useMailerPermissions(
         );
 
         // Refresh permissions after successful addition
-        await fetchPermissions();
+        await refresh();
 
         return result;
       } catch (err) {
@@ -223,7 +236,7 @@ export function useMailerPermissions(
         setIsProcessing(false);
       }
     },
-    [mailerClient, connectedWallet, chainInfo, fetchPermissions]
+    [mailerClient, connectedWallet, chainInfo, refresh]
   );
 
   /**
@@ -252,7 +265,7 @@ export function useMailerPermissions(
         );
 
         // Refresh permissions after successful removal
-        await fetchPermissions();
+        await refresh();
 
         return result;
       } catch (err) {
@@ -264,7 +277,7 @@ export function useMailerPermissions(
         setIsProcessing(false);
       }
     },
-    [mailerClient, connectedWallet, chainInfo, fetchPermissions]
+    [mailerClient, connectedWallet, chainInfo, refresh]
   );
 
   /**
@@ -274,18 +287,15 @@ export function useMailerPermissions(
     setError(null);
   }, []);
 
-  // Always auto-fetch on mount if wallet is available
-  useEffect(() => {
-    if (walletAddress && chainInfo) {
-      fetchPermissions();
-    }
-  }, [walletAddress, chainInfo, fetchPermissions]);
+  // Combine loading states and errors
+  const isLoading = permissionsQuery.isLoading || isProcessing;
+  const combinedError = error || queryError;
 
   return {
     permissions,
-    isLoading: isLoading || isProcessing,
-    error,
-    refresh: fetchPermissions,
+    isLoading,
+    error: combinedError,
+    refresh,
     addPermission,
     removePermission,
     clearError,

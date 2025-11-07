@@ -596,14 +596,16 @@ describe('useMailerDelegations', () => {
         mockEndpointUrl,
         false,
         mockWalletAddress,
-        mockAuth
+        mockAuth,
+        { enabled: true }
       );
 
       expect(useIndexerGetDelegatedFrom).toHaveBeenCalledWith(
         mockEndpointUrl,
         false,
         mockWalletAddress,
-        mockAuth
+        mockAuth,
+        { enabled: true }
       );
     });
 
@@ -622,7 +624,8 @@ describe('useMailerDelegations', () => {
         mockEndpointUrl,
         false,
         '',
-        expect.objectContaining({ message: '', signature: '', signer: '' })
+        expect.objectContaining({ message: '', signature: '', signer: '' }),
+        { enabled: false }
       );
     });
   });
