@@ -6,9 +6,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  CreateMailboxRequest,
   Optional,
   WildduckConfig,
   WildduckMailbox,
+  WildduckUpdateMailboxRequest,
   WildduckUserAuth,
 } from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
@@ -35,6 +37,15 @@ export interface UseAccountMailboxesReturn {
   error: Optional<string>;
   /** Function to refresh mailboxes */
   refresh: () => Promise<void>;
+  /** Function to create a new mailbox */
+  createMailbox: (params: CreateMailboxRequest) => Promise<void>;
+  /** Function to update an existing mailbox */
+  updateMailbox: (
+    mailboxId: string,
+    params: WildduckUpdateMailboxRequest
+  ) => Promise<void>;
+  /** Function to delete a mailbox */
+  deleteMailbox: (mailboxId: string) => Promise<void>;
 }
 
 /**
@@ -128,25 +139,35 @@ export function useAccountMailboxes(
 
   const mailboxesHook = useWildduckMailboxes(config, authResponse, devMode);
 
-  // Track the last fetched userId to prevent re-fetching for the same user
-  const lastFetchedUserIdRef = useRef<Optional<string>>(null);
+  // Track the last fetched userId and username to prevent re-fetching for the same account
+  const lastFetchedAccountRef = useRef<{
+    userId: string;
+    username: string;
+  } | null>(null);
 
-  // Fetch addresses when wildduckAuth becomes available
+  // Fetch addresses when wildduckAuth becomes available or selectedAccount changes
   useEffect(() => {
     if (!wildduckAuth || !selectedAccount) {
       setEmailAddress(null);
       setError(null);
-      lastFetchedUserIdRef.current = null;
+      lastFetchedAccountRef.current = null;
       return;
     }
 
-    // Skip if we've already fetched for this userId
-    if (lastFetchedUserIdRef.current === wildduckAuth.userId) {
+    // Skip if we've already fetched for this exact userId and username combination
+    if (
+      lastFetchedAccountRef.current?.userId === wildduckAuth.userId &&
+      lastFetchedAccountRef.current?.username ===
+        selectedAccount.username.toLowerCase()
+    ) {
       return;
     }
 
-    // Mark this userId as being fetched
-    lastFetchedUserIdRef.current = wildduckAuth.userId;
+    // Mark this account as being fetched
+    lastFetchedAccountRef.current = {
+      userId: wildduckAuth.userId,
+      username: selectedAccount.username.toLowerCase(),
+    };
 
     (async () => {
       try {
@@ -190,7 +211,7 @@ export function useAccountMailboxes(
         setEmailAddress(address);
 
         // Fetch mailboxes now that we have a valid address
-        await mailboxesHook.refresh(wildduckAuth.userId);
+        await mailboxesHook.refresh();
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to load email data';
@@ -198,7 +219,7 @@ export function useAccountMailboxes(
         setError(errorMessage);
         setEmailAddress(null);
         // Reset the ref so we can retry on next change
-        lastFetchedUserIdRef.current = null;
+        lastFetchedAccountRef.current = null;
       }
     })();
     // CRITICAL FIX: Only depend on primitive values, not hook objects
@@ -232,10 +253,49 @@ export function useAccountMailboxes(
       return;
     }
     // Reset the ref so the useEffect will re-run
-    lastFetchedUserIdRef.current = null;
+    lastFetchedAccountRef.current = null;
     // Trigger a refresh by calling the mailboxes hook's refresh method
-    await mailboxesHook.refresh(wildduckAuth.userId);
+    await mailboxesHook.refresh();
   }, [wildduckAuth, mailboxesHook]);
+
+  // Create mailbox wrapper function
+  const createMailbox = useCallback(
+    async (params: CreateMailboxRequest) => {
+      if (!wildduckAuth) {
+        throw new Error('Authentication is required to create mailbox');
+      }
+      await mailboxesHook.createMailbox(wildduckAuth.userId, params);
+      // Refresh mailboxes after creation
+      await refresh();
+    },
+    [wildduckAuth, mailboxesHook, refresh]
+  );
+
+  // Update mailbox wrapper function
+  const updateMailbox = useCallback(
+    async (mailboxId: string, params: WildduckUpdateMailboxRequest) => {
+      if (!wildduckAuth) {
+        throw new Error('Authentication is required to update mailbox');
+      }
+      await mailboxesHook.updateMailbox(wildduckAuth.userId, mailboxId, params);
+      // Refresh mailboxes after update
+      await refresh();
+    },
+    [wildduckAuth, mailboxesHook, refresh]
+  );
+
+  // Delete mailbox wrapper function
+  const deleteMailbox = useCallback(
+    async (mailboxId: string) => {
+      if (!wildduckAuth) {
+        throw new Error('Authentication is required to delete mailbox');
+      }
+      await mailboxesHook.deleteMailbox(wildduckAuth.userId, mailboxId);
+      // Refresh mailboxes after deletion
+      await refresh();
+    },
+    [wildduckAuth, mailboxesHook, refresh]
+  );
 
   // Memoize the return object to prevent unnecessary re-renders
   // Only recreate when any of the properties actually change
@@ -247,7 +307,20 @@ export function useAccountMailboxes(
       isLoading,
       error: combinedError,
       refresh,
+      createMailbox,
+      updateMailbox,
+      deleteMailbox,
     }),
-    [emailAddress, mailboxes, wildduckAuth, isLoading, combinedError, refresh]
+    [
+      emailAddress,
+      mailboxes,
+      wildduckAuth,
+      isLoading,
+      combinedError,
+      refresh,
+      createMailbox,
+      updateMailbox,
+      deleteMailbox,
+    ]
   );
 }

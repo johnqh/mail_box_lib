@@ -7,7 +7,7 @@
 import { Optional, WildduckConfig, WildduckUserAuth } from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
 import { useWildduckAuth } from '@sudobility/wildduck_client';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import {
   createGlobalState,
   setGlobalState,
@@ -49,6 +49,8 @@ export interface UseSelectedAccountReturn {
   selectedAccount: Optional<WildDuckAccount>;
   /** WildDuck authentication object (undefined if not authenticated) */
   wildduckAuth: Optional<WildduckUserAuth>;
+  /** Function to manually select an account by username */
+  selectAccount: (username: string) => void;
 }
 
 /**
@@ -95,7 +97,7 @@ export function useSelectedAccount(
   endpointUrl: string,
   apiToken: string,
   storage: StorageService,
-  devMode: boolean = false
+  devMode: boolean
 ): UseSelectedAccountReturn {
   const [accounts] = useGlobalWalletAccounts();
   const [selectedAccount] = useGlobalSelectedAccount();
@@ -253,10 +255,28 @@ export function useSelectedAccount(
     indexerAuth?.signer,
   ]);
 
+  /**
+   * Manually select an account by username
+   * Finds the account in the accounts list and sets it as selected
+   */
+  const selectAccount = useCallback(
+    (username: string) => {
+      const account = accounts.find(acc => acc.username === username);
+      if (account) {
+        setGlobalState('selectedAccount', account);
+      } else {
+        console.warn(
+          `⚠️ useSelectedAccount: Cannot select account "${username}" - not found in accounts list`
+        );
+      }
+    },
+    [accounts]
+  );
+
   // Memoize the return object to prevent unnecessary re-renders
   // Only recreate when selectedAccount or wildduckAuth actually change
   return useMemo<UseSelectedAccountReturn>(
-    () => ({ selectedAccount, wildduckAuth }),
-    [selectedAccount, wildduckAuth]
+    () => ({ selectedAccount, wildduckAuth, selectAccount }),
+    [selectedAccount, wildduckAuth, selectAccount]
   );
 }

@@ -1,10 +1,10 @@
 /**
- * Tests for useMailWebhooks hook
+ * Tests for useMailerWebhooks hook
  */
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useMailWebhooks } from '../useMailWebhooks';
+import { useMailerWebhooks } from '../useMailerWebhooks';
 import type { IndexerWebhookData } from '@sudobility/types';
 
 // Mock dependencies
@@ -12,7 +12,7 @@ vi.mock('@sudobility/indexer_client', () => ({
   useIndexerMailWebhooks: vi.fn(),
 }));
 
-vi.mock('../useWalletStatus', () => ({
+vi.mock('../../core/useWalletStatus', () => ({
   useWalletStatus: vi.fn(),
 }));
 
@@ -20,11 +20,32 @@ vi.mock('../../../stores/mailWebhooksStore', () => ({
   useMailWebhooksStore: vi.fn(),
 }));
 
+vi.mock('@sudobility/contracts', () => ({
+  OnchainMailerClient: class MockOnchainMailerClient {
+    sendThroughWebhook = vi.fn();
+  },
+}));
+
+vi.mock('@sudobility/configs', () => ({
+  RpcHelpers: class MockRpcHelpers {
+    static getChainInfo = vi.fn();
+    static getChainType = vi.fn();
+  },
+}));
+
+vi.mock('@sudobility/types', async () => {
+  const actual = await vi.importActual('@sudobility/types');
+  return {
+    ...actual,
+    validateAddress: vi.fn(),
+  };
+});
+
 import { useIndexerMailWebhooks } from '@sudobility/indexer_client';
-import { useWalletStatus } from '../useWalletStatus';
+import { useWalletStatus } from '../../core/useWalletStatus';
 import { useMailWebhooksStore } from '../../../stores/mailWebhooksStore';
 
-describe('useMailWebhooks', () => {
+describe('useMailerWebhooks', () => {
   const mockWebhook1: IndexerWebhookData = {
     id: 'webhook-1',
     userId: 'user-1',
@@ -123,7 +144,7 @@ describe('useMailWebhooks', () => {
 
   describe('initialization', () => {
     it('should initialize with empty state when wallet not connected', () => {
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       expect(result.current.webhooks).toEqual([]);
       expect(result.current.total).toBe(0);
@@ -151,7 +172,7 @@ describe('useMailWebhooks', () => {
       // Set up the cache in mockStoreCache
       mockStoreCache[walletAddress.toLowerCase()] = mockCacheEntry;
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       expect(result.current.webhooks).toEqual([mockWebhook1, mockWebhook2]);
       expect(result.current.total).toBe(2);
@@ -181,7 +202,7 @@ describe('useMailWebhooks', () => {
       });
 
       renderHook(() =>
-        useMailWebhooks({
+        useMailerWebhooks({
           ...mockConfig,
           autoFetch: true,
         })
@@ -210,7 +231,7 @@ describe('useMailWebhooks', () => {
       });
 
       renderHook(() =>
-        useMailWebhooks({
+        useMailerWebhooks({
           ...mockConfig,
           autoFetch: true,
         })
@@ -237,7 +258,7 @@ describe('useMailWebhooks', () => {
       mockStoreCache[walletAddress.toLowerCase()] = mockCacheEntry;
 
       renderHook(() =>
-        useMailWebhooks({
+        useMailerWebhooks({
           ...mockConfig,
           autoFetch: true,
         })
@@ -254,7 +275,7 @@ describe('useMailWebhooks', () => {
       });
 
       renderHook(() =>
-        useMailWebhooks({
+        useMailerWebhooks({
           ...mockConfig,
           autoFetch: false,
         })
@@ -283,7 +304,7 @@ describe('useMailWebhooks', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       await act(async () => {
         await result.current.fetchWebhooks();
@@ -304,7 +325,7 @@ describe('useMailWebhooks', () => {
         isVerified: false,
       });
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       await act(async () => {
         await result.current.fetchWebhooks();
@@ -320,7 +341,7 @@ describe('useMailWebhooks', () => {
         isVerified: false,
       });
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       await act(async () => {
         await result.current.fetchWebhooks();
@@ -342,7 +363,7 @@ describe('useMailWebhooks', () => {
 
       mockGetWebhooksApi.mockRejectedValue(new Error('Network error'));
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       await act(async () => {
         await result.current.fetchWebhooks();
@@ -370,7 +391,7 @@ describe('useMailWebhooks', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       await act(async () => {
         await result.current.fetchWebhooks();
@@ -408,7 +429,7 @@ describe('useMailWebhooks', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       await act(async () => {
         await result.current.createWebhook({
@@ -434,7 +455,7 @@ describe('useMailWebhooks', () => {
         isVerified: false,
       });
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       await expect(
         result.current.createWebhook({
@@ -454,7 +475,7 @@ describe('useMailWebhooks', () => {
 
       mockCreateWebhook.mockRejectedValue(new Error('Creation failed'));
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       await expect(
         result.current.createWebhook({
@@ -492,7 +513,7 @@ describe('useMailWebhooks', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       await act(async () => {
         await result.current.deleteWebhook('webhook-1');
@@ -516,7 +537,7 @@ describe('useMailWebhooks', () => {
         isVerified: false,
       });
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       await expect(result.current.deleteWebhook('webhook-1')).rejects.toThrow(
         'Wallet not verified'
@@ -534,7 +555,7 @@ describe('useMailWebhooks', () => {
 
       mockDeleteWebhook.mockRejectedValue(new Error('Deletion failed'));
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       await expect(result.current.deleteWebhook('webhook-1')).rejects.toThrow(
         'Deletion failed'
@@ -561,7 +582,7 @@ describe('useMailWebhooks', () => {
         timestamp: new Date().toISOString(),
       });
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       await act(async () => {
         await result.current.refreshWebhooks();
@@ -578,7 +599,7 @@ describe('useMailWebhooks', () => {
         isVerified: false,
       });
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       await act(async () => {
         await result.current.refreshWebhooks();
@@ -590,7 +611,7 @@ describe('useMailWebhooks', () => {
 
   describe('clearError', () => {
     it('should call indexer hook clearError', () => {
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       act(() => {
         result.current.clearError();
@@ -613,7 +634,7 @@ describe('useMailWebhooks', () => {
         clearError: mockClearError,
       });
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       expect(result.current.isLoading).toBe(true);
     });
@@ -630,7 +651,7 @@ describe('useMailWebhooks', () => {
         clearError: mockClearError,
       });
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       expect(result.current.error).toBe('Failed to fetch');
     });
@@ -639,7 +660,7 @@ describe('useMailWebhooks', () => {
   describe('wallet address changes', () => {
     it('should fetch webhooks when wallet address changes', async () => {
       const { rerender } = renderHook(() =>
-        useMailWebhooks({ ...mockConfig, autoFetch: true })
+        useMailerWebhooks({ ...mockConfig, autoFetch: true })
       );
 
       // Initially no wallet
@@ -703,7 +724,7 @@ describe('useMailWebhooks', () => {
         clearError: mockClearError,
       });
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       expect(result.current.isCached).toBe(true);
     });
@@ -736,7 +757,7 @@ describe('useMailWebhooks', () => {
         clearError: mockClearError,
       });
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       expect(result.current.isCached).toBe(false);
     });
@@ -744,7 +765,7 @@ describe('useMailWebhooks', () => {
     it('should be false when no cache exists', () => {
       // mockStoreCache is empty by default, no need to set anything
 
-      const { result } = renderHook(() => useMailWebhooks(mockConfig));
+      const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
       expect(result.current.isCached).toBe(false);
     });

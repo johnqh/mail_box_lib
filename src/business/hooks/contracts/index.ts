@@ -24,6 +24,12 @@ export * from './useMailerPermissions';
 // Mailer delegations management
 export * from './useMailerDelegations';
 
+// Mailer webhooks management
+export * from './useMailerWebhooks';
+
+// Mailer templates management
+export * from './useMailerTemplates';
+
 // Re-export types from the contracts package for convenience
 export type {
   UnifiedTransaction,

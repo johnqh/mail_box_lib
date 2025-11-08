@@ -1,13 +1,20 @@
 /**
- * React hook for managing mail webhooks
+ * React hook for managing mailer webhooks
  * Integrates with useWalletStatus and useIndexerMailWebhooks
  * Caches webhooks using Zustand store
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useIndexerMailWebhooks } from '@sudobility/indexer_client';
 import type { IndexerWebhookData, Optional } from '@sudobility/types';
-import { useWalletStatus } from './useWalletStatus';
+import { Chain, validateAddress } from '@sudobility/types';
+import {
+  type MessageResult,
+  OnchainMailerClient,
+  type Wallet,
+} from '@sudobility/contracts';
+import { RpcHelpers } from '@sudobility/configs';
+import { useWalletStatus } from '../core/useWalletStatus';
 import { useMailWebhooksStore } from '../../stores/mailWebhooksStore';
 
 /**
@@ -18,9 +25,9 @@ export interface WebhookCreateRequest {
 }
 
 /**
- * Configuration for useMailWebhooks hook
+ * Configuration for useMailerWebhooks hook
  */
-export interface UseMailWebhooksConfig {
+export interface UseMailerWebhooksConfig {
   /** Indexer endpoint URL */
   endpointUrl: string;
   /** Whether to use dev mode */
@@ -30,9 +37,9 @@ export interface UseMailWebhooksConfig {
 }
 
 /**
- * Return type for useMailWebhooks hook
+ * Return type for useMailerWebhooks hook
  */
-export interface UseMailWebhooksReturn {
+export interface UseMailerWebhooksReturn {
   /** Array of mail webhooks for the current wallet */
   webhooks: IndexerWebhookData[];
   /** Total number of webhooks */
@@ -53,6 +60,13 @@ export interface UseMailWebhooksReturn {
   createWebhook: (webhookData: WebhookCreateRequest) => Promise<void>;
   /** Delete a webhook */
   deleteWebhook: (webhookId: string) => Promise<void>;
+  /** Send email through webhook - validates recipient (only wallet addresses supported) */
+  sendWebhookEmail: (
+    connectedWallet: Wallet,
+    to: string,
+    webhookId: string,
+    chain: Chain
+  ) => Promise<MessageResult>;
   /** Clear error state */
   clearError: () => void;
   /** Refresh webhooks (bypass cache) */
@@ -60,13 +74,13 @@ export interface UseMailWebhooksReturn {
 }
 
 /**
- * Hook for managing mail webhooks
+ * Hook for managing mailer webhooks
  *
  * This hook automatically observes wallet status and fetches mail webhooks
  * when a wallet is verified. Webhooks are cached using Zustand store.
  *
  * @param config - Configuration for the hook
- * @returns UseMailWebhooksReturn with webhooks and management functions
+ * @returns UseMailerWebhooksReturn with webhooks and management functions
  *
  * @example
  * ```typescript
@@ -75,7 +89,7 @@ export interface UseMailWebhooksReturn {
  *   isLoading,
  *   createWebhook,
  *   deleteWebhook
- * } = useMailWebhooks({
+ * } = useMailerWebhooks({
  *   endpointUrl: 'https://api.example.com',
  *   autoFetch: true
  * });
@@ -89,9 +103,9 @@ export interface UseMailWebhooksReturn {
  * await deleteWebhook('webhook-id');
  * ```
  */
-export const useMailWebhooks = (
-  config: UseMailWebhooksConfig
-): UseMailWebhooksReturn => {
+export const useMailerWebhooks = (
+  config: UseMailerWebhooksConfig
+): UseMailerWebhooksReturn => {
   const { endpointUrl, dev = false, autoFetch = true } = config;
 
   // Get wallet status
@@ -99,6 +113,12 @@ export const useMailWebhooks = (
 
   // Get indexer hook
   const indexerHook = useIndexerMailWebhooks(endpointUrl, dev);
+
+  // Create OnchainMailerClient instance
+  const mailerClient = useMemo(() => new OnchainMailerClient(), []);
+
+  // Local loading state for send operations
+  const [isSending, setIsSending] = useState(false);
 
   // Get Zustand store methods
   const { setWebhooks: setCachedWebhooks, clearWebhooks: clearCachedWebhooks } =
@@ -188,6 +208,71 @@ export const useMailWebhooks = (
   );
 
   /**
+   * Simple email validation regex
+   */
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  /**
+   * Send email through webhook
+   * Note: Currently webhooks only support wallet addresses as recipients.
+   * Email addresses are validated but will throw an error as they're not supported.
+   */
+  const sendWebhookEmail = useCallback(
+    async (
+      connectedWallet: Wallet,
+      to: string,
+      webhookId: string,
+      chain: Chain
+    ): Promise<MessageResult> => {
+      setIsSending(true);
+
+      try {
+        const chainInfo = RpcHelpers.getChainInfo(chain);
+        if (!chainInfo) {
+          throw new Error(`Invalid chain: ${chain}`);
+        }
+
+        const chainType = RpcHelpers.getChainType(chain);
+        if (!chainType) {
+          throw new Error(`Invalid chain: ${chain}`);
+        }
+
+        // Check if 'to' is an email address
+        if (isValidEmail(to)) {
+          // Webhooks currently only support wallet addresses, not email addresses
+          throw new Error(
+            'Webhooks currently only support sending to wallet addresses, not email addresses'
+          );
+        }
+
+        // Check if 'to' is a valid wallet address for the chain
+        const isValidWalletAddress = validateAddress(to, chainType);
+
+        if (isValidWalletAddress) {
+          // Send through webhook to wallet address
+          return await mailerClient.sendThroughWebhook(
+            connectedWallet,
+            chainInfo,
+            to,
+            webhookId
+          );
+        }
+
+        // Neither valid email nor valid wallet address
+        throw new Error(
+          `Invalid recipient: "${to}" is not a valid wallet address for ${chain}`
+        );
+      } finally {
+        setIsSending(false);
+      }
+    },
+    [mailerClient]
+  );
+
+  /**
    * Auto-fetch webhooks when wallet is verified
    */
   useEffect(() => {
@@ -214,13 +299,14 @@ export const useMailWebhooks = (
       webhooks: cachedWebhooks,
       total: cachedData?.total || 0,
       hasMore: cachedData?.hasMore || false,
-      isLoading: indexerHook.isLoading,
+      isLoading: indexerHook.isLoading || isSending,
       error: indexerHook.error,
       isCached,
       cachedAt: cachedData?.cachedAt,
       fetchWebhooks,
       createWebhook,
       deleteWebhook,
+      sendWebhookEmail,
       clearError: indexerHook.clearError,
       refreshWebhooks,
     }),
@@ -228,12 +314,14 @@ export const useMailWebhooks = (
       cachedWebhooks,
       cachedData,
       indexerHook.isLoading,
+      isSending,
       indexerHook.error,
       indexerHook.clearError,
       isCached,
       fetchWebhooks,
       createWebhook,
       deleteWebhook,
+      sendWebhookEmail,
       refreshWebhooks,
     ]
   );

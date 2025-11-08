@@ -6,9 +6,11 @@
 
 import { useMemo } from 'react';
 import {
+  CreateMailboxRequest,
   MailboxSpecialUse,
   Optional,
   WildduckMailbox,
+  WildduckUpdateMailboxRequest,
   WildduckUserAuth,
 } from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
@@ -44,6 +46,15 @@ export interface UseMailboxesAndSettingsReturn {
   error: Optional<string>;
   /** Function to refresh mailboxes */
   refresh: () => Promise<void>;
+  /** Function to create a new mailbox */
+  createMailbox: (params: CreateMailboxRequest) => Promise<void>;
+  /** Function to update an existing mailbox */
+  updateMailbox: (
+    mailboxId: string,
+    params: WildduckUpdateMailboxRequest
+  ) => Promise<void>;
+  /** Function to delete a mailbox */
+  deleteMailbox: (mailboxId: string) => Promise<void>;
 }
 
 /**

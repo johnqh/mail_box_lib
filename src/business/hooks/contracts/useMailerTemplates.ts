@@ -1,10 +1,10 @@
 /**
- * React hook for managing mail templates
+ * React hook for managing mailer templates
  * Integrates with useWalletStatus and useIndexerMailTemplates
  * Caches templates using Zustand store
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useIndexerMailTemplates } from '@sudobility/indexer_client';
 import type {
   IndexerTemplateCreateRequest,
@@ -12,13 +12,20 @@ import type {
   IndexerTemplateUpdateRequest,
   Optional,
 } from '@sudobility/types';
-import { useWalletStatus } from './useWalletStatus';
+import { Chain, validateAddress } from '@sudobility/types';
+import {
+  type MessageResult,
+  OnchainMailerClient,
+  type Wallet,
+} from '@sudobility/contracts';
+import { RpcHelpers } from '@sudobility/configs';
+import { useWalletStatus } from '../core/useWalletStatus';
 import { useMailTemplatesStore } from '../../stores/mailTemplatesStore';
 
 /**
- * Configuration for useMailTemplates hook
+ * Configuration for useMailerTemplates hook
  */
-export interface UseMailTemplatesConfig {
+export interface UseMailerTemplatesConfig {
   /** Indexer endpoint URL */
   endpointUrl: string;
   /** Whether to use dev mode */
@@ -28,9 +35,9 @@ export interface UseMailTemplatesConfig {
 }
 
 /**
- * Return type for useMailTemplates hook
+ * Return type for useMailerTemplates hook
  */
-export interface UseMailTemplatesReturn {
+export interface UseMailerTemplatesReturn {
   /** Array of mail templates for the current wallet */
   templates: IndexerTemplateData[];
   /** Total number of templates */
@@ -56,6 +63,13 @@ export interface UseMailTemplatesReturn {
   ) => Promise<void>;
   /** Delete a template */
   deleteTemplate: (templateId: string) => Promise<void>;
+  /** Send email using prepared template - validates recipient and chooses appropriate method */
+  sendPreparedEmail: (
+    connectedWallet: Wallet,
+    to: string,
+    templateId: string,
+    chain: Chain
+  ) => Promise<MessageResult>;
   /** Clear error state */
   clearError: () => void;
   /** Refresh templates (bypass cache) */
@@ -63,13 +77,13 @@ export interface UseMailTemplatesReturn {
 }
 
 /**
- * Hook for managing mail templates
+ * Hook for managing mailer templates
  *
  * This hook automatically observes wallet status and fetches mail templates
  * when a wallet is verified. Templates are cached using Zustand store.
  *
  * @param config - Configuration for the hook
- * @returns UseMailTemplatesReturn with templates and management functions
+ * @returns UseMailerTemplatesReturn with templates and management functions
  *
  * @example
  * ```typescript
@@ -79,7 +93,7 @@ export interface UseMailTemplatesReturn {
  *   createTemplate,
  *   updateTemplate,
  *   deleteTemplate
- * } = useMailTemplates({
+ * } = useMailerTemplates({
  *   endpointUrl: 'https://api.example.com',
  *   autoFetch: true
  * });
@@ -96,9 +110,9 @@ export interface UseMailTemplatesReturn {
  * });
  * ```
  */
-export const useMailTemplates = (
-  config: UseMailTemplatesConfig
-): UseMailTemplatesReturn => {
+export const useMailerTemplates = (
+  config: UseMailerTemplatesConfig
+): UseMailerTemplatesReturn => {
   const { endpointUrl, dev = false, autoFetch = true } = config;
 
   // Get wallet status
@@ -106,6 +120,12 @@ export const useMailTemplates = (
 
   // Get indexer hook
   const indexerHook = useIndexerMailTemplates(endpointUrl, dev);
+
+  // Create OnchainMailerClient instance
+  const mailerClient = useMemo(() => new OnchainMailerClient(), []);
+
+  // Local loading state for send operations
+  const [isSending, setIsSending] = useState(false);
 
   // Get Zustand store methods
   const {
@@ -223,6 +243,73 @@ export const useMailTemplates = (
   );
 
   /**
+   * Simple email validation regex
+   */
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  /**
+   * Send email using prepared template
+   * Validates recipient and chooses appropriate method (wallet address or email)
+   */
+  const sendPreparedEmail = useCallback(
+    async (
+      connectedWallet: Wallet,
+      to: string,
+      templateId: string,
+      chain: Chain
+    ): Promise<MessageResult> => {
+      setIsSending(true);
+
+      try {
+        const chainInfo = RpcHelpers.getChainInfo(chain);
+        if (!chainInfo) {
+          throw new Error(`Invalid chain: ${chain}`);
+        }
+
+        const chainType = RpcHelpers.getChainType(chain);
+        if (!chainType) {
+          throw new Error(`Invalid chain: ${chain}`);
+        }
+
+        // Check if 'to' is a valid email address
+        if (isValidEmail(to)) {
+          // Send to email address
+          return await mailerClient.sendPreparedToEmailAddress(
+            connectedWallet,
+            chainInfo,
+            to,
+            templateId
+          );
+        }
+
+        // Check if 'to' is a valid wallet address for the chain
+        const isValidWalletAddress = validateAddress(to, chainType);
+
+        if (isValidWalletAddress) {
+          // Send to wallet address
+          return await mailerClient.sendPrepared(
+            connectedWallet,
+            chainInfo,
+            to,
+            templateId
+          );
+        }
+
+        // Neither valid email nor valid wallet address
+        throw new Error(
+          `Invalid recipient: "${to}" is neither a valid email address nor a valid wallet address for ${chain}`
+        );
+      } finally {
+        setIsSending(false);
+      }
+    },
+    [mailerClient]
+  );
+
+  /**
    * Auto-fetch templates when wallet is verified
    */
   useEffect(() => {
@@ -249,7 +336,7 @@ export const useMailTemplates = (
       templates: cachedTemplates,
       total: cachedData?.total || 0,
       hasMore: cachedData?.hasMore || false,
-      isLoading: indexerHook.isLoading,
+      isLoading: indexerHook.isLoading || isSending,
       error: indexerHook.error,
       isCached,
       cachedAt: cachedData?.cachedAt,
@@ -257,6 +344,7 @@ export const useMailTemplates = (
       createTemplate,
       updateTemplate,
       deleteTemplate,
+      sendPreparedEmail,
       clearError: indexerHook.clearError,
       refreshTemplates,
     }),
@@ -264,6 +352,7 @@ export const useMailTemplates = (
       cachedTemplates,
       cachedData,
       indexerHook.isLoading,
+      isSending,
       indexerHook.error,
       indexerHook.clearError,
       isCached,
@@ -271,6 +360,7 @@ export const useMailTemplates = (
       createTemplate,
       updateTemplate,
       deleteTemplate,
+      sendPreparedEmail,
       refreshTemplates,
     ]
   );

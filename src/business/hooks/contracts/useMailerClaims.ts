@@ -184,9 +184,9 @@ export const useMailerClaims = (
       };
 
       // Wait for transaction to be mined and confirmed
-      if (transaction.hash && (connectedWallet as EVMWallet).publicClient) {
-        const publicClient = (connectedWallet as EVMWallet).publicClient!;
-        await publicClient.waitForTransactionReceipt({
+      const evmWallet = connectedWallet as EVMWallet;
+      if (transaction.hash && evmWallet.publicClient) {
+        await evmWallet.publicClient.waitForTransactionReceipt({
           hash: transaction.hash as `0x${string}`,
         });
 

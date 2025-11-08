@@ -6,7 +6,7 @@
  * Returns a list of permissioned contract addresses for a given wallet
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Chain, Optional } from '@sudobility/types';
 import { useIndexerGetWalletPermissions } from '@sudobility/indexer_client';
 import {
@@ -187,12 +187,15 @@ export function useMailerPermissions(
 
   // Extract permissions from query data
   const permissions = useMemo<string[]>(() => {
-    console.log('[useMailerPermissions] Extracting permissions from query data:', {
-      hasData: !!permissionsQuery.data,
-      success: permissionsQuery.data?.success,
-      data: permissionsQuery.data?.data,
-      rawData: permissionsQuery.data,
-    });
+    console.log(
+      '[useMailerPermissions] Extracting permissions from query data:',
+      {
+        hasData: !!permissionsQuery.data,
+        success: permissionsQuery.data?.success,
+        data: permissionsQuery.data?.data,
+        rawData: permissionsQuery.data,
+      }
+    );
 
     if (permissionsQuery.data?.success) {
       // Handle both API response formats:
@@ -203,22 +206,32 @@ export function useMailerPermissions(
       // Try nested format first (data.permissions)
       if (responseData.data?.permissions) {
         const extracted = responseData.data.permissions;
-        console.log('[useMailerPermissions] Extracted permissions (nested format):', extracted);
+        console.log(
+          '[useMailerPermissions] Extracted permissions (nested format):',
+          extracted
+        );
         return extracted;
       }
 
       // Try flat format (contracts at top level)
       if (responseData.contracts) {
         const extracted = responseData.contracts;
-        console.log('[useMailerPermissions] Extracted permissions (flat format, contracts):', extracted);
+        console.log(
+          '[useMailerPermissions] Extracted permissions (flat format, contracts):',
+          extracted
+        );
         return extracted;
       }
 
       // Fallback to empty array
-      console.log('[useMailerPermissions] No permissions or contracts found in response');
+      console.log(
+        '[useMailerPermissions] No permissions or contracts found in response'
+      );
       return [];
     }
-    console.log('[useMailerPermissions] No permissions extracted, returning empty array');
+    console.log(
+      '[useMailerPermissions] No permissions extracted, returning empty array'
+    );
     return [];
   }, [permissionsQuery.data]);
 

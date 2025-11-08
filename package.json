@@ -90,11 +90,11 @@
   "license": "MIT",
   "devDependencies": {
     "@sudobility/configs": "^0.0.18",
-    "@sudobility/contracts": "^1.15.2",
+    "@sudobility/contracts": "^1.16.0",
     "@sudobility/di": "^1.4.10",
     "@sudobility/indexer_client": "^0.0.41",
     "@sudobility/types": "^1.9.3",
-    "@sudobility/wildduck_client": "^1.0.16",
+    "@sudobility/wildduck_client": "^1.0.21",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
@@ -123,11 +123,11 @@
   "peerDependencies": {
     "@bonfida/spl-name-service": "^3.0.16",
     "@sudobility/configs": "^0.0.18",
-    "@sudobility/contracts": "^1.15.2",
+    "@sudobility/contracts": "^1.16.0",
     "@sudobility/di": "^1.4.10",
     "@sudobility/indexer_client": "^0.0.41",
     "@sudobility/types": "^1.9.3",
-    "@sudobility/wildduck_client": "^1.0.16",
+    "@sudobility/wildduck_client": "^1.0.21",
     "@tanstack/react-query": "^5.90.5",
     "react": "^19.2.0",
     "viem": "^2.38.4"
