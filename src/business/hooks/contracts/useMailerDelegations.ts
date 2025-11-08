@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   type DelegationResult,
+  type EVMWallet,
   OnchainMailerClient,
   type UnifiedTransaction,
   type Wallet,
@@ -109,7 +110,7 @@ const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
  */
 export function useMailerDelegations(
   connectedWallet: Optional<Wallet>,
-  chain: Chain,
+  chain: Optional<Chain>,
   auth: Optional<IndexerUserAuth>,
   indexerEndpoint: string,
   indexerDevMode: boolean = false
@@ -122,6 +123,7 @@ export function useMailerDelegations(
 
   // Get chainInfo using convenient helper
   const chainInfo = useMemo<Optional<ChainInfo>>(() => {
+    if (!chain) return null;
     return RpcHelpers.getChainInfo(chain);
   }, [chain]);
 
@@ -286,10 +288,10 @@ export function useMailerDelegations(
         );
 
         // Wait for transaction to be mined and confirmed
-        if (result.transactionHash && (connectedWallet as any).publicClient) {
-          const publicClient = (connectedWallet as any).publicClient;
-          await publicClient.waitForTransactionReceipt({
-            hash: result.transactionHash,
+        const evmWallet = connectedWallet as EVMWallet;
+        if (result.transactionHash && evmWallet.publicClient) {
+          await evmWallet.publicClient.waitForTransactionReceipt({
+            hash: result.transactionHash as `0x${string}`,
           });
 
           // Wait additional time for indexer to process the event
@@ -332,6 +334,17 @@ export function useMailerDelegations(
         ZERO_ADDRESS
       );
 
+      // Wait for transaction to be mined and confirmed
+      const evmWallet = connectedWallet as EVMWallet;
+      if (result.transactionHash && evmWallet.publicClient) {
+        await evmWallet.publicClient.waitForTransactionReceipt({
+          hash: result.transactionHash as `0x${string}`,
+        });
+
+        // Wait additional time for indexer to process the event
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+
       // Refresh indexer data after successful revocation
       await refresh();
 
@@ -372,9 +385,11 @@ export function useMailerDelegations(
         );
 
         // Wait for transaction to be mined and confirmed
-        if (result.hash && (connectedWallet as any).publicClient) {
-          const publicClient = (connectedWallet as any).publicClient;
-          await publicClient.waitForTransactionReceipt({ hash: result.hash });
+        const evmWallet = connectedWallet as EVMWallet;
+        if (result.hash && evmWallet.publicClient) {
+          await evmWallet.publicClient.waitForTransactionReceipt({
+            hash: result.hash as `0x${string}`,
+          });
 
           // Wait additional time for indexer to process the event
           await new Promise(resolve => setTimeout(resolve, 2000));

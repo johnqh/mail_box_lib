@@ -6,10 +6,11 @@
  * Returns a list of permissioned contract addresses for a given wallet
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Chain, Optional } from '@sudobility/types';
 import { useIndexerGetWalletPermissions } from '@sudobility/indexer_client';
 import {
+  type EVMWallet,
   OnchainMailerClient,
   type UnifiedTransaction,
   type Wallet,
@@ -111,10 +112,19 @@ export interface UseMailerPermissionsReturn {
  */
 export function useMailerPermissions(
   connectedWallet: Optional<Wallet>,
-  chain: Chain,
+  chain: Optional<Chain>,
   indexerEndpoint: string,
   indexerDevMode: boolean = false
 ): UseMailerPermissionsReturn {
+  console.log('[useMailerPermissions] Hook called with params:', {
+    hasConnectedWallet: !!connectedWallet,
+    connectedWalletType: connectedWallet ? typeof connectedWallet : 'null',
+    connectedWalletKeys: connectedWallet ? Object.keys(connectedWallet) : [],
+    chain,
+    indexerEndpoint,
+    indexerDevMode,
+  });
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<Optional<string>>(null);
 
@@ -123,6 +133,7 @@ export function useMailerPermissions(
 
   // Get chainInfo using convenient helper
   const chainInfo = useMemo<Optional<ChainInfo>>(() => {
+    if (!chain) return null;
     return RpcHelpers.getChainInfo(chain);
   }, [chain]);
 
@@ -137,14 +148,17 @@ export function useMailerPermissions(
   }, [connectedWallet]);
 
   // Debug logging
-  console.log('[useMailerPermissions] Parameters:', {
+  console.log('[useMailerPermissions] Computed values:', {
     walletAddress,
     chain,
     chainId: chainInfo?.chainId,
+    chainName: chainInfo?.name,
     isTestNet: chainInfo?.isTestNet,
     indexerEndpoint,
     indexerDevMode,
-    enabled: !!walletAddress && !!chainInfo,
+    enabledCondition: !!walletAddress && !!chainInfo,
+    hasWalletAddress: !!walletAddress,
+    hasChainInfo: !!chainInfo,
   });
 
   // Fetch wallet permissions from indexer using React Query
@@ -159,19 +173,52 @@ export function useMailerPermissions(
     }
   );
 
-  console.log('[useMailerPermissions] Query state:', {
+  console.log('[useMailerPermissions] React Query state:', {
     isLoading: permissionsQuery.isLoading,
     isError: permissionsQuery.isError,
     isFetching: permissionsQuery.isFetching,
     hasData: !!permissionsQuery.data,
+    dataSuccess: permissionsQuery.data?.success,
+    dataHasPermissions: !!permissionsQuery.data?.data?.permissions,
+    permissionsCount: permissionsQuery.data?.data?.permissions?.length || 0,
     error: permissionsQuery.error,
+    dataError: permissionsQuery.data?.error,
   });
 
   // Extract permissions from query data
   const permissions = useMemo<string[]>(() => {
-    if (permissionsQuery.data?.success && permissionsQuery.data.data) {
-      return permissionsQuery.data.data.permissions || [];
+    console.log('[useMailerPermissions] Extracting permissions from query data:', {
+      hasData: !!permissionsQuery.data,
+      success: permissionsQuery.data?.success,
+      data: permissionsQuery.data?.data,
+      rawData: permissionsQuery.data,
+    });
+
+    if (permissionsQuery.data?.success) {
+      // Handle both API response formats:
+      // 1. Nested: { success: true, data: { permissions: [...] } }
+      // 2. Flat: { success: true, contracts: [...] }
+      const responseData = permissionsQuery.data as any;
+
+      // Try nested format first (data.permissions)
+      if (responseData.data?.permissions) {
+        const extracted = responseData.data.permissions;
+        console.log('[useMailerPermissions] Extracted permissions (nested format):', extracted);
+        return extracted;
+      }
+
+      // Try flat format (contracts at top level)
+      if (responseData.contracts) {
+        const extracted = responseData.contracts;
+        console.log('[useMailerPermissions] Extracted permissions (flat format, contracts):', extracted);
+        return extracted;
+      }
+
+      // Fallback to empty array
+      console.log('[useMailerPermissions] No permissions or contracts found in response');
+      return [];
     }
+    console.log('[useMailerPermissions] No permissions extracted, returning empty array');
     return [];
   }, [permissionsQuery.data]);
 
@@ -198,6 +245,11 @@ export function useMailerPermissions(
     await permissionsQuery.refetch();
   }, [permissionsQuery]);
 
+  // Auto-fetch permissions when wallet and chain info become available
+  // Note: We don't need an explicit useEffect here because React Query's `enabled` flag
+  // will automatically fetch when the conditions (walletAddress && chainInfo) are met.
+  // The `enabled` option in useIndexerGetWalletPermissions handles this automatically.
+
   /**
    * Add permission for a contract address using smart contract
    */
@@ -222,6 +274,17 @@ export function useMailerPermissions(
           chainInfo,
           contractAddress
         );
+
+        // Wait for transaction to be mined and confirmed
+        const evmWallet = connectedWallet as EVMWallet;
+        if (result.hash && evmWallet.publicClient) {
+          await evmWallet.publicClient.waitForTransactionReceipt({
+            hash: result.hash as `0x${string}`,
+          });
+
+          // Wait additional time for indexer to process the event
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
 
         // Refresh permissions after successful addition
         await refresh();
@@ -263,6 +326,17 @@ export function useMailerPermissions(
           chainInfo,
           contractAddress
         );
+
+        // Wait for transaction to be mined and confirmed
+        const evmWallet = connectedWallet as EVMWallet;
+        if (result.hash && evmWallet.publicClient) {
+          await evmWallet.publicClient.waitForTransactionReceipt({
+            hash: result.hash as `0x${string}`,
+          });
+
+          // Wait additional time for indexer to process the event
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
 
         // Refresh permissions after successful removal
         await refresh();

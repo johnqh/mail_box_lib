@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  type EVMWallet,
   OnchainMailerClient,
   type UnifiedTransaction,
   type Wallet,
@@ -181,6 +182,17 @@ export const useMailerClaims = (
         amountClaimed: reward.claimableAmount,
         success: true,
       };
+
+      // Wait for transaction to be mined and confirmed
+      if (transaction.hash && (connectedWallet as EVMWallet).publicClient) {
+        const publicClient = (connectedWallet as EVMWallet).publicClient!;
+        await publicClient.waitForTransactionReceipt({
+          hash: transaction.hash as `0x${string}`,
+        });
+
+        // Wait additional time for indexer to process the event
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
 
       // Refresh rewards after claiming
       await refresh();
