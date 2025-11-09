@@ -112,13 +112,19 @@ export const useMailerClaims = (
       return;
     }
 
+    // Extract publicClient for EVM chains or connection for Solana
+    const publicClient = (connectedWallet as any).publicClient;
+    const connection = (connectedWallet as any).connection;
+
     setIsLoading(true);
     setError(null);
 
     try {
       const claimableInfo = await client.getRecipientClaimable(
         walletAddress,
-        chainInfo
+        chainInfo,
+        publicClient,
+        connection
       );
 
       if (!claimableInfo) {
