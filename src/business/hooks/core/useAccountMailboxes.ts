@@ -106,7 +106,6 @@ export function useAccountMailboxes(
   emailDomain: string,
   devMode: boolean = false
 ): UseAccountMailboxesReturn {
-
   const [emailAddress, setEmailAddress] = useState<Optional<string>>(null);
   const [error, setError] = useState<Optional<string>>(null);
 

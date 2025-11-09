@@ -83,21 +83,14 @@ export function useMailApp(
   // Get selected account from global state
   const [selectedAccount, setSelectedAccount] = useGlobalSelectedAccount();
 
-  // Log when selectedAccount changes
-  useEffect(() => {
-    console.log('[useMailApp] selectedAccount changed to:', selectedAccount);
-  }, [selectedAccount]);
-
   // Auto-select first account if none selected and accounts are available
   useEffect(() => {
     if (accounts.length > 0 && !selectedAccount) {
-      console.log('[useMailApp] Auto-selecting first account:', accounts[0].username);
       setSelectedAccount(accounts[0]);
     }
   }, [accounts, selectedAccount, setSelectedAccount]);
 
   // Get authentication for the selected account using username
-  console.log('[useMailApp] Calling useAccountWildduckAuth with username:', selectedAccount?.username);
   const wildduckAuth = useAccountWildduckAuth(
     selectedAccount?.username,
     wildduckConfig,

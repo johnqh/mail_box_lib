@@ -118,10 +118,14 @@ export function useSelectedAccount(
     const authKey = `${selectedAccount.username.toLowerCase()}:${indexerAuth.signer}`;
     const cached = authCache.get(authKey);
     // Validate that cached auth matches the current selected account
-    if (cached && cached.username.toLowerCase() === selectedAccount.username.toLowerCase()) {
+    if (
+      cached &&
+      cached.username.toLowerCase() === selectedAccount.username.toLowerCase()
+    ) {
       return cached.auth;
     }
     return undefined;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAccount, indexerAuth, authUpdateCounter]);
 
   const config: WildduckConfig = {

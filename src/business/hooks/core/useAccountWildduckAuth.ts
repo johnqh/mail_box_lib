@@ -7,8 +7,7 @@
 import { Optional, WildduckConfig, WildduckUserAuth } from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
 import { useWildduckAuth } from '@sudobility/wildduck_client';
-import { useEffect, useState, useCallback } from 'react';
-import { useGlobalSelectedAccount } from './useSelectedAccount';
+import { useCallback, useEffect, useState } from 'react';
 import { useWalletStatus } from './useWalletStatus';
 import { ReferralConsumptionHelper } from '../../../utils/ReferralConsumptionHelper';
 
@@ -90,6 +89,7 @@ export function useAccountWildduckAuth(
       return cached.auth;
     }
     return undefined;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username, indexerAuth, authUpdateCounter])();
 
   // Authenticate when username changes
@@ -130,7 +130,7 @@ export function useAccountWildduckAuth(
         const referralCode = ReferralConsumptionHelper.consume();
 
         const response = await authenticate({
-          username: username,
+          username,
           message: indexerAuth.message,
           signature: indexerAuth.signature,
           signer: indexerAuth.signer,
@@ -149,7 +149,7 @@ export function useAccountWildduckAuth(
             // Store in cache
             authCache.set(authKey, {
               auth,
-              username: username,
+              username,
             });
             lastAuthenticatedKey = authKey;
             setAuthUpdate(prev => prev + 1);
@@ -175,7 +175,10 @@ export function useAccountWildduckAuth(
             setAuthUpdate(prev => prev + 1);
           }
         } else {
-          console.warn('⚠️ useAccountWildduckAuth: Authentication failed', response);
+          console.warn(
+            '⚠️ useAccountWildduckAuth: Authentication failed',
+            response
+          );
           authCache.delete(authKey);
           lastAuthenticatedKey = null;
           setAuthUpdate(prev => prev + 1);
