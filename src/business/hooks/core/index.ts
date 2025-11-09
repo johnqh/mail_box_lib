@@ -13,6 +13,8 @@ export * from './useLocalStorage';
 export * from './useWalletStatus';
 export * from './useWalletAccounts';
 export * from './useSelectedAccount';
+export * from './useAccountWildduckAuth';
+export * from './useMailApp';
 export * from './useSelectedChain';
 export * from './useAccountMailboxes';
 export * from './useMailboxesAndSettings';

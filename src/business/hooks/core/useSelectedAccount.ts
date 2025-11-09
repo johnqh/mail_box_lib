@@ -7,7 +7,7 @@
 import { Optional, WildduckConfig, WildduckUserAuth } from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
 import { useWildduckAuth } from '@sudobility/wildduck_client';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   createGlobalState,
   setGlobalState,
@@ -20,12 +20,23 @@ import { ReferralConsumptionHelper } from '../../../utils/ReferralConsumptionHel
  * Global authentication tracking to prevent duplicate authentication calls
  * across multiple component instances
  *
- * We track by username only - not by message/signature - because:
- * 1. Once authenticated for a username, we don't need to re-authenticate
- * 2. Different account objects with same username shouldn't trigger re-auth
+ * We track by username + signer combination to ensure:
+ * 1. Each wallet address gets its own authentication
+ * 2. Switching accounts with different wallet addresses re-authenticates
+ * 3. Same wallet address with same username doesn't re-authenticate
  */
 let authenticationInProgress: Optional<string> = null;
-let lastAuthenticatedUsername: Optional<string> = null;
+let lastAuthenticatedKey: Optional<string> = null; // Format: "username:signer"
+
+/**
+ * Global authentication cache - maps "username:signer" to auth with metadata
+ * This allows multiple accounts to each have their own authentication
+ */
+interface CachedAuth {
+  auth: WildduckUserAuth;
+  username: string; // Track which account this auth belongs to
+}
+const authCache = new Map<string, CachedAuth>();
 
 /**
  * Global selected account state - shared across all components
@@ -33,13 +44,6 @@ let lastAuthenticatedUsername: Optional<string> = null;
 export const useGlobalSelectedAccount = createGlobalState<
   Optional<WildDuckAccount>
 >('selectedAccount', null);
-
-/**
- * Global WildDuck authentication state - shared across all components
- */
-export const useGlobalWildduckAuth = createGlobalState<
-  Optional<WildduckUserAuth>
->('wildduckAuth', undefined);
 
 /**
  * Return type for useSelectedAccount hook
@@ -102,7 +106,23 @@ export function useSelectedAccount(
   const [accounts] = useGlobalWalletAccounts();
   const [selectedAccount] = useGlobalSelectedAccount();
   const { indexerAuth } = useWalletStatus();
-  const [wildduckAuth, setWildduckAuthGlobal] = useGlobalWildduckAuth();
+
+  // Local state to trigger re-renders when auth changes
+  const [authUpdateCounter, setAuthUpdate] = useState(0);
+
+  // Get current auth from cache based on selected account
+  const wildduckAuth = useMemo(() => {
+    if (!selectedAccount || !indexerAuth) {
+      return undefined;
+    }
+    const authKey = `${selectedAccount.username.toLowerCase()}:${indexerAuth.signer}`;
+    const cached = authCache.get(authKey);
+    // Validate that cached auth matches the current selected account
+    if (cached && cached.username.toLowerCase() === selectedAccount.username.toLowerCase()) {
+      return cached.auth;
+    }
+    return undefined;
+  }, [selectedAccount, indexerAuth, authUpdateCounter]);
 
   const config: WildduckConfig = {
     backendUrl: endpointUrl,
@@ -143,43 +163,39 @@ export function useSelectedAccount(
   useEffect(() => {
     if (!selectedAccount || !indexerAuth) {
       // Clear authentication if prerequisites are missing
-      if (wildduckAuth) {
-        setWildduckAuthGlobal(undefined);
-      }
       authenticationInProgress = null;
-      lastAuthenticatedUsername = null;
+      lastAuthenticatedKey = null;
       return;
     }
 
     // Normalize username to lowercase to handle case differences
     const normalizedUsername = selectedAccount.username.toLowerCase();
+    // Create unique key combining username and signer to handle multiple wallets
+    const authKey = `${normalizedUsername}:${indexerAuth.signer}`;
 
-    // Skip if we've already authenticated for this username
+    // Check if we already have auth cached for this account
+    const cachedAuth = authCache.get(authKey);
+
+    // Skip if we've already authenticated for this username + signer combination
     // BUT: If there's a pending referral code, allow re-authentication to include it
     const hasPendingReferral = ReferralConsumptionHelper.hasPending();
-    if (
-      lastAuthenticatedUsername === normalizedUsername &&
-      !hasPendingReferral
-    ) {
+    if (cachedAuth && lastAuthenticatedKey === authKey && !hasPendingReferral) {
       return;
     }
 
     // If there's a pending referral code for an already-authenticated user
-    if (
-      lastAuthenticatedUsername === normalizedUsername &&
-      hasPendingReferral
-    ) {
-      // Clear the last authenticated username so authentication proceeds
-      lastAuthenticatedUsername = null;
+    if (lastAuthenticatedKey === authKey && hasPendingReferral) {
+      // Clear the last authenticated key so authentication proceeds
+      lastAuthenticatedKey = null;
     }
 
-    // Skip if another component instance is currently authenticating this username
-    if (authenticationInProgress === normalizedUsername) {
+    // Skip if another component instance is currently authenticating this combination
+    if (authenticationInProgress === authKey) {
       return;
     }
 
-    // Mark authentication as in progress for this username
-    authenticationInProgress = normalizedUsername;
+    // Mark authentication as in progress for this username + signer combination
+    authenticationInProgress = authKey;
 
     // Call authenticate only once per unique account/signature combination
     (async () => {
@@ -205,8 +221,14 @@ export function useSelectedAccount(
               userId,
               accessToken: token,
             };
-            setWildduckAuthGlobal(auth);
-            lastAuthenticatedUsername = normalizedUsername;
+            // Store auth in cache for this specific account with username for validation
+            authCache.set(authKey, {
+              auth,
+              username: selectedAccount.username,
+            });
+            lastAuthenticatedKey = authKey;
+            // Trigger re-render to update wildduckAuth
+            setAuthUpdate(prev => prev + 1);
 
             // Clean URL parameter if referral code was consumed
             if (referralCode) {
@@ -227,21 +249,27 @@ export function useSelectedAccount(
               '⚠️ useSelectedAccount: Missing token or userId in response:',
               { token, userId }
             );
-            setWildduckAuthGlobal(undefined);
-            lastAuthenticatedUsername = null;
+            // Clear auth from cache
+            authCache.delete(authKey);
+            lastAuthenticatedKey = null;
+            setAuthUpdate(prev => prev + 1);
           }
         } else {
           console.warn(
             '⚠️ useSelectedAccount: WildDuck authenticate failed or unsuccessful:',
             response
           );
-          setWildduckAuthGlobal(undefined);
-          lastAuthenticatedUsername = null;
+          // Clear auth from cache
+          authCache.delete(authKey);
+          lastAuthenticatedKey = null;
+          setAuthUpdate(prev => prev + 1);
         }
       } catch (error) {
         console.error('WildDuck authentication failed:', error);
-        setWildduckAuthGlobal(undefined);
-        lastAuthenticatedUsername = null;
+        // Clear auth from cache
+        authCache.delete(authKey);
+        lastAuthenticatedKey = null;
+        setAuthUpdate(prev => prev + 1);
       } finally {
         // Clear the in-progress flag
         authenticationInProgress = null;

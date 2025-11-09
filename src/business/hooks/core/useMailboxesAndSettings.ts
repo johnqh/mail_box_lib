@@ -13,8 +13,8 @@ import {
   WildduckUpdateMailboxRequest,
   WildduckUserAuth,
 } from '@sudobility/types';
-import type { StorageService } from '@sudobility/di';
 import { useAccountMailboxes } from './useAccountMailboxes';
+import { WildDuckAccount } from './useWalletAccounts';
 
 /**
  * Special mailbox ID for the settings item
@@ -69,21 +69,26 @@ export interface UseMailboxesAndSettingsReturn {
  * - Special Use: MailboxSpecialUse.Settings
  * - isSettings flag: true (for easy identification)
  *
+ * @param wildduckAuth - WildDuck authentication object (from useAccountWildduckAuth)
+ * @param selectedAccount - Currently selected account (from useSelectedAccount)
  * @param endpointUrl - WildDuck API backend URL
  * @param apiToken - WildDuck API token for authentication
  * @param emailDomain - Email domain to validate against (e.g., "0xmail.box")
- * @param storage - Storage service for caching
  * @param devMode - Whether to use mock data on errors
  * @returns Object containing mailboxes (with Settings item), emailAddress, and other data
  *
  * @example
  * ```tsx
  * function MyMailboxList() {
+ *   const wildduckAuth = useAccountWildduckAuth(config, storage, false);
+ *   const [selectedAccount] = useGlobalSelectedAccount();
+ *
  *   const { mailboxes, isLoading } = useMailboxesAndSettings(
+ *     wildduckAuth,
+ *     selectedAccount,
  *     'https://wildduck.example.com',
  *     'token',
  *     '0xmail.box',
- *     storage,
  *     false
  *   );
  *
@@ -102,18 +107,20 @@ export interface UseMailboxesAndSettingsReturn {
  * ```
  */
 export function useMailboxesAndSettings(
+  wildduckAuth: Optional<WildduckUserAuth>,
+  selectedAccount: Optional<WildDuckAccount>,
   endpointUrl: string,
   apiToken: string,
   emailDomain: string,
-  storage: StorageService,
   devMode: boolean = false
 ): UseMailboxesAndSettingsReturn {
   // Get mailboxes from the base hook
   const mailboxResult = useAccountMailboxes(
+    wildduckAuth,
+    selectedAccount,
     endpointUrl,
     apiToken,
     emailDomain,
-    storage,
     devMode
   );
 

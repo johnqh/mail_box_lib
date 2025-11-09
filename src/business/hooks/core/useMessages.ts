@@ -11,10 +11,9 @@
  * - If searchScope is "all": searches across all mailboxes
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Optional } from '@sudobility/types';
-import type { StorageService } from '@sudobility/di';
+import { Optional, WildduckUserAuth } from '@sudobility/types';
 import type { NetworkClient } from '@sudobility/types';
 import { useMailboxMessages } from './useMailboxMessages';
 import { Message } from '../../types/message';
@@ -24,8 +23,6 @@ export interface UseMessagesParams {
   endpointUrl: string;
   /** Email domain (e.g., '0xmail.box') */
   emailDomain: string;
-  /** Storage service for caching */
-  storage: StorageService;
   /** Network client for API calls */
   networkClient: NetworkClient;
   /** Whether to use mock data on errors */
@@ -109,8 +106,7 @@ export interface UseMessagesReturn {
  */
 export function useMessages({
   endpointUrl,
-  emailDomain,
-  storage,
+  emailDomain: _emailDomain,
   networkClient,
   devMode = false,
   pageSize = 50,
@@ -125,12 +121,17 @@ export function useMessages({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const previousMailboxId = useRef<Optional<string>>(mailboxId);
 
+  // Construct wildduckAuth from userId and accessToken
+  const wildduckAuth = useMemo<Optional<WildduckUserAuth>>(() => {
+    if (!userId || !accessToken) return undefined;
+    return { userId, accessToken };
+  }, [userId, accessToken]);
+
   // Always keep mailbox messages hook active so it's ready when search is cleared
   const mailboxMessages = useMailboxMessages(
+    wildduckAuth,
     endpointUrl,
     '',
-    emailDomain,
-    storage,
     devMode,
     pageSize
   );

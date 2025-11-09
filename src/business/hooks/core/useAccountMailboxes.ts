@@ -13,12 +13,11 @@ import {
   WildduckUpdateMailboxRequest,
   WildduckUserAuth,
 } from '@sudobility/types';
-import type { StorageService } from '@sudobility/di';
 import {
   useWildduckAddresses,
   useWildduckMailboxes,
 } from '@sudobility/wildduck_client';
-import { useSelectedAccount } from './useSelectedAccount';
+import { WildDuckAccount } from './useWalletAccounts';
 import { useMailboxStore } from '../../stores/mailboxStore';
 
 /**
@@ -51,7 +50,7 @@ export interface UseAccountMailboxesReturn {
 /**
  * Hook to manage mailboxes for the currently selected account
  *
- * Observes wildduckAuth from useSelectedAccount and:
+ * Accepts wildduckAuth and selectedAccount as parameters and:
  * - Fetches email addresses when authenticated
  * - Validates that exactly one address exists ({username}@{emailDomain})
  * - Fetches mailboxes for that address
@@ -59,6 +58,8 @@ export interface UseAccountMailboxesReturn {
  * - Returns cached mailboxes immediately for better UX
  * - Exposes email address, mailboxes, and wildduckAuth
  *
+ * @param wildduckAuth - WildDuck authentication object (from useAccountWildduckAuth)
+ * @param selectedAccount - Currently selected account (from useSelectedAccount)
  * @param endpointUrl - WildDuck API backend URL
  * @param apiToken - WildDuck API token for authentication
  * @param emailDomain - Email domain to validate against (e.g., "0xmail.box")
@@ -68,7 +69,12 @@ export interface UseAccountMailboxesReturn {
  * @example
  * ```tsx
  * function MyComponent() {
- *   const { emailAddress, mailboxes, wildduckAuth, isLoading, error } = useAccountMailboxes(
+ *   const wildduckAuth = useAccountWildduckAuth(config, storage, false);
+ *   const [selectedAccount] = useGlobalSelectedAccount();
+ *
+ *   const { emailAddress, mailboxes, isLoading, error } = useAccountMailboxes(
+ *     wildduckAuth,
+ *     selectedAccount,
  *     'https://wildduck.example.com',
  *     'your-api-token',
  *     '0xmail.box',
@@ -93,18 +99,13 @@ export interface UseAccountMailboxesReturn {
  * ```
  */
 export function useAccountMailboxes(
+  wildduckAuth: Optional<WildduckUserAuth>,
+  selectedAccount: Optional<WildDuckAccount>,
   endpointUrl: string,
   apiToken: string,
   emailDomain: string,
-  storage: StorageService,
   devMode: boolean = false
 ): UseAccountMailboxesReturn {
-  const { selectedAccount, wildduckAuth } = useSelectedAccount(
-    endpointUrl,
-    apiToken,
-    storage,
-    devMode
-  );
 
   const [emailAddress, setEmailAddress] = useState<Optional<string>>(null);
   const [error, setError] = useState<Optional<string>>(null);
@@ -163,20 +164,16 @@ export function useAccountMailboxes(
       return;
     }
 
-    // Mark this account as being fetched
-    lastFetchedAccountRef.current = {
-      userId: wildduckAuth.userId,
-      username: selectedAccount.username.toLowerCase(),
-    };
+    // Store the current userId and username for this fetch attempt
+    const currentUserId = wildduckAuth.userId;
+    const currentUsername = selectedAccount.username.toLowerCase();
 
     (async () => {
       try {
         setError(null);
 
         // Fetch addresses for the user
-        const addresses = await addressesHook.getUserAddresses(
-          wildduckAuth.userId
-        );
+        const addresses = await addressesHook.getUserAddresses(currentUserId);
 
         // Validate that exactly one address exists
         if (!addresses || addresses.length === 0) {
@@ -196,19 +193,25 @@ export function useAccountMailboxes(
 
         const address = firstAddress.address;
 
-        // Validate the username part (before '@') matches the selected account
+        // Validate the username part (before '@') matches the account we fetched for
         // Use case-insensitive comparison for wallet addresses
         const [username] = address.split('@');
         if (!username) {
           throw new Error(`Invalid email address format: ${address}`);
         }
-        if (username.toLowerCase() !== selectedAccount.username.toLowerCase()) {
+        if (username.toLowerCase() !== currentUsername) {
           throw new Error(
-            `Expected username ${selectedAccount.username}, but found ${username} in address ${address}`
+            `Expected username ${currentUsername}, but found ${username} in address ${address}`
           );
         }
 
         setEmailAddress(address);
+
+        // Mark this account as successfully fetched AFTER validation passes
+        lastFetchedAccountRef.current = {
+          userId: currentUserId,
+          username: currentUsername,
+        };
 
         // Fetch mailboxes now that we have a valid address
         await mailboxesHook.refresh();

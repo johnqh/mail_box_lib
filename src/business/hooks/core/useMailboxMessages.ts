@@ -4,10 +4,8 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Optional, WildduckConfig } from '@sudobility/types';
-import type { StorageService } from '@sudobility/di';
+import { Optional, WildduckConfig, WildduckUserAuth } from '@sudobility/types';
 import { useWildduckMessages } from '@sudobility/wildduck_client';
-import { useAccountMailboxes } from './useAccountMailboxes';
 import {
   createGlobalState,
   setGlobalState,
@@ -51,7 +49,7 @@ export interface UseMailboxMessagesReturn {
  * Hook to manage the selected mailbox and its messages
  *
  * Features:
- * - Provides a setter to select a mailbox from useAccountMailboxes
+ * - Provides a setter to select a mailbox
  * - Fetches messages with includeHeaders for to, from, and subject
  * - Uses smart pagination to eventually get all messages
  * - Updates the exposed message list after each page load
@@ -59,9 +57,9 @@ export interface UseMailboxMessagesReturn {
  * - Caches messages in Zustand store using userId + mailboxId as key
  * - Returns cached messages immediately for better UX
  *
+ * @param wildduckAuth - WildDuck authentication object (from useAccountWildduckAuth)
  * @param endpointUrl - WildDuck API backend URL
  * @param apiToken - WildDuck API token for authentication
- * @param emailDomain - Email domain (passed to useAccountMailboxes)
  * @param devMode - Whether to use mock data on errors
  * @param pageSize - Number of messages to fetch per page (default: 50)
  * @returns Object containing selectedMailboxId, selectMailbox, messages (cached), and pagination controls
@@ -69,6 +67,8 @@ export interface UseMailboxMessagesReturn {
  * @example
  * ```tsx
  * function MailboxView() {
+ *   const wildduckAuth = useAccountWildduckAuth(config, storage, false);
+ *
  *   const {
  *     selectedMailboxId,
  *     selectMailbox,
@@ -80,9 +80,9 @@ export interface UseMailboxMessagesReturn {
  *     refresh,
  *     error
  *   } = useMailboxMessages(
+ *     wildduckAuth,
  *     'https://wildduck.example.com',
  *     'your-api-token',
- *     '0xmail.box',
  *     false,
  *     50
  *   );
@@ -106,21 +106,13 @@ export interface UseMailboxMessagesReturn {
  * ```
  */
 export function useMailboxMessages(
+  wildduckAuth: Optional<WildduckUserAuth>,
   endpointUrl: string,
   apiToken: string,
-  emailDomain: string,
-  storage: StorageService,
   devMode: boolean = false,
   pageSize: number = 50
 ): UseMailboxMessagesReturn {
   const [selectedMailboxId] = useGlobalSelectedMailboxId();
-  const { wildduckAuth } = useAccountMailboxes(
-    endpointUrl,
-    apiToken,
-    emailDomain,
-    storage,
-    devMode
-  );
 
   // Get Zustand store methods
   const {

@@ -24,9 +24,13 @@ export {
 
   // Core hooks
   useAccountMailboxes,
+  useAccountWildduckAuth,
+  clearAccountWildduckAuthCache,
+  useGlobalSelectedAccount,
   useGlobalWalletAccounts,
   useKYC,
   useMailAccountSettings,
+  useMailApp,
   useMailboxesAndSettings,
   useMailerClaims,
   useMailerClient,

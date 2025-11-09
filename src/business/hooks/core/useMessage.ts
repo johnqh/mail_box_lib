@@ -4,10 +4,8 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Optional, WildduckConfig } from '@sudobility/types';
-import type { StorageService } from '@sudobility/di';
+import { Optional, WildduckConfig, WildduckUserAuth } from '@sudobility/types';
 import { useWildduckMessages } from '@sudobility/wildduck_client';
-import { useSelectedAccount } from './useSelectedAccount';
 import {
   createGlobalState,
   setGlobalState,
@@ -46,10 +44,11 @@ export interface UseMessageReturn {
  * Features:
  * - Provides a setter to select a message by messageId
  * - Fetches full message payload from WildDuck when messageId is set
- * - Observes wildduckAuth from useSelectedAccount for authentication
+ * - Accepts wildduckAuth as parameter for authentication
  * - Caches messages in Zustand store using userId + messageId as key
  * - Returns cached message immediately for better UX
  *
+ * @param wildduckAuth - WildDuck authentication object (from useAccountWildduckAuth)
  * @param endpointUrl - WildDuck API backend URL
  * @param apiToken - WildDuck API token for authentication
  * @param devMode - Whether to use mock data on errors
@@ -58,6 +57,8 @@ export interface UseMessageReturn {
  * @example
  * ```tsx
  * function MessageView() {
+ *   const wildduckAuth = useAccountWildduckAuth(config, storage, false);
+ *
  *   const {
  *     selectedMessageId,
  *     selectMessage,
@@ -65,6 +66,7 @@ export interface UseMessageReturn {
  *     isLoading,
  *     error
  *   } = useMessage(
+ *     wildduckAuth,
  *     'https://wildduck.example.com',
  *     'your-api-token',
  *     false
@@ -87,19 +89,13 @@ export interface UseMessageReturn {
  * ```
  */
 export function useMessage(
+  wildduckAuth: Optional<WildduckUserAuth>,
   endpointUrl: string,
   apiToken: string,
-  storage: StorageService,
   devMode: boolean = false
 ): UseMessageReturn {
   const [selectedMessageId] = useGlobalSelectedMessageId();
   const [selectedMailboxId] = useGlobalSelectedMailboxId();
-  const { wildduckAuth } = useSelectedAccount(
-    endpointUrl,
-    apiToken,
-    storage,
-    devMode
-  );
 
   // Get Zustand store methods
   const { getMessage: getCachedMessage, setMessage: cacheMessage } =
