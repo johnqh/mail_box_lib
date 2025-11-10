@@ -85,7 +85,25 @@ export function useMailApp(
 
   // Auto-select first account if none selected and accounts are available
   useEffect(() => {
-    if (accounts.length > 0 && !selectedAccount) {
+    // Clear selection when no accounts are available (wallet disconnected or switching)
+    if (accounts.length === 0) {
+      if (selectedAccount !== undefined) {
+        setSelectedAccount(undefined);
+      }
+      return;
+    }
+
+    // Keep the current selection if it still exists in the refreshed account list
+    const currentAccountStillExists = selectedAccount
+      ? accounts.some(
+          account =>
+            account.username === selectedAccount.username &&
+            account.walletAddress === selectedAccount.walletAddress
+        )
+      : false;
+
+    // Select the first account when nothing is selected or the selection is stale
+    if (!selectedAccount || !currentAccountStillExists) {
       setSelectedAccount(accounts[0]);
     }
   }, [accounts, selectedAccount, setSelectedAccount]);

@@ -90,7 +90,7 @@
   "license": "MIT",
   "devDependencies": {
     "@sudobility/configs": "^0.0.18",
-    "@sudobility/contracts": "^1.16.0",
+    "@sudobility/contracts": "^1.16.1",
     "@sudobility/di": "^1.4.10",
     "@sudobility/indexer_client": "^0.0.41",
     "@sudobility/types": "^1.9.3",

@@ -7,12 +7,12 @@
 import { Optional, WildduckConfig, WildduckUserAuth } from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
 import { useWildduckAuth } from '@sudobility/wildduck_client';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   createGlobalState,
   setGlobalState,
 } from '../../../utils/useGlobalState';
-import { useGlobalWalletAccounts, WildDuckAccount } from './useWalletAccounts';
+import { useWalletAccounts, WildDuckAccount } from './useWalletAccounts';
 import { useWalletStatus } from './useWalletStatus';
 import { ReferralConsumptionHelper } from '../../../utils/ReferralConsumptionHelper';
 
@@ -25,8 +25,8 @@ import { ReferralConsumptionHelper } from '../../../utils/ReferralConsumptionHel
  * 2. Switching accounts with different wallet addresses re-authenticates
  * 3. Same wallet address with same username doesn't re-authenticate
  */
-let authenticationInProgress: Optional<string> = null;
-let lastAuthenticatedKey: Optional<string> = null; // Format: "username:signer"
+let authenticationInProgress: Optional<string> = undefined;
+let lastAuthenticatedKey: Optional<string> = undefined; // Format: "username:signer"
 
 /**
  * Global authentication cache - maps "username:signer" to auth with metadata
@@ -43,7 +43,7 @@ const authCache = new Map<string, CachedAuth>();
  */
 export const useGlobalSelectedAccount = createGlobalState<
   Optional<WildDuckAccount>
->('selectedAccount', null);
+>('selectedAccount', undefined);
 
 /**
  * Return type for useSelectedAccount hook
@@ -103,9 +103,18 @@ export function useSelectedAccount(
   storage: StorageService,
   devMode: boolean
 ): UseSelectedAccountReturn {
-  const [accounts] = useGlobalWalletAccounts();
+  const { accounts } = useWalletAccounts(endpointUrl, devMode);
   const [selectedAccount] = useGlobalSelectedAccount();
   const { indexerAuth } = useWalletStatus();
+
+  // DEBUG: Log on EVERY render
+  const timestamp = new Date().toISOString().split('T')[1];
+  console.log(`🟡 [useSelectedAccount] Hook rendered at ${timestamp}:`, {
+    accountsLength: accounts.length,
+    selectedAccount:
+      selectedAccount === undefined ? 'UNDEFINED' : selectedAccount?.username,
+    hasIndexerAuth: !!indexerAuth,
+  });
 
   // Local state to trigger re-renders when auth changes
   const [authUpdateCounter, setAuthUpdate] = useState(0);
@@ -134,12 +143,27 @@ export function useSelectedAccount(
   };
   const { authenticate } = useWildduckAuth(config, storage, devMode);
 
+  // Track the authentication key to prevent repeated authentication
+  // Only re-authenticate when the key actually changes
+  const authKeyRef = useRef<Optional<string>>(undefined);
+
   // Manage selected account selection
+  // This hook ONLY reacts to changes in the accounts list
   useEffect(() => {
-    // If no accounts, clear selection
+    console.log('🟡 [useSelectedAccount] Accounts list changed:', {
+      accountsLength: accounts.length,
+      accountUsernames: accounts.map(a => a.username),
+      currentSelectedUsername: selectedAccount?.username,
+      currentSelectedWallet: selectedAccount?.walletAddress,
+    });
+
+    // If no accounts, clear selection to undefined
     if (accounts.length === 0) {
-      if (selectedAccount !== null) {
-        setGlobalState('selectedAccount', null);
+      if (selectedAccount !== undefined) {
+        console.log(
+          '🟡 [useSelectedAccount] Clearing selected account (no accounts)'
+        );
+        setGlobalState('selectedAccount', undefined);
       }
       return;
     }
@@ -155,20 +179,41 @@ export function useSelectedAccount(
 
     // If current account is still valid, keep it
     if (currentAccountStillExists) {
+      console.log(
+        '🟡 [useSelectedAccount] Keeping current account:',
+        selectedAccount?.username
+      );
       return;
     }
 
     // Otherwise, select the first account
+    console.log(
+      '🟡 [useSelectedAccount] Selecting first account:',
+      accounts[0]?.username
+    );
     setGlobalState('selectedAccount', accounts[0]);
   }, [accounts, selectedAccount]);
 
   // Authenticate with WildDuck when selected account changes
   // SINGLETON PATTERN: Only one component instance should perform authentication
   useEffect(() => {
+    console.log('🔴 [useSelectedAccount] Auth effect triggered:', {
+      hasSelectedAccount: !!selectedAccount,
+      selectedUsername: selectedAccount?.username,
+      selectedWallet: selectedAccount?.walletAddress,
+      hasIndexerAuth: !!indexerAuth,
+      indexerAuthSigner: indexerAuth?.signer,
+      currentAuthKey: authKeyRef.current,
+    });
+
     if (!selectedAccount || !indexerAuth) {
       // Clear authentication if prerequisites are missing
-      authenticationInProgress = null;
-      lastAuthenticatedKey = null;
+      console.log(
+        '🔴 [useSelectedAccount] Missing prerequisites, clearing auth'
+      );
+      authenticationInProgress = undefined;
+      lastAuthenticatedKey = undefined;
+      authKeyRef.current = undefined;
       return;
     }
 
@@ -177,6 +222,25 @@ export function useSelectedAccount(
     // Create unique key combining username and signer to handle multiple wallets
     const authKey = `${normalizedUsername}:${indexerAuth.signer}`;
 
+    console.log('🔴 [useSelectedAccount] Checking auth key:', {
+      newAuthKey: authKey,
+      cachedAuthKey: authKeyRef.current,
+      shouldSkip: authKeyRef.current === authKey,
+    });
+
+    // CRITICAL: Skip if the authKey hasn't actually changed
+    // This prevents repeated authentication calls when the effect re-runs
+    // due to object reference changes in dependencies
+    if (authKeyRef.current === authKey) {
+      console.log(
+        '🔴 [useSelectedAccount] Auth key unchanged, skipping authentication'
+      );
+      return;
+    }
+
+    // Update the ref to track current authKey
+    authKeyRef.current = authKey;
+
     // Check if we already have auth cached for this account
     const cachedAuth = authCache.get(authKey);
 
@@ -184,22 +248,32 @@ export function useSelectedAccount(
     // BUT: If there's a pending referral code, allow re-authentication to include it
     const hasPendingReferral = ReferralConsumptionHelper.hasPending();
     if (cachedAuth && lastAuthenticatedKey === authKey && !hasPendingReferral) {
+      // IMPORTANT: Early return to prevent repeated authentication calls
       return;
     }
 
     // If there's a pending referral code for an already-authenticated user
     if (lastAuthenticatedKey === authKey && hasPendingReferral) {
       // Clear the last authenticated key so authentication proceeds
-      lastAuthenticatedKey = null;
+      lastAuthenticatedKey = undefined;
     }
 
     // Skip if another component instance is currently authenticating this combination
     if (authenticationInProgress === authKey) {
+      // IMPORTANT: Early return to prevent duplicate authentication calls
+      console.log(
+        '🔴 [useSelectedAccount] Auth already in progress for this key, skipping'
+      );
       return;
     }
 
     // Mark authentication as in progress for this username + signer combination
     authenticationInProgress = authKey;
+    console.log('🔴 [useSelectedAccount] Starting authentication:', {
+      username: selectedAccount.username,
+      signer: indexerAuth.signer,
+      authKey,
+    });
 
     // Call authenticate only once per unique account/signature combination
     (async () => {
@@ -207,6 +281,7 @@ export function useSelectedAccount(
         // Get referral code if available (consume removes it from storage)
         const referralCode = ReferralConsumptionHelper.consume();
 
+        console.log('🔴 [useSelectedAccount] Calling WildDuck authenticate');
         const response = await authenticate({
           username: selectedAccount.username,
           message: indexerAuth.message,
@@ -217,6 +292,7 @@ export function useSelectedAccount(
         });
 
         if (response && response.success) {
+          console.log('🔴 [useSelectedAccount] Authentication successful');
           const token = response.token;
           const userId = response.id;
           if (token && userId) {
@@ -232,6 +308,7 @@ export function useSelectedAccount(
             });
             lastAuthenticatedKey = authKey;
             // Trigger re-render to update wildduckAuth
+            console.log('🔴 [useSelectedAccount] Auth cached, updating state');
             setAuthUpdate(prev => prev + 1);
 
             // Clean URL parameter if referral code was consumed
@@ -249,34 +326,37 @@ export function useSelectedAccount(
               }
             }
           } else {
-            console.warn(
-              '⚠️ useSelectedAccount: Missing token or userId in response:',
+            console.error(
+              '🔴 [useSelectedAccount] Missing token or userId in response:',
               { token, userId }
             );
             // Clear auth from cache
             authCache.delete(authKey);
-            lastAuthenticatedKey = null;
+            lastAuthenticatedKey = undefined;
             setAuthUpdate(prev => prev + 1);
           }
         } else {
-          console.warn(
-            '⚠️ useSelectedAccount: WildDuck authenticate failed or unsuccessful:',
+          console.error(
+            '🔴 [useSelectedAccount] WildDuck authenticate failed or unsuccessful:',
             response
           );
           // Clear auth from cache
           authCache.delete(authKey);
-          lastAuthenticatedKey = null;
+          lastAuthenticatedKey = undefined;
           setAuthUpdate(prev => prev + 1);
         }
       } catch (error) {
-        console.error('WildDuck authentication failed:', error);
+        console.error('🔴 [useSelectedAccount] Authentication error:', error);
         // Clear auth from cache
         authCache.delete(authKey);
-        lastAuthenticatedKey = null;
+        lastAuthenticatedKey = undefined;
         setAuthUpdate(prev => prev + 1);
       } finally {
         // Clear the in-progress flag
-        authenticationInProgress = null;
+        console.log(
+          '🔴 [useSelectedAccount] Auth complete, clearing in-progress flag'
+        );
+        authenticationInProgress = undefined;
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
