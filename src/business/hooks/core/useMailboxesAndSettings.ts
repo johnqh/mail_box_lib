@@ -81,10 +81,22 @@ export interface UseMailboxesAndSettingsReturn {
  * @example
  * ```tsx
  * function MyMailboxList() {
- *   const wildduckAuth = useAccountWildduckAuth(config, storage, false);
- *   const [selectedAccount] = useGlobalSelectedAccount();
+ *   const networkClient = useNetworkClient();
+ *   const { selectedAccount } = useSelectedAccount(
+ *     networkClient,
+ *     'https://indexer.example.com',
+ *     false
+ *   );
+ *   const wildduckAuth = useAccountWildduckAuth(
+ *     networkClient,
+ *     selectedAccount?.username,
+ *     config,
+ *     storage,
+ *     false
+ *   );
  *
  *   const { mailboxes, isLoading } = useMailboxesAndSettings(
+ *     networkClient,
  *     wildduckAuth,
  *     selectedAccount,
  *     'https://wildduck.example.com',

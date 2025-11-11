@@ -70,10 +70,22 @@ export interface UseAccountMailboxesReturn {
  * @example
  * ```tsx
  * function MyComponent() {
- *   const wildduckAuth = useAccountWildduckAuth(config, storage, false);
- *   const [selectedAccount] = useGlobalSelectedAccount();
+ *   const networkClient = useNetworkClient();
+ *   const { selectedAccount } = useSelectedAccount(
+ *     networkClient,
+ *     'https://indexer.example.com',
+ *     false
+ *   );
+ *   const wildduckAuth = useAccountWildduckAuth(
+ *     networkClient,
+ *     selectedAccount?.username,
+ *     config,
+ *     storage,
+ *     false
+ *   );
  *
  *   const { emailAddress, mailboxes, isLoading, error } = useAccountMailboxes(
+ *     networkClient,
  *     wildduckAuth,
  *     selectedAccount,
  *     'https://wildduck.example.com',
@@ -161,10 +173,11 @@ export function useAccountMailboxes(
     devMode
   );
 
-  // Track the last fetched userId and username to prevent re-fetching for the same account
+  // Track the last fetched userId/username/token combo to prevent duplicate fetches
   const lastFetchedAccountRef = useRef<{
     userId: string;
     username: string;
+    token: string;
   } | null>(null);
 
   // Fetch addresses when wildduckAuth becomes available or selectedAccount changes
@@ -183,7 +196,6 @@ export function useAccountMailboxes(
       );
       setEmailAddress(null);
       setError(null);
-      lastFetchedAccountRef.current = null;
       return;
     }
 
@@ -191,7 +203,8 @@ export function useAccountMailboxes(
     if (
       lastFetchedAccountRef.current?.userId === wildduckAuth.userId &&
       lastFetchedAccountRef.current?.username ===
-        selectedAccount.username.toLowerCase()
+        selectedAccount.username.toLowerCase() &&
+      lastFetchedAccountRef.current?.token === wildduckAuth.accessToken
     ) {
       console.log('🔍 [useAccountMailboxes] Already fetched, skipping');
       return;
@@ -251,6 +264,7 @@ export function useAccountMailboxes(
         lastFetchedAccountRef.current = {
           userId: currentUserId,
           username: currentUsername,
+          token: wildduckAuth.accessToken,
         };
 
         // Fetch mailboxes now that we have a valid address
@@ -269,7 +283,12 @@ export function useAccountMailboxes(
     // The addressesHook and mailboxesHook are recreated on every render,
     // but we only want to re-fetch when the userId or username actually changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wildduckAuth?.userId, selectedAccount?.username, emailDomain]);
+  }, [
+    wildduckAuth?.userId,
+    wildduckAuth?.accessToken,
+    selectedAccount?.username,
+    emailDomain,
+  ]);
 
   // Update local state and cache when mailboxes change
   useEffect(() => {
@@ -288,6 +307,7 @@ export function useAccountMailboxes(
       setLocalMailboxes(mailboxesHook.mailboxes);
       setMailboxes(wildduckAuth.userId, mailboxesHook.mailboxes);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wildduckAuth?.userId, mailboxesHook.mailboxes, setMailboxes]);
 
   const isLoading =

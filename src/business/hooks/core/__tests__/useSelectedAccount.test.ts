@@ -64,34 +64,27 @@ describe('useSelectedAccount', () => {
       username: '0x1111111111111111111111111111111111111111',
       entitled: true,
     };
-    const signerTwo = '0x2222222222222222222222222222222222222222';
 
+    // When wallet changes, useWalletAccounts returns empty accounts
+    // (this is handled by useWalletAccounts logic when signer doesn't match)
     mockUseWalletAccounts.mockReturnValue({
-      accounts: [accountOne],
+      accounts: [], // Empty accounts when wallet doesn't match
       indexerAuth: undefined,
       refresh: vi.fn(),
     });
 
-    mockUseWalletStatus.mockReturnValue({
-      indexerAuth: {
-        message: 'message',
-        signature: 'signature',
-        signer: signerTwo,
-      },
-    });
-
+    // Set initial selected account
     setGlobalState('selectedAccount', accountOne);
 
     renderHook(() =>
       useSelectedAccount(
         mockNetworkClient,
         endpointUrl,
-        'token',
-        mockStorage,
         false
       )
     );
 
+    // useSelectedAccount should clear selection when accounts become empty
     await waitFor(() => {
       expect(getGlobalState('selectedAccount')).toBeUndefined();
     });

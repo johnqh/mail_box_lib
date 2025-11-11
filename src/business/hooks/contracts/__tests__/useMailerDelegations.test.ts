@@ -10,8 +10,17 @@ import {
   useIndexerGetDelegatedFrom,
   useIndexerGetDelegatedTo,
 } from '@sudobility/indexer_client';
-import { Chain, ChainType } from '@sudobility/types';
+import { Chain, ChainType, NetworkClient } from '@sudobility/types';
 import type { ChainInfo } from '@sudobility/configs';
+
+// Mock NetworkClient
+const mockNetworkClient: NetworkClient = {
+  request: vi.fn(),
+  get: vi.fn(),
+  post: vi.fn(),
+  put: vi.fn(),
+  delete: vi.fn(),
+};
 
 // Mock dependencies
 vi.mock('@sudobility/contracts', () => ({
@@ -139,6 +148,7 @@ describe('useMailerDelegations', () => {
     it('should initialize with delegation data from indexer', () => {
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -172,6 +182,7 @@ describe('useMailerDelegations', () => {
 
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -195,6 +206,7 @@ describe('useMailerDelegations', () => {
 
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -221,6 +233,7 @@ describe('useMailerDelegations', () => {
 
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -247,6 +260,7 @@ describe('useMailerDelegations', () => {
     it('should throw error if delegating without wallet', async () => {
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           null,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -265,6 +279,7 @@ describe('useMailerDelegations', () => {
     it('should throw error if delegating with empty address', async () => {
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -286,6 +301,7 @@ describe('useMailerDelegations', () => {
 
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -323,6 +339,7 @@ describe('useMailerDelegations', () => {
 
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -349,6 +366,7 @@ describe('useMailerDelegations', () => {
     it('should throw error if revoking without wallet', async () => {
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           null,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -379,6 +397,7 @@ describe('useMailerDelegations', () => {
 
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -405,6 +424,7 @@ describe('useMailerDelegations', () => {
     it('should throw error if rejecting without wallet', async () => {
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           null,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -423,6 +443,7 @@ describe('useMailerDelegations', () => {
     it('should throw error if rejecting with empty address', async () => {
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -444,6 +465,7 @@ describe('useMailerDelegations', () => {
 
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -475,6 +497,7 @@ describe('useMailerDelegations', () => {
 
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -498,6 +521,7 @@ describe('useMailerDelegations', () => {
 
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -541,6 +565,7 @@ describe('useMailerDelegations', () => {
 
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -566,6 +591,7 @@ describe('useMailerDelegations', () => {
 
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -584,6 +610,7 @@ describe('useMailerDelegations', () => {
     it('should call indexer hooks with correct parameters', () => {
       renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -593,6 +620,7 @@ describe('useMailerDelegations', () => {
       );
 
       expect(useIndexerGetDelegatedTo).toHaveBeenCalledWith(
+        mockNetworkClient,
         mockEndpointUrl,
         false,
         mockWalletAddress,
@@ -601,6 +629,7 @@ describe('useMailerDelegations', () => {
       );
 
       expect(useIndexerGetDelegatedFrom).toHaveBeenCalledWith(
+        mockNetworkClient,
         mockEndpointUrl,
         false,
         mockWalletAddress,
@@ -612,6 +641,7 @@ describe('useMailerDelegations', () => {
     it('should handle null wallet and auth', () => {
       renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           null,
           Chain.ETH_MAINNET,
           null,
@@ -621,6 +651,7 @@ describe('useMailerDelegations', () => {
       );
 
       expect(useIndexerGetDelegatedTo).toHaveBeenCalledWith(
+        mockNetworkClient,
         mockEndpointUrl,
         false,
         '',
@@ -637,6 +668,7 @@ describe('useMailerDelegations', () => {
 
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -659,6 +691,7 @@ describe('useMailerDelegations', () => {
 
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -697,6 +730,7 @@ describe('useMailerDelegations', () => {
 
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -726,6 +760,7 @@ describe('useMailerDelegations', () => {
 
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -756,6 +791,7 @@ describe('useMailerDelegations', () => {
 
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,
@@ -780,6 +816,7 @@ describe('useMailerDelegations', () => {
 
       const { result } = renderHook(() =>
         useMailerDelegations(
+          mockNetworkClient,
           mockConnectedWallet as any,
           Chain.ETH_MAINNET,
           mockAuth,

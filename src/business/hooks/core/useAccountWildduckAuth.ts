@@ -12,7 +12,7 @@ import {
 } from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
 import { useWildduckAuth } from '@sudobility/wildduck_client';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useWalletStatus } from './useWalletStatus';
 import { ReferralConsumptionHelper } from '../../../utils/ReferralConsumptionHelper';
 
@@ -94,23 +94,16 @@ export function useAccountWildduckAuth(
     backendUrl: config.backendUrl,
   });
 
-  // Local state to trigger re-renders when auth changes
-  const [authUpdateCounter, setAuthUpdate] = useState(0);
-
-  // Get current auth from cache based on username
-  const wildduckAuth = useCallback((): Optional<WildduckUserAuth> => {
-    if (!username || !indexerAuth) {
-      return undefined;
+  // Use React state for the auth - this is cleaner than the cache + counter pattern
+  const [wildduckAuth, setWildduckAuth] = useState<Optional<WildduckUserAuth>>(
+    () => {
+      // Initialize from cache if available
+      if (!username || !indexerAuth) return undefined;
+      const authKey = `${username.toLowerCase()}:${indexerAuth.signer}`;
+      const cached = authCache.get(authKey);
+      return cached?.auth;
     }
-    const authKey = `${username.toLowerCase()}:${indexerAuth.signer}`;
-    const cached = authCache.get(authKey);
-    // Validate that cached auth matches the current username
-    if (cached && cached.username.toLowerCase() === username.toLowerCase()) {
-      return cached.auth;
-    }
-    return undefined;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [username, indexerAuth, authUpdateCounter])();
+  );
 
   // Authenticate when username changes
   useEffect(() => {
@@ -121,6 +114,7 @@ export function useAccountWildduckAuth(
 
     if (!username || !indexerAuth) {
       console.log('🔍 [useAccountWildduckAuth] No username or indexerAuth');
+      setWildduckAuth(undefined);
       authenticationInProgress = null;
       return;
     }
@@ -143,6 +137,10 @@ export function useAccountWildduckAuth(
       console.log(
         '🔍 [useAccountWildduckAuth] Already authenticated, skipping'
       );
+      // Ensure state matches cache
+      if (wildduckAuth?.userId !== cachedAuth.auth.userId) {
+        setWildduckAuth(cachedAuth.auth);
+      }
       return;
     }
 
@@ -184,7 +182,7 @@ export function useAccountWildduckAuth(
               auth,
               username,
             });
-            setAuthUpdate(prev => prev + 1);
+            setWildduckAuth(auth);
 
             // Clean URL parameter if referral code was consumed
             if (referralCode) {
@@ -203,7 +201,7 @@ export function useAccountWildduckAuth(
           } else {
             console.warn('⚠️ useAccountWildduckAuth: Missing token or userId');
             authCache.delete(authKey);
-            setAuthUpdate(prev => prev + 1);
+            setWildduckAuth(undefined);
           }
         } else {
           console.warn(
@@ -211,16 +209,17 @@ export function useAccountWildduckAuth(
             response
           );
           authCache.delete(authKey);
-          setAuthUpdate(prev => prev + 1);
+          setWildduckAuth(undefined);
         }
       } catch (error) {
         console.error('❌ useAccountWildduckAuth: Error:', error);
         authCache.delete(authKey);
-        setAuthUpdate(prev => prev + 1);
+        setWildduckAuth(undefined);
       } finally {
         authenticationInProgress = null;
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username, indexerAuth, authenticate]);
 
   return wildduckAuth;

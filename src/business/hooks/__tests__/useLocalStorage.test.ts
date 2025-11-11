@@ -18,7 +18,10 @@ Object.defineProperty(window, 'CustomEvent', {
 describe('useLocalStorage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Reset all localStorage mocks to default behavior
     localStorageMock.getItem.mockReturnValue(null);
+    localStorageMock.setItem.mockImplementation(() => {});
+    localStorageMock.removeItem.mockImplementation(() => {});
   });
 
   afterEach(() => {

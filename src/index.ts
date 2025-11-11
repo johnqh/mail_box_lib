@@ -26,8 +26,6 @@ export {
   useAccountMailboxes,
   useAccountWildduckAuth,
   clearAccountWildduckAuthCache,
-  useGlobalSelectedAccount,
-  useGlobalWalletAccounts,
   useKYC,
   useMailAccountSettings,
   useMailApp,

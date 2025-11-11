@@ -4,7 +4,7 @@
  * Manages account selection and authentication orchestration
  */
 
-import { useEffect } from 'react';
+import { useCallback } from 'react';
 import {
   NetworkClient,
   Optional,
@@ -12,8 +12,8 @@ import {
   WildduckUserAuth,
 } from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
-import { useWalletAccounts, WildDuckAccount } from './useWalletAccounts';
-import { useGlobalSelectedAccount } from './useSelectedAccount';
+import { WildDuckAccount } from './useWalletAccounts';
+import { useSelectedAccount } from './useSelectedAccount';
 import { useAccountWildduckAuth } from './useAccountWildduckAuth';
 
 /**
@@ -80,15 +80,9 @@ export function useMailApp(
   storage: StorageService,
   devMode: boolean = false
 ): UseMailAppReturn {
-  // Get wallet accounts from indexer
-  const { accounts, refresh: refreshAccounts } = useWalletAccounts(
-    networkClient,
-    indexerBackendUrl,
-    devMode
-  );
-
-  // Get selected account from global state
-  const [selectedAccount, setSelectedAccount] = useGlobalSelectedAccount();
+  // Use useSelectedAccount which handles account selection logic
+  const { selectedAccount, selectAccount, accounts, refreshAccounts } =
+    useSelectedAccount(networkClient, indexerBackendUrl, devMode);
 
   // DEBUG: Log render
   console.log('🔍 [useMailApp] RENDER', {
@@ -97,31 +91,6 @@ export function useMailApp(
     indexerBackendUrl,
   });
 
-  // Auto-select first account if none selected and accounts are available
-  useEffect(() => {
-    // Clear selection when no accounts are available (wallet disconnected or switching)
-    if (accounts.length === 0) {
-      if (selectedAccount !== undefined) {
-        setSelectedAccount(undefined);
-      }
-      return;
-    }
-
-    // Keep the current selection if it still exists in the refreshed account list
-    const currentAccountStillExists = selectedAccount
-      ? accounts.some(
-          account =>
-            account.username === selectedAccount.username &&
-            account.walletAddress === selectedAccount.walletAddress
-        )
-      : false;
-
-    // Select the first account when nothing is selected or the selection is stale
-    if (!selectedAccount || !currentAccountStillExists) {
-      setSelectedAccount(accounts[0]);
-    }
-  }, [accounts, selectedAccount, setSelectedAccount]);
-
   // Get authentication for the selected account using username
   const wildduckAuth = useAccountWildduckAuth(
     networkClient,
@@ -129,6 +98,16 @@ export function useMailApp(
     wildduckConfig,
     storage,
     devMode
+  );
+
+  // Wrapper function to convert account object to username for selectAccount
+  const setSelectedAccount = useCallback(
+    (account: Optional<WildDuckAccount>) => {
+      if (account) {
+        selectAccount(account.username);
+      }
+    },
+    [selectAccount]
   );
 
   return {

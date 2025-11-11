@@ -7,7 +7,16 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useMailerPermissions } from '../useMailerPermissions';
 import { useIndexerGetWalletPermissions } from '@sudobility/indexer_client';
 import { OnchainMailerClient } from '@sudobility/contracts';
-import { Chain, ChainType } from '@sudobility/types';
+import { Chain, ChainType, NetworkClient } from '@sudobility/types';
+
+// Mock NetworkClient
+const mockNetworkClient: NetworkClient = {
+  request: vi.fn(),
+  get: vi.fn(),
+  post: vi.fn(),
+  put: vi.fn(),
+  delete: vi.fn(),
+};
 
 // Mock indexer client hooks
 vi.mock('@sudobility/indexer_client', () => ({
@@ -117,7 +126,7 @@ describe('useMailerPermissions', () => {
       });
 
       const { result } = renderHook(() =>
-        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+        useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
       // Wait for auto-fetch to complete
@@ -131,7 +140,7 @@ describe('useMailerPermissions', () => {
 
     it('should not fetch when walletAddress is not provided', async () => {
       const { result } = renderHook(() =>
-        useMailerPermissions(null, Chain.ETH_MAINNET, mockEndpointUrl, false)
+        useMailerPermissions(mockNetworkClient, null, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
       // Wait a bit for any side effects
@@ -141,6 +150,7 @@ describe('useMailerPermissions', () => {
       expect(result.current.error).toBe(null);
       // Hook is called but with enabled: false
       expect(useIndexerGetWalletPermissions).toHaveBeenCalledWith(
+        mockNetworkClient,
         mockEndpointUrl,
         false,
         '',
@@ -166,7 +176,7 @@ describe('useMailerPermissions', () => {
       });
 
       const { result } = renderHook(() =>
-        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+        useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
       // Wait for auto-fetch to complete
@@ -177,6 +187,7 @@ describe('useMailerPermissions', () => {
       expect(result.current.permissions).toEqual(mockPermissions);
       expect(result.current.error).toBe(null);
       expect(useIndexerGetWalletPermissions).toHaveBeenCalledWith(
+        mockNetworkClient,
         mockEndpointUrl,
         false,
         mockWalletAddress,
@@ -195,7 +206,7 @@ describe('useMailerPermissions', () => {
       });
 
       const { result } = renderHook(() =>
-        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+        useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
       // Wait for auto-fetch to complete
@@ -211,7 +222,7 @@ describe('useMailerPermissions', () => {
       mockGetWalletPermissions(undefined, { isError: true, error: new Error('Network error') });
 
       const { result } = renderHook(() =>
-        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+        useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
       // Wait for auto-fetch to complete
@@ -225,7 +236,7 @@ describe('useMailerPermissions', () => {
 
     it('should not fetch when wallet address is missing', async () => {
       const { result } = renderHook(() =>
-        useMailerPermissions(null, Chain.ETH_MAINNET, mockEndpointUrl, false)
+        useMailerPermissions(mockNetworkClient, null, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
       // Wait a bit for side effects
@@ -235,6 +246,7 @@ describe('useMailerPermissions', () => {
       expect(result.current.error).toBe(null);
       // Hook is called but with enabled: false
       expect(useIndexerGetWalletPermissions).toHaveBeenCalledWith(
+        mockNetworkClient,
         mockEndpointUrl,
         false,
         '',
@@ -258,7 +270,7 @@ describe('useMailerPermissions', () => {
       });
 
       const { result } = renderHook(() =>
-        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+        useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
       // Wait for auto-fetch to complete
@@ -272,7 +284,7 @@ describe('useMailerPermissions', () => {
 
     it('should not auto-fetch when disabled', async () => {
       const { result } = renderHook(() =>
-        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+        useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
       // Wait a bit but not long enough to auto-fetch
@@ -283,7 +295,7 @@ describe('useMailerPermissions', () => {
 
     it('should not auto-fetch when walletAddress is null', async () => {
       const { result } = renderHook(() =>
-        useMailerPermissions(null, Chain.ETH_MAINNET, mockEndpointUrl, false)
+        useMailerPermissions(mockNetworkClient, null, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
       // Wait a bit to ensure auto-fetch doesn't trigger
@@ -292,6 +304,7 @@ describe('useMailerPermissions', () => {
       expect(result.current.permissions).toEqual([]);
       // Hook is called but with enabled: false
       expect(useIndexerGetWalletPermissions).toHaveBeenCalledWith(
+        mockNetworkClient,
         mockEndpointUrl,
         false,
         '',
@@ -315,7 +328,7 @@ describe('useMailerPermissions', () => {
       });
 
       const { result } = renderHook(() =>
-        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+        useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
       // Wait for auto-fetch to complete
@@ -350,7 +363,7 @@ describe('useMailerPermissions', () => {
       });
 
       const { result } = renderHook(() =>
-        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+        useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
       // Wait for initial load
@@ -395,7 +408,7 @@ describe('useMailerPermissions', () => {
       });
 
       const { result } = renderHook(() =>
-        useMailerPermissions(mockWallet as any, Chain.ETH_SEPOLIA, mockEndpointUrl, true)
+        useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_SEPOLIA, mockEndpointUrl, true)
       );
 
       // Wait for auto-fetch to complete
@@ -404,6 +417,7 @@ describe('useMailerPermissions', () => {
       });
 
       expect(useIndexerGetWalletPermissions).toHaveBeenCalledWith(
+        mockNetworkClient,
         mockEndpointUrl,
         true,
         mockWalletAddress,
@@ -427,7 +441,7 @@ describe('useMailerPermissions', () => {
       });
 
       const { result } = renderHook(() =>
-        useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+        useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
       );
 
       // Wait for auto-fetch to complete
@@ -460,7 +474,7 @@ describe('useMailerPermissions', () => {
         });
 
         const { result } = renderHook(() =>
-          useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+          useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
 
         // Wait for auto-fetch to complete
@@ -506,7 +520,7 @@ describe('useMailerPermissions', () => {
         });
 
         const { result } = renderHook(() =>
-          useMailerPermissions(null, Chain.ETH_MAINNET, mockEndpointUrl, false)
+          useMailerPermissions(mockNetworkClient, null, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
 
         await expect(async () => {
@@ -530,7 +544,7 @@ describe('useMailerPermissions', () => {
         });
 
         const { result } = renderHook(() =>
-          useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+          useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
 
         // Wait for auto-fetch
@@ -561,7 +575,7 @@ describe('useMailerPermissions', () => {
         });
 
         const { result } = renderHook(() =>
-          useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+          useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
 
         // Wait for auto-fetch
@@ -599,7 +613,7 @@ describe('useMailerPermissions', () => {
         });
 
         const { result } = renderHook(() =>
-          useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+          useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
 
         // Wait for auto-fetch
@@ -643,7 +657,7 @@ describe('useMailerPermissions', () => {
         });
 
         const { result } = renderHook(() =>
-          useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+          useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
 
         // Wait for auto-fetch
@@ -689,7 +703,7 @@ describe('useMailerPermissions', () => {
         });
 
         const { result } = renderHook(() =>
-          useMailerPermissions(null, Chain.ETH_MAINNET, mockEndpointUrl, false)
+          useMailerPermissions(mockNetworkClient, null, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
 
         await expect(async () => {
@@ -713,7 +727,7 @@ describe('useMailerPermissions', () => {
         });
 
         const { result } = renderHook(() =>
-          useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+          useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
 
         // Wait for auto-fetch
@@ -744,7 +758,7 @@ describe('useMailerPermissions', () => {
         });
 
         const { result } = renderHook(() =>
-          useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+          useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
 
         // Wait for auto-fetch
@@ -782,7 +796,7 @@ describe('useMailerPermissions', () => {
         });
 
         const { result } = renderHook(() =>
-          useMailerPermissions(mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
+          useMailerPermissions(mockNetworkClient, mockWallet as any, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
 
         // Wait for auto-fetch

@@ -4,7 +4,7 @@
  * Uses global state for React Native compatibility
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { NetworkClient, Optional, WalletData } from '@sudobility/types';
 import { useWalletStatus } from './useWalletStatus';
 import {
@@ -77,11 +77,29 @@ export function useWalletAccounts(
   devMode: boolean = false
 ): UseWalletAccountsReturn {
   const { status, indexerAuth } = useWalletStatus();
-  const [accounts] = useGlobalWalletAccounts();
+  const [rawAccounts] = useGlobalWalletAccounts();
+
+  // Stabilize accounts array reference based on content
+  // This prevents infinite loops from array reference changes
+  const accountsKey = rawAccounts
+    .map(a => `${a.username}:${a.walletAddress}`)
+    .join('|');
+  const accounts = useMemo(
+    () => rawAccounts,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rawAccounts.length, accountsKey]
+  );
+
+  // Stabilize indexerAuth object reference based on content
+  const stableIndexerAuth = useMemo(
+    () => indexerAuth,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [indexerAuth?.message, indexerAuth?.signature, indexerAuth?.signer]
+  );
 
   // useIndexerGetWalletAccounts now requires networkClient and walletAddress and auth upfront
   const walletAddress = status?.walletAddress || '';
-  const auth = indexerAuth || { message: '', signature: '', signer: '' };
+  const auth = stableIndexerAuth || { message: '', signature: '', signer: '' };
   const queryResult = useIndexerGetWalletAccounts(
     networkClient,
     endpointUrl,
@@ -90,12 +108,37 @@ export function useWalletAccounts(
     auth
   );
 
+  // DEBUG: Log render
+  console.log('🔍 [useWalletAccounts] RENDER', {
+    accountsCount: accounts.length,
+    accountsUsernames: accounts.map(a => a.username),
+    accountsWallets: accounts.map(a => a.walletAddress),
+    statusWalletAddress: status?.walletAddress,
+    statusChainType: status?.chainType,
+    isVerified: !!(
+      status?.walletAddress &&
+      status?.message &&
+      status?.signature
+    ),
+    hasQueryData: !!queryResult.data,
+  });
+
   useEffect(() => {
+    console.log('🔍 [useWalletAccounts] EFFECT triggered', {
+      accountsLength: accounts.length,
+      statusWallet: status?.walletAddress,
+      hasQueryData: !!queryResult.data,
+    });
+
     // Check if wallet is verified (has message and signature)
     const isVerified =
       status?.walletAddress && status?.message && status?.signature;
 
     if (!isVerified) {
+      console.log('🔍 [useWalletAccounts] ⚠️ Not verified, CLEARING accounts', {
+        hadAccounts: accounts.length > 0,
+        previousCount: accounts.length,
+      });
       // Set accounts to empty array when not verified
       setGlobalState('walletAccounts', []);
       return;
@@ -111,26 +154,51 @@ export function useWalletAccounts(
     // If so, clear first before populating with new wallet
     const hasAccountsFromDifferentWallet =
       accounts.length > 0 &&
-      accounts[0]?.walletAddress !== currentWalletAddress;
+      accounts[0]?.walletAddress?.toLowerCase() !==
+        currentWalletAddress.toLowerCase();
+
+    console.log('🔍 [useWalletAccounts] Wallet check', {
+      hasAccountsFromDifferentWallet,
+      accountsWallet: accounts[0]?.walletAddress,
+      currentWallet: currentWalletAddress,
+    });
 
     if (hasAccountsFromDifferentWallet) {
+      console.log(
+        '🔍 [useWalletAccounts] ⚠️ Different wallet detected, CLEARING accounts',
+        {
+          oldWallet: accounts[0]?.walletAddress,
+          newWallet: currentWalletAddress,
+          previousCount: accounts.length,
+        }
+      );
       // Clear accounts from old wallet first
       setGlobalState('walletAccounts', []);
       // Return and let the effect re-run with empty accounts
       return;
     }
 
-    // Immediately set accounts to show the wallet address
+    // Immediately set accounts to show the wallet address ONLY if we don't have any accounts yet
     // This provides instant feedback while we fetch the full list
     // This will be replaced when the query returns
-    setGlobalState('walletAccounts', [
-      {
-        walletAddress: currentWalletAddress,
-        chainType,
-        username: currentWalletAddress,
-        entitled: true,
-      },
-    ]);
+    if (accounts.length === 0) {
+      console.log(
+        '🔍 [useWalletAccounts] 📝 Setting initial PLACEHOLDER account',
+        {
+          walletAddress: currentWalletAddress,
+          chainType,
+          hasQueryData: !!queryResult.data,
+        }
+      );
+      setGlobalState('walletAccounts', [
+        {
+          walletAddress: currentWalletAddress,
+          chainType,
+          username: currentWalletAddress,
+          entitled: true,
+        },
+      ]);
+    }
 
     // Process query result when data is available
     if (queryResult.data && queryResult.data.success && queryResult.data.data) {
@@ -163,33 +231,57 @@ export function useWalletAccounts(
         }
       }
 
+      console.log(
+        '🔍 [useWalletAccounts] ✅ Processing query result, SETTING accounts',
+        {
+          previousCount: accounts.length,
+          newCount: flattenedAccounts.length,
+          newUsernames: flattenedAccounts.map(a => a.username),
+          rawAccountsCount: queryResult.data.data.accounts.length,
+        }
+      );
       setGlobalState('walletAccounts', flattenedAccounts);
     } else if (queryResult.isError) {
       // Log error and set accounts to empty
-      console.error('Error fetching wallet accounts:', queryResult.error);
+      console.error(
+        '🔍 [useWalletAccounts] ❌ Error fetching wallet accounts, CLEARING',
+        {
+          error: queryResult.error,
+          previousCount: accounts.length,
+        }
+      );
       setGlobalState('walletAccounts', []);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    status,
-    indexerAuth,
+    status?.walletAddress,
+    status?.message,
+    status?.signature,
+    status?.chainType,
+    indexerAuth?.signer,
     queryResult.data,
     queryResult.isError,
     queryResult.error,
-    accounts.length,
+    // NOTE: Do NOT include accounts.length here as it creates a render loop
+    // The effect modifies accounts, which would change accounts.length,
+    // which would trigger the effect again, creating an infinite loop
   ]);
 
   // Refresh function to manually refetch wallet accounts
+  // Use a ref to avoid recreating the callback when queryResult changes
+  const queryResultRef = useRef(queryResult);
+  queryResultRef.current = queryResult;
+
   const refresh = useCallback(async () => {
-    if (queryResult.refetch) {
-      await queryResult.refetch();
+    if (queryResultRef.current.refetch) {
+      await queryResultRef.current.refetch();
     }
-  }, [queryResult]);
+  }, []); // Empty deps - stable reference
 
   // Memoize the return object to prevent unnecessary re-renders
   // Only recreate when accounts or indexerAuth actually change
   return useMemo<UseWalletAccountsReturn>(
-    () => ({ accounts, indexerAuth, refresh }),
-    [accounts, indexerAuth, refresh]
+    () => ({ accounts, indexerAuth: stableIndexerAuth, refresh }),
+    [accounts, stableIndexerAuth, refresh]
   );
 }
