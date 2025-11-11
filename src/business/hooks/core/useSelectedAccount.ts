@@ -114,15 +114,6 @@ export function useSelectedAccount(
   const [selectedAccount] = useGlobalSelectedAccount();
   const { indexerAuth } = useWalletStatus();
 
-  // DEBUG: Log on EVERY render
-  const timestamp = new Date().toISOString().split('T')[1];
-  console.log(`🟡 [useSelectedAccount] Hook rendered at ${timestamp}:`, {
-    accountsLength: accounts.length,
-    selectedAccount:
-      selectedAccount === undefined ? 'UNDEFINED' : selectedAccount?.username,
-    hasIndexerAuth: !!indexerAuth,
-  });
-
   // Local state to trigger re-renders when auth changes
   const [authUpdateCounter, setAuthUpdate] = useState(0);
 
@@ -157,19 +148,10 @@ export function useSelectedAccount(
   // Manage selected account selection
   // This hook ONLY reacts to changes in the accounts list
   useEffect(() => {
-    console.log('🟡 [useSelectedAccount] Accounts list changed:', {
-      accountsLength: accounts.length,
-      accountUsernames: accounts.map(a => a.username),
-      currentSelectedUsername: selectedAccount?.username,
-      currentSelectedWallet: selectedAccount?.walletAddress,
-    });
 
     // If no accounts, clear selection to undefined
     if (accounts.length === 0) {
       if (selectedAccount !== undefined) {
-        console.log(
-          '🟡 [useSelectedAccount] Clearing selected account (no accounts)'
-        );
         setGlobalState('selectedAccount', undefined);
       }
       return;
@@ -186,38 +168,19 @@ export function useSelectedAccount(
 
     // If current account is still valid, keep it
     if (currentAccountStillExists) {
-      console.log(
-        '🟡 [useSelectedAccount] Keeping current account:',
-        selectedAccount?.username
-      );
       return;
     }
 
     // Otherwise, select the first account
-    console.log(
-      '🟡 [useSelectedAccount] Selecting first account:',
-      accounts[0]?.username
-    );
     setGlobalState('selectedAccount', accounts[0]);
   }, [accounts, selectedAccount]);
 
   // Authenticate with WildDuck when selected account changes
   // SINGLETON PATTERN: Only one component instance should perform authentication
   useEffect(() => {
-    console.log('🔴 [useSelectedAccount] Auth effect triggered:', {
-      hasSelectedAccount: !!selectedAccount,
-      selectedUsername: selectedAccount?.username,
-      selectedWallet: selectedAccount?.walletAddress,
-      hasIndexerAuth: !!indexerAuth,
-      indexerAuthSigner: indexerAuth?.signer,
-      currentAuthKey: authKeyRef.current,
-    });
 
     if (!selectedAccount || !indexerAuth) {
       // Clear authentication if prerequisites are missing
-      console.log(
-        '🔴 [useSelectedAccount] Missing prerequisites, clearing auth'
-      );
       authenticationInProgress = undefined;
       lastAuthenticatedKey = undefined;
       authKeyRef.current = undefined;
@@ -229,19 +192,11 @@ export function useSelectedAccount(
     // Create unique key combining username and signer to handle multiple wallets
     const authKey = `${normalizedUsername}:${indexerAuth.signer}`;
 
-    console.log('🔴 [useSelectedAccount] Checking auth key:', {
-      newAuthKey: authKey,
-      cachedAuthKey: authKeyRef.current,
-      shouldSkip: authKeyRef.current === authKey,
-    });
 
     // CRITICAL: Skip if the authKey hasn't actually changed
     // This prevents repeated authentication calls when the effect re-runs
     // due to object reference changes in dependencies
     if (authKeyRef.current === authKey) {
-      console.log(
-        '🔴 [useSelectedAccount] Auth key unchanged, skipping authentication'
-      );
       return;
     }
 
@@ -268,19 +223,11 @@ export function useSelectedAccount(
     // Skip if another component instance is currently authenticating this combination
     if (authenticationInProgress === authKey) {
       // IMPORTANT: Early return to prevent duplicate authentication calls
-      console.log(
-        '🔴 [useSelectedAccount] Auth already in progress for this key, skipping'
-      );
       return;
     }
 
     // Mark authentication as in progress for this username + signer combination
     authenticationInProgress = authKey;
-    console.log('🔴 [useSelectedAccount] Starting authentication:', {
-      username: selectedAccount.username,
-      signer: indexerAuth.signer,
-      authKey,
-    });
 
     // Call authenticate only once per unique account/signature combination
     (async () => {
@@ -288,7 +235,6 @@ export function useSelectedAccount(
         // Get referral code if available (consume removes it from storage)
         const referralCode = ReferralConsumptionHelper.consume();
 
-        console.log('🔴 [useSelectedAccount] Calling WildDuck authenticate');
         const response = await authenticate({
           username: selectedAccount.username,
           message: indexerAuth.message,
@@ -299,7 +245,6 @@ export function useSelectedAccount(
         });
 
         if (response && response.success) {
-          console.log('🔴 [useSelectedAccount] Authentication successful');
           const token = response.token;
           const userId = response.id;
           if (token && userId) {
@@ -315,8 +260,6 @@ export function useSelectedAccount(
             });
             lastAuthenticatedKey = authKey;
             // Trigger re-render to update wildduckAuth
-            console.log('🔴 [useSelectedAccount] Auth cached, updating state');
-            setAuthUpdate(prev => prev + 1);
 
             // Clean URL parameter if referral code was consumed
             if (referralCode) {
@@ -360,9 +303,6 @@ export function useSelectedAccount(
         setAuthUpdate(prev => prev + 1);
       } finally {
         // Clear the in-progress flag
-        console.log(
-          '🔴 [useSelectedAccount] Auth complete, clearing in-progress flag'
-        );
         authenticationInProgress = undefined;
       }
     })();

@@ -1,13 +1,15 @@
 /**
  * useMailApp Hook
  * Central business logic hook for the Mail application
- * Orchestrates account management and authentication
+ * Manages account selection and authentication orchestration
  */
 
+import { useEffect } from 'react';
 import { Optional, WildduckConfig, WildduckUserAuth } from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
-import { useSelectedAccount } from './useSelectedAccount';
-import type { WildDuckAccount } from './useWalletAccounts';
+import { useWalletAccounts, WildDuckAccount } from './useWalletAccounts';
+import { useGlobalSelectedAccount } from './useSelectedAccount';
+import { useAccountWildduckAuth } from './useAccountWildduckAuth';
 
 /**
  * Return type for useMailApp hook
@@ -15,8 +17,8 @@ import type { WildDuckAccount } from './useWalletAccounts';
 export interface UseMailAppReturn {
   /** Currently selected account */
   selectedAccount: Optional<WildDuckAccount>;
-  /** Function to select an account by username */
-  selectAccount: (username: string) => void;
+  /** Function to select an account */
+  setSelectedAccount: (account: Optional<WildDuckAccount>) => void;
   /** WildDuck authentication for the selected account */
   wildduckAuth: Optional<WildduckUserAuth>;
   /** All available wallet accounts */
@@ -29,8 +31,8 @@ export interface UseMailAppReturn {
  * Hook to manage mail application business logic
  *
  * Orchestrates:
- * - Account selection and authentication (via useSelectedAccount)
- * - Provides a unified interface for mail app functionality
+ * - Account selection (auto-selects first account if none selected)
+ * - WildDuck authentication for the selected account
  *
  * @param indexerBackendUrl - Indexer API endpoint URL
  * @param wildduckConfig - WildDuck configuration
@@ -43,7 +45,7 @@ export interface UseMailAppReturn {
  * function MailApp() {
  *   const {
  *     selectedAccount,
- *     selectAccount,
+ *     setSelectedAccount,
  *     wildduckAuth,
  *     accounts,
  *   } = useMailApp(
@@ -58,7 +60,7 @@ export interface UseMailAppReturn {
  *       <AccountSelector
  *         accounts={accounts}
  *         selected={selectedAccount}
- *         onSelect={(account) => selectAccount(account.username)}
+ *         onSelect={setSelectedAccount}
  *       />
  *       <MailboxList wildduckAuth={wildduckAuth} />
  *     </div>
@@ -72,23 +74,51 @@ export function useMailApp(
   storage: StorageService,
   devMode: boolean = false
 ): UseMailAppReturn {
-  // useSelectedAccount manages everything: accounts list, selection logic, and authentication
-  const {
-    selectedAccount,
-    wildduckAuth,
-    selectAccount,
-    accounts,
-    refreshAccounts,
-  } = useSelectedAccount(
+  // Get wallet accounts from indexer
+  const { accounts, refresh: refreshAccounts } = useWalletAccounts(
     indexerBackendUrl,
-    wildduckConfig.apiToken,
+    devMode
+  );
+
+  // Get selected account from global state
+  const [selectedAccount, setSelectedAccount] = useGlobalSelectedAccount();
+
+  // Auto-select first account if none selected and accounts are available
+  useEffect(() => {
+    // Clear selection when no accounts are available (wallet disconnected or switching)
+    if (accounts.length === 0) {
+      if (selectedAccount !== undefined) {
+        setSelectedAccount(undefined);
+      }
+      return;
+    }
+
+    // Keep the current selection if it still exists in the refreshed account list
+    const currentAccountStillExists = selectedAccount
+      ? accounts.some(
+          account =>
+            account.username === selectedAccount.username &&
+            account.walletAddress === selectedAccount.walletAddress
+        )
+      : false;
+
+    // Select the first account when nothing is selected or the selection is stale
+    if (!selectedAccount || !currentAccountStillExists) {
+      setSelectedAccount(accounts[0]);
+    }
+  }, [accounts, selectedAccount, setSelectedAccount]);
+
+  // Get authentication for the selected account using username
+  const wildduckAuth = useAccountWildduckAuth(
+    selectedAccount?.username,
+    wildduckConfig,
     storage,
     devMode
   );
 
   return {
     selectedAccount,
-    selectAccount,
+    setSelectedAccount,
     wildduckAuth,
     accounts,
     refreshAccounts,

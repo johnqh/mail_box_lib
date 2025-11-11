@@ -76,15 +76,6 @@ export function useWalletAccounts(
   const { status, indexerAuth } = useWalletStatus();
   const [accounts] = useGlobalWalletAccounts();
 
-  // DEBUG: Log on EVERY render
-  const timestamp = new Date().toISOString().split('T')[1];
-  console.log(`🟢 [useWalletAccounts] Hook rendered at ${timestamp}:`, {
-    status:
-      status === undefined ? 'UNDEFINED' : status === null ? 'NULL' : 'OBJECT',
-    statusWallet: status?.walletAddress || 'NONE',
-    accountsLength: accounts.length,
-  });
-
   // useIndexerGetWalletAccounts now requires walletAddress and auth upfront
   const walletAddress = status?.walletAddress || '';
   const auth = indexerAuth || { message: '', signature: '', signer: '' };
@@ -96,24 +87,12 @@ export function useWalletAccounts(
   );
 
   useEffect(() => {
-    console.log('🟢 [useWalletAccounts] Effect triggered:', {
-      statusWallet: status?.walletAddress,
-      isVerified: !!(
-        status?.walletAddress &&
-        status?.message &&
-        status?.signature
-      ),
-      currentAccountsLength: accounts.length,
-      currentAccountsWallet: accounts[0]?.walletAddress,
-    });
-
     // Check if wallet is verified (has message and signature)
     const isVerified =
       status?.walletAddress && status?.message && status?.signature;
 
     if (!isVerified) {
       // Set accounts to empty array when not verified
-      console.log('🟢 [useWalletAccounts] Not verified, clearing accounts');
       setGlobalState('walletAccounts', []);
       return;
     }
@@ -132,10 +111,6 @@ export function useWalletAccounts(
 
     if (hasAccountsFromDifferentWallet) {
       // Clear accounts from old wallet first
-      console.log('🟢 [useWalletAccounts] Clearing old wallet accounts:', {
-        oldWallet: accounts[0]?.walletAddress,
-        newWallet: currentWalletAddress,
-      });
       setGlobalState('walletAccounts', []);
       // Return and let the effect re-run with empty accounts
       return;
@@ -144,9 +119,6 @@ export function useWalletAccounts(
     // Immediately set accounts to show the wallet address
     // This provides instant feedback while we fetch the full list
     // This will be replaced when the query returns
-    console.log('🟢 [useWalletAccounts] Setting initial account:', {
-      walletAddress: currentWalletAddress,
-    });
     setGlobalState('walletAccounts', [
       {
         walletAddress: currentWalletAddress,
@@ -158,9 +130,6 @@ export function useWalletAccounts(
 
     // Process query result when data is available
     if (queryResult.data && queryResult.data.success && queryResult.data.data) {
-      console.log(
-        '🟢 [useWalletAccounts] Query returned data, processing accounts'
-      );
       const flattenedAccounts: WildDuckAccount[] = [];
 
       for (const walletAccount of queryResult.data.data.accounts) {

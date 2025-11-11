@@ -75,14 +75,12 @@ export const connectWallet = (
     throw new Error('Wallet address is required');
   }
 
-  console.log('🔵 [connectWallet] Called:', { walletAddress, chainType });
   const newStatus: WalletStatus = {
     walletAddress: walletAddress.trim(),
     chainType,
   };
 
   setGlobalState('walletStatus', newStatus);
-  console.log('🔵 [connectWallet] Status set (connected, not verified yet)');
 };
 
 /**
@@ -107,7 +105,6 @@ export const verifyWallet = (
     throw new Error('Signature is required for verification');
   }
 
-  console.log('🔵 [verifyWallet] Called:', { walletAddress, chainType });
   const newStatus: WalletStatus = {
     walletAddress: walletAddress.trim(),
     chainType,
@@ -116,20 +113,13 @@ export const verifyWallet = (
   };
 
   setGlobalState('walletStatus', newStatus);
-  console.log('🔵 [verifyWallet] Status set (verified)');
 };
 
 /**
  * Disconnect wallet (set status to undefined)
  */
 export const disconnectWallet = (): void => {
-  const timestamp = new Date().toISOString().split('T')[1];
-  console.log(
-    `🔵 [disconnectWallet] Called at ${timestamp} - clearing wallet status`
-  );
-  console.trace('🔵 [disconnectWallet] Call stack:');
   setGlobalState('walletStatus', undefined);
-  console.log(`🔵 [disconnectWallet] Wallet status cleared at ${timestamp}`);
 };
 
 /**
@@ -253,19 +243,6 @@ export interface UseWalletStatusReturn {
 export const useWalletStatus = (): UseWalletStatusReturn => {
   // Use shared global state
   const [status] = useGlobalWalletStatus();
-
-  // DEBUG: Log on EVERY render to see if hook is called
-  const timestamp = new Date().toISOString().split('T')[1];
-  console.log(`🔵 [useWalletStatus] Hook rendered at ${timestamp}:`, {
-    status:
-      status === undefined ? 'UNDEFINED' : status === null ? 'NULL' : 'OBJECT',
-    walletAddress: status?.walletAddress || 'NONE',
-    hasMessage: !!status?.message,
-    hasSignature: !!status?.signature,
-    chainType: status?.chainType,
-    isConnected: checkWalletConnected(status),
-    isVerified: checkWalletVerified(status),
-  });
 
   // Memoized action functions
   const connectWalletCallback = useCallback(
