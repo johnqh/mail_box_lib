@@ -212,7 +212,8 @@ export function useAccountMailboxes(
         setError(null);
 
         // Fetch addresses for the user
-        const addresses = await addressesHook.getUserAddresses(currentUserId);
+        const addresses =
+          await addressesHook.getUserAddresses(wildduckUserAuth);
         console.log('🔍 [useAccountMailboxes] Got addresses', {
           count: addresses?.length,
         });
@@ -323,7 +324,7 @@ export function useAccountMailboxes(
       if (!wildduckUserAuth) {
         throw new Error('Authentication is required to create mailbox');
       }
-      await mailboxesHook.createMailbox(wildduckUserAuth.userId, params);
+      await mailboxesHook.createMailbox(wildduckUserAuth, params);
       // Refresh mailboxes after creation
       await refresh();
     },
@@ -336,11 +337,7 @@ export function useAccountMailboxes(
       if (!wildduckUserAuth) {
         throw new Error('Authentication is required to update mailbox');
       }
-      await mailboxesHook.updateMailbox(
-        wildduckUserAuth.userId,
-        mailboxId,
-        params
-      );
+      await mailboxesHook.updateMailbox(wildduckUserAuth, mailboxId, params);
       // Refresh mailboxes after update
       await refresh();
     },
@@ -353,7 +350,7 @@ export function useAccountMailboxes(
       if (!wildduckUserAuth) {
         throw new Error('Authentication is required to delete mailbox');
       }
-      await mailboxesHook.deleteMailbox(wildduckUserAuth.userId, mailboxId);
+      await mailboxesHook.deleteMailbox(wildduckUserAuth, mailboxId);
       // Refresh mailboxes after deletion
       await refresh();
     },
