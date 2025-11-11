@@ -51,12 +51,10 @@ export class ReferralConsumptionHelper {
   static record(referralCode: string): void {
     const storage = getStorage();
     if (!storage) {
-      console.warn('Storage not available, cannot record referral code');
       return;
     }
 
     if (!referralCode || referralCode.trim() === '') {
-      console.warn('Invalid referral code provided');
       return;
     }
 
@@ -70,7 +68,6 @@ export class ReferralConsumptionHelper {
   static consume(): Optional<string> {
     const storage = getStorage();
     if (!storage) {
-      console.warn('Storage not available, cannot consume referral code');
       return undefined;
     }
 

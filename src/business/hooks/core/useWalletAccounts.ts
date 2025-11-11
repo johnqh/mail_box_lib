@@ -108,37 +108,12 @@ export function useWalletAccounts(
     auth
   );
 
-  // DEBUG: Log render
-  console.log('🔍 [useWalletAccounts] RENDER', {
-    accountsCount: accounts.length,
-    accountsUsernames: accounts.map(a => a.username),
-    accountsWallets: accounts.map(a => a.walletAddress),
-    statusWalletAddress: status?.walletAddress,
-    statusChainType: status?.chainType,
-    isVerified: !!(
-      status?.walletAddress &&
-      status?.message &&
-      status?.signature
-    ),
-    hasQueryData: !!queryResult.data,
-  });
-
   useEffect(() => {
-    console.log('🔍 [useWalletAccounts] EFFECT triggered', {
-      accountsLength: accounts.length,
-      statusWallet: status?.walletAddress,
-      hasQueryData: !!queryResult.data,
-    });
-
     // Check if wallet is verified (has message and signature)
     const isVerified =
       status?.walletAddress && status?.message && status?.signature;
 
     if (!isVerified) {
-      console.log('🔍 [useWalletAccounts] ⚠️ Not verified, CLEARING accounts', {
-        hadAccounts: accounts.length > 0,
-        previousCount: accounts.length,
-      });
       // Set accounts to empty array when not verified
       setGlobalState('walletAccounts', []);
       return;
@@ -157,21 +132,7 @@ export function useWalletAccounts(
       accounts[0]?.walletAddress?.toLowerCase() !==
         currentWalletAddress.toLowerCase();
 
-    console.log('🔍 [useWalletAccounts] Wallet check', {
-      hasAccountsFromDifferentWallet,
-      accountsWallet: accounts[0]?.walletAddress,
-      currentWallet: currentWalletAddress,
-    });
-
     if (hasAccountsFromDifferentWallet) {
-      console.log(
-        '🔍 [useWalletAccounts] ⚠️ Different wallet detected, CLEARING accounts',
-        {
-          oldWallet: accounts[0]?.walletAddress,
-          newWallet: currentWalletAddress,
-          previousCount: accounts.length,
-        }
-      );
       // Clear accounts from old wallet first
       setGlobalState('walletAccounts', []);
       // Return and let the effect re-run with empty accounts
@@ -182,14 +143,6 @@ export function useWalletAccounts(
     // This provides instant feedback while we fetch the full list
     // This will be replaced when the query returns
     if (accounts.length === 0) {
-      console.log(
-        '🔍 [useWalletAccounts] 📝 Setting initial PLACEHOLDER account',
-        {
-          walletAddress: currentWalletAddress,
-          chainType,
-          hasQueryData: !!queryResult.data,
-        }
-      );
       setGlobalState('walletAccounts', [
         {
           walletAddress: currentWalletAddress,
@@ -231,24 +184,12 @@ export function useWalletAccounts(
         }
       }
 
-      console.log(
-        '🔍 [useWalletAccounts] ✅ Processing query result, SETTING accounts',
-        {
-          previousCount: accounts.length,
-          newCount: flattenedAccounts.length,
-          newUsernames: flattenedAccounts.map(a => a.username),
-          rawAccountsCount: queryResult.data.data.accounts.length,
-        }
-      );
       setGlobalState('walletAccounts', flattenedAccounts);
     } else if (queryResult.isError) {
       // Log error and set accounts to empty
       console.error(
-        '🔍 [useWalletAccounts] ❌ Error fetching wallet accounts, CLEARING',
-        {
-          error: queryResult.error,
-          previousCount: accounts.length,
-        }
+        '❌ useWalletAccounts: Error fetching wallet accounts',
+        queryResult.error
       );
       setGlobalState('walletAccounts', []);
     }

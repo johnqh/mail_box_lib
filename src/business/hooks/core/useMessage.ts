@@ -194,10 +194,6 @@ export function useMessage(
             selectedMessageId,
             transformedMessage
           );
-        } else {
-          console.warn(
-            '[useMessage] No message data in response or request failed'
-          );
         }
       } catch (err) {
         const errorMessage =

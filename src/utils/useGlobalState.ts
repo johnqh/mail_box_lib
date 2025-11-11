@@ -125,9 +125,6 @@ export function setGlobalState<T>(
   const state = globalStates.get(key);
 
   if (!state) {
-    console.warn(
-      `Global state "${key}" does not exist. Create it first with createGlobalState.`
-    );
     return;
   }
 

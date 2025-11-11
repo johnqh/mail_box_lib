@@ -94,35 +94,13 @@ export function useSelectedAccount(
     [rawAccounts.length, accountsKey]
   );
 
-  // DEBUG: Log render
-  console.log('🔍 [useSelectedAccount] RENDER', {
-    accountsLength: accounts.length,
-    accountsUsernames: accounts.map(a => a.username),
-    selectedAccountUsername: selectedAccount?.username,
-  });
-
   // Manage selected account selection
   // This hook ONLY reacts to changes in the accounts list
   useEffect(() => {
-    console.log('🔍 [useSelectedAccount] EFFECT triggered', {
-      accountsLength: accounts.length,
-      accountsUsernames: accounts.map(a => a.username),
-      accountsWallets: accounts.map(a => a.walletAddress),
-      selectedAccountUsername: selectedAccount?.username,
-      selectedAccountWallet: selectedAccount?.walletAddress,
-    });
-
     // If no accounts, clear selection to undefined
     if (accounts.length === 0) {
       if (selectedAccount !== undefined) {
-        console.log(
-          '🔍 [useSelectedAccount] ⚠️ CLEARING selectedAccount (no accounts)'
-        );
         setGlobalState('selectedAccount', undefined);
-      } else {
-        console.log(
-          '🔍 [useSelectedAccount] No accounts, selectedAccount already undefined'
-        );
       }
       return;
     }
@@ -136,40 +114,12 @@ export function useSelectedAccount(
         )
       : false;
 
-    console.log('🔍 [useSelectedAccount] Account existence check', {
-      hasSelectedAccount: !!selectedAccount,
-      currentAccountStillExists,
-      willSetAccount: !currentAccountStillExists,
-      firstAccountUsername: accounts[0]?.username,
-      firstAccountWallet: accounts[0]?.walletAddress,
-    });
-
     // If current account is still valid, keep it
     if (currentAccountStillExists) {
-      console.log('🔍 [useSelectedAccount] ✅ Keeping current account', {
-        username: selectedAccount?.username,
-      });
       return;
     }
 
     // Otherwise, select the first account
-    if (!selectedAccount) {
-      console.log(
-        '🔍 [useSelectedAccount] 🆕 Setting first account (none selected)',
-        {
-          username: accounts[0]?.username,
-          wallet: accounts[0]?.walletAddress,
-        }
-      );
-    } else {
-      console.log(
-        '🔍 [useSelectedAccount] 🔄 Replacing stale account with first',
-        {
-          oldUsername: selectedAccount.username,
-          newUsername: accounts[0]?.username,
-        }
-      );
-    }
     setGlobalState('selectedAccount', accounts[0]);
   }, [accounts, selectedAccount]);
 
@@ -182,10 +132,6 @@ export function useSelectedAccount(
       const account = accounts.find(acc => acc.username === username);
       if (account) {
         setGlobalState('selectedAccount', account);
-      } else {
-        console.warn(
-          `⚠️ useSelectedAccount: Cannot select account "${username}" - not found in accounts list`
-        );
       }
     },
     [accounts]

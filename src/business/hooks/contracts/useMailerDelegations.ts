@@ -143,25 +143,6 @@ export function useMailerDelegations(
     );
   }, [connectedWallet]);
 
-  // Debug logging
-  console.log('[useMailerDelegations] Parameters:', {
-    walletAddress,
-    chain,
-    indexerEndpoint,
-    indexerDevMode,
-    hasAuth: !!auth,
-    authDetails: auth
-      ? {
-          hasMessage: !!auth.message,
-          hasSignature: !!auth.signature,
-          hasSigner: !!auth.signer,
-          messageLength: auth.message?.length || 0,
-          signatureLength: auth.signature?.length || 0,
-        }
-      : 'no auth',
-    enabled: !!walletAddress,
-  });
-
   // Fetch delegation data from indexer
   // For read-only operations, pass enabled option to allow queries without auth
   const delegatedToQuery = useIndexerGetDelegatedTo(
@@ -185,23 +166,6 @@ export function useMailerDelegations(
       enabled: !!walletAddress, // Only require walletAddress, not auth for read operations
     }
   );
-
-  console.log('[useMailerDelegations] Query states:', {
-    delegatedTo: {
-      isLoading: delegatedToQuery.isLoading,
-      isError: delegatedToQuery.isError,
-      isFetching: delegatedToQuery.isFetching,
-      hasData: !!delegatedToQuery.data,
-      error: delegatedToQuery.error,
-    },
-    delegatedFrom: {
-      isLoading: delegatedFromQuery.isLoading,
-      isError: delegatedFromQuery.isError,
-      isFetching: delegatedFromQuery.isFetching,
-      hasData: !!delegatedFromQuery.data,
-      error: delegatedFromQuery.error,
-    },
-  });
 
   // Extract delegation data
   const delegatedToMe = useMemo<Optional<IndexerDelegateData>>(() => {

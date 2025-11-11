@@ -84,13 +84,6 @@ export function useMailApp(
   const { selectedAccount, selectAccount, accounts, refreshAccounts } =
     useSelectedAccount(networkClient, indexerBackendUrl, devMode);
 
-  // DEBUG: Log render
-  console.log('🔍 [useMailApp] RENDER', {
-    accountsCount: accounts.length,
-    selectedAccountUsername: selectedAccount?.username,
-    indexerBackendUrl,
-  });
-
   // Get authentication for the selected account using username
   const wildduckUserAuth = useAccountWildduckAuth(
     networkClient,

@@ -86,14 +86,6 @@ export function useAccountWildduckAuth(
     devMode
   );
 
-  // DEBUG: Log render
-  console.log('🔍 [useAccountWildduckAuth] RENDER', {
-    username,
-    hasIndexerAuth: !!indexerAuth,
-    signer: indexerAuth?.signer,
-    backendUrl: config.backendUrl,
-  });
-
   // Use React state for the auth - this is cleaner than the cache + counter pattern
   const [wildduckUserAuth, setWildduckAuth] = useState<
     Optional<WildduckUserAuth>
@@ -107,13 +99,7 @@ export function useAccountWildduckAuth(
 
   // Authenticate when username changes
   useEffect(() => {
-    console.log('🔍 [useAccountWildduckAuth] EFFECT triggered', {
-      username,
-      hasIndexerAuth: !!indexerAuth,
-    });
-
     if (!username || !indexerAuth) {
-      console.log('🔍 [useAccountWildduckAuth] No username or indexerAuth');
       setWildduckAuth(undefined);
       authenticationInProgress = null;
       return;
@@ -125,18 +111,9 @@ export function useAccountWildduckAuth(
     // Check if we already have auth cached
     const cachedAuth = authCache.get(authKey);
 
-    console.log('🔍 [useAccountWildduckAuth] Auth check', {
-      authKey,
-      hasCached: !!cachedAuth,
-      inProgress: authenticationInProgress === authKey,
-    });
-
     // Skip if already authenticated
     const hasPendingReferral = ReferralConsumptionHelper.hasPending();
     if (cachedAuth && !hasPendingReferral) {
-      console.log(
-        '🔍 [useAccountWildduckAuth] Already authenticated, skipping'
-      );
       // Ensure state matches cache
       if (wildduckUserAuth?.userId !== cachedAuth.auth.userId) {
         setWildduckAuth(cachedAuth.auth);
@@ -146,14 +123,10 @@ export function useAccountWildduckAuth(
 
     // Skip if another instance is authenticating
     if (authenticationInProgress === authKey) {
-      console.log(
-        '🔍 [useAccountWildduckAuth] Authentication in progress, skipping'
-      );
       return;
     }
 
     // Mark as in progress
-    console.log('🔍 [useAccountWildduckAuth] Starting authentication');
     authenticationInProgress = authKey;
 
     (async () => {
@@ -195,20 +168,15 @@ export function useAccountWildduckAuth(
                   ? `${window.location.pathname}?${newSearch}`
                   : window.location.pathname;
                 window.history.replaceState({}, '', newUrl);
-              } catch (error) {
-                console.warn('Failed to clean referral URL parameter:', error);
+              } catch {
+                // Silently ignore URL parameter cleanup errors
               }
             }
           } else {
-            console.warn('⚠️ useAccountWildduckAuth: Missing token or userId');
             authCache.delete(authKey);
             setWildduckAuth(undefined);
           }
         } else {
-          console.warn(
-            '⚠️ useAccountWildduckAuth: Authentication failed',
-            response
-          );
           authCache.delete(authKey);
           setWildduckAuth(undefined);
         }
