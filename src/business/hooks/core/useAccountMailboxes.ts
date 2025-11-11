@@ -122,10 +122,13 @@ export function useAccountMailboxes(
     cachedMailboxes || []
   );
 
-  const config: WildduckConfig = {
-    backendUrl: endpointUrl,
-    apiToken,
-  };
+  const config: WildduckConfig = useMemo(
+    () => ({
+      backendUrl: endpointUrl,
+      apiToken,
+    }),
+    [endpointUrl, apiToken]
+  );
 
   // Get addresses hook
   const addressesHook = useWildduckAddresses(networkClient, config, devMode);
@@ -246,7 +249,7 @@ export function useAccountMailboxes(
       setLocalMailboxes(mailboxesHook.mailboxes);
       setMailboxes(wildduckAuth.userId, mailboxesHook.mailboxes);
     }
-  }, [wildduckAuth, mailboxesHook.mailboxes, setMailboxes]);
+  }, [wildduckAuth?.userId, mailboxesHook.mailboxes, setMailboxes]);
 
   const isLoading =
     (!!wildduckAuth && !emailAddress && !error) ||
