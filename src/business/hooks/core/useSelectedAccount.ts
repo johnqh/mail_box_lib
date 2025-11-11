@@ -49,12 +49,16 @@ export const useGlobalSelectedAccount = createGlobalState<
  * Return type for useSelectedAccount hook
  */
 export interface UseSelectedAccountReturn {
-  /** The currently selected account (null if none available) */
+  /** The currently selected account (undefined if none available) */
   selectedAccount: Optional<WildDuckAccount>;
   /** WildDuck authentication object (undefined if not authenticated) */
   wildduckAuth: Optional<WildduckUserAuth>;
   /** Function to manually select an account by username */
   selectAccount: (username: string) => void;
+  /** All available wallet accounts */
+  accounts: WildDuckAccount[];
+  /** Function to refresh wallet accounts */
+  refreshAccounts: () => Promise<void>;
 }
 
 /**
@@ -103,7 +107,10 @@ export function useSelectedAccount(
   storage: StorageService,
   devMode: boolean
 ): UseSelectedAccountReturn {
-  const { accounts } = useWalletAccounts(endpointUrl, devMode);
+  const { accounts, refresh: refreshAccounts } = useWalletAccounts(
+    endpointUrl,
+    devMode
+  );
   const [selectedAccount] = useGlobalSelectedAccount();
   const { indexerAuth } = useWalletStatus();
 
@@ -388,7 +395,13 @@ export function useSelectedAccount(
   // Memoize the return object to prevent unnecessary re-renders
   // Only recreate when selectedAccount or wildduckAuth actually change
   return useMemo<UseSelectedAccountReturn>(
-    () => ({ selectedAccount, wildduckAuth, selectAccount }),
-    [selectedAccount, wildduckAuth, selectAccount]
+    () => ({
+      selectedAccount,
+      wildduckAuth,
+      selectAccount,
+      accounts,
+      refreshAccounts,
+    }),
+    [selectedAccount, wildduckAuth, selectAccount, accounts, refreshAccounts]
   );
 }

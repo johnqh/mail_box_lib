@@ -12,7 +12,6 @@ import {
 } from '../../../utils/useGlobalState';
 import { useUnifiedMessagesStore } from '../../stores/unifiedMessagesStore';
 import { Message, messageFromDetailedResponse } from '../../types/message';
-import { useGlobalSelectedMailboxId } from './useMailboxMessages';
 
 /**
  * Global selected message ID - shared across all components
@@ -49,6 +48,7 @@ export interface UseMessageReturn {
  * - Returns cached message immediately for better UX
  *
  * @param wildduckAuth - WildDuck authentication object (from useAccountWildduckAuth)
+ * @param selectedMailboxId - Currently selected mailbox ID (from useMailboxMessages)
  * @param endpointUrl - WildDuck API backend URL
  * @param apiToken - WildDuck API token for authentication
  * @param devMode - Whether to use mock data on errors
@@ -58,6 +58,7 @@ export interface UseMessageReturn {
  * ```tsx
  * function MessageView() {
  *   const wildduckAuth = useAccountWildduckAuth(config, storage, false);
+ *   const { selectedMailboxId } = useMailboxMessages(wildduckAuth, endpointUrl, apiToken, false);
  *
  *   const {
  *     selectedMessageId,
@@ -67,6 +68,7 @@ export interface UseMessageReturn {
  *     error
  *   } = useMessage(
  *     wildduckAuth,
+ *     selectedMailboxId,
  *     'https://wildduck.example.com',
  *     'your-api-token',
  *     false
@@ -90,12 +92,12 @@ export interface UseMessageReturn {
  */
 export function useMessage(
   wildduckAuth: Optional<WildduckUserAuth>,
+  selectedMailboxId: Optional<string>,
   endpointUrl: string,
   apiToken: string,
   devMode: boolean = false
 ): UseMessageReturn {
   const [selectedMessageId] = useGlobalSelectedMessageId();
-  const [selectedMailboxId] = useGlobalSelectedMailboxId();
 
   // Get Zustand store methods
   const { getMessage: getCachedMessage, setMessage: cacheMessage } =
