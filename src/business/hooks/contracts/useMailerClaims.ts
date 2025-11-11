@@ -38,8 +38,8 @@ interface UseMailerClaimsReturn {
   /** Refresh claimable rewards (alias for fetchRewards) */
   refresh: () => Promise<void>;
 
-  /** Claim rewards on the chain */
-  claimRewards: () => Promise<ClaimRewardResult>;
+  /** Claim rewards on the chain, returns undefined on error */
+  claimRewards: () => Promise<Optional<ClaimRewardResult>>;
 
   /** Clear any error state */
   clearError: () => void;
@@ -158,19 +158,27 @@ export const useMailerClaims = (
   /**
    * Claim rewards on the chain
    */
-  const claimRewards = useCallback(async (): Promise<ClaimRewardResult> => {
+  const claimRewards = useCallback(async (): Promise<
+    Optional<ClaimRewardResult>
+  > => {
     if (!connectedWallet) {
-      throw new Error('Wallet not provided');
+      setError('Wallet not provided');
+      console.error('Cannot claim rewards: Wallet not provided');
+      return undefined;
     }
 
     if (!chainInfo || !chainType) {
-      throw new Error('Chain configuration not available');
+      setError('Chain configuration not available');
+      console.error('Cannot claim rewards: Chain configuration not available');
+      return undefined;
     }
 
     // Find the reward for this chain
     const reward = rewards[0];
     if (!reward || reward.claimableAmount === BigInt(0)) {
-      throw new Error('No claimable rewards found');
+      setError('No claimable rewards found');
+      console.error('Cannot claim rewards: No claimable rewards found');
+      return undefined;
     }
 
     setIsClaiming(true);
@@ -208,7 +216,7 @@ export const useMailerClaims = (
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to claim rewards';
       setError(errorMessage);
-      throw err;
+      return undefined;
     } finally {
       setIsClaiming(false);
     }

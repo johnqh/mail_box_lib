@@ -224,19 +224,21 @@ describe('useMailerClaims', () => {
       expect(result.current.rewards[0].claimableAmount).toBe(BigInt(0));
     });
 
-    it('should throw error when trying to claim with no wallet', async () => {
+    it('should return undefined and set error when trying to claim with no wallet', async () => {
       const { result } = renderHook(() =>
         useMailerClaims(null as any, Chain.ETH_MAINNET)
       );
 
-      await expect(async () => {
-        await act(async () => {
-          await result.current.claimRewards();
-        });
-      }).rejects.toThrow('Wallet not provided');
+      let claimResult;
+      await act(async () => {
+        claimResult = await result.current.claimRewards();
+      });
+
+      expect(claimResult).toBeUndefined();
+      expect(result.current.error).toBe('Wallet not provided');
     });
 
-    it('should throw error when chain info not available', async () => {
+    it('should return undefined and set error when chain info not available', async () => {
       // Mock null chain info
       mockGetChainInfo.mockReturnValue(null);
 
@@ -248,14 +250,16 @@ describe('useMailerClaims', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      await expect(async () => {
-        await act(async () => {
-          await result.current.claimRewards();
-        });
-      }).rejects.toThrow('Chain configuration not available');
+      let claimResult;
+      await act(async () => {
+        claimResult = await result.current.claimRewards();
+      });
+
+      expect(claimResult).toBeUndefined();
+      expect(result.current.error).toBe('Chain configuration not available');
     });
 
-    it('should throw error when no claimable rewards found', async () => {
+    it('should return undefined and set error when no claimable rewards found', async () => {
       // Auto-fetch on mount with zero amount
       mockGetRecipientClaimable.mockResolvedValueOnce({
         amount: BigInt(0),
@@ -281,11 +285,13 @@ describe('useMailerClaims', () => {
       expect(result.current.rewards).toHaveLength(1);
       expect(result.current.rewards[0].claimableAmount).toBe(BigInt(0));
 
-      await expect(async () => {
-        await act(async () => {
-          await result.current.claimRewards();
-        });
-      }).rejects.toThrow('No claimable rewards found');
+      let claimResult;
+      await act(async () => {
+        claimResult = await result.current.claimRewards();
+      });
+
+      expect(claimResult).toBeUndefined();
+      expect(result.current.error).toBe('No claimable rewards found');
     });
 
     it('should set error state when claim fails', async () => {

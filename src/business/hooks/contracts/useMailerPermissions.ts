@@ -49,10 +49,14 @@ export interface UseMailerPermissionsReturn {
   error: Optional<string>;
   /** Function to manually fetch/refresh permissions */
   refresh: () => Promise<void>;
-  /** Function to add permission for a contract address */
-  addPermission: (contractAddress: string) => Promise<UnifiedTransaction>;
-  /** Function to remove permission for a contract address */
-  removePermission: (contractAddress: string) => Promise<UnifiedTransaction>;
+  /** Function to add permission for a contract address, returns undefined on error */
+  addPermission: (
+    contractAddress: string
+  ) => Promise<Optional<UnifiedTransaction>>;
+  /** Function to remove permission for a contract address, returns undefined on error */
+  removePermission: (
+    contractAddress: string
+  ) => Promise<Optional<UnifiedTransaction>>;
   /** Function to clear error state */
   clearError: () => void;
 }
@@ -211,15 +215,20 @@ export function useMailerPermissions(
    * Add permission for a contract address using smart contract
    */
   const addPermission = useCallback(
-    async (contractAddress: string): Promise<UnifiedTransaction> => {
+    async (contractAddress: string): Promise<Optional<UnifiedTransaction>> => {
       if (!connectedWallet || !chainInfo) {
-        throw new Error(
-          'Wallet and chain info are required for permission operations'
-        );
+        const errorMsg =
+          'Wallet and chain info are required for permission operations';
+        setError(errorMsg);
+        console.error(`Cannot add permission: ${errorMsg}`);
+        return undefined;
       }
 
       if (!contractAddress || contractAddress.trim() === '') {
-        throw new Error('Contract address is required');
+        const errorMsg = 'Contract address is required';
+        setError(errorMsg);
+        console.error(`Cannot add permission: ${errorMsg}`);
+        return undefined;
       }
 
       setIsProcessing(true);
@@ -251,7 +260,7 @@ export function useMailerPermissions(
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to add permission';
         setError(errorMessage);
-        throw err;
+        return undefined;
       } finally {
         setIsProcessing(false);
       }
@@ -263,15 +272,20 @@ export function useMailerPermissions(
    * Remove permission for a contract address using smart contract
    */
   const removePermission = useCallback(
-    async (contractAddress: string): Promise<UnifiedTransaction> => {
+    async (contractAddress: string): Promise<Optional<UnifiedTransaction>> => {
       if (!connectedWallet || !chainInfo) {
-        throw new Error(
-          'Wallet and chain info are required for permission operations'
-        );
+        const errorMsg =
+          'Wallet and chain info are required for permission operations';
+        setError(errorMsg);
+        console.error(`Cannot remove permission: ${errorMsg}`);
+        return undefined;
       }
 
       if (!contractAddress || contractAddress.trim() === '') {
-        throw new Error('Contract address is required');
+        const errorMsg = 'Contract address is required';
+        setError(errorMsg);
+        console.error(`Cannot remove permission: ${errorMsg}`);
+        return undefined;
       }
 
       setIsProcessing(true);
@@ -303,7 +317,7 @@ export function useMailerPermissions(
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to remove permission';
         setError(errorMessage);
-        throw err;
+        return undefined;
       } finally {
         setIsProcessing(false);
       }

@@ -448,7 +448,7 @@ describe('useMailerWebhooks', () => {
       expect(mockGetWebhooksApi).toHaveBeenCalled();
     });
 
-    it('should throw error if wallet not verified', async () => {
+    it('should return early if wallet not verified', async () => {
       (useWalletStatus as any).mockReturnValue({
         walletAddress: null,
         indexerAuth: null,
@@ -457,11 +457,9 @@ describe('useMailerWebhooks', () => {
 
       const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
-      await expect(
-        result.current.createWebhook({
-          webhookUrl: 'https://example.com/webhook',
-        })
-      ).rejects.toThrow('Wallet not verified');
+      await result.current.createWebhook({
+        webhookUrl: 'https://example.com/webhook',
+      });
 
       expect(mockCreateWebhook).not.toHaveBeenCalled();
     });
@@ -530,7 +528,7 @@ describe('useMailerWebhooks', () => {
       expect(mockGetWebhooksApi).toHaveBeenCalled();
     });
 
-    it('should throw error if wallet not verified', async () => {
+    it('should return early if wallet not verified', async () => {
       (useWalletStatus as any).mockReturnValue({
         walletAddress: null,
         indexerAuth: null,
@@ -539,9 +537,7 @@ describe('useMailerWebhooks', () => {
 
       const { result } = renderHook(() => useMailerWebhooks(mockConfig));
 
-      await expect(result.current.deleteWebhook('webhook-1')).rejects.toThrow(
-        'Wallet not verified'
-      );
+      await result.current.deleteWebhook('webhook-1');
 
       expect(mockDeleteWebhook).not.toHaveBeenCalled();
     });

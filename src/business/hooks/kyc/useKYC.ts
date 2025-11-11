@@ -12,6 +12,7 @@ import {
   type InitiateKYCRequest,
   type InitiateKYCResponse,
   type KYCVerificationLevel,
+  type Optional,
 } from '@sudobility/types';
 
 interface SignedData {
@@ -30,7 +31,9 @@ interface UseKYCReturn {
   status: GetKYCStatusResponse | null;
   loading: boolean;
   error: string | null;
-  initiateKYC: (level: KYCVerificationLevel) => Promise<InitiateKYCResponse>;
+  initiateKYC: (
+    level: KYCVerificationLevel
+  ) => Promise<Optional<InitiateKYCResponse>>;
   refreshStatus: () => Promise<void>;
 }
 
@@ -135,7 +138,9 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
       }
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch KYC status: ${response.statusText}`);
+        console.error(`Failed to fetch KYC status: ${response.statusText}`);
+        setError(`Failed to fetch KYC status: ${response.statusText}`);
+        return;
       }
 
       const data = await response.json();
@@ -143,7 +148,9 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
       if (data.success && data.data) {
         setStatus(data.data);
       } else {
-        throw new Error(data.error || 'Failed to fetch KYC status');
+        const errorMsg = data.error || 'Failed to fetch KYC status';
+        console.error(errorMsg);
+        setError(errorMsg);
       }
     } catch (err: any) {
       console.error('Error fetching KYC status:', err);
@@ -160,13 +167,21 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
    * @returns Promise with Sumsub access token and application details
    */
   const initiateKYC = useCallback(
-    async (level: KYCVerificationLevel): Promise<InitiateKYCResponse> => {
+    async (
+      level: KYCVerificationLevel
+    ): Promise<Optional<InitiateKYCResponse>> => {
       if (!walletAddress) {
-        throw new Error('Wallet not connected');
+        const errorMsg = 'Wallet not connected';
+        setError(errorMsg);
+        console.error(`Cannot initiate KYC: ${errorMsg}`);
+        return undefined;
       }
 
       if (!signedData) {
-        throw new Error('Please sign in with your wallet first');
+        const errorMsg = 'Please sign in with your wallet first';
+        setError(errorMsg);
+        console.error(`Cannot initiate KYC: ${errorMsg}`);
+        return undefined;
       }
 
       try {
@@ -200,13 +215,18 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
             // Response is not JSON (e.g., 404 HTML page)
             errorMessage = `KYC service unavailable (${response.status})`;
           }
-          throw new Error(errorMessage);
+          setError(errorMessage);
+          console.error(errorMessage);
+          return undefined;
         }
 
         const data = await response.json();
 
         if (!data.success || !data.data) {
-          throw new Error(data.error || 'Failed to initiate KYC verification');
+          const errorMsg = data.error || 'Failed to initiate KYC verification';
+          setError(errorMsg);
+          console.error(errorMsg);
+          return undefined;
         }
 
         // Refresh status after initiation
@@ -216,7 +236,7 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
       } catch (err: any) {
         console.error('Error initiating KYC:', err);
         setError(err.message);
-        throw err;
+        return undefined;
       } finally {
         setLoading(false);
       }

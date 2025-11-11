@@ -72,7 +72,8 @@ export const connectWallet = (
   chainType: ChainType
 ): void => {
   if (!walletAddress || walletAddress.trim() === '') {
-    throw new Error('Wallet address is required');
+    console.error('Cannot connect wallet: Wallet address is required');
+    return;
   }
 
   const newStatus: WalletStatus = {
@@ -96,13 +97,18 @@ export const verifyWallet = (
   signature: string
 ): void => {
   if (!walletAddress || walletAddress.trim() === '') {
-    throw new Error('Wallet address is required');
+    console.error('Cannot verify wallet: Wallet address is required');
+    return;
   }
   if (!message || message.trim() === '') {
-    throw new Error('Message is required for verification');
+    console.error('Cannot verify wallet: Message is required for verification');
+    return;
   }
   if (!signature || signature.trim() === '') {
-    throw new Error('Signature is required for verification');
+    console.error(
+      'Cannot verify wallet: Signature is required for verification'
+    );
+    return;
   }
 
   const newStatus: WalletStatus = {
@@ -130,7 +136,8 @@ export const updateWalletAddress = (
   chainType: ChainType
 ): void => {
   if (!walletAddress || walletAddress.trim() === '') {
-    throw new Error('Wallet address is required');
+    console.error('Cannot update wallet address: Wallet address is required');
+    return;
   }
 
   const currentStatus = getWalletStatus();

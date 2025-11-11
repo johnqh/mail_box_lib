@@ -66,13 +66,13 @@ export interface UseMailerWebhooksReturn {
   createWebhook: (webhookData: WebhookCreateRequest) => Promise<void>;
   /** Delete a webhook */
   deleteWebhook: (webhookId: string) => Promise<void>;
-  /** Send email through webhook - validates recipient (only wallet addresses supported) */
+  /** Send email through webhook - validates recipient (only wallet addresses supported), returns undefined on error */
   sendWebhookEmail: (
     connectedWallet: Wallet,
     to: string,
     webhookId: string,
     chain: Chain
-  ) => Promise<MessageResult>;
+  ) => Promise<Optional<MessageResult>>;
   /** Clear error state */
   clearError: () => void;
   /** Refresh webhooks (bypass cache) */
@@ -185,7 +185,8 @@ export const useMailerWebhooks = (
   const createWebhook = useCallback(
     async (webhookData: WebhookCreateRequest) => {
       if (!walletAddress || !indexerAuth) {
-        throw new Error('Wallet not verified');
+        console.error('Cannot create webhook: Wallet not verified');
+        return;
       }
 
       await indexerHook.createWebhook(walletAddress, indexerAuth, webhookData);
@@ -202,7 +203,8 @@ export const useMailerWebhooks = (
   const deleteWebhook = useCallback(
     async (webhookId: string) => {
       if (!walletAddress || !indexerAuth) {
-        throw new Error('Wallet not verified');
+        console.error('Cannot delete webhook: Wallet not verified');
+        return;
       }
 
       await indexerHook.deleteWebhook(walletAddress, webhookId, indexerAuth);
@@ -224,7 +226,7 @@ export const useMailerWebhooks = (
   /**
    * Send email through webhook
    * Note: Currently webhooks only support wallet addresses as recipients.
-   * Email addresses are validated but will throw an error as they're not supported.
+   * Email addresses are validated but will return undefined as they're not supported.
    */
   const sendWebhookEmail = useCallback(
     async (
@@ -232,26 +234,29 @@ export const useMailerWebhooks = (
       to: string,
       webhookId: string,
       chain: Chain
-    ): Promise<MessageResult> => {
+    ): Promise<Optional<MessageResult>> => {
       setIsSending(true);
 
       try {
         const chainInfo = RpcHelpers.getChainInfo(chain);
         if (!chainInfo) {
-          throw new Error(`Invalid chain: ${chain}`);
+          console.error(`Invalid chain: ${chain}`);
+          return undefined;
         }
 
         const chainType = RpcHelpers.getChainType(chain);
         if (!chainType) {
-          throw new Error(`Invalid chain: ${chain}`);
+          console.error(`Invalid chain: ${chain}`);
+          return undefined;
         }
 
         // Check if 'to' is an email address
         if (isValidEmail(to)) {
           // Webhooks currently only support wallet addresses, not email addresses
-          throw new Error(
+          console.error(
             'Webhooks currently only support sending to wallet addresses, not email addresses'
           );
+          return undefined;
         }
 
         // Check if 'to' is a valid wallet address for the chain
@@ -268,9 +273,10 @@ export const useMailerWebhooks = (
         }
 
         // Neither valid email nor valid wallet address
-        throw new Error(
+        console.error(
           `Invalid recipient: "${to}" is not a valid wallet address for ${chain}`
         );
+        return undefined;
       } finally {
         setIsSending(false);
       }

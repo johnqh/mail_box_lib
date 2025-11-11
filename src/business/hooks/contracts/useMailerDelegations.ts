@@ -38,12 +38,12 @@ export interface UseMailerDelegationsReturn {
   isLoading: boolean;
   /** Error message if any */
   error: Optional<string>;
-  /** Delegate to a target wallet address */
-  delegate: (targetAddress: string) => Promise<DelegationResult>;
-  /** Revoke delegation (delegate to 0x0 address) */
-  revoke: () => Promise<DelegationResult>;
-  /** Reject a delegation from a target wallet address */
-  reject: (delegatorAddress: string) => Promise<UnifiedTransaction>;
+  /** Delegate to a target wallet address, returns undefined on error */
+  delegate: (targetAddress: string) => Promise<Optional<DelegationResult>>;
+  /** Revoke delegation (delegate to 0x0 address), returns undefined on error */
+  revoke: () => Promise<Optional<DelegationResult>>;
+  /** Reject a delegation from a target wallet address, returns undefined on error */
+  reject: (delegatorAddress: string) => Promise<Optional<UnifiedTransaction>>;
   /** Refresh delegation data from indexer */
   refresh: () => Promise<void>;
   /** Clear error state */
@@ -238,15 +238,20 @@ export function useMailerDelegations(
    * Delegate to a target wallet address using smart contract
    */
   const delegate = useCallback(
-    async (targetAddress: string): Promise<DelegationResult> => {
+    async (targetAddress: string): Promise<Optional<DelegationResult>> => {
       if (!connectedWallet || !chainInfo) {
-        throw new Error(
-          'Wallet and chain info are required for delegation operations'
-        );
+        const errorMsg =
+          'Wallet and chain info are required for delegation operations';
+        setError(errorMsg);
+        console.error(`Cannot delegate: ${errorMsg}`);
+        return undefined;
       }
 
       if (!targetAddress || targetAddress.trim() === '') {
-        throw new Error('Target address is required');
+        const errorMsg = 'Target address is required';
+        setError(errorMsg);
+        console.error(`Cannot delegate: ${errorMsg}`);
+        return undefined;
       }
 
       setIsProcessing(true);
@@ -278,7 +283,7 @@ export function useMailerDelegations(
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to delegate';
         setError(errorMessage);
-        throw err;
+        return undefined;
       } finally {
         setIsProcessing(false);
       }
@@ -289,11 +294,13 @@ export function useMailerDelegations(
   /**
    * Revoke delegation by delegating to 0x0 address
    */
-  const revoke = useCallback(async (): Promise<DelegationResult> => {
+  const revoke = useCallback(async (): Promise<Optional<DelegationResult>> => {
     if (!connectedWallet || !chainInfo) {
-      throw new Error(
-        'Wallet and chain info are required for delegation operations'
-      );
+      const errorMsg =
+        'Wallet and chain info are required for delegation operations';
+      setError(errorMsg);
+      console.error(`Cannot revoke delegation: ${errorMsg}`);
+      return undefined;
     }
 
     setIsProcessing(true);
@@ -325,7 +332,7 @@ export function useMailerDelegations(
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to revoke delegation';
       setError(errorMessage);
-      throw err;
+      return undefined;
     } finally {
       setIsProcessing(false);
     }
@@ -335,15 +342,20 @@ export function useMailerDelegations(
    * Reject a delegation from a target wallet address
    */
   const reject = useCallback(
-    async (delegatorAddress: string): Promise<UnifiedTransaction> => {
+    async (delegatorAddress: string): Promise<Optional<UnifiedTransaction>> => {
       if (!connectedWallet || !chainInfo) {
-        throw new Error(
-          'Wallet and chain info are required for delegation operations'
-        );
+        const errorMsg =
+          'Wallet and chain info are required for delegation operations';
+        setError(errorMsg);
+        console.error(`Cannot reject delegation: ${errorMsg}`);
+        return undefined;
       }
 
       if (!delegatorAddress || delegatorAddress.trim() === '') {
-        throw new Error('Delegator address is required');
+        const errorMsg = 'Delegator address is required';
+        setError(errorMsg);
+        console.error(`Cannot reject delegation: ${errorMsg}`);
+        return undefined;
       }
 
       setIsProcessing(true);
@@ -375,7 +387,7 @@ export function useMailerDelegations(
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to reject delegation';
         setError(errorMessage);
-        throw err;
+        return undefined;
       } finally {
         setIsProcessing(false);
       }

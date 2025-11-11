@@ -190,18 +190,29 @@ export function useAccountMailboxes(
 
         // Validate that exactly one address exists
         if (!addresses || addresses.length === 0) {
-          throw new Error('No email address found for this account');
+          console.error('No email address found for this account');
+          setError('No email address found for this account');
+          setEmailAddress(null);
+          lastFetchedAccountRef.current = null;
+          return;
         }
 
         if (addresses.length > 1) {
-          throw new Error(
-            `Expected exactly one email address, but found ${addresses.length}`
-          );
+          const errorMsg = `Expected exactly one email address, but found ${addresses.length}`;
+          console.error(errorMsg);
+          setError(errorMsg);
+          setEmailAddress(null);
+          lastFetchedAccountRef.current = null;
+          return;
         }
 
         const firstAddress = addresses[0];
         if (!firstAddress) {
-          throw new Error('Failed to retrieve email address');
+          console.error('Failed to retrieve email address');
+          setError('Failed to retrieve email address');
+          setEmailAddress(null);
+          lastFetchedAccountRef.current = null;
+          return;
         }
 
         const address = firstAddress.address;
@@ -210,12 +221,20 @@ export function useAccountMailboxes(
         // Use case-insensitive comparison for wallet addresses
         const [username] = address.split('@');
         if (!username) {
-          throw new Error(`Invalid email address format: ${address}`);
+          const errorMsg = `Invalid email address format: ${address}`;
+          console.error(errorMsg);
+          setError(errorMsg);
+          setEmailAddress(null);
+          lastFetchedAccountRef.current = null;
+          return;
         }
         if (username.toLowerCase() !== currentUsername) {
-          throw new Error(
-            `Expected username ${currentUsername}, but found ${username} in address ${address}`
-          );
+          const errorMsg = `Expected username ${currentUsername}, but found ${username} in address ${address}`;
+          console.error(errorMsg);
+          setError(errorMsg);
+          setEmailAddress(null);
+          lastFetchedAccountRef.current = null;
+          return;
         }
 
         setEmailAddress(address);
@@ -284,7 +303,9 @@ export function useAccountMailboxes(
   const createMailbox = useCallback(
     async (params: CreateMailboxRequest) => {
       if (!wildduckUserAuth) {
-        throw new Error('Authentication is required to create mailbox');
+        setError('Authentication is required to create mailbox');
+        console.error('Cannot create mailbox: Authentication required');
+        return;
       }
       await mailboxesHook.createMailbox(wildduckUserAuth, params);
       // Refresh mailboxes after creation
@@ -297,7 +318,9 @@ export function useAccountMailboxes(
   const updateMailbox = useCallback(
     async (mailboxId: string, params: WildduckUpdateMailboxRequest) => {
       if (!wildduckUserAuth) {
-        throw new Error('Authentication is required to update mailbox');
+        setError('Authentication is required to update mailbox');
+        console.error('Cannot update mailbox: Authentication required');
+        return;
       }
       await mailboxesHook.updateMailbox(wildduckUserAuth, mailboxId, params);
       // Refresh mailboxes after update
@@ -310,7 +333,9 @@ export function useAccountMailboxes(
   const deleteMailbox = useCallback(
     async (mailboxId: string) => {
       if (!wildduckUserAuth) {
-        throw new Error('Authentication is required to delete mailbox');
+        setError('Authentication is required to delete mailbox');
+        console.error('Cannot delete mailbox: Authentication required');
+        return;
       }
       await mailboxesHook.deleteMailbox(wildduckUserAuth, mailboxId);
       // Refresh mailboxes after deletion

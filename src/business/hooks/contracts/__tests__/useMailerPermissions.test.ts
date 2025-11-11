@@ -506,7 +506,7 @@ describe('useMailerPermissions', () => {
         );
       });
 
-      it('should throw error when mailerClient is not initialized', async () => {
+      it('should return undefined and set error when mailerClient is not initialized', async () => {
         mockGetWalletPermissions({
           success: true,
           data: {
@@ -523,14 +523,16 @@ describe('useMailerPermissions', () => {
           useMailerPermissions(mockNetworkClient, null, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
 
-        await expect(async () => {
-          await act(async () => {
-            await result.current.addPermission('0x1234567890123456789012345678901234567890');
-          });
-        }).rejects.toThrow('Wallet and chain info are required for permission operations');
+        let addResult;
+        await act(async () => {
+          addResult = await result.current.addPermission('0x1234567890123456789012345678901234567890');
+        });
+
+        expect(addResult).toBeUndefined();
+        expect(result.current.error).toBe('Wallet and chain info are required for permission operations');
       });
 
-      it('should throw error when contract address is empty', async () => {
+      it('should return undefined and set error when contract address is empty', async () => {
         mockGetWalletPermissions({
           success: true,
           data: {
@@ -552,11 +554,13 @@ describe('useMailerPermissions', () => {
           expect(result.current.isLoading).toBe(false);
         });
 
-        await expect(async () => {
-          await act(async () => {
-            await result.current.addPermission('');
-          });
-        }).rejects.toThrow('Contract address is required');
+        let addResult;
+        await act(async () => {
+          addResult = await result.current.addPermission('');
+        });
+
+        expect(addResult).toBeUndefined();
+        expect(result.current.error).toBe('Contract address is required');
       });
 
       it('should handle errors and set error state', async () => {
@@ -689,7 +693,7 @@ describe('useMailerPermissions', () => {
         );
       });
 
-      it('should throw error when mailerClient is not initialized', async () => {
+      it('should return undefined and set error when mailerClient is not initialized', async () => {
         mockGetWalletPermissions({
           success: true,
           data: {
@@ -706,14 +710,16 @@ describe('useMailerPermissions', () => {
           useMailerPermissions(mockNetworkClient, null, Chain.ETH_MAINNET, mockEndpointUrl, false)
         );
 
-        await expect(async () => {
-          await act(async () => {
-            await result.current.removePermission('0x1234567890123456789012345678901234567890');
-          });
-        }).rejects.toThrow('Wallet and chain info are required for permission operations');
+        let removeResult;
+        await act(async () => {
+          removeResult = await result.current.removePermission('0x1234567890123456789012345678901234567890');
+        });
+
+        expect(removeResult).toBeUndefined();
+        expect(result.current.error).toBe('Wallet and chain info are required for permission operations');
       });
 
-      it('should throw error when contract address is empty', async () => {
+      it('should return undefined and set error when contract address is empty', async () => {
         mockGetWalletPermissions({
           success: true,
           data: {
@@ -735,11 +741,13 @@ describe('useMailerPermissions', () => {
           expect(result.current.isLoading).toBe(false);
         });
 
-        await expect(async () => {
-          await act(async () => {
-            await result.current.removePermission('');
-          });
-        }).rejects.toThrow('Contract address is required');
+        let removeResult;
+        await act(async () => {
+          removeResult = await result.current.removePermission('');
+        });
+
+        expect(removeResult).toBeUndefined();
+        expect(result.current.error).toBe('Contract address is required');
       });
 
       it('should handle errors and set error state', async () => {

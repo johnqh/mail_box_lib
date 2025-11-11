@@ -160,7 +160,8 @@ export function useMessages({
     ],
     queryFn: async () => {
       if (!wildduckUserAuth?.userId || !wildduckUserAuth?.accessToken) {
-        throw new Error('Not authenticated');
+        console.error('Cannot search messages: Not authenticated');
+        return [];
       }
 
       // Build search query parameters

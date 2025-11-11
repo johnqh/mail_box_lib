@@ -66,13 +66,13 @@ export interface UseMailerTemplatesReturn {
   ) => Promise<void>;
   /** Delete a template */
   deleteTemplate: (templateId: string) => Promise<void>;
-  /** Send email using prepared template - validates recipient and chooses appropriate method */
+  /** Send email using prepared template - validates recipient and chooses appropriate method, returns undefined on error */
   sendPreparedEmail: (
     connectedWallet: Wallet,
     to: string,
     templateId: string,
     chain: Chain
-  ) => Promise<MessageResult>;
+  ) => Promise<Optional<MessageResult>>;
   /** Clear error state */
   clearError: () => void;
   /** Refresh templates (bypass cache) */
@@ -191,7 +191,8 @@ export const useMailerTemplates = (
   const createTemplate = useCallback(
     async (templateData: IndexerTemplateCreateRequest) => {
       if (!walletAddress || !indexerAuth) {
-        throw new Error('Wallet not verified');
+        console.error('Cannot create template: Wallet not verified');
+        return;
       }
 
       await indexerHook.createTemplate(
@@ -212,7 +213,8 @@ export const useMailerTemplates = (
   const updateTemplate = useCallback(
     async (templateId: string, updates: IndexerTemplateUpdateRequest) => {
       if (!walletAddress || !indexerAuth) {
-        throw new Error('Wallet not verified');
+        console.error('Cannot update template: Wallet not verified');
+        return;
       }
 
       await indexerHook.updateTemplate(
@@ -234,7 +236,8 @@ export const useMailerTemplates = (
   const deleteTemplate = useCallback(
     async (templateId: string) => {
       if (!walletAddress || !indexerAuth) {
-        throw new Error('Wallet not verified');
+        console.error('Cannot delete template: Wallet not verified');
+        return;
       }
 
       await indexerHook.deleteTemplate(walletAddress, templateId, indexerAuth);
@@ -263,18 +266,20 @@ export const useMailerTemplates = (
       to: string,
       templateId: string,
       chain: Chain
-    ): Promise<MessageResult> => {
+    ): Promise<Optional<MessageResult>> => {
       setIsSending(true);
 
       try {
         const chainInfo = RpcHelpers.getChainInfo(chain);
         if (!chainInfo) {
-          throw new Error(`Invalid chain: ${chain}`);
+          console.error(`Invalid chain: ${chain}`);
+          return undefined;
         }
 
         const chainType = RpcHelpers.getChainType(chain);
         if (!chainType) {
-          throw new Error(`Invalid chain: ${chain}`);
+          console.error(`Invalid chain: ${chain}`);
+          return undefined;
         }
 
         // Check if 'to' is a valid email address
@@ -302,9 +307,10 @@ export const useMailerTemplates = (
         }
 
         // Neither valid email nor valid wallet address
-        throw new Error(
+        console.error(
           `Invalid recipient: "${to}" is neither a valid email address nor a valid wallet address for ${chain}`
         );
+        return undefined;
       } finally {
         setIsSending(false);
       }

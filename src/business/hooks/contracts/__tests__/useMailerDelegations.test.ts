@@ -257,7 +257,7 @@ describe('useMailerDelegations', () => {
       expect(mockRefetchFrom).toHaveBeenCalled();
     });
 
-    it('should throw error if delegating without wallet', async () => {
+    it('should return undefined and set error if delegating without wallet', async () => {
       const { result } = renderHook(() =>
         useMailerDelegations(
           mockNetworkClient,
@@ -269,14 +269,18 @@ describe('useMailerDelegations', () => {
         )
       );
 
-      await expect(async () => {
-        await act(async () => {
-          await result.current.delegate('0xTarget');
-        });
-      }).rejects.toThrow('Wallet and chain info are required for delegation operations');
+      let delegateResult;
+      await act(async () => {
+        delegateResult = await result.current.delegate('0xTarget');
+      });
+
+      expect(delegateResult).toBeUndefined();
+      expect(result.current.error).toBe(
+        'Wallet and chain info are required for delegation operations'
+      );
     });
 
-    it('should throw error if delegating with empty address', async () => {
+    it('should return undefined and set error if delegating with empty address', async () => {
       const { result } = renderHook(() =>
         useMailerDelegations(
           mockNetworkClient,
@@ -288,11 +292,13 @@ describe('useMailerDelegations', () => {
         )
       );
 
-      await expect(async () => {
-        await act(async () => {
-          await result.current.delegate('');
-        });
-      }).rejects.toThrow('Target address is required');
+      let delegateResult;
+      await act(async () => {
+        delegateResult = await result.current.delegate('');
+      });
+
+      expect(delegateResult).toBeUndefined();
+      expect(result.current.error).toBe('Target address is required');
     });
 
     it('should handle delegation errors', async () => {
@@ -310,18 +316,12 @@ describe('useMailerDelegations', () => {
         )
       );
 
-      let caughtError = false;
+      let delegateResult;
       await act(async () => {
-        try {
-          await result.current.delegate('0xTarget');
-        } catch (err) {
-          caughtError = true;
-          expect(err).toBeInstanceOf(Error);
-          expect((err as Error).message).toBe(errorMessage);
-        }
+        delegateResult = await result.current.delegate('0xTarget');
       });
 
-      expect(caughtError).toBe(true);
+      expect(delegateResult).toBeUndefined();
       expect(result.current.error).toBe(errorMessage);
     });
   });
@@ -363,7 +363,7 @@ describe('useMailerDelegations', () => {
       expect(mockRefetchFrom).toHaveBeenCalled();
     });
 
-    it('should throw error if revoking without wallet', async () => {
+    it('should return undefined and set error if revoking without wallet', async () => {
       const { result } = renderHook(() =>
         useMailerDelegations(
           mockNetworkClient,
@@ -375,11 +375,15 @@ describe('useMailerDelegations', () => {
         )
       );
 
-      await expect(async () => {
-        await act(async () => {
-          await result.current.revoke();
-        });
-      }).rejects.toThrow('Wallet and chain info are required for delegation operations');
+      let revokeResult;
+      await act(async () => {
+        revokeResult = await result.current.revoke();
+      });
+
+      expect(revokeResult).toBeUndefined();
+      expect(result.current.error).toBe(
+        'Wallet and chain info are required for delegation operations'
+      );
     });
   });
 
@@ -421,7 +425,7 @@ describe('useMailerDelegations', () => {
       expect(mockRefetchFrom).toHaveBeenCalled();
     });
 
-    it('should throw error if rejecting without wallet', async () => {
+    it('should return undefined and set error if rejecting without wallet', async () => {
       const { result } = renderHook(() =>
         useMailerDelegations(
           mockNetworkClient,
@@ -433,14 +437,18 @@ describe('useMailerDelegations', () => {
         )
       );
 
-      await expect(async () => {
-        await act(async () => {
-          await result.current.reject('0xDelegator');
-        });
-      }).rejects.toThrow('Wallet and chain info are required for delegation operations');
+      let rejectResult;
+      await act(async () => {
+        rejectResult = await result.current.reject('0xDelegator');
+      });
+
+      expect(rejectResult).toBeUndefined();
+      expect(result.current.error).toBe(
+        'Wallet and chain info are required for delegation operations'
+      );
     });
 
-    it('should throw error if rejecting with empty address', async () => {
+    it('should return undefined and set error if rejecting with empty address', async () => {
       const { result } = renderHook(() =>
         useMailerDelegations(
           mockNetworkClient,
@@ -452,11 +460,13 @@ describe('useMailerDelegations', () => {
         )
       );
 
-      await expect(async () => {
-        await act(async () => {
-          await result.current.reject('');
-        });
-      }).rejects.toThrow('Delegator address is required');
+      let rejectResult;
+      await act(async () => {
+        rejectResult = await result.current.reject('');
+      });
+
+      expect(rejectResult).toBeUndefined();
+      expect(result.current.error).toBe('Delegator address is required');
     });
 
     it('should handle rejection errors', async () => {
@@ -474,18 +484,12 @@ describe('useMailerDelegations', () => {
         )
       );
 
-      let caughtError = false;
+      let rejectResult;
       await act(async () => {
-        try {
-          await result.current.reject('0xDelegator');
-        } catch (err) {
-          caughtError = true;
-          expect(err).toBeInstanceOf(Error);
-          expect((err as Error).message).toBe(errorMessage);
-        }
+        rejectResult = await result.current.reject('0xDelegator');
       });
 
-      expect(caughtError).toBe(true);
+      expect(rejectResult).toBeUndefined();
       expect(result.current.error).toBe(errorMessage);
     });
   });

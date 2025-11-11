@@ -29,7 +29,7 @@ import {
 import type { Address, Chain as ViemChain } from 'viem';
 
 // Helper function to get viem chain from chainId
-const getViemChain = (chainId: number): ViemChain => {
+const getViemChain = (chainId: number): ViemChain | undefined => {
   const chainMap: Record<number, ViemChain> = {
     1: mainnet,
     11155111: sepolia,
@@ -45,7 +45,8 @@ const getViemChain = (chainId: number): ViemChain => {
 
   const chain = chainMap[chainId];
   if (!chain) {
-    throw new Error(`Unsupported chain ID: ${chainId}`);
+    console.error(`Unsupported chain ID: ${chainId}`);
+    return undefined;
   }
 
   return chain;
@@ -169,7 +170,10 @@ export const useMailerContractApproval = (
 
     try {
       if (!chainInfo) {
-        throw new Error('Chain information not available');
+        const errorMsg = 'Chain information not available';
+        console.error(errorMsg);
+        setError(errorMsg);
+        return;
       }
 
       // Build RPC URL with priority: Ankr > Metamask > Alchemy
@@ -184,9 +188,11 @@ export const useMailerContractApproval = (
       }
 
       if (!rpcUrl) {
-        throw new Error(
-          'No RPC endpoint configured. Please provide at least one API key (Alchemy, Ankr, or Metamask).'
-        );
+        const errorMsg =
+          'No RPC endpoint configured. Please provide at least one API key (Alchemy, Ankr, or Metamask).';
+        console.error(errorMsg);
+        setError(errorMsg);
+        return;
       }
 
       // Create public client for reading using the RPC URL
@@ -232,11 +238,17 @@ export const useMailerContractApproval = (
   const approve = useCallback(
     async (amount: string) => {
       if (!isConnected || !walletAddress || !usdcAddress || !mailerAddress) {
-        throw new Error('Wallet not connected or contracts not available');
+        const errorMsg = 'Wallet not connected or contracts not available';
+        console.error(`Cannot approve: ${errorMsg}`);
+        setError(errorMsg);
+        return;
       }
 
       if (!connector) {
-        throw new Error('Wallet connector not available');
+        const errorMsg = 'Wallet connector not available';
+        console.error(`Cannot approve: ${errorMsg}`);
+        setError(errorMsg);
+        return;
       }
 
       setIsApproving(true);
@@ -249,9 +261,18 @@ export const useMailerContractApproval = (
 
         // Get the correct viem chain for the target chainId
         if (!chainId) {
-          throw new Error('Chain ID not available');
+          const errorMsg = 'Chain ID not available';
+          console.error(`Cannot approve: ${errorMsg}`);
+          setError(errorMsg);
+          return;
         }
         const targetChain = getViemChain(chainId);
+        if (!targetChain) {
+          const errorMsg = 'Failed to get target chain';
+          console.error(`Cannot approve: ${errorMsg}`);
+          setError(errorMsg);
+          return;
+        }
 
         // Create wallet client with the correct chain
         const walletClient = await createWalletClient({
@@ -303,7 +324,7 @@ export const useMailerContractApproval = (
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to approve USDC';
         setError(errorMessage);
-        throw err;
+        console.error('Failed to approve USDC:', err);
       } finally {
         setIsApproving(false);
       }
@@ -328,11 +349,17 @@ export const useMailerContractApproval = (
    */
   const revoke = useCallback(async () => {
     if (!isConnected || !walletAddress || !usdcAddress || !mailerAddress) {
-      throw new Error('Wallet not connected or contracts not available');
+      const errorMsg = 'Wallet not connected or contracts not available';
+      console.error(`Cannot revoke: ${errorMsg}`);
+      setError(errorMsg);
+      return;
     }
 
     if (!connector) {
-      throw new Error('Wallet connector not available');
+      const errorMsg = 'Wallet connector not available';
+      console.error(`Cannot revoke: ${errorMsg}`);
+      setError(errorMsg);
+      return;
     }
 
     setIsApproving(true);
@@ -345,9 +372,18 @@ export const useMailerContractApproval = (
 
       // Get the correct viem chain for the target chainId
       if (!chainId) {
-        throw new Error('Chain ID not available');
+        const errorMsg = 'Chain ID not available';
+        console.error(`Cannot revoke: ${errorMsg}`);
+        setError(errorMsg);
+        return;
       }
       const targetChain = getViemChain(chainId);
+      if (!targetChain) {
+        const errorMsg = 'Failed to get target chain';
+        console.error(`Cannot revoke: ${errorMsg}`);
+        setError(errorMsg);
+        return;
+      }
 
       // Create wallet client with the correct chain
       const walletClient = await createWalletClient({
@@ -396,7 +432,7 @@ export const useMailerContractApproval = (
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to revoke approval';
       setError(errorMessage);
-      throw err;
+      console.error('Failed to revoke approval:', err);
     } finally {
       setIsApproving(false);
     }

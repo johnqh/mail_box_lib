@@ -167,9 +167,10 @@ export function useSelectedChain({
       const isValidChain = chains.some(c => c.chain === newChain);
       if (!isValidChain) {
         const availableChains = chains.map(c => c.chain).join(', ');
-        throw new Error(
+        console.error(
           `Invalid chain selection: ${newChain}. Must be one of: ${availableChains}`
         );
+        return;
       }
 
       setStoredChain(newChain);

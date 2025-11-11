@@ -92,9 +92,10 @@ export function useReferralCode(
   // Manual refetch function
   const refetch = async () => {
     if (!walletAddress || !indexerAuth) {
-      throw new Error(
-        'Wallet address and auth required to fetch referral code'
+      console.error(
+        'Cannot refetch referral code: Wallet address and auth required'
       );
+      return;
     }
 
     setHasFetched(false);
