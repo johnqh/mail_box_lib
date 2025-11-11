@@ -11,7 +11,7 @@
  * - If searchScope is "all": searches across all mailboxes
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Optional, WildduckUserAuth } from '@sudobility/types';
 import type { NetworkClient } from '@sudobility/types';
@@ -35,10 +35,8 @@ export interface UseMessagesParams {
   searchText: string;
   /** Search scope: 'current' = current mailbox only, 'all' = all mailboxes */
   searchScope: 'current' | 'all';
-  /** WildDuck user ID for search */
-  userId?: string;
-  /** Access token for authenticated search */
-  accessToken?: string;
+  /** WildDuck authentication (includes wildduckUserAuth?.userId, wildduckUserAuth?.accessToken, and username) */
+  wildduckUserAuth?: Optional<WildduckUserAuth>;
   /** Whether the hook is enabled */
   enabled?: boolean;
 }
@@ -91,8 +89,8 @@ export interface UseMessagesReturn {
  *     mailboxId: 'inbox-id',
  *     searchText: '',
  *     searchScope: 'current',
- *     userId: 'user-123',
- *     accessToken: 'token',
+ *     wildduckUserAuth?.userId: 'user-123',
+ *     wildduckUserAuth?.accessToken: 'token',
  *   });
  *
  *   return (
@@ -113,24 +111,17 @@ export function useMessages({
   mailboxId,
   searchText,
   searchScope,
-  userId,
-  accessToken,
+  wildduckUserAuth,
   enabled = true,
 }: UseMessagesParams): UseMessagesReturn {
   // Track mailbox transitions to show loading state
   const [isTransitioning, setIsTransitioning] = useState(false);
   const previousMailboxId = useRef<Optional<string>>(mailboxId);
 
-  // Construct wildduckAuth from userId and accessToken
-  const wildduckAuth = useMemo<Optional<WildduckUserAuth>>(() => {
-    if (!userId || !accessToken) return undefined;
-    return { userId, accessToken };
-  }, [userId, accessToken]);
-
   // Always keep mailbox messages hook active so it's ready when search is cleared
   const mailboxMessages = useMailboxMessages(
     networkClient,
-    wildduckAuth,
+    wildduckUserAuth,
     endpointUrl,
     '',
     devMode,
@@ -160,9 +151,15 @@ export function useMessages({
 
   // Search query when searchText is not empty
   const searchQuery = useQuery({
-    queryKey: ['messages-search', userId, searchText, searchScope, mailboxId],
+    queryKey: [
+      'messages-search',
+      wildduckUserAuth?.userId,
+      searchText,
+      searchScope,
+      mailboxId,
+    ],
     queryFn: async () => {
-      if (!userId || !accessToken) {
+      if (!wildduckUserAuth?.userId || !wildduckUserAuth?.accessToken) {
         throw new Error('Not authenticated');
       }
 
@@ -177,11 +174,11 @@ export function useMessages({
         params.append('mailbox', mailboxId);
       }
 
-      const url = `${endpointUrl}/users/${userId}/search?${params.toString()}`;
+      const url = `${endpointUrl}/users/${wildduckUserAuth?.userId}/search?${params.toString()}`;
 
       const response = await networkClient.get<SearchResponse>(url, {
         headers: {
-          'X-Access-Token': accessToken,
+          'X-Access-Token': wildduckUserAuth?.accessToken,
         },
       });
 
@@ -191,7 +188,11 @@ export function useMessages({
 
       return [];
     },
-    enabled: enabled && !!searchText.trim() && !!userId && !!accessToken,
+    enabled:
+      enabled &&
+      !!searchText.trim() &&
+      !!wildduckUserAuth?.userId &&
+      !!wildduckUserAuth?.accessToken,
     staleTime: 1000, // Search results are fresh for 1 second
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });

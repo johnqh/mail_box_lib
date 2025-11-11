@@ -48,11 +48,11 @@ export interface UseMessageReturn {
  * Features:
  * - Provides a setter to select a message by messageId
  * - Fetches full message payload from WildDuck when messageId is set
- * - Accepts wildduckAuth as parameter for authentication
+ * - Accepts wildduckUserAuth as parameter for authentication
  * - Caches messages in Zustand store using userId + messageId as key
  * - Returns cached message immediately for better UX
  *
- * @param wildduckAuth - WildDuck authentication object (from useAccountWildduckAuth)
+ * @param wildduckUserAuth - WildDuck authentication object (from useAccountWildduckAuth)
  * @param selectedMailboxId - Currently selected mailbox ID (from useMailboxMessages)
  * @param endpointUrl - WildDuck API backend URL
  * @param apiToken - WildDuck API token for authentication
@@ -62,8 +62,8 @@ export interface UseMessageReturn {
  * @example
  * ```tsx
  * function MessageView() {
- *   const wildduckAuth = useAccountWildduckAuth(config, storage, false);
- *   const { selectedMailboxId } = useMailboxMessages(wildduckAuth, endpointUrl, apiToken, false);
+ *   const wildduckUserAuth = useAccountWildduckAuth(config, storage, false);
+ *   const { selectedMailboxId } = useMailboxMessages(wildduckUserAuth, endpointUrl, apiToken, false);
  *
  *   const {
  *     selectedMessageId,
@@ -72,7 +72,7 @@ export interface UseMessageReturn {
  *     isLoading,
  *     error
  *   } = useMessage(
- *     wildduckAuth,
+ *     wildduckUserAuth,
  *     selectedMailboxId,
  *     'https://wildduck.example.com',
  *     'your-api-token',
@@ -97,7 +97,7 @@ export interface UseMessageReturn {
  */
 export function useMessage(
   networkClient: NetworkClient,
-  wildduckAuth: Optional<WildduckUserAuth>,
+  wildduckUserAuth: Optional<WildduckUserAuth>,
   selectedMailboxId: Optional<string>,
   endpointUrl: string,
   apiToken: string,
@@ -111,8 +111,8 @@ export function useMessage(
 
   // Check if we have cached message
   const cachedMessage =
-    wildduckAuth && selectedMessageId
-      ? getCachedMessage(wildduckAuth.userId, selectedMessageId)
+    wildduckUserAuth && selectedMessageId
+      ? getCachedMessage(wildduckUserAuth.userId, selectedMessageId)
       : undefined;
 
   const [message, setMessage] = useState<Optional<Message>>(
@@ -144,7 +144,7 @@ export function useMessage(
 
   // Load message when messageId or auth changes
   useEffect(() => {
-    if (!wildduckAuth || !selectedMessageId) {
+    if (!wildduckUserAuth || !selectedMessageId) {
       setMessage(null);
       setError(null);
       return;
@@ -172,7 +172,7 @@ export function useMessage(
         setError(null);
 
         const response = await getMessage(
-          wildduckAuth.userId,
+          wildduckUserAuth.userId,
           mailboxId,
           selectedMessageId
         );
@@ -190,7 +190,7 @@ export function useMessage(
           setMessage(transformedMessage);
           // Cache the message - this will also update any list cache that contains it
           cacheMessage(
-            wildduckAuth.userId,
+            wildduckUserAuth.userId,
             selectedMessageId,
             transformedMessage
           );
@@ -210,7 +210,7 @@ export function useMessage(
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    wildduckAuth,
+    wildduckUserAuth,
     selectedMessageId,
     selectedMailboxId,
     cachedMessage?.mailbox,

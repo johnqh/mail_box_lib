@@ -56,7 +56,7 @@ export function clearAccountWildduckAuthCache(): void {
  * @example
  * ```tsx
  * const networkClient = useNetworkClient();
- * const wildduckAuth = useAccountWildduckAuth(
+ * const wildduckUserAuth = useAccountWildduckAuth(
  *   networkClient,
  *   '0x123...abc',
  *   config,
@@ -64,11 +64,11 @@ export function clearAccountWildduckAuthCache(): void {
  *   false
  * );
  *
- * if (!wildduckAuth) {
+ * if (!wildduckUserAuth) {
  *   return <div>Authenticating...</div>;
  * }
  *
- * return <MailboxList wildduckAuth={wildduckAuth} />;
+ * return <MailboxList wildduckUserAuth={wildduckUserAuth} />;
  * ```
  */
 export function useAccountWildduckAuth(
@@ -95,15 +95,15 @@ export function useAccountWildduckAuth(
   });
 
   // Use React state for the auth - this is cleaner than the cache + counter pattern
-  const [wildduckAuth, setWildduckAuth] = useState<Optional<WildduckUserAuth>>(
-    () => {
-      // Initialize from cache if available
-      if (!username || !indexerAuth) return undefined;
-      const authKey = `${username.toLowerCase()}:${indexerAuth.signer}`;
-      const cached = authCache.get(authKey);
-      return cached?.auth;
-    }
-  );
+  const [wildduckUserAuth, setWildduckAuth] = useState<
+    Optional<WildduckUserAuth>
+  >(() => {
+    // Initialize from cache if available
+    if (!username || !indexerAuth) return undefined;
+    const authKey = `${username.toLowerCase()}:${indexerAuth.signer}`;
+    const cached = authCache.get(authKey);
+    return cached?.auth;
+  });
 
   // Authenticate when username changes
   useEffect(() => {
@@ -138,7 +138,7 @@ export function useAccountWildduckAuth(
         '🔍 [useAccountWildduckAuth] Already authenticated, skipping'
       );
       // Ensure state matches cache
-      if (wildduckAuth?.userId !== cachedAuth.auth.userId) {
+      if (wildduckUserAuth?.userId !== cachedAuth.auth.userId) {
         setWildduckAuth(cachedAuth.auth);
       }
       return;
@@ -176,6 +176,7 @@ export function useAccountWildduckAuth(
             const auth: WildduckUserAuth = {
               userId,
               accessToken: token,
+              username,
             };
             // Store in cache
             authCache.set(authKey, {
@@ -222,5 +223,5 @@ export function useAccountWildduckAuth(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username, indexerAuth, authenticate]);
 
-  return wildduckAuth;
+  return wildduckUserAuth;
 }

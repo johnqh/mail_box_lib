@@ -25,7 +25,7 @@ export interface UseMailAppReturn {
   /** Function to select an account */
   setSelectedAccount: (account: Optional<WildDuckAccount>) => void;
   /** WildDuck authentication for the selected account */
-  wildduckAuth: Optional<WildduckUserAuth>;
+  wildduckUserAuth: Optional<WildduckUserAuth>;
   /** All available wallet accounts */
   accounts: WildDuckAccount[];
   /** Function to refresh wallet accounts */
@@ -43,7 +43,7 @@ export interface UseMailAppReturn {
  * @param wildduckConfig - WildDuck configuration
  * @param storage - Storage service for caching
  * @param devMode - Whether to use mock data on errors
- * @returns Object containing selectedAccount, wildduckAuth, and account management functions
+ * @returns Object containing selectedAccount, wildduckUserAuth, and account management functions
  *
  * @example
  * ```tsx
@@ -51,7 +51,7 @@ export interface UseMailAppReturn {
  *   const {
  *     selectedAccount,
  *     setSelectedAccount,
- *     wildduckAuth,
+ *     wildduckUserAuth,
  *     accounts,
  *   } = useMailApp(
  *     'https://indexer.example.com',
@@ -67,7 +67,7 @@ export interface UseMailAppReturn {
  *         selected={selectedAccount}
  *         onSelect={setSelectedAccount}
  *       />
- *       <MailboxList wildduckAuth={wildduckAuth} />
+ *       <MailboxList wildduckUserAuth={wildduckUserAuth} />
  *     </div>
  *   );
  * }
@@ -92,7 +92,7 @@ export function useMailApp(
   });
 
   // Get authentication for the selected account using username
-  const wildduckAuth = useAccountWildduckAuth(
+  const wildduckUserAuth = useAccountWildduckAuth(
     networkClient,
     selectedAccount?.username,
     wildduckConfig,
@@ -113,7 +113,7 @@ export function useMailApp(
   return {
     selectedAccount,
     setSelectedAccount,
-    wildduckAuth,
+    wildduckUserAuth,
     accounts,
     refreshAccounts,
   };

@@ -15,7 +15,6 @@ import {
   WildduckUserAuth,
 } from '@sudobility/types';
 import { useAccountMailboxes } from './useAccountMailboxes';
-import { WildDuckAccount } from './useWalletAccounts';
 
 /**
  * Special mailbox ID for the settings item
@@ -40,7 +39,7 @@ export interface UseMailboxesAndSettingsReturn {
   /** Array of mailboxes plus a Settings item */
   mailboxes: MailboxOrSettings[];
   /** WildDuck authentication object */
-  wildduckAuth: Optional<WildduckUserAuth>;
+  wildduckUserAuth: Optional<WildduckUserAuth>;
   /** Whether data is currently loading */
   isLoading: boolean;
   /** Error message if any */
@@ -70,8 +69,8 @@ export interface UseMailboxesAndSettingsReturn {
  * - Special Use: MailboxSpecialUse.Settings
  * - isSettings flag: true (for easy identification)
  *
- * @param wildduckAuth - WildDuck authentication object (from useAccountWildduckAuth)
- * @param selectedAccount - Currently selected account (from useSelectedAccount)
+ * @param networkClient - Network client for API calls
+ * @param wildduckUserAuth - WildDuck authentication object (from useAccountWildduckAuth, includes username)
  * @param endpointUrl - WildDuck API backend URL
  * @param apiToken - WildDuck API token for authentication
  * @param emailDomain - Email domain to validate against (e.g., "0xmail.box")
@@ -87,7 +86,7 @@ export interface UseMailboxesAndSettingsReturn {
  *     'https://indexer.example.com',
  *     false
  *   );
- *   const wildduckAuth = useAccountWildduckAuth(
+ *   const wildduckUserAuth = useAccountWildduckAuth(
  *     networkClient,
  *     selectedAccount?.username,
  *     config,
@@ -97,8 +96,7 @@ export interface UseMailboxesAndSettingsReturn {
  *
  *   const { mailboxes, isLoading } = useMailboxesAndSettings(
  *     networkClient,
- *     wildduckAuth,
- *     selectedAccount,
+ *     wildduckUserAuth,
  *     'https://wildduck.example.com',
  *     'token',
  *     '0xmail.box',
@@ -121,8 +119,7 @@ export interface UseMailboxesAndSettingsReturn {
  */
 export function useMailboxesAndSettings(
   networkClient: NetworkClient,
-  wildduckAuth: Optional<WildduckUserAuth>,
-  selectedAccount: Optional<WildDuckAccount>,
+  wildduckUserAuth: Optional<WildduckUserAuth>,
   endpointUrl: string,
   apiToken: string,
   emailDomain: string,
@@ -131,8 +128,7 @@ export function useMailboxesAndSettings(
   // Get mailboxes from the base hook
   const mailboxResult = useAccountMailboxes(
     networkClient,
-    wildduckAuth,
-    selectedAccount,
+    wildduckUserAuth,
     endpointUrl,
     apiToken,
     emailDomain,

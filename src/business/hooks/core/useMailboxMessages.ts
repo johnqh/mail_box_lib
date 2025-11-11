@@ -62,7 +62,7 @@ export interface UseMailboxMessagesReturn {
  * - Caches messages in Zustand store using userId + mailboxId as key
  * - Returns cached messages immediately for better UX
  *
- * @param wildduckAuth - WildDuck authentication object (from useAccountWildduckAuth)
+ * @param wildduckUserAuth - WildDuck authentication object (from useAccountWildduckAuth)
  * @param endpointUrl - WildDuck API backend URL
  * @param apiToken - WildDuck API token for authentication
  * @param devMode - Whether to use mock data on errors
@@ -72,7 +72,7 @@ export interface UseMailboxMessagesReturn {
  * @example
  * ```tsx
  * function MailboxView() {
- *   const wildduckAuth = useAccountWildduckAuth(config, storage, false);
+ *   const wildduckUserAuth = useAccountWildduckAuth(config, storage, false);
  *
  *   const {
  *     selectedMailboxId,
@@ -85,7 +85,7 @@ export interface UseMailboxMessagesReturn {
  *     refresh,
  *     error
  *   } = useMailboxMessages(
- *     wildduckAuth,
+ *     wildduckUserAuth,
  *     'https://wildduck.example.com',
  *     'your-api-token',
  *     false,
@@ -112,7 +112,7 @@ export interface UseMailboxMessagesReturn {
  */
 export function useMailboxMessages(
   networkClient: NetworkClient,
-  wildduckAuth: Optional<WildduckUserAuth>,
+  wildduckUserAuth: Optional<WildduckUserAuth>,
   endpointUrl: string,
   apiToken: string,
   devMode: boolean = false,
@@ -129,8 +129,8 @@ export function useMailboxMessages(
 
   // Check if we have cached messages for this mailbox
   const cachedData =
-    wildduckAuth && selectedMailboxId
-      ? getCachedMessages(wildduckAuth.userId, selectedMailboxId)
+    wildduckUserAuth && selectedMailboxId
+      ? getCachedMessages(wildduckUserAuth.userId, selectedMailboxId)
       : undefined;
 
   const [messages, setMessages] = useState<Message[]>(
@@ -163,7 +163,7 @@ export function useMailboxMessages(
   // Load messages for a specific page
   const loadPage = useCallback(
     async (page: number) => {
-      if (!wildduckAuth || !selectedMailboxId) {
+      if (!wildduckUserAuth || !selectedMailboxId) {
         return;
       }
 
@@ -172,7 +172,7 @@ export function useMailboxMessages(
         setError(null);
 
         const result = await messagesHook.getMessages(
-          wildduckAuth.userId,
+          wildduckUserAuth.userId,
           selectedMailboxId,
           {
             page,
@@ -199,7 +199,7 @@ export function useMailboxMessages(
           setMessages(transformedMessages);
           // Cache first page
           cacheMessages(
-            wildduckAuth.userId,
+            wildduckUserAuth.userId,
             selectedMailboxId,
             transformedMessages,
             total,
@@ -209,7 +209,7 @@ export function useMailboxMessages(
           setMessages(prev => [...prev, ...transformedMessages]);
           // Append to cache
           appendMessages(
-            wildduckAuth.userId,
+            wildduckUserAuth.userId,
             selectedMailboxId,
             transformedMessages,
             total,
@@ -225,7 +225,7 @@ export function useMailboxMessages(
       }
     },
     [
-      wildduckAuth,
+      wildduckUserAuth,
       selectedMailboxId,
       messagesHook,
       pageSize,
@@ -239,7 +239,7 @@ export function useMailboxMessages(
 
   // Load first page when mailbox or auth changes
   useEffect(() => {
-    if (wildduckAuth && selectedMailboxId) {
+    if (wildduckUserAuth && selectedMailboxId) {
       setMessages([]);
       setCurrentPage(1);
       loadPage(1);
@@ -249,9 +249,9 @@ export function useMailboxMessages(
       setCurrentPage(1);
     }
     // loadPage is intentionally omitted from dependencies to prevent infinite loop
-    // We only want to trigger when wildduckAuth or selectedMailboxId changes
+    // We only want to trigger when wildduckUserAuth or selectedMailboxId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wildduckAuth, selectedMailboxId]);
+  }, [wildduckUserAuth, selectedMailboxId]);
 
   // Load more messages (next page)
   const loadMore = useCallback(async () => {
@@ -273,14 +273,14 @@ export function useMailboxMessages(
 
   // Refresh function to reload messages from the first page
   const refresh = useCallback(async () => {
-    if (!wildduckAuth || !selectedMailboxId) {
+    if (!wildduckUserAuth || !selectedMailboxId) {
       return;
     }
     // Reset state and reload first page
     setMessages([]);
     setCurrentPage(1);
     await loadPage(1);
-  }, [wildduckAuth, selectedMailboxId, loadPage]);
+  }, [wildduckUserAuth, selectedMailboxId, loadPage]);
 
   return {
     selectedMailboxId,
