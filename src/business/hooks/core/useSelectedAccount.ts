@@ -148,7 +148,6 @@ export function useSelectedAccount(
   // Manage selected account selection
   // This hook ONLY reacts to changes in the accounts list
   useEffect(() => {
-
     // If no accounts, clear selection to undefined
     if (accounts.length === 0) {
       if (selectedAccount !== undefined) {
@@ -178,7 +177,6 @@ export function useSelectedAccount(
   // Authenticate with WildDuck when selected account changes
   // SINGLETON PATTERN: Only one component instance should perform authentication
   useEffect(() => {
-
     if (!selectedAccount || !indexerAuth) {
       // Clear authentication if prerequisites are missing
       authenticationInProgress = undefined;
@@ -191,7 +189,6 @@ export function useSelectedAccount(
     const normalizedUsername = selectedAccount.username.toLowerCase();
     // Create unique key combining username and signer to handle multiple wallets
     const authKey = `${normalizedUsername}:${indexerAuth.signer}`;
-
 
     // CRITICAL: Skip if the authKey hasn't actually changed
     // This prevents repeated authentication calls when the effect re-runs
@@ -260,6 +257,7 @@ export function useSelectedAccount(
             });
             lastAuthenticatedKey = authKey;
             // Trigger re-render to update wildduckAuth
+            setAuthUpdate(prev => prev + 1);
 
             // Clean URL parameter if referral code was consumed
             if (referralCode) {
