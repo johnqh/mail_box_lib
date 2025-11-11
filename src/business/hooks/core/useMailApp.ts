@@ -90,6 +90,13 @@ export function useMailApp(
   // Get selected account from global state
   const [selectedAccount, setSelectedAccount] = useGlobalSelectedAccount();
 
+  // DEBUG: Log render
+  console.log('🔍 [useMailApp] RENDER', {
+    accountsCount: accounts.length,
+    selectedAccountUsername: selectedAccount?.username,
+    indexerBackendUrl,
+  });
+
   // Auto-select first account if none selected and accounts are available
   useEffect(() => {
     // Clear selection when no accounts are available (wallet disconnected or switching)

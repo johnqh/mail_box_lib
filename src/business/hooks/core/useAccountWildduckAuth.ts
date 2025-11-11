@@ -86,6 +86,14 @@ export function useAccountWildduckAuth(
     devMode
   );
 
+  // DEBUG: Log render
+  console.log('🔍 [useAccountWildduckAuth] RENDER', {
+    username,
+    hasIndexerAuth: !!indexerAuth,
+    signer: indexerAuth?.signer,
+    backendUrl: config.backendUrl,
+  });
+
   // Local state to trigger re-renders when auth changes
   const [authUpdateCounter, setAuthUpdate] = useState(0);
 
@@ -106,7 +114,13 @@ export function useAccountWildduckAuth(
 
   // Authenticate when username changes
   useEffect(() => {
+    console.log('🔍 [useAccountWildduckAuth] EFFECT triggered', {
+      username,
+      hasIndexerAuth: !!indexerAuth,
+    });
+
     if (!username || !indexerAuth) {
+      console.log('🔍 [useAccountWildduckAuth] No username or indexerAuth');
       authenticationInProgress = null;
       return;
     }
@@ -117,18 +131,31 @@ export function useAccountWildduckAuth(
     // Check if we already have auth cached
     const cachedAuth = authCache.get(authKey);
 
+    console.log('🔍 [useAccountWildduckAuth] Auth check', {
+      authKey,
+      hasCached: !!cachedAuth,
+      inProgress: authenticationInProgress === authKey,
+    });
+
     // Skip if already authenticated
     const hasPendingReferral = ReferralConsumptionHelper.hasPending();
     if (cachedAuth && !hasPendingReferral) {
+      console.log(
+        '🔍 [useAccountWildduckAuth] Already authenticated, skipping'
+      );
       return;
     }
 
     // Skip if another instance is authenticating
     if (authenticationInProgress === authKey) {
+      console.log(
+        '🔍 [useAccountWildduckAuth] Authentication in progress, skipping'
+      );
       return;
     }
 
     // Mark as in progress
+    console.log('🔍 [useAccountWildduckAuth] Starting authentication');
     authenticationInProgress = authKey;
 
     (async () => {

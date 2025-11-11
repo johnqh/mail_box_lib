@@ -111,6 +111,15 @@ export function useAccountMailboxes(
   const [emailAddress, setEmailAddress] = useState<Optional<string>>(null);
   const [error, setError] = useState<Optional<string>>(null);
 
+  // DEBUG: Log component render
+  console.log('🔍 [useAccountMailboxes] RENDER', {
+    userId: wildduckAuth?.userId,
+    username: selectedAccount?.username,
+    endpointUrl,
+    apiToken: `${apiToken?.substring(0, 10)}...`,
+    emailDomain,
+  });
+
   // Get Zustand store methods
   const { getMailboxes, setMailboxes } = useMailboxStore();
 
@@ -122,13 +131,16 @@ export function useAccountMailboxes(
     cachedMailboxes || []
   );
 
-  const config: WildduckConfig = useMemo(
-    () => ({
+  const config: WildduckConfig = useMemo(() => {
+    console.log('🔍 [useAccountMailboxes] config RECALCULATED', {
+      endpointUrl,
+      apiToken: `${apiToken?.substring(0, 10)}...`,
+    });
+    return {
       backendUrl: endpointUrl,
       apiToken,
-    }),
-    [endpointUrl, apiToken]
-  );
+    };
+  }, [endpointUrl, apiToken]);
 
   // Get addresses hook
   const addressesHook = useWildduckAddresses(networkClient, config, devMode);
@@ -157,7 +169,18 @@ export function useAccountMailboxes(
 
   // Fetch addresses when wildduckAuth becomes available or selectedAccount changes
   useEffect(() => {
+    console.log('🔍 [useAccountMailboxes] EFFECT 1 triggered', {
+      hasAuth: !!wildduckAuth,
+      hasAccount: !!selectedAccount,
+      userId: wildduckAuth?.userId,
+      username: selectedAccount?.username,
+      lastFetched: lastFetchedAccountRef.current,
+    });
+
     if (!wildduckAuth || !selectedAccount) {
+      console.log(
+        '🔍 [useAccountMailboxes] No auth or account, clearing state'
+      );
       setEmailAddress(null);
       setError(null);
       lastFetchedAccountRef.current = null;
@@ -170,6 +193,7 @@ export function useAccountMailboxes(
       lastFetchedAccountRef.current?.username ===
         selectedAccount.username.toLowerCase()
     ) {
+      console.log('🔍 [useAccountMailboxes] Already fetched, skipping');
       return;
     }
 
@@ -179,10 +203,17 @@ export function useAccountMailboxes(
 
     (async () => {
       try {
+        console.log('🔍 [useAccountMailboxes] FETCHING addresses', {
+          currentUserId,
+          currentUsername,
+        });
         setError(null);
 
         // Fetch addresses for the user
         const addresses = await addressesHook.getUserAddresses(currentUserId);
+        console.log('🔍 [useAccountMailboxes] Got addresses', {
+          count: addresses?.length,
+        });
 
         // Validate that exactly one address exists
         if (!addresses || addresses.length === 0) {
@@ -223,6 +254,7 @@ export function useAccountMailboxes(
         };
 
         // Fetch mailboxes now that we have a valid address
+        console.log('🔍 [useAccountMailboxes] FETCHING mailboxes via refresh');
         await mailboxesHook.refresh();
       } catch (err) {
         const errorMessage =
@@ -241,11 +273,18 @@ export function useAccountMailboxes(
 
   // Update local state and cache when mailboxes change
   useEffect(() => {
+    console.log('🔍 [useAccountMailboxes] EFFECT 2 triggered', {
+      hasAuth: !!wildduckAuth,
+      mailboxCount: mailboxesHook.mailboxes?.length || 0,
+    });
     if (
       wildduckAuth &&
       mailboxesHook.mailboxes &&
       mailboxesHook.mailboxes.length > 0
     ) {
+      console.log(
+        '🔍 [useAccountMailboxes] Updating local mailboxes and cache'
+      );
       setLocalMailboxes(mailboxesHook.mailboxes);
       setMailboxes(wildduckAuth.userId, mailboxesHook.mailboxes);
     }
