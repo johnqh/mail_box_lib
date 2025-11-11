@@ -5,7 +5,12 @@
  */
 
 import { useEffect } from 'react';
-import { Optional, WildduckConfig, WildduckUserAuth } from '@sudobility/types';
+import {
+  NetworkClient,
+  Optional,
+  WildduckConfig,
+  WildduckUserAuth,
+} from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
 import { useWalletAccounts, WildDuckAccount } from './useWalletAccounts';
 import { useGlobalSelectedAccount } from './useSelectedAccount';
@@ -69,6 +74,7 @@ export interface UseMailAppReturn {
  * ```
  */
 export function useMailApp(
+  networkClient: NetworkClient,
   indexerBackendUrl: string,
   wildduckConfig: WildduckConfig,
   storage: StorageService,
@@ -76,6 +82,7 @@ export function useMailApp(
 ): UseMailAppReturn {
   // Get wallet accounts from indexer
   const { accounts, refresh: refreshAccounts } = useWalletAccounts(
+    networkClient,
     indexerBackendUrl,
     devMode
   );
@@ -110,6 +117,7 @@ export function useMailApp(
 
   // Get authentication for the selected account using username
   const wildduckAuth = useAccountWildduckAuth(
+    networkClient,
     selectedAccount?.username,
     wildduckConfig,
     storage,

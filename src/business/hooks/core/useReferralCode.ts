@@ -5,11 +5,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Optional } from '@sudobility/types';
+import { NetworkClient, Optional } from '@sudobility/types';
 import { useIndexerReferralCode } from '@sudobility/indexer_client';
 import { useWalletStatus } from './useWalletStatus';
 
 export interface UseReferralCodeConfig {
+  networkClient: NetworkClient;
   endpointUrl: string;
   walletAddress: Optional<string>;
   dev?: boolean;
@@ -49,7 +50,7 @@ export interface UseReferralCodeReturn {
 export function useReferralCode(
   config: UseReferralCodeConfig
 ): UseReferralCodeReturn {
-  const { endpointUrl, walletAddress, dev = false } = config;
+  const { networkClient, endpointUrl, walletAddress, dev = false } = config;
   const { indexerAuth } = useWalletStatus();
 
   // Use the low-level indexer client hook
@@ -58,7 +59,7 @@ export function useReferralCode(
     isLoading,
     error,
     fetchReferralCode,
-  } = useIndexerReferralCode(endpointUrl, dev);
+  } = useIndexerReferralCode(networkClient, endpointUrl, dev);
 
   // State to track if we've already fetched
   const [hasFetched, setHasFetched] = useState(false);

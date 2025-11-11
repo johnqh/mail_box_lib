@@ -18,7 +18,12 @@ import {
   useIndexerGetDelegatedFrom,
   useIndexerGetDelegatedTo,
 } from '@sudobility/indexer_client';
-import { Chain, type IndexerDelegateData, Optional } from '@sudobility/types';
+import {
+  Chain,
+  type IndexerDelegateData,
+  NetworkClient,
+  Optional,
+} from '@sudobility/types';
 import { type ChainInfo, RpcHelpers } from '@sudobility/configs';
 
 /**
@@ -109,6 +114,7 @@ const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
  * ```
  */
 export function useMailerDelegations(
+  networkClient: NetworkClient,
   connectedWallet: Optional<Wallet>,
   chain: Optional<Chain>,
   auth: Optional<IndexerUserAuth>,
@@ -159,6 +165,7 @@ export function useMailerDelegations(
   // Fetch delegation data from indexer
   // For read-only operations, pass enabled option to allow queries without auth
   const delegatedToQuery = useIndexerGetDelegatedTo(
+    networkClient,
     indexerEndpoint,
     indexerDevMode,
     walletAddress || '',
@@ -169,6 +176,7 @@ export function useMailerDelegations(
   );
 
   const delegatedFromQuery = useIndexerGetDelegatedFrom(
+    networkClient,
     indexerEndpoint,
     indexerDevMode,
     walletAddress || '',

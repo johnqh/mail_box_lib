@@ -8,6 +8,7 @@ import { useMemo } from 'react';
 import {
   CreateMailboxRequest,
   MailboxSpecialUse,
+  NetworkClient,
   Optional,
   WildduckMailbox,
   WildduckUpdateMailboxRequest,
@@ -107,6 +108,7 @@ export interface UseMailboxesAndSettingsReturn {
  * ```
  */
 export function useMailboxesAndSettings(
+  networkClient: NetworkClient,
   wildduckAuth: Optional<WildduckUserAuth>,
   selectedAccount: Optional<WildDuckAccount>,
   endpointUrl: string,
@@ -116,6 +118,7 @@ export function useMailboxesAndSettings(
 ): UseMailboxesAndSettingsReturn {
   // Get mailboxes from the base hook
   const mailboxResult = useAccountMailboxes(
+    networkClient,
     wildduckAuth,
     selectedAccount,
     endpointUrl,

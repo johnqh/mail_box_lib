@@ -129,6 +129,7 @@ export function useMessages({
 
   // Always keep mailbox messages hook active so it's ready when search is cleared
   const mailboxMessages = useMailboxMessages(
+    networkClient,
     wildduckAuth,
     endpointUrl,
     '',

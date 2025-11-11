@@ -5,12 +5,27 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useMailApp } from '../useMailApp';
-import {
-  verifyWallet,
-  disconnectWallet,
-} from '../useWalletStatus';
-import { ChainType } from '@sudobility/types';
+import { verifyWallet, disconnectWallet } from '../useWalletStatus';
+import { ChainType, NetworkClient } from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
+import {
+  setGlobalState,
+  createGlobalState,
+} from '../../../../utils/useGlobalState';
+
+// Create global states needed for tests
+createGlobalState('walletAccounts', []);
+createGlobalState('walletStatus', undefined);
+createGlobalState('selectedAccount', undefined);
+
+// Mock NetworkClient
+const mockNetworkClient: NetworkClient = {
+  request: vi.fn(),
+  get: vi.fn(),
+  post: vi.fn(),
+  put: vi.fn(),
+  delete: vi.fn(),
+};
 
 const ADDRESS_ONE = '0x1111111111111111111111111111111111111111';
 const ADDRESS_TWO = '0x2222222222222222222222222222222222222222';
@@ -66,7 +81,12 @@ vi.mock('@sudobility/indexer_client', () => {
 
   return {
     useIndexerGetWalletAccounts: vi.fn(
-      (_endpointUrl: string, _devMode: boolean, walletAddress: string) => {
+      (
+        _networkClient: NetworkClient,
+        _endpointUrl: string,
+        _devMode: boolean,
+        walletAddress: string
+      ) => {
         if (!walletAddress) {
           return baseResponse;
         }
@@ -89,11 +109,20 @@ describe('useMailApp wallet selection flow', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     disconnectWallet();
+    setGlobalState('selectedAccount', undefined);
+    setGlobalState('walletAccounts', []);
+    setGlobalState('walletStatus', undefined);
   });
 
   it('clears selected account when wallet disconnects and selects the new wallet', async () => {
     const { result } = renderHook(() =>
-      useMailApp(indexerUrl, wildduckConfig, mockStorage, false)
+      useMailApp(
+        mockNetworkClient,
+        indexerUrl,
+        wildduckConfig,
+        mockStorage,
+        false
+      )
     );
 
     // Step 1 & 2: Verify wallet with ADDRESS_ONE and ensure it becomes the selected account

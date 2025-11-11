@@ -7,6 +7,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CreateMailboxRequest,
+  NetworkClient,
   Optional,
   WildduckConfig,
   WildduckMailbox,
@@ -99,6 +100,7 @@ export interface UseAccountMailboxesReturn {
  * ```
  */
 export function useAccountMailboxes(
+  networkClient: NetworkClient,
   wildduckAuth: Optional<WildduckUserAuth>,
   selectedAccount: Optional<WildDuckAccount>,
   endpointUrl: string,
@@ -126,7 +128,7 @@ export function useAccountMailboxes(
   };
 
   // Get addresses hook
-  const addressesHook = useWildduckAddresses(config, devMode);
+  const addressesHook = useWildduckAddresses(networkClient, config, devMode);
 
   // Get mailboxes hook - we'll pass the auth response derived from wildduckAuth
   const authResponse = wildduckAuth
@@ -137,7 +139,12 @@ export function useAccountMailboxes(
       }
     : null;
 
-  const mailboxesHook = useWildduckMailboxes(config, authResponse, devMode);
+  const mailboxesHook = useWildduckMailboxes(
+    networkClient,
+    config,
+    authResponse,
+    devMode
+  );
 
   // Track the last fetched userId and username to prevent re-fetching for the same account
   const lastFetchedAccountRef = useRef<{

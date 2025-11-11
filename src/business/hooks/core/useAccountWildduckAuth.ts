@@ -4,7 +4,12 @@
  * Observes selectedAccount and returns appropriate auth
  */
 
-import { Optional, WildduckConfig, WildduckUserAuth } from '@sudobility/types';
+import {
+  NetworkClient,
+  Optional,
+  WildduckConfig,
+  WildduckUserAuth,
+} from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
 import { useWildduckAuth } from '@sudobility/wildduck_client';
 import { useCallback, useEffect, useState } from 'react';
@@ -19,30 +24,91 @@ interface CachedAuth {
   username: string;
 }
 
+interface AuthFailureState {
+  count: number;
+  lastFailureAt: number;
+  notified?: boolean;
+}
+
 /**
  * Global authentication cache - maps "username:signer" to auth
  */
 const authCache = new Map<string, CachedAuth>();
+const authFailureState = new Map<string, AuthFailureState>();
+
+const MAX_AUTH_RETRY_ATTEMPTS = 3;
+const AUTH_RETRY_COOLDOWN_MS = 30_000;
 
 /**
  * Track authentication in progress to prevent duplicates
  */
 let authenticationInProgress: Optional<string> = null;
-let lastAuthenticatedKey: Optional<string> = null;
-
 /**
  * Clear all authentication cache
  * Call this when disconnecting wallet to ensure clean state
  */
 export function clearAccountWildduckAuthCache(): void {
   authCache.clear();
+  authFailureState.clear();
   authenticationInProgress = null;
-  lastAuthenticatedKey = null;
 }
+
+const recordAuthFailure = (authKey: string): void => {
+  const previous = authFailureState.get(authKey);
+  const nextCount = (previous?.count ?? 0) + 1;
+  authFailureState.set(authKey, {
+    count: nextCount,
+    lastFailureAt: Date.now(),
+    notified: false,
+  });
+};
+
+const clearAuthFailure = (authKey: string): void => {
+  authFailureState.delete(authKey);
+};
+
+const shouldThrottleAuth = (
+  authKey: string,
+  hasPendingReferral: boolean
+): boolean => {
+  const failureInfo = authFailureState.get(authKey);
+  if (!failureInfo) {
+    return false;
+  }
+
+  if (hasPendingReferral) {
+    // Referral flows should always retry immediately
+    return false;
+  }
+
+  const now = Date.now();
+  const withinCooldown =
+    now - failureInfo.lastFailureAt < AUTH_RETRY_COOLDOWN_MS;
+
+  if (failureInfo.count >= MAX_AUTH_RETRY_ATTEMPTS && withinCooldown) {
+    if (!failureInfo.notified) {
+      console.warn(
+        '⚠️ useAccountWildduckAuth: Pausing authentication retries after repeated failures. Will retry after cooldown.'
+      );
+      authFailureState.set(authKey, {
+        ...failureInfo,
+        notified: true,
+      });
+    }
+    return true;
+  }
+
+  if (!withinCooldown) {
+    authFailureState.delete(authKey);
+  }
+
+  return false;
+};
 
 /**
  * Hook to manage WildDuck authentication for a specific account
  *
+ * @param networkClient Network client for API calls
  * @param username Account username to authenticate (can be wallet address or ENS/SNS name)
  * @param config WildDuck configuration
  * @param storage Storage service for caching
@@ -51,7 +117,9 @@ export function clearAccountWildduckAuthCache(): void {
  *
  * @example
  * ```tsx
+ * const networkClient = useNetworkClient();
  * const wildduckAuth = useAccountWildduckAuth(
+ *   networkClient,
  *   '0x123...abc',
  *   config,
  *   storage,
@@ -66,13 +134,19 @@ export function clearAccountWildduckAuthCache(): void {
  * ```
  */
 export function useAccountWildduckAuth(
+  networkClient: NetworkClient,
   username: Optional<string>,
   config: WildduckConfig,
   storage: StorageService,
   devMode: boolean
 ): Optional<WildduckUserAuth> {
   const { indexerAuth } = useWalletStatus();
-  const { authenticate } = useWildduckAuth(config, storage, devMode);
+  const { authenticate } = useWildduckAuth(
+    networkClient,
+    config,
+    storage,
+    devMode
+  );
 
   // Local state to trigger re-renders when auth changes
   const [authUpdateCounter, setAuthUpdate] = useState(0);
@@ -96,7 +170,6 @@ export function useAccountWildduckAuth(
   useEffect(() => {
     if (!username || !indexerAuth) {
       authenticationInProgress = null;
-      lastAuthenticatedKey = null;
       return;
     }
 
@@ -108,17 +181,16 @@ export function useAccountWildduckAuth(
 
     // Skip if already authenticated
     const hasPendingReferral = ReferralConsumptionHelper.hasPending();
-    if (cachedAuth && lastAuthenticatedKey === authKey && !hasPendingReferral) {
+    if (cachedAuth && !hasPendingReferral) {
       return;
-    }
-
-    // Handle referral code re-authentication
-    if (lastAuthenticatedKey === authKey && hasPendingReferral) {
-      lastAuthenticatedKey = null;
     }
 
     // Skip if another instance is authenticating
     if (authenticationInProgress === authKey) {
+      return;
+    }
+
+    if (shouldThrottleAuth(authKey, hasPendingReferral)) {
       return;
     }
 
@@ -151,7 +223,7 @@ export function useAccountWildduckAuth(
               auth,
               username,
             });
-            lastAuthenticatedKey = authKey;
+            clearAuthFailure(authKey);
             setAuthUpdate(prev => prev + 1);
 
             // Clean URL parameter if referral code was consumed
@@ -171,8 +243,8 @@ export function useAccountWildduckAuth(
           } else {
             console.warn('⚠️ useAccountWildduckAuth: Missing token or userId');
             authCache.delete(authKey);
-            lastAuthenticatedKey = null;
             setAuthUpdate(prev => prev + 1);
+            recordAuthFailure(authKey);
           }
         } else {
           console.warn(
@@ -180,14 +252,14 @@ export function useAccountWildduckAuth(
             response
           );
           authCache.delete(authKey);
-          lastAuthenticatedKey = null;
           setAuthUpdate(prev => prev + 1);
+          recordAuthFailure(authKey);
         }
       } catch (error) {
         console.error('❌ useAccountWildduckAuth: Error:', error);
         authCache.delete(authKey);
-        lastAuthenticatedKey = null;
         setAuthUpdate(prev => prev + 1);
+        recordAuthFailure(authKey);
       } finally {
         authenticationInProgress = null;
       }

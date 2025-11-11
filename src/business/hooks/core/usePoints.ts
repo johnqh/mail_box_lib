@@ -14,6 +14,7 @@ import {
 import type {
   IndexerLeaderboardResponse,
   IndexerSiteStatsResponse,
+  NetworkClient,
   Optional,
 } from '@sudobility/types';
 import type { UseQueryResult } from '@tanstack/react-query';
@@ -42,6 +43,8 @@ export interface SiteStats {
  * Configuration for usePoints hook
  */
 export interface UsePointsConfig {
+  /** Network client for API calls */
+  networkClient: NetworkClient;
   /** Indexer endpoint URL */
   endpointUrl: string;
   /** Whether to use dev mode */
@@ -130,7 +133,12 @@ export interface UsePointsReturn {
  * ```
  */
 export const usePoints = (config: UsePointsConfig): UsePointsReturn => {
-  const { endpointUrl, dev = false, leaderboardCount = 50 } = config;
+  const {
+    networkClient,
+    endpointUrl,
+    dev = false,
+    leaderboardCount = 50,
+  } = config;
 
   // Get wallet status
   const { walletAddress, indexerAuth, isVerified } = useWalletStatus();
@@ -141,7 +149,12 @@ export const usePoints = (config: UsePointsConfig): UsePointsReturn => {
     isLoading: isLoadingLeaderboard,
     error: leaderboardError,
     refetch: refetchLeaderboard,
-  } = useIndexerPointsLeaderboard(endpointUrl, dev, leaderboardCount);
+  } = useIndexerPointsLeaderboard(
+    networkClient,
+    endpointUrl,
+    dev,
+    leaderboardCount
+  );
 
   // Fetch site stats data
   const {
@@ -149,7 +162,7 @@ export const usePoints = (config: UsePointsConfig): UsePointsReturn => {
     isLoading: isLoadingSiteStats,
     error: siteStatsError,
     refetch: refetchSiteStats,
-  } = useIndexerPointsSiteStats(endpointUrl, dev);
+  } = useIndexerPointsSiteStats(networkClient, endpointUrl, dev);
 
   // Fetch user's points balance (only when wallet is verified)
   const shouldFetchBalance = isVerified && !!walletAddress && !!indexerAuth;
@@ -159,6 +172,7 @@ export const usePoints = (config: UsePointsConfig): UsePointsReturn => {
     error: userBalanceError,
     refetch: refetchUserBalanceQuery,
   } = useIndexerGetPointsBalance(
+    networkClient,
     endpointUrl,
     dev,
     shouldFetchBalance && walletAddress ? walletAddress : '',

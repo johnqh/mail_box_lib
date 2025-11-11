@@ -4,10 +4,15 @@
  * Automatically updates when wallet accounts change
  */
 
-import { Optional, WildduckConfig, WildduckUserAuth } from '@sudobility/types';
+import {
+  NetworkClient,
+  Optional,
+  WildduckConfig,
+  WildduckUserAuth,
+} from '@sudobility/types';
 import type { StorageService } from '@sudobility/di';
 import { useWildduckAuth } from '@sudobility/wildduck_client';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   createGlobalState,
   setGlobalState,
@@ -70,6 +75,7 @@ export interface UseSelectedAccountReturn {
  * - Selects first account if current account is not in the list
  * - Authenticates with WildDuck when account changes
  *
+ * @param networkClient - Network client for API calls
  * @param endpointUrl - WildDuck API backend URL
  * @param apiToken - WildDuck API token for authentication
  * @param storage - Storage service for persisting auth tokens
@@ -80,7 +86,9 @@ export interface UseSelectedAccountReturn {
  * ```tsx
  * function MyComponent() {
  *   const storage = useStorageService();
+ *   const networkClient = useNetworkClient();
  *   const { selectedAccount, wildduckAuth } = useSelectedAccount(
+ *     networkClient,
  *     'https://wildduck.example.com',
  *     'your-api-token',
  *     storage,
@@ -102,20 +110,19 @@ export interface UseSelectedAccountReturn {
  * ```
  */
 export function useSelectedAccount(
+  networkClient: NetworkClient,
   endpointUrl: string,
   apiToken: string,
   storage: StorageService,
   devMode: boolean
 ): UseSelectedAccountReturn {
   const { accounts, refresh: refreshAccounts } = useWalletAccounts(
+    networkClient,
     endpointUrl,
     devMode
   );
   const [selectedAccount] = useGlobalSelectedAccount();
   const { indexerAuth } = useWalletStatus();
-
-  // Local state to trigger re-renders when auth changes
-  const [authUpdateCounter, setAuthUpdate] = useState(0);
 
   // Get current auth from cache based on selected account
   const wildduckAuth = useMemo(() => {
@@ -132,14 +139,18 @@ export function useSelectedAccount(
       return cached.auth;
     }
     return undefined;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAccount, indexerAuth, authUpdateCounter]);
+  }, [selectedAccount, indexerAuth]);
 
   const config: WildduckConfig = {
     backendUrl: endpointUrl,
     apiToken,
   };
-  const { authenticate } = useWildduckAuth(config, storage, devMode);
+  const { authenticate } = useWildduckAuth(
+    networkClient,
+    config,
+    storage,
+    devMode
+  );
 
   // Track the authentication key to prevent repeated authentication
   // Only re-authenticate when the key actually changes
@@ -179,6 +190,24 @@ export function useSelectedAccount(
   useEffect(() => {
     if (!selectedAccount || !indexerAuth) {
       // Clear authentication if prerequisites are missing
+      authenticationInProgress = undefined;
+      lastAuthenticatedKey = undefined;
+      authKeyRef.current = undefined;
+      return;
+    }
+
+    // Ensure the selected account still belongs to the signer before authenticating
+    const selectedWalletLower = selectedAccount.walletAddress?.toLowerCase();
+    const signerLower = indexerAuth.signer.toLowerCase();
+    if (selectedWalletLower && selectedWalletLower !== signerLower) {
+      console.log(
+        '🔴 [useSelectedAccount] Wallet mismatch detected, clearing selection',
+        {
+          selectedWallet: selectedAccount.walletAddress,
+          signer: indexerAuth.signer,
+        }
+      );
+      setGlobalState('selectedAccount', undefined);
       authenticationInProgress = undefined;
       lastAuthenticatedKey = undefined;
       authKeyRef.current = undefined;
@@ -256,8 +285,6 @@ export function useSelectedAccount(
               username: selectedAccount.username,
             });
             lastAuthenticatedKey = authKey;
-            // Trigger re-render to update wildduckAuth
-            setAuthUpdate(prev => prev + 1);
 
             // Clean URL parameter if referral code was consumed
             if (referralCode) {
@@ -281,7 +308,6 @@ export function useSelectedAccount(
             // Clear auth from cache
             authCache.delete(authKey);
             lastAuthenticatedKey = undefined;
-            setAuthUpdate(prev => prev + 1);
           }
         } else {
           console.error(
@@ -291,14 +317,12 @@ export function useSelectedAccount(
           // Clear auth from cache
           authCache.delete(authKey);
           lastAuthenticatedKey = undefined;
-          setAuthUpdate(prev => prev + 1);
         }
       } catch (error) {
         console.error('🔴 [useSelectedAccount] Authentication error:', error);
         // Clear auth from cache
         authCache.delete(authKey);
         lastAuthenticatedKey = undefined;
-        setAuthUpdate(prev => prev + 1);
       } finally {
         // Clear the in-progress flag
         authenticationInProgress = undefined;

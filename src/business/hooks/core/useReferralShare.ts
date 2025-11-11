@@ -4,7 +4,7 @@
  */
 
 import { useMemo } from 'react';
-import { Optional } from '@sudobility/types';
+import { NetworkClient, Optional } from '@sudobility/types';
 import { useReferralCode } from './useReferralCode';
 
 /**
@@ -30,8 +30,10 @@ export interface UseReferralShareReturn {
  * - Handles URLs that already have query parameters
  * - Memoizes the result to prevent unnecessary updates
  *
+ * @param networkClient - Network client for API calls
  * @param url - The base URL to share
  * @param endpointUrl - Indexer API endpoint URL
+ * @param walletAddress - Wallet address to get referral code for
  * @param devMode - Whether to use mock data on errors
  * @param paramName - The query parameter name for the referral code (default: 'ref')
  * @returns Object containing referralUrl, referralCode, isLoading, and error
@@ -39,9 +41,12 @@ export interface UseReferralShareReturn {
  * @example
  * ```tsx
  * function ShareButton() {
+ *   const networkClient = useNetworkClient();
  *   const { referralUrl, isLoading } = useReferralShare(
+ *     networkClient,
  *     'https://example.com/signup',
  *     'https://indexer.example.com',
+ *     walletAddress,
  *     false
  *   );
  *
@@ -56,6 +61,7 @@ export interface UseReferralShareReturn {
  * ```
  */
 export function useReferralShare(
+  networkClient: NetworkClient,
   url: string,
   endpointUrl: string,
   walletAddress: Optional<string>,
@@ -63,6 +69,7 @@ export function useReferralShare(
   paramName: string = 'ref'
 ): UseReferralShareReturn {
   const { referralCode, isLoading, error } = useReferralCode({
+    networkClient,
     endpointUrl,
     walletAddress,
     dev: devMode,

@@ -6,7 +6,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useIndexerMailWebhooks } from '@sudobility/indexer_client';
-import type { IndexerWebhookData, Optional } from '@sudobility/types';
+import type {
+  IndexerWebhookData,
+  NetworkClient,
+  Optional,
+} from '@sudobility/types';
 import { Chain, validateAddress } from '@sudobility/types';
 import {
   type MessageResult,
@@ -28,6 +32,8 @@ export interface WebhookCreateRequest {
  * Configuration for useMailerWebhooks hook
  */
 export interface UseMailerWebhooksConfig {
+  /** Network client for API calls */
+  networkClient: NetworkClient;
   /** Indexer endpoint URL */
   endpointUrl: string;
   /** Whether to use dev mode */
@@ -106,13 +112,13 @@ export interface UseMailerWebhooksReturn {
 export const useMailerWebhooks = (
   config: UseMailerWebhooksConfig
 ): UseMailerWebhooksReturn => {
-  const { endpointUrl, dev = false, autoFetch = true } = config;
+  const { networkClient, endpointUrl, dev = false, autoFetch = true } = config;
 
   // Get wallet status
   const { walletAddress, indexerAuth, isVerified } = useWalletStatus();
 
   // Get indexer hook
-  const indexerHook = useIndexerMailWebhooks(endpointUrl, dev);
+  const indexerHook = useIndexerMailWebhooks(networkClient, endpointUrl, dev);
 
   // Create OnchainMailerClient instance
   const mailerClient = useMemo(() => new OnchainMailerClient(), []);

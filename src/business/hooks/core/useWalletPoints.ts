@@ -5,13 +5,15 @@
 
 import { useCallback, useMemo } from 'react';
 import { useIndexerGetPointsBalance } from '@sudobility/indexer_client';
-import type { Optional } from '@sudobility/types';
+import type { NetworkClient, Optional } from '@sudobility/types';
 import { useWalletStatus } from './useWalletStatus';
 
 /**
  * Configuration for useWalletPoints hook
  */
 export interface UseWalletPointsConfig {
+  /** Network client for API calls */
+  networkClient: NetworkClient;
   /** Indexer endpoint URL */
   endpointUrl: string;
   /** Wallet address to fetch points for */
@@ -86,7 +88,7 @@ export interface UseWalletPointsReturn {
 export const useWalletPoints = (
   config: UseWalletPointsConfig
 ): UseWalletPointsReturn => {
-  const { endpointUrl, walletAddress, dev = false } = config;
+  const { networkClient, endpointUrl, walletAddress, dev = false } = config;
 
   // Get indexer authentication from wallet status
   const { indexerAuth } = useWalletStatus();
@@ -101,6 +103,7 @@ export const useWalletPoints = (
     error,
     refetch: refetchQuery,
   } = useIndexerGetPointsBalance(
+    networkClient,
     endpointUrl,
     dev,
     shouldFetch && walletAddress ? walletAddress : '',

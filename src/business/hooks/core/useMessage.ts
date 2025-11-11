@@ -4,7 +4,12 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Optional, WildduckConfig, WildduckUserAuth } from '@sudobility/types';
+import {
+  NetworkClient,
+  Optional,
+  WildduckConfig,
+  WildduckUserAuth,
+} from '@sudobility/types';
 import { useWildduckMessages } from '@sudobility/wildduck_client';
 import {
   createGlobalState,
@@ -91,6 +96,7 @@ export interface UseMessageReturn {
  * ```
  */
 export function useMessage(
+  networkClient: NetworkClient,
   wildduckAuth: Optional<WildduckUserAuth>,
   selectedMailboxId: Optional<string>,
   endpointUrl: string,
@@ -124,7 +130,7 @@ export function useMessage(
     [endpointUrl, apiToken]
   );
 
-  const messagesHook = useWildduckMessages(config, devMode);
+  const messagesHook = useWildduckMessages(networkClient, config, devMode);
   // Extract getMessage to prevent useEffect from triggering on messagesHook state changes
   const { getMessage } = messagesHook;
 

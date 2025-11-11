@@ -4,7 +4,12 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Optional, WildduckConfig, WildduckUserAuth } from '@sudobility/types';
+import {
+  NetworkClient,
+  Optional,
+  WildduckConfig,
+  WildduckUserAuth,
+} from '@sudobility/types';
 import { useWildduckMessages } from '@sudobility/wildduck_client';
 import {
   createGlobalState,
@@ -106,6 +111,7 @@ export interface UseMailboxMessagesReturn {
  * ```
  */
 export function useMailboxMessages(
+  networkClient: NetworkClient,
   wildduckAuth: Optional<WildduckUserAuth>,
   endpointUrl: string,
   apiToken: string,
@@ -142,7 +148,7 @@ export function useMailboxMessages(
     apiToken,
   };
 
-  const messagesHook = useWildduckMessages(config, devMode);
+  const messagesHook = useWildduckMessages(networkClient, config, devMode);
 
   // Function to select a mailbox
   const selectMailbox = useCallback((mailboxId: string) => {

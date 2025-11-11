@@ -10,6 +10,7 @@ import type {
   IndexerTemplateCreateRequest,
   IndexerTemplateData,
   IndexerTemplateUpdateRequest,
+  NetworkClient,
   Optional,
 } from '@sudobility/types';
 import { Chain, validateAddress } from '@sudobility/types';
@@ -26,6 +27,8 @@ import { useMailTemplatesStore } from '../../stores/mailTemplatesStore';
  * Configuration for useMailerTemplates hook
  */
 export interface UseMailerTemplatesConfig {
+  /** Network client for API calls */
+  networkClient: NetworkClient;
   /** Indexer endpoint URL */
   endpointUrl: string;
   /** Whether to use dev mode */
@@ -113,13 +116,13 @@ export interface UseMailerTemplatesReturn {
 export const useMailerTemplates = (
   config: UseMailerTemplatesConfig
 ): UseMailerTemplatesReturn => {
-  const { endpointUrl, dev = false, autoFetch = true } = config;
+  const { networkClient, endpointUrl, dev = false, autoFetch = true } = config;
 
   // Get wallet status
   const { walletAddress, indexerAuth, isVerified } = useWalletStatus();
 
   // Get indexer hook
-  const indexerHook = useIndexerMailTemplates(endpointUrl, dev);
+  const indexerHook = useIndexerMailTemplates(networkClient, endpointUrl, dev);
 
   // Create OnchainMailerClient instance
   const mailerClient = useMemo(() => new OnchainMailerClient(), []);

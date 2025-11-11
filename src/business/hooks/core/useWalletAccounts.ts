@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
-import { Optional, WalletData } from '@sudobility/types';
+import { NetworkClient, Optional, WalletData } from '@sudobility/types';
 import { useWalletStatus } from './useWalletStatus';
 import {
   IndexerUserAuth,
@@ -48,6 +48,7 @@ export interface UseWalletAccountsReturn {
 /**
  * Hook to manage wallet accounts based on wallet status
  *
+ * @param networkClient - Network client for API calls
  * @param endpointUrl - Indexer API endpoint URL
  * @param devMode - Whether to use mock data on errors
  * @returns Object containing accounts array and indexerAuth
@@ -55,7 +56,8 @@ export interface UseWalletAccountsReturn {
  * @example
  * ```tsx
  * function MyComponent() {
- *   const { accounts, indexerAuth } = useWalletAccounts('https://indexer.example.com', false);
+ *   const networkClient = useNetworkClient();
+ *   const { accounts, indexerAuth } = useWalletAccounts(networkClient, 'https://indexer.example.com', false);
  *
  *   return (
  *     <ul>
@@ -70,16 +72,18 @@ export interface UseWalletAccountsReturn {
  * ```
  */
 export function useWalletAccounts(
+  networkClient: NetworkClient,
   endpointUrl: string,
   devMode: boolean = false
 ): UseWalletAccountsReturn {
   const { status, indexerAuth } = useWalletStatus();
   const [accounts] = useGlobalWalletAccounts();
 
-  // useIndexerGetWalletAccounts now requires walletAddress and auth upfront
+  // useIndexerGetWalletAccounts now requires networkClient and walletAddress and auth upfront
   const walletAddress = status?.walletAddress || '';
   const auth = indexerAuth || { message: '', signature: '', signer: '' };
   const queryResult = useIndexerGetWalletAccounts(
+    networkClient,
     endpointUrl,
     devMode,
     walletAddress,

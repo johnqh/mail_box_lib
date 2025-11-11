@@ -7,7 +7,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { Chain, Optional } from '@sudobility/types';
+import { Chain, NetworkClient, Optional } from '@sudobility/types';
 import { useIndexerGetWalletPermissions } from '@sudobility/indexer_client';
 import {
   type EVMWallet,
@@ -60,6 +60,7 @@ export interface UseMailerPermissionsReturn {
 /**
  * Hook to fetch and manage wallet permissions from the indexer
  *
+ * @param networkClient - Network client for API calls
  * @param connectedWallet - Connected wallet instance
  * @param chain - Chain for smart contract operations
  * @param indexerEndpoint - Indexer API endpoint URL
@@ -72,6 +73,7 @@ export interface UseMailerPermissionsReturn {
  *
  * function PermissionManager() {
  *   const connectedWallet = useWallet(); // Your wallet instance
+ *   const networkClient = useNetworkClient();
  *
  *   const {
  *     permissions,
@@ -81,6 +83,7 @@ export interface UseMailerPermissionsReturn {
  *     refresh,
  *     error
  *   } = useMailerPermissions(
+ *     networkClient,
  *     connectedWallet,
  *     Chain.ETH_MAINNET,
  *     'https://indexer.example.com'
@@ -111,6 +114,7 @@ export interface UseMailerPermissionsReturn {
  * ```
  */
 export function useMailerPermissions(
+  networkClient: NetworkClient,
   connectedWallet: Optional<Wallet>,
   chain: Optional<Chain>,
   indexerEndpoint: string,
@@ -163,6 +167,7 @@ export function useMailerPermissions(
 
   // Fetch wallet permissions from indexer using React Query
   const permissionsQuery = useIndexerGetWalletPermissions(
+    networkClient,
     indexerEndpoint,
     indexerDevMode,
     walletAddress || '',
