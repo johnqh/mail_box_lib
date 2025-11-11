@@ -24,86 +24,24 @@ interface CachedAuth {
   username: string;
 }
 
-interface AuthFailureState {
-  count: number;
-  lastFailureAt: number;
-  notified?: boolean;
-}
-
 /**
  * Global authentication cache - maps "username:signer" to auth
  */
 const authCache = new Map<string, CachedAuth>();
-const authFailureState = new Map<string, AuthFailureState>();
-
-const MAX_AUTH_RETRY_ATTEMPTS = 3;
-const AUTH_RETRY_COOLDOWN_MS = 30_000;
 
 /**
  * Track authentication in progress to prevent duplicates
  */
 let authenticationInProgress: Optional<string> = null;
+
 /**
  * Clear all authentication cache
  * Call this when disconnecting wallet to ensure clean state
  */
 export function clearAccountWildduckAuthCache(): void {
   authCache.clear();
-  authFailureState.clear();
   authenticationInProgress = null;
 }
-
-const recordAuthFailure = (authKey: string): void => {
-  const previous = authFailureState.get(authKey);
-  const nextCount = (previous?.count ?? 0) + 1;
-  authFailureState.set(authKey, {
-    count: nextCount,
-    lastFailureAt: Date.now(),
-    notified: false,
-  });
-};
-
-const clearAuthFailure = (authKey: string): void => {
-  authFailureState.delete(authKey);
-};
-
-const shouldThrottleAuth = (
-  authKey: string,
-  hasPendingReferral: boolean
-): boolean => {
-  const failureInfo = authFailureState.get(authKey);
-  if (!failureInfo) {
-    return false;
-  }
-
-  if (hasPendingReferral) {
-    // Referral flows should always retry immediately
-    return false;
-  }
-
-  const now = Date.now();
-  const withinCooldown =
-    now - failureInfo.lastFailureAt < AUTH_RETRY_COOLDOWN_MS;
-
-  if (failureInfo.count >= MAX_AUTH_RETRY_ATTEMPTS && withinCooldown) {
-    if (!failureInfo.notified) {
-      console.warn(
-        '⚠️ useAccountWildduckAuth: Pausing authentication retries after repeated failures. Will retry after cooldown.'
-      );
-      authFailureState.set(authKey, {
-        ...failureInfo,
-        notified: true,
-      });
-    }
-    return true;
-  }
-
-  if (!withinCooldown) {
-    authFailureState.delete(authKey);
-  }
-
-  return false;
-};
 
 /**
  * Hook to manage WildDuck authentication for a specific account
@@ -190,10 +128,6 @@ export function useAccountWildduckAuth(
       return;
     }
 
-    if (shouldThrottleAuth(authKey, hasPendingReferral)) {
-      return;
-    }
-
     // Mark as in progress
     authenticationInProgress = authKey;
 
@@ -223,7 +157,6 @@ export function useAccountWildduckAuth(
               auth,
               username,
             });
-            clearAuthFailure(authKey);
             setAuthUpdate(prev => prev + 1);
 
             // Clean URL parameter if referral code was consumed
@@ -244,7 +177,6 @@ export function useAccountWildduckAuth(
             console.warn('⚠️ useAccountWildduckAuth: Missing token or userId');
             authCache.delete(authKey);
             setAuthUpdate(prev => prev + 1);
-            recordAuthFailure(authKey);
           }
         } else {
           console.warn(
@@ -253,13 +185,11 @@ export function useAccountWildduckAuth(
           );
           authCache.delete(authKey);
           setAuthUpdate(prev => prev + 1);
-          recordAuthFailure(authKey);
         }
       } catch (error) {
         console.error('❌ useAccountWildduckAuth: Error:', error);
         authCache.delete(authKey);
         setAuthUpdate(prev => prev + 1);
-        recordAuthFailure(authKey);
       } finally {
         authenticationInProgress = null;
       }

@@ -227,7 +227,6 @@ export function useAccountMailboxes(
         console.error('❌ useAccountMailboxes: Error:', errorMessage);
         setError(errorMessage);
         setEmailAddress(null);
-        // Reset the ref so we can retry on next change
         lastFetchedAccountRef.current = null;
       }
     })();
