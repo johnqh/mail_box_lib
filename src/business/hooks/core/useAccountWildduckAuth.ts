@@ -174,9 +174,9 @@ export function useAccountWildduckAuth(
           const userId = response.id;
           if (token && userId) {
             const auth: WildduckUserAuth = {
+              username,
               userId,
               accessToken: token,
-              username,
             };
             // Store in cache
             authCache.set(authKey, {

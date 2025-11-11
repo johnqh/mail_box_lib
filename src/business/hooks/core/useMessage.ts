@@ -172,7 +172,7 @@ export function useMessage(
         setError(null);
 
         const response = await getMessage(
-          wildduckUserAuth.userId,
+          wildduckUserAuth,
           mailboxId,
           selectedMessageId
         );

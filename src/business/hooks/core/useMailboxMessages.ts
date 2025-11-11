@@ -172,7 +172,7 @@ export function useMailboxMessages(
         setError(null);
 
         const result = await messagesHook.getMessages(
-          wildduckUserAuth.userId,
+          wildduckUserAuth,
           selectedMailboxId,
           {
             page,
