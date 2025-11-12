@@ -115,7 +115,6 @@ const { rewards, claim } = useMailerClaims({
 The library supports platform-specific environment management:
 
 ### Web (Vite)
-- `VITE_WILDDUCK_API_TOKEN`
 - `VITE_INDEXER_API_URL`
 - `VITE_WALLETCONNECT_PROJECT_ID`
 - `VITE_PRIVY_APP_ID`

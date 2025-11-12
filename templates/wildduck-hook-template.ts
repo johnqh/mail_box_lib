@@ -55,7 +55,6 @@ interface Use{{HookName}}Return {
  * @example
  * ```typescript
  * const config: WildDuckConfig = {
- *   apiToken: process.env.VITE_WILDDUCK_API_TOKEN!,
  *   backendUrl: process.env.VITE_WILDDUCK_BACKEND_URL,
  *   cloudflareWorkerUrl: process.env.VITE_CLOUDFLARE_WORKER_URL,
  *   useMockFallback: process.env.VITE_USE_MOCK_FALLBACK === 'true',
@@ -200,7 +199,6 @@ USAGE EXAMPLES:
 
 // Configuration setup
 const wildDuckConfig: WildDuckConfig = {
-  apiToken: process.env.VITE_WILDDUCK_API_TOKEN!,
   backendUrl: process.env.VITE_WILDDUCK_BACKEND_URL,
   cloudflareWorkerUrl: process.env.VITE_CLOUDFLARE_WORKER_URL,
   useMockFallback: process.env.VITE_USE_MOCK_FALLBACK === 'true',
