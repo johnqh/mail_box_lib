@@ -15,6 +15,7 @@ export * from './useWalletAccounts';
 export * from './useSelectedAccount';
 export * from './useAccountWildduckAuth';
 export * from './useMailApp';
+export * from './useMailAccount';
 export * from './useSelectedChain';
 export * from './useAccountMailboxes';
 export * from './useMailboxesAndSettings';
