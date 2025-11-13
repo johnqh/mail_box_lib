@@ -1,6 +1,6 @@
 {
   "name": "@sudobility/lib",
-  "version": "3.13.5",
+  "version": "3.13.6",
   "description": "React Native-compatible shared utilities library for 0xmail.box projects with Optional<T> type safety patterns and comprehensive blockchain integration",
   "type": "module",
   "main": "dist/index.js",
@@ -90,7 +90,7 @@
   "license": "MIT",
   "devDependencies": {
     "@sudobility/configs": "^0.0.21",
-    "@sudobility/contracts": "^1.16.4",
+    "@sudobility/contracts": "^1.16.5",
     "@sudobility/di": "^1.4.14",
     "@sudobility/indexer_client": "^0.0.48",
     "@sudobility/types": "^1.9.5",
