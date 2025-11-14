@@ -9,9 +9,9 @@ import {
   CreateMailboxRequest,
   NetworkClient,
   Optional,
+  UpdateMailboxRequest,
   WildduckConfig,
   WildduckMailbox,
-  WildduckUpdateMailboxRequest,
   WildduckUserAuth,
 } from '@sudobility/types';
 import {
@@ -41,7 +41,7 @@ export interface UseAccountMailboxesReturn {
   /** Function to update an existing mailbox */
   updateMailbox: (
     mailboxId: string,
-    params: WildduckUpdateMailboxRequest
+    params: UpdateMailboxRequest
   ) => Promise<void>;
   /** Function to delete a mailbox */
   deleteMailbox: (mailboxId: string) => Promise<void>;
@@ -141,13 +141,11 @@ export function useAccountMailboxes(
   // Get addresses hook
   const addressesHook = useWildduckAddresses(networkClient, config, devMode);
 
-  // Get mailboxes hook - pass wildduckUserAuth directly
-  const authResponse = wildduckUserAuth;
-
+  // Get mailboxes hook - pass wildduckUserAuth directly (v2.0.0 now takes auth in constructor)
   const mailboxesHook = useWildduckMailboxes(
     networkClient,
     config,
-    authResponse,
+    wildduckUserAuth,
     devMode
   );
 
@@ -316,7 +314,7 @@ export function useAccountMailboxes(
 
   // Update mailbox wrapper function
   const updateMailbox = useCallback(
-    async (mailboxId: string, params: WildduckUpdateMailboxRequest) => {
+    async (mailboxId: string, params: UpdateMailboxRequest) => {
       if (!wildduckUserAuth) {
         setError('Authentication is required to update mailbox');
         console.error('Cannot update mailbox: Authentication required');

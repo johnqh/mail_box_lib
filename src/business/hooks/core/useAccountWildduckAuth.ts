@@ -79,12 +79,8 @@ export function useAccountWildduckAuth(
   devMode: boolean
 ): Optional<WildduckUserAuth> {
   const { indexerAuth } = useWalletStatus();
-  const { authenticate } = useWildduckAuth(
-    networkClient,
-    config,
-    storage,
-    devMode
-  );
+  const authHook = useWildduckAuth(networkClient, config, storage, devMode);
+  const { authenticate } = authHook;
 
   // Use React state for the auth - this is cleaner than the cache + counter pattern
   const [wildduckUserAuth, setWildduckAuth] = useState<

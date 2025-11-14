@@ -144,7 +144,16 @@ export function useMessage(
 
   // Load message when messageId or auth changes
   useEffect(() => {
+    console.log('[useMessage] Effect triggered:', {
+      hasAuth: !!wildduckUserAuth,
+      selectedMessageId,
+      selectedMailboxId,
+      cachedMailbox: cachedMessage?.mailbox,
+      isLoadingMessage,
+    });
+
     if (!wildduckUserAuth || !selectedMessageId) {
+      console.log('[useMessage] Missing auth or messageId, clearing state');
       setMessage(null);
       setError(null);
       return;
@@ -163,8 +172,15 @@ export function useMessage(
 
     // Don't re-fetch if we're already loading
     if (isLoadingMessage) {
+      console.log('[useMessage] Already loading, skipping fetch');
       return;
     }
+
+    console.log('[useMessage] Fetching message:', {
+      userId: wildduckUserAuth.userId,
+      mailboxId,
+      messageId: selectedMessageId,
+    });
 
     (async () => {
       try {
@@ -176,6 +192,13 @@ export function useMessage(
           mailboxId,
           selectedMessageId
         );
+
+        console.log('[useMessage] Got response:', {
+          success: response?.success,
+          hasHtml: !!(response as any)?.html,
+          hasAttachments: !!(response as any)?.attachments,
+          attachmentsCount: (response as any)?.attachments?.length,
+        });
 
         // The WildDuck API returns the message directly in the response, not nested in a 'data' field
         // Response structure: { success: true, id, mailbox, html, attachments, ... }
