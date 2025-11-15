@@ -109,11 +109,14 @@ export function useMessage(
   const { getMessage: getCachedMessage, setMessage: cacheMessage } =
     useUnifiedMessagesStore();
 
-  // Check if we have cached message
-  const cachedMessage =
-    wildduckUserAuth && selectedMessageId
-      ? getCachedMessage(wildduckUserAuth.userId, selectedMessageId)
-      : undefined;
+  // Check if we have cached message - memoize to prevent infinite loops
+  const cachedMessage = useMemo(
+    () =>
+      wildduckUserAuth && selectedMessageId
+        ? getCachedMessage(wildduckUserAuth.userId, selectedMessageId)
+        : undefined,
+    [wildduckUserAuth, selectedMessageId, getCachedMessage]
+  );
 
   const [message, setMessage] = useState<Optional<Message>>(
     cachedMessage || null
@@ -131,8 +134,6 @@ export function useMessage(
   );
 
   const messagesHook = useWildduckMessages(networkClient, config, devMode);
-  // Extract getMessage to prevent useEffect from triggering on messagesHook state changes
-  const { getMessage } = messagesHook;
 
   // Function to select a message
   const selectMessage = useCallback((messageId: string) => {
@@ -187,7 +188,7 @@ export function useMessage(
         setIsLoadingMessage(true);
         setError(null);
 
-        const response = await getMessage(
+        const response = await messagesHook.getMessage(
           wildduckUserAuth,
           mailboxId,
           selectedMessageId
@@ -227,16 +228,23 @@ export function useMessage(
         setIsLoadingMessage(false);
       }
     })();
+    // Note: We intentionally omit cachedMessage and messagesHook.getMessage from dependencies
+    // - cachedMessage: Only used for fallback mailboxId logic, not as a trigger
+    // - getMessage: Stable function, changes shouldn't trigger re-fetch
+    // Effect should only run when auth, messageId, or mailboxId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    wildduckUserAuth,
-    selectedMessageId,
-    selectedMailboxId,
-    cachedMessage?.mailbox,
-  ]);
+  }, [wildduckUserAuth, selectedMessageId, selectedMailboxId]);
 
-  const isLoading = messagesHook.isLoading || isLoadingMessage;
-  const combinedError = error || messagesHook.error;
+  // Destructure to prevent re-renders from messagesHook reference changes
+  const { isLoading: hookIsLoading, error: hookError } = messagesHook;
+
+  // Memoize computed values to prevent unnecessary re-renders
+  const isLoading = useMemo(
+    () => hookIsLoading || isLoadingMessage,
+    [hookIsLoading, isLoadingMessage]
+  );
+
+  const combinedError = useMemo(() => error || hookError, [error, hookError]);
 
   // Memoize the return object to prevent unnecessary re-renders
   // Only recreate when any of the properties actually change

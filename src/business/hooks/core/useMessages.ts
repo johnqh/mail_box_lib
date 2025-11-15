@@ -4,23 +4,31 @@
  *
  * When searchText is empty:
  * - Uses useMailboxMessages to get messages from the selected mailbox
+ * - Supports infinite scroll with next() function
  *
  * When searchText is not empty:
- * - Calls WildDuck search API
+ * - Uses useWildduckSearch for cursor-based search
  * - If searchScope is "current": searches only in mailboxId
  * - If searchScope is "all": searches across all mailboxes
+ * - Supports infinite scroll with next() function
  */
 
-import { useEffect, useRef, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Optional, WildduckUserAuth } from '@sudobility/types';
-import type { NetworkClient } from '@sudobility/types';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  NetworkClient,
+  Optional,
+  WildduckConfig,
+  WildduckUserAuth,
+} from '@sudobility/types';
+import { useWildduckSearch } from '@sudobility/wildduck_client';
 import { useMailboxMessages } from './useMailboxMessages';
-import { Message } from '../../types/message';
+import { Message, messageFromListItem } from '../../types/message';
 
 export interface UseMessagesParams {
   /** WildDuck API backend URL */
   endpointUrl: string;
+  /** WildDuck API token */
+  apiToken: string;
   /** Email domain (e.g., '0xmail.box') */
   emailDomain: string;
   /** Network client for API calls */
@@ -41,12 +49,6 @@ export interface UseMessagesParams {
   enabled?: boolean;
 }
 
-interface SearchResponse {
-  success: boolean;
-  results: Message[];
-  total: number;
-}
-
 export interface UseMessagesReturn {
   /** Array of messages (search results or mailbox messages) */
   messages: Message[];
@@ -58,10 +60,10 @@ export interface UseMessagesReturn {
   isSearching: boolean;
   /** Total number of messages */
   totalMessages: number;
-  /** Whether more messages are available (only for mailbox view) */
+  /** Whether more messages are available */
   hasMore: boolean;
-  /** Load more messages (only for mailbox view) */
-  loadMore?: () => Promise<void>;
+  /** Load next page of messages (infinite scroll) */
+  next: () => Promise<void>;
   /** Refresh messages */
   refresh: () => Promise<void>;
 }
@@ -80,23 +82,22 @@ export interface UseMessagesReturn {
  *     isLoading,
  *     isSearching,
  *     hasMore,
- *     loadMore,
+ *     next,
  *   } = useMessages({
  *     endpointUrl: 'https://api.0xmail.box',
+ *     apiToken: 'your-api-token',
  *     emailDomain: '0xmail.box',
- *     storage,
  *     networkClient,
  *     mailboxId: 'inbox-id',
  *     searchText: '',
  *     searchScope: 'current',
- *     wildduckUserAuth?.userId: 'user-123',
- *     wildduckUserAuth?.accessToken: 'token',
+ *     wildduckUserAuth,
  *   });
  *
  *   return (
  *     <div>
  *       {messages.map(msg => <MessageItem key={msg.id} message={msg} />)}
- *       {hasMore && <button onClick={loadMore}>Load More</button>}
+ *       {hasMore && <button onClick={next}>Load More</button>}
  *     </div>
  *   );
  * }
@@ -104,6 +105,7 @@ export interface UseMessagesReturn {
  */
 export function useMessages({
   endpointUrl,
+  apiToken,
   emailDomain: _emailDomain,
   networkClient,
   devMode = false,
@@ -118,13 +120,50 @@ export function useMessages({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const previousMailboxId = useRef<Optional<string>>(mailboxId);
 
+  const config: WildduckConfig = useMemo(
+    () => ({
+      backendUrl: endpointUrl,
+      apiToken,
+    }),
+    [endpointUrl, apiToken]
+  );
+
   // Always keep mailbox messages hook active so it's ready when search is cleared
   const mailboxMessages = useMailboxMessages(
     networkClient,
     wildduckUserAuth,
     endpointUrl,
-    '',
+    apiToken,
     devMode,
+    pageSize
+  );
+
+  // Build search params conditionally
+  const searchParams = useMemo(() => {
+    const params: {
+      wildduckUserAuth?: WildduckUserAuth;
+      query?: string;
+      mailbox?: string;
+    } = {};
+
+    if (wildduckUserAuth) {
+      params.wildduckUserAuth = wildduckUserAuth;
+    }
+    if (searchText.trim()) {
+      params.query = searchText.trim();
+    }
+    if (searchScope === 'current' && mailboxId) {
+      params.mailbox = mailboxId;
+    }
+
+    return params;
+  }, [wildduckUserAuth, searchText, searchScope, mailboxId]);
+
+  // Search hook for when searchText is provided
+  const searchHook = useWildduckSearch(
+    networkClient,
+    config,
+    searchParams,
     pageSize
   );
 
@@ -149,93 +188,113 @@ export function useMessages({
     }
   }, [mailboxMessages.isLoading, isTransitioning]);
 
-  // Search query when searchText is not empty
-  const searchQuery = useQuery({
-    queryKey: [
-      'messages-search',
-      wildduckUserAuth?.userId,
-      searchText,
-      searchScope,
-      mailboxId,
-    ],
-    queryFn: async () => {
-      if (!wildduckUserAuth?.userId || !wildduckUserAuth?.accessToken) {
-        console.error('Cannot search messages: Not authenticated');
-        return [];
-      }
-
-      // Build search query parameters
-      const params = new URLSearchParams({
-        query: searchText,
-        limit: '100',
-      });
-
-      // If scope is "current" and we have a mailboxId, search only in that mailbox
-      if (searchScope === 'current' && mailboxId) {
-        params.append('mailbox', mailboxId);
-      }
-
-      const url = `${endpointUrl}/users/${wildduckUserAuth?.userId}/search?${params.toString()}`;
-
-      const response = await networkClient.get<SearchResponse>(url, {
-        headers: {
-          'X-Access-Token': wildduckUserAuth?.accessToken,
-        },
-      });
-
-      if (response.ok && response.data?.results) {
-        return response.data.results;
-      }
-
-      return [];
-    },
-    enabled:
-      enabled &&
-      !!searchText.trim() &&
-      !!wildduckUserAuth?.userId &&
-      !!wildduckUserAuth?.accessToken,
-    staleTime: 1000, // Search results are fresh for 1 second
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
-  });
+  // Reset search results when search text changes
+  useEffect(() => {
+    if (searchText.trim()) {
+      searchHook.resetResults();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchText, searchScope, mailboxId]);
 
   // Return the appropriate data based on whether we're searching
-  const isSearching = !!searchText.trim();
+  const isSearching = !!searchText.trim() && enabled;
+
+  // Transform search results to Message type
+  const searchMessages = useMemo(() => {
+    if (!isSearching) return [];
+    return searchHook.results.map(msg => messageFromListItem(msg));
+  }, [isSearching, searchHook.results]);
 
   // Refresh function that works for both search and mailbox view
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     if (isSearching) {
-      // Refetch search results
-      await searchQuery.refetch();
+      // Reset and refetch search results
+      searchHook.resetResults();
+      searchHook.refetch();
     } else {
       // Refresh mailbox messages
       await mailboxMessages.refresh();
     }
-  };
+  }, [isSearching, searchHook, mailboxMessages]);
 
-  const result: UseMessagesReturn = {
-    messages: isSearching
-      ? (searchQuery.data ?? [])
-      : mailboxMessages.messages || [],
-    isLoading: isSearching
-      ? searchQuery.isLoading
-      : mailboxMessages.isLoading || isTransitioning,
-    error: isSearching
-      ? searchQuery.error
-      : mailboxMessages.error
-        ? new Error(mailboxMessages.error)
-        : null,
-    isSearching,
-    totalMessages: isSearching
-      ? (searchQuery.data?.length ?? 0)
-      : mailboxMessages.totalMessages,
-    hasMore: isSearching ? false : mailboxMessages.hasMore,
-    refresh,
-  };
+  // Extract stable references to prevent next() from being recreated
+  const searchNext = searchHook.next;
+  const mailboxNext = mailboxMessages.next;
 
-  // Only add loadMore if not searching
-  if (!isSearching && mailboxMessages.loadMore) {
-    result.loadMore = mailboxMessages.loadMore;
-  }
+  // Next function for infinite scroll - memoized with stable dependencies
+  const next = useCallback(async () => {
+    if (isSearching) {
+      // Load next page of search results
+      await searchNext();
+    } else {
+      // Load next page of mailbox messages
+      await mailboxNext();
+    }
+  }, [isSearching, searchNext, mailboxNext]);
 
-  return result;
+  // Memoize computed values to prevent unnecessary re-renders
+  const messages = useMemo(
+    () => (isSearching ? searchMessages : mailboxMessages.messages || []),
+    [isSearching, searchMessages, mailboxMessages.messages]
+  );
+
+  const isLoading = useMemo(
+    () =>
+      isSearching
+        ? searchHook.isLoading
+        : mailboxMessages.isLoading || isTransitioning,
+    [
+      isSearching,
+      searchHook.isLoading,
+      mailboxMessages.isLoading,
+      isTransitioning,
+    ]
+  );
+
+  const error = useMemo(
+    () =>
+      isSearching
+        ? searchHook.error
+        : mailboxMessages.error
+          ? new Error(mailboxMessages.error)
+          : null,
+    [isSearching, searchHook.error, mailboxMessages.error]
+  );
+
+  const totalMessages = useMemo(
+    () =>
+      isSearching
+        ? (searchHook.data?.total ?? 0)
+        : mailboxMessages.totalMessages,
+    [isSearching, searchHook.data?.total, mailboxMessages.totalMessages]
+  );
+
+  const hasMore = useMemo(
+    () => (isSearching ? searchHook.hasNextPage : mailboxMessages.hasMore),
+    [isSearching, searchHook.hasNextPage, mailboxMessages.hasMore]
+  );
+
+  // Memoize return object to prevent unnecessary re-renders
+  return useMemo(
+    () => ({
+      messages,
+      isLoading,
+      error,
+      isSearching,
+      totalMessages,
+      hasMore,
+      next,
+      refresh,
+    }),
+    [
+      messages,
+      isLoading,
+      error,
+      isSearching,
+      totalMessages,
+      hasMore,
+      next,
+      refresh,
+    ]
+  );
 }

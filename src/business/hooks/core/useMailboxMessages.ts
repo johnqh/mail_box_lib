@@ -40,10 +40,10 @@ export interface UseMailboxMessagesReturn {
   totalMessages: number;
   /** Whether more messages are being loaded */
   isLoading: boolean;
-  /** Whether all messages have been loaded */
+  /** Whether more messages are available */
   hasMore: boolean;
-  /** Load more messages (next page) */
-  loadMore: () => Promise<void>;
+  /** Load next page of messages - uses cursor-based pagination */
+  next: () => Promise<void>;
   /** Refresh messages (reload from first page) */
   refresh: () => Promise<void>;
   /** Error message if any */
@@ -81,7 +81,7 @@ export interface UseMailboxMessagesReturn {
  *     totalMessages,
  *     isLoading,
  *     hasMore,
- *     loadMore,
+ *     next,
  *     refresh,
  *     error
  *   } = useMailboxMessages(
@@ -101,7 +101,7 @@ export interface UseMailboxMessagesReturn {
  *         </div>
  *       ))}
  *       {hasMore && (
- *         <button onClick={loadMore} disabled={isLoading}>
+ *         <button onClick={next} disabled={isLoading}>
  *           {isLoading ? 'Loading...' : 'Load More'}
  *         </button>
  *       )}
@@ -121,11 +121,8 @@ export function useMailboxMessages(
   const [selectedMailboxId] = useGlobalSelectedMailboxId();
 
   // Get Zustand store methods
-  const {
-    getMessages: getCachedMessages,
-    setMessages: cacheMessages,
-    appendMessages,
-  } = useUnifiedMessagesStore();
+  const { getMessages: getCachedMessages, setMessages: cacheMessages } =
+    useUnifiedMessagesStore();
 
   // Check if we have cached messages for this mailbox
   const cachedData =
@@ -136,10 +133,6 @@ export function useMailboxMessages(
   const [messages, setMessages] = useState<Message[]>(
     cachedData?.messages || []
   );
-  const [totalMessages, setTotalMessages] = useState(
-    cachedData?.totalMessages || 0
-  );
-  const [currentPage, setCurrentPage] = useState(cachedData?.currentPage || 1);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<Optional<string>>(null);
 
@@ -148,126 +141,137 @@ export function useMailboxMessages(
     apiToken,
   };
 
-  const messagesHook = useWildduckMessages(networkClient, config, devMode);
-
-  // Function to select a mailbox
-  const selectMailbox = useCallback((mailboxId: string) => {
-    setGlobalState('selectedMailboxId', mailboxId);
-    // Reset pagination state when selecting a new mailbox
-    setMessages([]);
-    setTotalMessages(0);
-    setCurrentPage(1);
-    setError(null);
-  }, []);
-
-  // Load messages for a specific page
-  const loadPage = useCallback(
-    async (page: number) => {
-      if (!wildduckUserAuth || !selectedMailboxId) {
-        return;
-      }
-
-      try {
-        setIsLoadingMore(true);
-        setError(null);
-
-        const result = await messagesHook.getMessages(
-          wildduckUserAuth,
-          selectedMailboxId,
-          {
-            page,
-            limit: pageSize,
-            order: 'desc', // Most recent first
-          }
-        );
-
-        // Transform WildduckMessage[] to Message[]
-        const transformedMessages = result.map(msg => messageFromListItem(msg));
-
-        // Stop if no messages returned
-        if (transformedMessages.length === 0) {
-          setIsLoadingMore(false);
-          return;
-        }
-
-        // Update total from the hook
-        const total = messagesHook.totalMessages;
-        setTotalMessages(total);
-
-        // Update local state and cache
-        if (page === 1) {
-          setMessages(transformedMessages);
-          // Cache first page
-          cacheMessages(
-            wildduckUserAuth.userId,
-            selectedMailboxId,
-            transformedMessages,
-            total,
-            page
-          );
-        } else {
-          setMessages(prev => [...prev, ...transformedMessages]);
-          // Append to cache
-          appendMessages(
-            wildduckUserAuth.userId,
-            selectedMailboxId,
-            transformedMessages,
-            total,
-            page
-          );
-        }
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to load messages';
-        setError(errorMessage);
-      } finally {
-        setIsLoadingMore(false);
-      }
-    },
-    [
-      wildduckUserAuth,
-      selectedMailboxId,
-      messagesHook,
-      pageSize,
-      cacheMessages,
-      appendMessages,
-    ]
+  const messagesHook = useWildduckMessages(
+    networkClient,
+    config,
+    devMode,
+    pageSize
   );
 
-  // Calculate if there are more messages to load
-  const hasMore = messages.length < totalMessages;
+  // Function to select a mailbox
+  const selectMailbox = useCallback(
+    (mailboxId: string) => {
+      setGlobalState('selectedMailboxId', mailboxId);
+      // Reset pagination state when selecting a new mailbox
+      setMessages([]);
+      setError(null);
+      messagesHook.resetMessages();
+    },
+    [messagesHook]
+  );
 
-  // Load first page when mailbox or auth changes
+  // Load initial messages for the selected mailbox
+  const loadInitialMessages = useCallback(async () => {
+    if (!wildduckUserAuth || !selectedMailboxId) {
+      return;
+    }
+
+    try {
+      setIsLoadingMore(true);
+      setError(null);
+
+      const result = await messagesHook.getMessages(
+        wildduckUserAuth,
+        selectedMailboxId,
+        {
+          limit: pageSize,
+          order: 'desc', // Most recent first
+        }
+      );
+
+      // Transform WildduckMessage[] to Message[]
+      const transformedMessages = result.map(msg => messageFromListItem(msg));
+
+      // Update local state and cache
+      setMessages(transformedMessages);
+
+      // Cache messages
+      if (transformedMessages.length > 0) {
+        cacheMessages(
+          wildduckUserAuth.userId,
+          selectedMailboxId,
+          transformedMessages,
+          messagesHook.totalMessages,
+          1
+        );
+      }
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to load messages';
+      setError(errorMessage);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [
+    wildduckUserAuth,
+    selectedMailboxId,
+    messagesHook,
+    pageSize,
+    cacheMessages,
+  ]);
+
+  // Whether more messages are available (based on cursor)
+  const hasMore = messagesHook.hasNextPage;
+
+  // Load initial messages when mailbox or auth changes
   useEffect(() => {
     if (wildduckUserAuth && selectedMailboxId) {
       setMessages([]);
-      setCurrentPage(1);
-      loadPage(1);
+      loadInitialMessages();
     } else {
       setMessages([]);
-      setTotalMessages(0);
-      setCurrentPage(1);
     }
-    // loadPage is intentionally omitted from dependencies to prevent infinite loop
+    // loadInitialMessages is intentionally omitted from dependencies to prevent infinite loop
     // We only want to trigger when wildduckUserAuth or selectedMailboxId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wildduckUserAuth, selectedMailboxId]);
 
-  // Load more messages (next page)
-  const loadMore = useCallback(async () => {
-    if (isLoadingMore) {
+  // Update messages when wildduckMessages hook state changes
+  useEffect(() => {
+    if (messagesHook.messages.length > 0) {
+      const transformedMessages = messagesHook.messages.map(msg =>
+        messageFromListItem(msg)
+      );
+      setMessages(transformedMessages);
+
+      // Update cache
+      if (wildduckUserAuth && selectedMailboxId) {
+        cacheMessages(
+          wildduckUserAuth.userId,
+          selectedMailboxId,
+          transformedMessages,
+          messagesHook.totalMessages,
+          messagesHook.currentPage
+        );
+      }
+    }
+  }, [
+    messagesHook.messages,
+    messagesHook.totalMessages,
+    messagesHook.currentPage,
+    wildduckUserAuth,
+    selectedMailboxId,
+    cacheMessages,
+  ]);
+
+  // Load next page using cursor-based pagination
+  const next = useCallback(async () => {
+    if (isLoadingMore || !hasMore) {
       return;
     }
 
-    // Check if there are more messages
-    if (messages.length >= totalMessages) {
-      return;
+    try {
+      setIsLoadingMore(true);
+      setError(null);
+      await messagesHook.next();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to load more messages';
+      setError(errorMessage);
+    } finally {
+      setIsLoadingMore(false);
     }
-
-    const nextPage = currentPage + 1;
-    setCurrentPage(nextPage);
-    await loadPage(nextPage);
-  }, [currentPage, isLoadingMore, messages.length, totalMessages, loadPage]);
+  }, [isLoadingMore, hasMore, messagesHook]);
 
   const isLoading = messagesHook.isLoading || isLoadingMore;
 
@@ -276,20 +280,20 @@ export function useMailboxMessages(
     if (!wildduckUserAuth || !selectedMailboxId) {
       return;
     }
-    // Reset state and reload first page
+    // Reset state and reload initial messages
     setMessages([]);
-    setCurrentPage(1);
-    await loadPage(1);
-  }, [wildduckUserAuth, selectedMailboxId, loadPage]);
+    messagesHook.resetMessages();
+    await loadInitialMessages();
+  }, [wildduckUserAuth, selectedMailboxId, messagesHook, loadInitialMessages]);
 
   return {
     selectedMailboxId,
     selectMailbox,
     messages,
-    totalMessages,
+    totalMessages: messagesHook.totalMessages,
     isLoading,
     hasMore,
-    loadMore,
+    next,
     refresh,
     error: error || messagesHook.error,
   };
