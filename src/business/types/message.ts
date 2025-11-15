@@ -22,7 +22,7 @@ import {
  */
 export interface Message {
   // Core fields (always present from both list and detail)
-  id: string;
+  id: string; // Converted from number to string for consistency
   mailbox: string;
   thread: string;
   from?: WildduckMessageAddress;
@@ -38,7 +38,6 @@ export interface Message {
   draft: boolean;
   answered: boolean;
   size: number;
-  ha: boolean; // Has attachments flag from base type
 
   // List view field
   attachments: boolean;
@@ -50,7 +49,7 @@ export interface Message {
   headers?: Optional<Record<string, string | string[]>>;
   attachmentsDetail?: Optional<WildduckMessageAttachment[]>; // Renamed to avoid conflict with attachments boolean
   references?: Optional<string[]>;
-  inReplyTo?: Optional<string>;
+  replyTo?: Optional<WildduckMessageAddress>; // Changed from inReplyTo to match WildduckMessageDetail
 
   // Metadata to track which view this message came from
   hasDetailedContent?: boolean;
@@ -61,7 +60,7 @@ export interface Message {
  */
 export function messageFromListItem(item: WildduckMessage): Message {
   const message: Message = {
-    id: item.id,
+    id: String(item.id), // Convert number to string
     mailbox: item.mailbox,
     thread: item.thread,
     to: item.to,
@@ -75,7 +74,6 @@ export function messageFromListItem(item: WildduckMessage): Message {
     flagged: item.flagged,
     draft: item.draft,
     answered: item.answered,
-    ha: item.ha,
     hasDetailedContent: false,
   };
 
@@ -83,11 +81,14 @@ export function messageFromListItem(item: WildduckMessage): Message {
   if (item.from !== undefined) {
     message.from = item.from;
   }
-  if (item.cc !== undefined) {
+  if (item.cc !== undefined && item.cc.length > 0) {
     message.cc = item.cc;
   }
-  if (item.bcc !== undefined) {
+  if (item.bcc !== undefined && item.bcc.length > 0) {
     message.bcc = item.bcc;
+  }
+  if (item.references !== undefined && item.references.length > 0) {
+    message.references = item.references;
   }
 
   return message;
@@ -103,7 +104,7 @@ export function messageFromDetailedResponse(
 ): Message {
   // Generate intro from text if not available in detail response
   const intro =
-    (response as any).intro ||
+    response.intro ||
     existingMessage?.intro ||
     (response.text ? response.text.substring(0, 200) : '');
 
@@ -112,7 +113,7 @@ export function messageFromDetailedResponse(
     ...(existingMessage || {}),
 
     // Core fields from detail response
-    id: response.id,
+    id: String(response.id), // Convert number to string
     mailbox: response.mailbox,
     thread: response.thread,
     to: response.to,
@@ -125,7 +126,6 @@ export function messageFromDetailedResponse(
     flagged: response.flagged,
     draft: response.draft,
     answered: response.answered,
-    ha: response.ha,
 
     // Keep list view attachments boolean if present, otherwise check if detail has attachments
     attachments:
@@ -143,10 +143,10 @@ export function messageFromDetailedResponse(
   if (response.from !== undefined) {
     message.from = response.from;
   }
-  if (response.cc !== undefined) {
+  if (response.cc !== undefined && response.cc.length > 0) {
     message.cc = response.cc;
   }
-  if (response.bcc !== undefined) {
+  if (response.bcc !== undefined && response.bcc.length > 0) {
     message.bcc = response.bcc;
   }
   if (response.html !== undefined) {
@@ -161,11 +161,11 @@ export function messageFromDetailedResponse(
   if (response.headers !== undefined) {
     message.headers = response.headers;
   }
-  if (response.references !== undefined) {
+  if (response.references !== undefined && response.references.length > 0) {
     message.references = response.references;
   }
-  if (response.inReplyTo !== undefined) {
-    message.inReplyTo = response.inReplyTo;
+  if (response.replyTo !== undefined) {
+    message.replyTo = response.replyTo;
   }
 
   return message;
