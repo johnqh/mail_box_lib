@@ -67,7 +67,7 @@ export interface UseWalletPointsReturn {
  * @example
  * ```typescript
  * const { balance, isLoading, error, refetch } = useWalletPoints({
- *   endpointUrl: 'https://indexer.0xmail.box',
+ *   endpointUrl: 'https://indexer.example.com',
  *   walletAddress: '0x123...',
  *   dev: false,
  * });

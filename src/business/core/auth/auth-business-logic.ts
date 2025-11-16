@@ -102,7 +102,7 @@ class DefaultAuthBusinessLogic implements AuthBusinessLogic {
   generateAuthMessage(nonce?: string): string {
     const actualNonce =
       nonce || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    return `Authenticate with 0xMail\nNonce: ${actualNonce}`;
+    return `Sign in to authenticate\nNonce: ${actualNonce}`;
   }
 
   isValidWalletAddress(address: string, chainType: ChainType): boolean {
@@ -180,7 +180,7 @@ class DefaultAuthBusinessLogic implements AuthBusinessLogic {
     );
 
     if (namedAddress) {
-      // Extract name from email (e.g., "vitalik.eth@0xmail.box" -> "vitalik.eth")
+      // Extract name from email (e.g., "vitalik.eth@example.com" -> "vitalik.eth")
       const name = namedAddress.address.split('@')[0];
       return name || this.formatWalletAddressForDisplay(walletAddress);
     }
@@ -250,7 +250,8 @@ interface EmailAddressBusinessLogic {
    */
   generateEmailAddressesForWallet(
     walletAddress: string,
-    chainType: ChainType
+    chainType: ChainType,
+    emailDomain: string
   ): EmailAddress[];
 
   /**
@@ -284,12 +285,13 @@ interface EmailAddressBusinessLogic {
 class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLogic {
   generateEmailAddressesForWallet(
     walletAddress: string,
-    chainType: ChainType
+    chainType: ChainType,
+    emailDomain: string
   ): EmailAddress[] {
     const addresses: EmailAddress[] = [
       {
         id: `direct_${walletAddress}`,
-        address: `${walletAddress}@0xmail.box`,
+        address: `${walletAddress}@${emailDomain}`,
         verified: true,
         primary: true,
         createdAt: new Date(),
@@ -300,7 +302,7 @@ class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLogic {
     if (chainType === ChainType.EVM) {
       addresses.push({
         id: `ens_${walletAddress}`,
-        address: 'your-domain.eth@0xmail.box',
+        address: `your-domain.eth@${emailDomain}`,
         verified: false,
         primary: false,
         createdAt: new Date(),
@@ -311,7 +313,7 @@ class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLogic {
     if (chainType === ChainType.SOLANA) {
       addresses.push({
         id: `sns_${walletAddress}`,
-        address: 'your-domain.sol@0xmail.box',
+        address: `your-domain.sol@${emailDomain}`,
         verified: false,
         primary: false,
         createdAt: new Date(),

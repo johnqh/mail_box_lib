@@ -1,5 +1,5 @@
 /**
- * @fileoverview Comprehensive API type definitions for 0xmail.box
+ * @fileoverview Comprehensive API type definitions for blockchain email applications
  * @description Central location for all API types, interfaces, and response formats
  * This file provides complete type safety for WildDuck API
  *

@@ -87,11 +87,8 @@ export async function getENSNames(address: string): Promise<ENSName[]> {
     // Method 4: Try to check for .box domains on both mainnet and Optimism
     // .box domains are deployed on Optimism but also resolvable on mainnet
     try {
-      // Try known .box domains for this specific wallet address
-      // For wallet 0x03280150272c3B45071bEbD4A937d250D151Db46
-      const knownBoxDomains: Record<string, string[]> = {
-        '0x03280150272c3B45071bEbD4A937d250D151Db46': ['0xmail.box'],
-      };
+      // Known .box domains can be provided by the consumer if needed
+      const knownBoxDomains: Record<string, string[]> = {};
 
       if (knownBoxDomains[address]) {
         for (const boxName of knownBoxDomains[address]) {

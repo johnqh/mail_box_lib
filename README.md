@@ -2,7 +2,7 @@
 
 **Version: 3.6.9**
 
-React Native-compatible shared utilities library for 0xmail.box projects with comprehensive blockchain integration and type-safe patterns.
+React Native-compatible shared utilities library for blockchain email projects with comprehensive blockchain integration and type-safe patterns.
 
 ## Installation
 

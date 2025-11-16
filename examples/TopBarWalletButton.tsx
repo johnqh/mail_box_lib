@@ -75,7 +75,7 @@ export const TopBarWithWallet: React.FC<TopBarProps> = ({
     try {
       // Create authentication message
       const nonce = Date.now().toString();
-      const message = `Authenticate with 0xMail\nNonce: ${nonce}`;
+      const message = `Sign in to authenticate\nNonce: ${nonce}`;
 
       // Request signature from wallet
       const signature = await window.ethereum.request({
@@ -150,7 +150,7 @@ export const TopBarWithWallet: React.FC<TopBarProps> = ({
                 <img 
                   className="h-8 w-auto" 
                   src={logoSrc} 
-                  alt="0xMail.box" 
+                  alt="Blockchain Email" 
                 />
               </div>
             )}
@@ -278,7 +278,7 @@ export const WalletStatusButton: React.FC<{
   const handleVerify = useCallback(async () => {
     if (!walletAddress || !window.ethereum) return;
     try {
-      const message = `Authenticate with 0xMail\nNonce: ${Date.now()}`;
+      const message = `Sign in to authenticate\nNonce: ${Date.now()}`;
       const signature = await window.ethereum.request({
         method: 'personal_sign',
         params: [message, walletAddress]

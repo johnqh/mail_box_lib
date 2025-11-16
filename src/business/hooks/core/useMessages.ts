@@ -29,7 +29,7 @@ export interface UseMessagesParams {
   endpointUrl: string;
   /** WildDuck API token */
   apiToken: string;
-  /** Email domain (e.g., '0xmail.box') */
+  /** Email domain (e.g., 'example.com') */
   emailDomain: string;
   /** Network client for API calls */
   networkClient: NetworkClient;
@@ -84,9 +84,9 @@ export interface UseMessagesReturn {
  *     hasMore,
  *     next,
  *   } = useMessages({
- *     endpointUrl: 'https://api.0xmail.box',
+ *     endpointUrl: 'https://api.example.com',
  *     apiToken: 'your-api-token',
- *     emailDomain: '0xmail.box',
+ *     emailDomain: 'example.com',
  *     networkClient,
  *     mailboxId: 'inbox-id',
  *     searchText: '',

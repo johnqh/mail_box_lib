@@ -128,14 +128,14 @@ try {
 - **Version**: 3.3.3
 - **Package**: @johnqh/lib
 - **Type**: React Native-compatible shared library
-- **Primary Use**: 0xmail.box projects (web & mobile)
+- **Primary Use**: Blockchain email projects (web & mobile)
 - **Dependencies**: @johnqh/types (^1.6.2), @johnqh/mail_box_contracts (^1.5.3)
 
 ## Project Context
 
 ### What is @johnqh/lib?
 
-A React Native-compatible shared utilities library for 0xmail.box projects, providing:
+A React Native-compatible shared utilities library for blockchain email projects, providing:
 
 - Platform-agnostic business logic
 - Blockchain integration (Solana & EVM)

@@ -29,7 +29,7 @@ function TopBar() {
       disconnectWallet();
     } else if (isConnected) {
       // Verify wallet
-      const message = `Authenticate with 0xMail\nNonce: ${Date.now()}`;
+      const message = `Sign in to authenticate\nNonce: ${Date.now()}`;
       const signature = await window.ethereum.request({
         method: 'personal_sign',
         params: [message, walletAddress]

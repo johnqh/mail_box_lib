@@ -230,7 +230,7 @@ export interface UseWalletStatusReturn {
  *     verifyWallet(
  *       '0x742d35Cc6e3c05652aA6E10f35F74c29C5881398',
  *       ChainType.EVM,
- *       'Authenticate with 0xMail',
+ *       'Sign in to authenticate',
  *       'signature_here'
  *     );
  *   };

@@ -91,7 +91,7 @@ function CustomWalletButton() {
     } else if (isConnected) {
       // Verify wallet
       try {
-        const message = `Authenticate with 0xMail\nNonce: ${Date.now()}`;
+        const message = `Sign in to authenticate\nNonce: ${Date.now()}`;
         const signature = await window.ethereum.request({
           method: 'personal_sign',
           params: [message, walletAddress]
@@ -312,7 +312,7 @@ function WalletButtonWithLoading() {
         });
         connectWallet(accounts[0]);
       } else if (connectionState === 'connected') {
-        const message = `Authenticate with 0xMail\nNonce: ${Date.now()}`;
+        const message = `Sign in to authenticate\nNonce: ${Date.now()}`;
         const signature = await window.ethereum.request({
           method: 'personal_sign',
           params: [message, walletAddress]

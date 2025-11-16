@@ -93,14 +93,15 @@ const _createWildDuckAuthMessage = (nonce: string): string => {
 const _createAuthMessage = (
   chainType: ChainType,
   address: string,
-  domain: string = '0xmail.box',
+  domain: string,
   nonce?: string,
   issuedAt?: Date
 ): { message: string; nonce: string } => {
   const authNonce = nonce || generateNonce();
 
   // For WildDuck compatibility, sign the nonce directly
-  if (domain === '0xmail.box' || domain.includes('wildduck')) {
+  // Check if domain contains 'wildduck' to use nonce-only format
+  if (domain.includes('wildduck')) {
     return {
       message: authNonce, // Sign the nonce directly
       nonce: authNonce,

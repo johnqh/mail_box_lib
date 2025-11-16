@@ -29,7 +29,7 @@ const mockNetworkClient: NetworkClient = {
 
 const ADDRESS_ONE = '0x1111111111111111111111111111111111111111';
 const ADDRESS_TWO = '0x2222222222222222222222222222222222222222';
-const TEST_MESSAGE = 'Authenticate with 0xMail';
+const TEST_MESSAGE = 'Sign in to authenticate';
 const SIGNATURE_ONE = 'signature-one';
 const SIGNATURE_TWO = 'signature-two';
 

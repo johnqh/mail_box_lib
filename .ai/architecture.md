@@ -14,7 +14,7 @@ This document provides a comprehensive technical overview of the @johnqh/lib arc
         ┌─────────────────────────────────────────────┐
         │              Consumer Projects               │
         │  • mail_box (Web)  • React Native App      │
-        │  • Other 0xmail.box projects               │
+        │  • Other blockchain email projects        │
         └─────────────────────────────────────────────┘
 ```
 

@@ -99,7 +99,7 @@ export const use{{HookName}} = (config: WildDuckConfig): Use{{HookName}}Return =
 
         if (config.cloudflareWorkerUrl) {
           headers['Authorization'] = `Bearer ${config.apiToken}`;
-          headers['X-App-Source'] = '0xmail-box';
+          headers['X-App-Source'] = 'blockchain-email-app';
         } else {
           headers['X-Access-Token'] = config.apiToken;
         }
@@ -171,7 +171,7 @@ export const use{{HookName}}Query = (
 
       if (config.cloudflareWorkerUrl) {
         headers['Authorization'] = `Bearer ${config.apiToken}`;
-        headers['X-App-Source'] = '0xmail-box';
+        headers['X-App-Source'] = 'blockchain-email-app';
       } else {
         headers['X-Access-Token'] = config.apiToken;
       }

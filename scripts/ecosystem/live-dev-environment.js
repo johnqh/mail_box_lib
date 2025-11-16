@@ -2,7 +2,7 @@
 
 /**
  * Live Development Environment Manager
- * Orchestrates hot reloading across the entire 0xmail.box ecosystem
+ * Orchestrates hot reloading across the entire project ecosystem
  */
 
 import { spawn } from 'child_process';
@@ -353,8 +353,8 @@ class LiveDevEnvironment {
 
 async function main() {
   const liveEnv = new LiveDevEnvironment();
-  
-  log(colors.cyan, '🚀 0xmail.box Live Development Environment\n');
+
+  log(colors.cyan, '🚀 Live Development Environment\n');
   
   // Handle process termination
   process.on('SIGINT', async () => {

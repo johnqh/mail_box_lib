@@ -37,13 +37,13 @@ export interface UseReferralCodeReturn {
  * @example
  * ```tsx
  * const { referralCode, isLoading, error } = useReferralCode({
- *   endpointUrl: 'https://indexer.0xmail.box',
+ *   endpointUrl: 'https://indexer.example.com',
  *   walletAddress: '0x123...',
  *   dev: false,
  * });
  *
  * if (referralCode) {
- *   console.log(`https://0xmail.box?referral=${referralCode}`);
+ *   console.log(`https://example.com?referral=${referralCode}`);
  * }
  * ```
  */

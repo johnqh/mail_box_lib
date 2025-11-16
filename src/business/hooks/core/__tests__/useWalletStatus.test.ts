@@ -25,7 +25,7 @@ describe('useWalletStatus', () => {
 
   const testAddress = '0x742d35Cc6e3c05652aA6E10f35F74c29C5881398';
   const testChainType = ChainType.EVM;
-  const testMessage = 'Authenticate with 0xMail';
+  const testMessage = 'Sign in to authenticate';
   const testSignature = 'EjRWeJCrze8='; // base64-encoded signature (caller's responsibility)
 
   describe('Initial State', () => {
@@ -241,7 +241,7 @@ describe('useWalletConnectionState', () => {
 
   const testAddress = '0x742d35Cc6e3c05652aA6E10f35F74c29C5881398';
   const testChainType = ChainType.EVM;
-  const testMessage = 'Authenticate with 0xMail';
+  const testMessage = 'Sign in to authenticate';
   const testSignature = '0x1234567890abcdef';
 
   it('should start with disconnected state', () => {

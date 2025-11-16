@@ -47,7 +47,7 @@ ${hookType === 'indexer' ?
 
       if (config.cloudflareWorkerUrl) {
         headers['Authorization'] = \`Bearer \${config.apiToken}\`;
-        headers['X-App-Source'] = '0xmail-box';
+        headers['X-App-Source'] = 'example-app';
       } else {
         headers['X-Access-Token'] = config.apiToken;
       }

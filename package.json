@@ -1,7 +1,7 @@
 {
   "name": "@sudobility/lib",
-  "version": "3.13.11",
-  "description": "React Native-compatible shared utilities library for 0xmail.box projects with Optional<T> type safety patterns and comprehensive blockchain integration",
+  "version": "3.14.1",
+  "description": "React Native-compatible shared utilities library for blockchain email projects with Optional<T> type safety patterns and comprehensive blockchain integration",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -86,15 +86,15 @@
     "ethereum",
     "dependency-injection"
   ],
-  "author": "0xmail.box team",
+  "author": "Sudobility team",
   "license": "MIT",
   "devDependencies": {
     "@sudobility/configs": "^0.0.24",
     "@sudobility/contracts": "^1.16.5",
     "@sudobility/di": "^1.4.17",
-    "@sudobility/indexer_client": "^0.0.51",
-    "@sudobility/types": "^1.9.11",
-    "@sudobility/wildduck_client": "^2.1.1",
+    "@sudobility/indexer_client": "^0.0.52",
+    "@sudobility/types": "^1.9.12",
+    "@sudobility/wildduck_client": "^2.1.2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
@@ -126,9 +126,9 @@
     "@sudobility/configs": "^0.0.24",
     "@sudobility/contracts": "^1.16.2",
     "@sudobility/di": "^1.4.12",
-    "@sudobility/indexer_client": "^0.0.51",
-    "@sudobility/types": "^1.9.4",
-    "@sudobility/wildduck_client": "^2.1.0",
+    "@sudobility/indexer_client": "^0.0.52",
+    "@sudobility/types": "^1.9.12",
+    "@sudobility/wildduck_client": "^2.1.2",
     "@tanstack/react-query": "^5.90.5",
     "react": "^19.2.0",
     "viem": "^2.38.4"
@@ -141,12 +141,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/0xmail/mail_box_lib.git"
+    "url": "https://github.com/johnqh/mail_box_lib.git"
   },
   "bugs": {
-    "url": "https://github.com/0xmail/mail_box_lib/issues"
+    "url": "https://github.com/johnqh/mail_box_lib/issues"
   },
-  "homepage": "https://github.com/0xmail/mail_box_lib#readme",
+  "homepage": "https://github.com/johnqh/mail_box_lib#readme",
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"

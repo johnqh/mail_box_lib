@@ -438,6 +438,6 @@ When updating from older versions, refer to the migration guide for breaking cha
 
 ## Support
 
-- GitHub Issues: [Report bugs and request features](https://github.com/0xmail/mail_box_lib/issues)
-- Documentation: [Full documentation](https://docs.0xmail.box)
-- Examples: [Sample implementations](https://github.com/0xmail/mail_box_lib/tree/main/examples)
+- GitHub Issues: [Report bugs and request features](https://github.com/johnqh/mail_box_lib/issues)
+- Documentation: Full documentation in docs/ directory
+- Examples: Sample implementations in examples/ directory

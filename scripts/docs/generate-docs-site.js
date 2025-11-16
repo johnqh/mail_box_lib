@@ -7,7 +7,6 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import { spawn } from 'child_process';
 
 const colors = {
   reset: '\x1b[0m',
@@ -86,7 +85,10 @@ class DocumentationSiteGenerator {
 
         if (item.isDirectory() && !item.name.startsWith('.')) {
           await this.scanDirectory(itemPath);
-        } else if (item.isFile() && (item.name.endsWith('.ts') || item.name.endsWith('.tsx'))) {
+        } else if (
+          item.isFile() &&
+          (item.name.endsWith('.ts') || item.name.endsWith('.tsx'))
+        ) {
           await this.analyzeSourceFile(itemPath);
         }
       }
@@ -99,7 +101,7 @@ class DocumentationSiteGenerator {
     try {
       const content = await fs.readFile(filePath, 'utf8');
       const analysis = this.extractDocumentationInfo(content, filePath);
-      
+
       if (analysis) {
         this.sourceFiles.set(filePath, analysis);
       }
@@ -120,7 +122,9 @@ class DocumentationSiteGenerator {
     };
 
     // Extract exports
-    const exportMatches = content.match(/export\s+(?:const|function|class|interface|type)\s+(\w+)/g);
+    const exportMatches = content.match(
+      /export\s+(?:const|function|class|interface|type)\s+(\w+)/g
+    );
     if (exportMatches) {
       info.exports = exportMatches.map(match => {
         const name = match.match(/(\w+)$/)[1];
@@ -129,19 +133,27 @@ class DocumentationSiteGenerator {
     }
 
     // Extract interfaces
-    const interfaceMatches = content.match(/(?:export\s+)?interface\s+(\w+)[\s\S]*?(?=\n(?:export|interface|class|function|const|$))/g);
+    const interfaceMatches = content.match(
+      /(?:export\s+)?interface\s+(\w+)[\s\S]*?(?=\n(?:export|interface|class|function|const|$))/g
+    );
     if (interfaceMatches) {
-      info.interfaces = interfaceMatches.map(match => this.parseInterface(match));
+      info.interfaces = interfaceMatches.map(match =>
+        this.parseInterface(match)
+      );
     }
 
     // Extract functions
-    const functionMatches = content.match(/(?:export\s+)?(?:async\s+)?function\s+(\w+)\s*\([^)]*\)[\s\S]*?(?=\n(?:export|interface|class|function|const|$))/g);
+    const functionMatches = content.match(
+      /(?:export\s+)?(?:async\s+)?function\s+(\w+)\s*\([^)]*\)[\s\S]*?(?=\n(?:export|interface|class|function|const|$))/g
+    );
     if (functionMatches) {
       info.functions = functionMatches.map(match => this.parseFunction(match));
     }
 
     // Extract React hooks
-    const hookMatches = content.match(/(?:export\s+)?(?:const|function)\s+(use\w+)/g);
+    const hookMatches = content.match(
+      /(?:export\s+)?(?:const|function)\s+(use\w+)/g
+    );
     if (hookMatches) {
       info.hooks = hookMatches.map(match => {
         const name = match.match(/(use\w+)/)[1];
@@ -155,7 +167,11 @@ class DocumentationSiteGenerator {
       info.comments = commentMatches.map(comment => this.parseJSDoc(comment));
     }
 
-    return Object.values(info).some(arr => Array.isArray(arr) ? arr.length > 0 : arr) ? info : null;
+    return Object.values(info).some(arr =>
+      Array.isArray(arr) ? arr.length > 0 : arr
+    )
+      ? info
+      : null;
   }
 
   getExportType(exportStatement) {
@@ -170,11 +186,13 @@ class DocumentationSiteGenerator {
   parseInterface(interfaceString) {
     const nameMatch = interfaceString.match(/interface\s+(\w+)/);
     const name = nameMatch ? nameMatch[1] : 'Unknown';
-    
+
     // Extract properties (simplified)
     const properties = [];
-    const propertyMatches = interfaceString.match(/(\w+)(?:\?)?\s*:\s*([^;]+);/g);
-    
+    const propertyMatches = interfaceString.match(
+      /(\w+)(?:\?)?\s*:\s*([^;]+);/g
+    );
+
     if (propertyMatches) {
       propertyMatches.forEach(prop => {
         const propMatch = prop.match(/(\w+)(\?)?\s*:\s*([^;]+);/);
@@ -194,17 +212,21 @@ class DocumentationSiteGenerator {
   parseFunction(functionString) {
     const nameMatch = functionString.match(/function\s+(\w+)/);
     const name = nameMatch ? nameMatch[1] : 'Unknown';
-    
+
     // Extract parameters (simplified)
     const paramMatch = functionString.match(/\(([^)]*)\)/);
     const parameters = [];
-    
+
     if (paramMatch && paramMatch[1]) {
       const params = paramMatch[1].split(',').map(p => p.trim());
-      parameters.push(...params.filter(p => p).map(param => {
-        const [name, type] = param.split(':').map(s => s.trim());
-        return { name, type: type || 'any' };
-      }));
+      parameters.push(
+        ...params
+          .filter(p => p)
+          .map(param => {
+            const [name, type] = param.split(':').map(s => s.trim());
+            return { name, type: type || 'any' };
+          })
+      );
     }
 
     return { name, parameters };
@@ -230,7 +252,7 @@ class DocumentationSiteGenerator {
 
     // Group files by category
     const categories = new Map();
-    
+
     for (const [filePath, info] of this.sourceFiles) {
       const category = this.getCategoryFromPath(filePath);
       if (!categories.has(category)) {
@@ -241,8 +263,11 @@ class DocumentationSiteGenerator {
 
     // Generate documentation for each category
     for (const [category, files] of categories) {
-      const categoryDoc = await this.generateCategoryDocumentation(category, files);
-      
+      const categoryDoc = await this.generateCategoryDocumentation(
+        category,
+        files
+      );
+
       await fs.writeFile(
         path.join(this.outputDir, 'api', `${category}.md`),
         categoryDoc
@@ -261,7 +286,10 @@ class DocumentationSiteGenerator {
       this.generateApiIndex(apiIndex)
     );
 
-    log(colors.green, `✅ Generated API docs for ${categories.size} categories`);
+    log(
+      colors.green,
+      `✅ Generated API docs for ${categories.size} categories`
+    );
   }
 
   getCategoryFromPath(filePath) {
@@ -333,7 +361,8 @@ class DocumentationSiteGenerator {
     }
 
     index += '\n## Overview\n\n';
-    index += '@johnqh/lib is a React Native-compatible shared utilities library for 0xmail.box projects.\n\n';
+    index +=
+      '@johnqh/lib is a React Native-compatible shared utilities library for blockchain email projects.\n\n';
     index += '### Key Features\n\n';
     index += '- Platform-agnostic business logic\n';
     index += '- Email management services (WildDuck integration)\n';
@@ -404,7 +433,7 @@ function EmailComponent() {
     try {
       await sendEmail({
         to: 'recipient@example.com',
-        subject: 'Hello from 0xmail.box',
+        subject: 'Hello from blockchain email',
         text: 'This is a test email',
       });
     } catch (error) {
@@ -570,7 +599,8 @@ Make sure to:
 
   generateExamplesIndex(examples) {
     let index = '# Interactive Examples\n\n';
-    index += 'Practical examples showing how to use @johnqh/lib in real applications.\n\n';
+    index +=
+      'Practical examples showing how to use @johnqh/lib in real applications.\n\n';
 
     for (const example of examples) {
       index += `## [${example.title}](./${example.name}.md)\n\n`;
@@ -632,7 +662,7 @@ Make sure to:
   generateGettingStartedGuide() {
     return `# Getting Started with @johnqh/lib
 
-Welcome to @johnqh/lib, the comprehensive shared utilities library for 0xmail.box projects.
+Welcome to @johnqh/lib, the comprehensive shared utilities library for blockchain email projects.
 
 ## Installation
 
@@ -648,12 +678,12 @@ npm install @johnqh/lib
 import { createWildDuckConfig, createIndexerConfig } from '@johnqh/lib';
 
 const wildDuckConfig = createWildDuckConfig({
-  backendUrl: 'https://api.0xmail.box',
+  backendUrl: 'https://api.example.com',
   apiToken: 'your-api-token',
 });
 
 const indexerConfig = createIndexerConfig({
-  endpointUrl: 'https://indexer.0xmail.box',
+  endpointUrl: 'https://indexer.example.com',
   dev: false,
 });
 \`\`\`
@@ -711,7 +741,7 @@ interface WildDuckConfig {
 
 \`\`\`bash
 WILDDUCK_API_TOKEN=your_token_here
-WILDDUCK_BACKEND_URL=https://api.0xmail.box
+WILDDUCK_BACKEND_URL=https://api.example.com
 \`\`\`
 
 ## Indexer Configuration
@@ -914,15 +944,24 @@ If you're still having issues:
 
     // Generate CSS
     const css = this.generateSiteCSS();
-    await fs.writeFile(path.join(this.outputDir, 'assets', 'css', 'docs.css'), css);
+    await fs.writeFile(
+      path.join(this.outputDir, 'assets', 'css', 'docs.css'),
+      css
+    );
 
     // Generate JavaScript
     const js = this.generateSiteJS();
-    await fs.writeFile(path.join(this.outputDir, 'assets', 'js', 'docs.js'), js);
+    await fs.writeFile(
+      path.join(this.outputDir, 'assets', 'js', 'docs.js'),
+      js
+    );
 
     // Generate navigation component
     const nav = this.generateNavigation();
-    await fs.writeFile(path.join(this.outputDir, 'components', 'navigation.md'), nav);
+    await fs.writeFile(
+      path.join(this.outputDir, 'components', 'navigation.md'),
+      nav
+    );
   }
 
   generateSiteCSS() {
@@ -1207,7 +1246,7 @@ function scrollToElement(link) {
   generateMainIndex() {
     return `# @johnqh/lib Documentation
 
-Welcome to the comprehensive documentation for @johnqh/lib, the shared utilities library for 0xmail.box projects.
+Welcome to the comprehensive documentation for @johnqh/lib, the shared utilities library for blockchain email projects.
 
 ## Overview
 
@@ -1258,7 +1297,7 @@ The library follows a layered architecture:
 - [Getting Started Guide](./guides/getting-started.md)
 - [Configuration Guide](./guides/configuration.md)
 - [Troubleshooting](./guides/troubleshooting.md)
-- [GitHub Issues](https://github.com/0xmail/mail_box_lib/issues)
+- [GitHub Issues](https://github.com/johnqh/mail_box_lib/issues)
 
 ---
 
@@ -1311,20 +1350,19 @@ To improve the documentation:
 
 async function main() {
   const generator = new DocumentationSiteGenerator();
-  
+
   try {
     await generator.generateSite();
-    
+
     log(colors.cyan, '\n📊 Documentation Site Summary:');
     log(colors.bright, '✅ API documentation generated');
     log(colors.bright, '✅ Interactive examples created');
     log(colors.bright, '✅ Guides and tutorials written');
     log(colors.bright, '✅ Site assets configured');
     log(colors.bright, '✅ Navigation structure built');
-    
+
     log(colors.green, '\n🎉 Documentation site is ready!');
     log(colors.cyan, 'Open docs-site/index.md to view the documentation');
-    
   } catch (error) {
     log(colors.red, '💥 Documentation generation failed:', error.message);
     process.exit(1);

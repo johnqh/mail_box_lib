@@ -2,7 +2,7 @@
 
 /**
  * Production Monitoring Dashboard
- * Real-time monitoring and analytics for the 0xmail.box ecosystem
+ * Real-time monitoring and analytics for the blockchain email ecosystem
  */
 
 import { promises as fs } from 'fs';

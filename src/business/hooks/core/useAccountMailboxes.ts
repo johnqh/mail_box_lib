@@ -62,7 +62,7 @@ export interface UseAccountMailboxesReturn {
  * @param wildduckUserAuth - WildDuck authentication object (from useAccountWildduckAuth, includes username)
  * @param endpointUrl - WildDuck API backend URL
  * @param apiToken - WildDuck API token for authentication
- * @param emailDomain - Email domain to validate against (e.g., "0xmail.box")
+ * @param emailDomain - Email domain to validate against (e.g., "example.com")
  * @param devMode - Whether to use mock data on errors
  * @returns Object containing emailAddress, mailboxes (cached), wildduckUserAuth, isLoading, and error
  *
@@ -88,7 +88,7 @@ export interface UseAccountMailboxesReturn {
  *     wildduckUserAuth,
  *     'https://wildduck.example.com',
  *     'your-api-token',
- *     '0xmail.box',
+ *     'example.com',
  *     false
  *   );
  *

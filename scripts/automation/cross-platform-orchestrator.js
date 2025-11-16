@@ -93,7 +93,7 @@ class CrossPlatformOrchestrator {
       buildCommand: 'docker build -t mail-box-api .',
       testCommand: 'npm run test:integration',
       deployCommand: 'kubectl apply -f deployment.yml',
-      healthCheck: 'curl -f http://api.0xmail.box/health',
+      healthCheck: 'curl -f http://api.example.com/health',
       artifacts: ['docker-image', 'k8s-manifests/'],
       environments: ['development', 'staging', 'production'],
       status: 'unknown',

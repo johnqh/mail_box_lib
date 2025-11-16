@@ -1,7 +1,7 @@
 # @johnqh/lib - AI Development Context
 
 ## Project Overview
-A React Native-compatible shared utilities library for 0xmail.box projects, providing platform-agnostic business logic, authentication, email handling, blockchain integration, and UI utilities.
+A React Native-compatible shared utilities library for blockchain email projects, providing platform-agnostic business logic, authentication, email handling, blockchain integration, and UI utilities.
 
 ### Key Features
 - **Platform Abstraction**: Works on both web and React Native
