@@ -51,6 +51,14 @@ export interface UseMailboxMessagesReturn {
 }
 
 /**
+ * Options for useMailboxMessages hook
+ */
+export interface UseMailboxMessagesOptions {
+  /** Enable WebSocket for real-time updates */
+  enableWebSocket?: boolean;
+}
+
+/**
  * Hook to manage the selected mailbox and its messages
  *
  * Features:
@@ -67,6 +75,7 @@ export interface UseMailboxMessagesReturn {
  * @param apiToken - WildDuck API token for authentication
  * @param devMode - Whether to use mock data on errors
  * @param pageSize - Number of messages to fetch per page (default: 50)
+ * @param options - Optional configuration including WebSocket support
  * @returns Object containing selectedMailboxId, selectMailbox, messages (cached), and pagination controls
  *
  * @example
@@ -116,7 +125,8 @@ export function useMailboxMessages(
   endpointUrl: string,
   apiToken: string,
   devMode: boolean = false,
-  pageSize: number = 50
+  pageSize: number = 50,
+  options?: UseMailboxMessagesOptions
 ): UseMailboxMessagesReturn {
   const [selectedMailboxId] = useGlobalSelectedMailboxId();
 
@@ -145,7 +155,8 @@ export function useMailboxMessages(
     networkClient,
     config,
     devMode,
-    pageSize
+    pageSize,
+    options
   );
 
   // Function to select a mailbox

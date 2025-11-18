@@ -43,6 +43,14 @@ export interface UseMessageReturn {
 }
 
 /**
+ * Options for useMessage hook
+ */
+export interface UseMessageOptions {
+  /** Enable WebSocket for real-time updates */
+  enableWebSocket?: boolean;
+}
+
+/**
  * Hook to manage a single message with full payload
  *
  * Features:
@@ -57,6 +65,7 @@ export interface UseMessageReturn {
  * @param endpointUrl - WildDuck API backend URL
  * @param apiToken - WildDuck API token for authentication
  * @param devMode - Whether to use mock data on errors
+ * @param options - Optional configuration including WebSocket support
  * @returns Object containing selectedMessageId, selectMessage, message (cached), isLoading, and error
  *
  * @example
@@ -101,7 +110,8 @@ export function useMessage(
   selectedMailboxId: Optional<string>,
   endpointUrl: string,
   apiToken: string,
-  devMode: boolean = false
+  devMode: boolean = false,
+  options?: UseMessageOptions
 ): UseMessageReturn {
   const [selectedMessageId] = useGlobalSelectedMessageId();
 
@@ -133,7 +143,13 @@ export function useMessage(
     [endpointUrl, apiToken]
   );
 
-  const messagesHook = useWildduckMessages(networkClient, config, devMode);
+  const messagesHook = useWildduckMessages(
+    networkClient,
+    config,
+    devMode,
+    undefined,
+    options
+  );
 
   // Function to select a message
   const selectMessage = useCallback((messageId: string) => {

@@ -48,6 +48,14 @@ export interface UseAccountMailboxesReturn {
 }
 
 /**
+ * Options for useAccountMailboxes hook
+ */
+export interface UseAccountMailboxesOptions {
+  /** Enable WebSocket for real-time mailbox updates */
+  enableWebSocket?: boolean;
+}
+
+/**
  * Hook to manage mailboxes for the currently authenticated account
  *
  * Accepts wildduckUserAuth as parameter and:
@@ -64,6 +72,7 @@ export interface UseAccountMailboxesReturn {
  * @param apiToken - WildDuck API token for authentication
  * @param emailDomain - Email domain to validate against (e.g., "example.com")
  * @param devMode - Whether to use mock data on errors
+ * @param options - Optional configuration including WebSocket support
  * @returns Object containing emailAddress, mailboxes (cached), wildduckUserAuth, isLoading, and error
  *
  * @example
@@ -115,7 +124,8 @@ export function useAccountMailboxes(
   endpointUrl: string,
   apiToken: string,
   emailDomain: string,
-  devMode: boolean = false
+  devMode: boolean = false,
+  options?: UseAccountMailboxesOptions
 ): UseAccountMailboxesReturn {
   const [emailAddress, setEmailAddress] = useState<Optional<string>>(null);
   const [error, setError] = useState<Optional<string>>(null);
@@ -146,7 +156,8 @@ export function useAccountMailboxes(
     networkClient,
     config,
     wildduckUserAuth,
-    devMode
+    devMode,
+    options
   );
 
   // Track the last fetched userId/username/token combo to prevent duplicate fetches

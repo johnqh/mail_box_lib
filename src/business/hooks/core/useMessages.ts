@@ -47,6 +47,8 @@ export interface UseMessagesParams {
   wildduckUserAuth?: Optional<WildduckUserAuth>;
   /** Whether the hook is enabled */
   enabled?: boolean;
+  /** Enable WebSocket for real-time updates */
+  enableWebSocket?: boolean;
 }
 
 export interface UseMessagesReturn {
@@ -115,6 +117,7 @@ export function useMessages({
   searchScope,
   wildduckUserAuth,
   enabled = true,
+  enableWebSocket = false,
 }: UseMessagesParams): UseMessagesReturn {
   // Track mailbox transitions to show loading state
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -135,7 +138,8 @@ export function useMessages({
     endpointUrl,
     apiToken,
     devMode,
-    pageSize
+    pageSize,
+    { enableWebSocket }
   );
 
   // Build search params conditionally
