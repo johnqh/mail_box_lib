@@ -14,7 +14,10 @@ import {
   WildduckUpdateMailboxRequest,
   WildduckUserAuth,
 } from '@sudobility/types';
-import { useAccountMailboxes } from './useAccountMailboxes';
+import {
+  useAccountMailboxes,
+  UseAccountMailboxesOptions,
+} from './useAccountMailboxes';
 
 /**
  * Special mailbox ID for the settings item
@@ -75,6 +78,7 @@ export interface UseMailboxesAndSettingsReturn {
  * @param apiToken - WildDuck API token for authentication
  * @param emailDomain - Email domain to validate against (e.g., "example.com")
  * @param devMode - Whether to use mock data on errors
+ * @param options - Optional configuration including WebSocket support
  * @returns Object containing mailboxes (with Settings item), emailAddress, and other data
  *
  * @example
@@ -123,7 +127,8 @@ export function useMailboxesAndSettings(
   endpointUrl: string,
   apiToken: string,
   emailDomain: string,
-  devMode: boolean = false
+  devMode: boolean = false,
+  options?: UseAccountMailboxesOptions
 ): UseMailboxesAndSettingsReturn {
   // Get mailboxes from the base hook
   const mailboxResult = useAccountMailboxes(
@@ -132,7 +137,8 @@ export function useMailboxesAndSettings(
     endpointUrl,
     apiToken,
     emailDomain,
-    devMode
+    devMode,
+    options
   );
 
   // Create mailboxes with Settings item appended
