@@ -1,6 +1,6 @@
 {
   "name": "@sudobility/lib",
-  "version": "3.14.10",
+  "version": "3.14.11",
   "description": "React Native-compatible shared utilities library for blockchain email projects with Optional<T> type safety patterns and comprehensive blockchain integration",
   "type": "module",
   "main": "dist/index.js",
@@ -90,7 +90,7 @@
   "license": "MIT",
   "devDependencies": {
     "@sudobility/configs": "^0.0.33",
-    "@sudobility/contracts": "^1.17.16",
+    "@sudobility/contracts": "^1.17.17",
     "@sudobility/di": "^1.4.23",
     "@sudobility/indexer_client": "^0.0.59",
     "@sudobility/types": "^1.9.18",
