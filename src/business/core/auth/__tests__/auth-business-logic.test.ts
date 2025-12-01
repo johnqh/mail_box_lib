@@ -43,10 +43,11 @@ describe('DefaultAuthBusinessLogic', () => {
     it('should parse email addresses correctly', () => {
       const email = 'test@example.com';
       const parsed = emailLogic.parseEmailAddress(email);
-      
+
       expect(parsed.address).toBe('test');
       expect(parsed.domain).toBe('example.com');
-      expect(parsed.type).toBeDefined();
+      // 'test' is not a recognized wallet address or domain, so type is undefined
+      expect(parsed.type).toBeUndefined();
     });
 
     it('should handle invalid email addresses', () => {
@@ -64,11 +65,11 @@ describe('DefaultAuthBusinessLogic', () => {
       expect(type).toBeDefined();
     });
 
-    it('should handle unknown address formats', () => {
+    it('should return undefined for unknown address formats', () => {
       const unknownAddress = 'unknown-format';
       const type = AddressHelper.getAddressType(unknownAddress);
-      
-      expect(type).toBeDefined();
+
+      expect(type).toBeUndefined();
     });
   });
 

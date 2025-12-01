@@ -203,8 +203,8 @@ const isValidBlockchainUsername = (username: string): boolean => {
   // Use getAddressType for standardized address detection
   const addressType = getAddressType(cleanUsername);
 
-  // Valid if it's any known address type (not Unknown)
-  if (addressType !== AddressType.Unknown) {
+  // Valid if it's any known address type (not undefined/Unknown)
+  if (addressType && addressType !== AddressType.Unknown) {
     return true;
   }
 

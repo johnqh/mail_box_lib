@@ -1,6 +1,6 @@
 /**
  * Name resolution utility for ENS and SNS domains
- * Handles resolving .eth, .box, .sol domains to wallet addresses
+ * Handles resolving domain names to wallet addresses
  */
 
 import { createPublicClient, http } from 'viem';
@@ -33,17 +33,16 @@ interface NameResolutionResult {
 }
 
 /**
- * Check if input looks like an ENS name
+ * Check if input looks like a domain name
+ * Domain names contain a "." and are not wallet addresses
  */
-function isENSName(input: string): boolean {
-  return AddressHelper.getAddressType(input) === AddressType.ENSName;
-}
-
-/**
- * Check if input looks like an SNS name
- */
-function isSNSName(input: string): boolean {
-  return AddressHelper.getAddressType(input) === AddressType.SNSName;
+function isDomainName(input: string): boolean {
+  if (!input || !input.includes('.')) {
+    return false;
+  }
+  // Check it's not a wallet address
+  const addressType = AddressHelper.getAddressType(input);
+  return addressType === undefined;
 }
 
 /**
@@ -170,24 +169,23 @@ export async function resolveNameOrAddress(
     };
   }
 
-  // Try ENS resolution
-  if (isENSName(trimmedInput)) {
-    const address = await resolveENSName(trimmedInput);
-    if (address) {
+  // Try domain resolution if it looks like a domain name
+  if (isDomainName(trimmedInput)) {
+    // Try ENS resolution first (supports .eth, .box, etc.)
+    const ensAddress = await resolveENSName(trimmedInput);
+    if (ensAddress) {
       return {
-        address,
+        address: ensAddress,
         type: 'ens',
         originalInput: input,
       };
     }
-  }
 
-  // Try SNS resolution
-  if (isSNSName(trimmedInput)) {
-    const address = await resolveSNSName(trimmedInput);
-    if (address) {
+    // Try SNS resolution (supports .sol, etc.)
+    const snsAddress = await resolveSNSName(trimmedInput);
+    if (snsAddress) {
       return {
-        address,
+        address: snsAddress,
         type: 'sns',
         originalInput: input,
       };
@@ -215,23 +213,9 @@ function validateNameOrAddressInput(input: string): {
     return { isValid: true };
   }
 
-  // Check if it looks like an ENS name
-  if (isENSName(trimmedInput)) {
+  // Check if it looks like a domain name
+  if (isDomainName(trimmedInput)) {
     return { isValid: true };
-  }
-
-  // Check if it looks like an SNS name
-  if (isSNSName(trimmedInput)) {
-    return { isValid: true };
-  }
-
-  // Check if it might be an incomplete domain
-  if (trimmedInput.includes('.')) {
-    return {
-      isValid: false,
-      error:
-        'Unsupported domain. Use .eth, .box (ENS) or .sol (SNS) domains, or a wallet address',
-    };
   }
 
   // If it looks like an address but is invalid
@@ -244,8 +228,7 @@ function validateNameOrAddressInput(input: string): {
 
   return {
     isValid: false,
-    error:
-      'Please enter a valid wallet address, ENS name (.eth/.box), or SNS name (.sol)',
+    error: 'Please enter a valid wallet address or domain name',
   };
 }
 
@@ -266,8 +249,7 @@ function getDisplayTextForResolution(result: NameResolutionResult): string {
 }
 
 export {
-  isENSName,
-  isSNSName,
+  isDomainName,
   isValidAddress,
   validateNameOrAddressInput,
   getDisplayTextForResolution,

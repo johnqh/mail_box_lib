@@ -13,6 +13,7 @@ import {
 import { STALE_TIMES } from '../../core/query';
 import { getENSNames } from '../../../utils/nameservice/ens';
 import { getSNSNames, resolveSNSDomain } from '../../../utils/nameservice/sns';
+import { resolveENSName } from '../../../utils/nameservice/nameResolution';
 
 // Types for name service resolution
 interface ENSResolutionResponse {
@@ -78,13 +79,13 @@ const useWalletFromENS = (
     queryKey: ['nameservice', 'ens', 'from-name', ensName],
     queryFn: async (): Promise<WalletResolutionResponse> => {
       try {
-        // For now, this would need a different implementation
-        // The current ENS utils don't have a direct ENS->wallet resolver
+        // Resolve ENS name to wallet address using viem
+        const walletAddress = await resolveENSName(ensName);
         return {
           nameService: 'ens',
           domain: ensName,
-          walletAddress: null,
-          success: false,
+          walletAddress: walletAddress || null,
+          success: !!walletAddress,
         };
       } catch {
         return {
@@ -96,7 +97,8 @@ const useWalletFromENS = (
       }
     },
     staleTime: STALE_TIMES.NAME_SERVICE_RESOLUTION,
-    enabled: !!ensName && ensName.endsWith('.eth'),
+    // Enable for any domain name (contains a dot)
+    enabled: !!ensName && ensName.includes('.'),
     ...options,
   });
 };
@@ -162,7 +164,8 @@ const useWalletFromSNS = (
       }
     },
     staleTime: STALE_TIMES.NAME_SERVICE_RESOLUTION,
-    enabled: !!snsName && snsName.endsWith('.sol'),
+    // Enable for any domain name (contains a dot)
+    enabled: !!snsName && snsName.includes('.'),
     ...options,
   });
 };
@@ -219,32 +222,29 @@ const useNameServiceResolution = (
             success: false,
           };
         }
-      } else {
-        // Input is a domain name
-        if (input.endsWith('.eth')) {
-          // For now, ENS->wallet resolution is not implemented
-          return {
-            address: '',
-            ensName: input,
-            success: false,
-          };
-        } else if (input.endsWith('.sol')) {
-          // Resolve wallet from SNS
-          try {
-            const walletAddress = await resolveSNSDomain(input);
+      } else if (input.includes('.')) {
+        // Input is a domain name - try SNS first, then ENS
+        // SNS resolution is implemented, ENS->wallet is not yet
+        try {
+          const walletAddress = await resolveSNSDomain(input);
+          if (walletAddress) {
             return {
-              address: walletAddress || '',
+              address: walletAddress,
               snsName: input,
-              success: !!walletAddress,
-            };
-          } catch {
-            return {
-              address: '',
-              snsName: input,
-              success: false,
+              success: true,
             };
           }
+        } catch {
+          // SNS resolution failed, continue to fallback
         }
+
+        // ENS->wallet resolution is not implemented yet
+        // Return the domain name with success: false
+        return {
+          address: '',
+          ensName: input,
+          success: false,
+        };
       }
 
       // Fallback for unrecognized format
