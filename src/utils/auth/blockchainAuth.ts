@@ -3,13 +3,18 @@
  * Compatible with WildDuck's blockchain authentication system
  */
 
-import { AddressType, ChainType, getAddressType } from '@sudobility/types';
+import {
+  AddressType,
+  ChainType,
+  getAddressType,
+  Optional,
+} from '@sudobility/types';
 
 /**
  * Detect address type from a given address string
  * This is a local wrapper around getAddressType from @sudobility/types
  */
-export const detectAddressType = (address: string): AddressType => {
+export const detectAddressType = (address: string): Optional<AddressType> => {
   return getAddressType(address);
 };
 
@@ -203,8 +208,8 @@ const isValidBlockchainUsername = (username: string): boolean => {
   // Use getAddressType for standardized address detection
   const addressType = getAddressType(cleanUsername);
 
-  // Valid if it's any known address type (not undefined/Unknown)
-  if (addressType && addressType !== AddressType.Unknown) {
+  // Valid if it's any known address type (not undefined)
+  if (addressType) {
     return true;
   }
 

@@ -2,18 +2,14 @@
  * Platform-agnostic authentication business logic
  */
 
-import { AuthStatus, ChainType, Optional } from '@sudobility/types';
+import {
+  AddressType,
+  AuthStatus,
+  ChainType,
+  getAddressType,
+  Optional,
+} from '@sudobility/types';
 import { EmailAddress } from '../../../types/email';
-
-/**
- * Address type enumeration
- */
-enum AddressType {
-  EVMAddress = 'EVMAddress',
-  SolanaAddress = 'SolanaAddress',
-  ENSName = 'ENSName',
-  SNSName = 'SNSName',
-}
 
 /**
  * Parsed email address structure
@@ -109,8 +105,7 @@ class DefaultAuthBusinessLogic implements AuthBusinessLogic {
       return false;
     }
 
-    // Use AddressHelper for consistent validation
-    const addressType = AddressHelper.getAddressType(address);
+    const addressType = getAddressType(address);
 
     switch (chainType) {
       case ChainType.EVM:
@@ -139,11 +134,11 @@ class DefaultAuthBusinessLogic implements AuthBusinessLogic {
     let isENS = emailAddress.id.startsWith('ens_');
     let isSNS = emailAddress.id.startsWith('sns_');
 
-    // Also check the email address part using AddressHelper
+    // Also check the email address part
     if (!isENS && !isSNS) {
       const emailParts = emailAddress.address.split('@');
       if (emailParts.length === 2) {
-        const addressType = AddressHelper.getAddressType(emailParts[0] || '');
+        const addressType = getAddressType(emailParts[0] || '');
         isENS = addressType === AddressType.ENSName;
         isSNS = addressType === AddressType.SNSName;
       }
@@ -380,95 +375,6 @@ class DefaultEmailAddressBusinessLogic implements EmailAddressBusinessLogic {
 }
 
 /**
- * Address Helper class for address type detection and validation
- */
-class AddressHelper {
-  /**
-   * Determine the address type from an address string
-   * Case insensitive as addresses are case insensitive
-   *
-   * @param address - The address to check
-   * @param parentAddressType - Optional parent address type for context
-   *   If parent is EVMAddress and address contains ".", returns ENSName
-   *   If parent is SolanaAddress and address contains ".", returns SNSName
-   *   If parent is undefined, only checks for wallet address patterns
-   * @returns The detected address type, or undefined if not recognized
-   */
-  static getAddressType(
-    address: string,
-    parentAddressType?: AddressType
-  ): Optional<AddressType> {
-    if (!address || typeof address !== 'string') {
-      return undefined;
-    }
-
-    // Convert to lowercase for case-insensitive comparison
-    const lowerAddress = address.trim().toLowerCase();
-
-    // If parent address type is provided and address contains ".", it's a domain name
-    if (parentAddressType && lowerAddress.includes('.')) {
-      if (parentAddressType === AddressType.EVMAddress) {
-        return AddressType.ENSName;
-      }
-      if (parentAddressType === AddressType.SolanaAddress) {
-        return AddressType.SNSName;
-      }
-    }
-
-    // Check for EVM address (0x followed by 40 hex characters)
-    if (this.isEVMAddress(lowerAddress)) {
-      return AddressType.EVMAddress;
-    }
-
-    // Check for Solana address (base58 encoded, 32-44 characters)
-    if (this.isSolanaAddress(lowerAddress)) {
-      return AddressType.SolanaAddress;
-    }
-
-    return undefined;
-  }
-
-  /**
-   * Check if address is an EVM address
-   */
-  private static isEVMAddress(address: string): boolean {
-    // EVM addresses are 0x followed by exactly 40 hexadecimal characters
-    return /^0x[a-f0-9]{40}$/.test(address);
-  }
-
-  /**
-   * Check if address is a Solana address
-   */
-  private static isSolanaAddress(address: string): boolean {
-    try {
-      // Solana addresses are base58 encoded and typically 32-44 characters
-      if (address.length < 32 || address.length > 44) {
-        return false;
-      }
-
-      // Base58 alphabet: 123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz
-      const base58Regex = /^[1-9a-hjkmnp-z]+$/;
-      if (!base58Regex.test(address)) {
-        return false;
-      }
-
-      // Additional validation: try to decode with bs58 if available
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const bs58 = require('bs58');
-        const decoded = bs58.decode(address);
-        return decoded.length === 32; // Solana addresses decode to 32 bytes
-      } catch {
-        // If bs58 is not available, rely on regex validation
-        return true;
-      }
-    } catch {
-      return false;
-    }
-  }
-}
-
-/**
  * Email Address Helper class for parsing and analyzing email addresses
  */
 class EmailAddressHelper {
@@ -502,8 +408,8 @@ class EmailAddressHelper {
       return undefined;
     }
 
-    // Determine the address type using AddressHelper
-    const type = AddressHelper.getAddressType(address);
+    // Determine the address type
+    const type = getAddressType(address);
 
     return {
       address,
@@ -516,9 +422,7 @@ class EmailAddressHelper {
 export {
   DefaultAuthBusinessLogic,
   DefaultEmailAddressBusinessLogic,
-  AddressHelper,
   EmailAddressHelper,
-  AddressType,
   type AuthBusinessLogic,
   type EmailAddressBusinessLogic,
   type ParsedEmailAddress,

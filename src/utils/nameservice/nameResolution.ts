@@ -6,11 +6,7 @@
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
 import { isAddress } from 'viem';
-import { Optional } from '@sudobility/types';
-import {
-  AddressHelper,
-  AddressType,
-} from '../../business/core/auth/auth-business-logic';
+import { AddressType, getAddressType, Optional } from '@sudobility/types';
 
 // Create public client for ENS resolution
 const publicClient = createPublicClient({
@@ -41,7 +37,7 @@ function isDomainName(input: string): boolean {
     return false;
   }
   // Check it's not a wallet address
-  const addressType = AddressHelper.getAddressType(input);
+  const addressType = getAddressType(input);
   return addressType === undefined;
 }
 
@@ -55,8 +51,8 @@ function isValidAddress(input: string): boolean {
       return true;
     }
 
-    // Then check with AddressHelper for Solana addresses
-    const addressType = AddressHelper.getAddressType(input);
+    // Then check for Solana addresses
+    const addressType = getAddressType(input);
     return (
       addressType === AddressType.EVMAddress ||
       addressType === AddressType.SolanaAddress

@@ -3,7 +3,13 @@
  * Transforms wallet account data into email address formats for UI consumption
  */
 
-import { ChainType, IndexerNameServiceAccount } from '@sudobility/types';
+import {
+  AddressType,
+  ChainType,
+  getAddressType,
+  IndexerNameServiceAccount,
+  Optional,
+} from '@sudobility/types';
 import { WildDuckAccount } from '../../business/hooks/core/useWalletAccounts';
 
 // Local transformation type for email utilities
@@ -16,15 +22,14 @@ export interface TransformationWalletAccount {
 export interface TransformationEmailAddress {
   address: string;
   name: string;
-  type: 'primary' | 'ens' | 'sns';
   walletAddress: string;
-  addressType: 'evm' | 'solana';
+  addressType: Optional<AddressType>;
   entitled?: boolean;
 }
 
 export interface WalletEmailGroup {
   walletAddress: string;
-  addressType: 'evm' | 'solana';
+  addressType: Optional<AddressType>;
   primaryEmail: TransformationEmailAddress;
   domainEmails: TransformationEmailAddress[];
 }
@@ -39,8 +44,7 @@ export function transformWalletAccountsToEmailGroups(
   if (!walletAccounts || walletAccounts.length === 0) return [];
 
   return walletAccounts.map(walletAccount => {
-    const addressType =
-      walletAccount.chainType === ChainType.SOLANA ? 'solana' : 'evm';
+    const addressType = getAddressType(walletAccount.walletAddress);
 
     return {
       walletAddress: walletAccount.walletAddress,
@@ -49,20 +53,20 @@ export function transformWalletAccountsToEmailGroups(
       primaryEmail: {
         address: walletAccount.walletAddress,
         name: `${walletAccount.walletAddress.slice(0, 8)}...`,
-        type: 'primary' as const,
         walletAddress: walletAccount.walletAddress,
         addressType,
         entitled: true, // Wallet addresses are always entitled
       },
       // Domain names (ENS/SNS) with their entitled status from the API
-      // Type is determined by parent wallet's chain type
       domainEmails: walletAccount.names.map(
         (nameServiceAccount: IndexerNameServiceAccount) => ({
           address: nameServiceAccount.name,
           name: nameServiceAccount.name,
-          type: addressType === 'solana' ? ('sns' as const) : ('ens' as const),
           walletAddress: walletAccount.walletAddress,
-          addressType,
+          addressType: getAddressType(
+            nameServiceAccount.name,
+            addressType ?? undefined
+          ),
           entitled: nameServiceAccount.entitled,
         })
       ),

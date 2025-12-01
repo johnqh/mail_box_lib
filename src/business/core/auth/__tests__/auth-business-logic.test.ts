@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { DefaultAuthBusinessLogic, DefaultEmailAddressBusinessLogic, AddressHelper } from '../auth-business-logic';
+import { DefaultAuthBusinessLogic, DefaultEmailAddressBusinessLogic } from '../auth-business-logic';
 import { WalletUserData } from '../../../../types/email';
-import { ChainType, AuthStatus } from '@sudobility/types';
+import { ChainType, AuthStatus, getAddressType } from '@sudobility/types';
 
 describe('DefaultAuthBusinessLogic', () => {
   let authLogic: DefaultAuthBusinessLogic;
@@ -57,17 +57,17 @@ describe('DefaultAuthBusinessLogic', () => {
     });
   });
 
-  describe('AddressHelper utility', () => {
+  describe('getAddressType utility', () => {
     it('should detect address types correctly', () => {
       const ethAddress = '0x742d35Cc6634C0532925a3b8D94B94748e23d9C4';
-      const type = AddressHelper.getAddressType(ethAddress);
-      
+      const type = getAddressType(ethAddress);
+
       expect(type).toBeDefined();
     });
 
     it('should return undefined for unknown address formats', () => {
       const unknownAddress = 'unknown-format';
-      const type = AddressHelper.getAddressType(unknownAddress);
+      const type = getAddressType(unknownAddress);
 
       expect(type).toBeUndefined();
     });
@@ -75,7 +75,7 @@ describe('DefaultAuthBusinessLogic', () => {
 
   describe('edge cases', () => {
     it('should handle empty/null inputs', () => {
-      expect(() => AddressHelper.getAddressType('')).not.toThrow();
+      expect(() => getAddressType('')).not.toThrow();
       const result = emailLogic.parseEmailAddress('');
       expect(result).toBeUndefined();
     });
