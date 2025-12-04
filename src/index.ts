@@ -17,7 +17,9 @@ export {
   verifyWallet,
 
   // Points system
-  pointsService,
+  createPointsService,
+  PointsService,
+  type PointsServiceConfig,
 
   // Query management
   queryClient,
@@ -149,6 +151,8 @@ export {
 
   // Referral code management
   ReferralConsumptionHelper,
+  createReferralHelper,
+  type ReferralStorage,
 } from './utils';
 
 // ============================================================================

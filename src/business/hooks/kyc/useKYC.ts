@@ -14,17 +14,35 @@ import {
   type KYCVerificationLevel,
   type Optional,
 } from '@sudobility/types';
+import type { HttpClient } from '@sudobility/di';
 
 interface SignedData {
   signature: string;
   message: string;
 }
 
-interface UseKYCOptions {
+/**
+ * HTTP client interface for KYC operations
+ * @deprecated Use HttpClient from @sudobility/di instead
+ */
+export type KYCHttpClient = HttpClient;
+
+/**
+ * Configuration for useKYC hook
+ */
+export interface UseKYCConfig {
+  /** Wallet address to check KYC status for */
   walletAddress: string | null;
+  /** Chain type (defaults to EVM) */
   chainType?: ChainType;
+  /** Auto-fetch status on mount (defaults to true) */
   autoFetch?: boolean;
+  /** Signed data for authentication */
   signedData?: SignedData | null;
+  /** HTTP client for making API requests */
+  httpClient: HttpClient;
+  /** Base URL for the KYC API */
+  apiBaseUrl: string;
 }
 
 interface UseKYCReturn {
@@ -37,37 +55,19 @@ interface UseKYCReturn {
   refreshStatus: () => Promise<void>;
 }
 
-// Environment variable access - works in both browser and Node.js
-const getAPIBaseURL = (): string => {
-  // Browser environment with Vite
-  if (typeof window !== 'undefined' && (window as any).VITE_INDEXER_API_URL) {
-    return (window as any).VITE_INDEXER_API_URL;
-  }
-  // Process environment variable (Node.js or build time)
-  if (
-    typeof process !== 'undefined' &&
-    process.env &&
-    process.env.VITE_INDEXER_API_URL
-  ) {
-    return process.env.VITE_INDEXER_API_URL;
-  }
-  // Default fallback
-  return 'http://localhost:42069';
-};
-
-const API_BASE_URL = getAPIBaseURL();
-
 /**
  * Custom hook for KYC verification operations
  *
- * @param options - Configuration options
+ * @param config Configuration options
  * @returns KYC state and operations
  *
  * @example
  * ```tsx
  * const { status, loading, initiateKYC } = useKYC({
  *   walletAddress: account.address,
- *   chainType: 'evm',
+ *   chainType: ChainType.EVM,
+ *   httpClient: myHttpClient,
+ *   apiBaseUrl: 'https://api.example.com',
  * });
  *
  * const handleStart = async () => {
@@ -76,13 +76,15 @@ const API_BASE_URL = getAPIBaseURL();
  * };
  * ```
  */
-export function useKYC(options: UseKYCOptions): UseKYCReturn {
+export function useKYC(config: UseKYCConfig): UseKYCReturn {
   const {
     walletAddress,
     chainType = ChainType.EVM,
     autoFetch = true,
     signedData,
-  } = options;
+    httpClient,
+    apiBaseUrl,
+  } = config;
 
   const [status, setStatus] = useState<GetKYCStatusResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -126,10 +128,11 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
 
       const headers = createAuthHeaders();
 
-      const response = await fetch(
-        `${API_BASE_URL}/kyc/status/${walletAddress}`,
-        { headers }
-      );
+      const response = await httpClient.get<{
+        success: boolean;
+        data?: GetKYCStatusResponse;
+        error?: string;
+      }>(`${apiBaseUrl}/kyc/status/${walletAddress}`, headers);
 
       if (response.status === 404) {
         // No KYC application found - this is okay
@@ -143,7 +146,7 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
         return;
       }
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success && data.data) {
         setStatus(data.data);
@@ -158,7 +161,7 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
     } finally {
       setLoading(false);
     }
-  }, [walletAddress, signedData, createAuthHeaders]);
+  }, [walletAddress, signedData, createAuthHeaders, httpClient, apiBaseUrl]);
 
   /**
    * Initiate KYC verification for a specific level
@@ -196,31 +199,22 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
           verificationLevel: level,
         };
 
-        const response = await fetch(
-          `${API_BASE_URL}/kyc/initiate/${walletAddress}`,
-          {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(request),
-          }
-        );
+        const response = await httpClient.post<{
+          success: boolean;
+          data?: InitiateKYCResponse;
+          error?: string;
+        }>(`${apiBaseUrl}/kyc/initiate/${walletAddress}`, request, headers);
 
         if (!response.ok) {
-          // Try to parse JSON error, fallback to text if not JSON
-          let errorMessage = 'Failed to initiate KYC verification';
-          try {
-            const errorData = await response.json();
-            errorMessage = errorData.error || errorMessage;
-          } catch {
-            // Response is not JSON (e.g., 404 HTML page)
-            errorMessage = `KYC service unavailable (${response.status})`;
-          }
+          const errorMessage =
+            response.data?.error ||
+            `KYC service unavailable (${response.status})`;
           setError(errorMessage);
           console.error(errorMessage);
           return undefined;
         }
 
-        const data = await response.json();
+        const data = response.data;
 
         if (!data.success || !data.data) {
           const errorMsg = data.error || 'Failed to initiate KYC verification';
@@ -241,7 +235,15 @@ export function useKYC(options: UseKYCOptions): UseKYCReturn {
         setLoading(false);
       }
     },
-    [walletAddress, chainType, signedData, createAuthHeaders, fetchStatus]
+    [
+      walletAddress,
+      chainType,
+      signedData,
+      createAuthHeaders,
+      fetchStatus,
+      httpClient,
+      apiBaseUrl,
+    ]
   );
 
   // Auto-fetch status on mount and when wallet changes

@@ -85,13 +85,13 @@ export function useMailApp(
     useSelectedAccount(networkClient, indexerBackendUrl, devMode);
 
   // Get authentication for the selected account using username
-  const wildduckUserAuth = useAccountWildduckAuth(
+  const wildduckUserAuth = useAccountWildduckAuth({
     networkClient,
-    selectedAccount?.username,
-    wildduckConfig,
+    username: selectedAccount?.username,
+    config: wildduckConfig,
     storage,
-    devMode
-  );
+    devMode,
+  });
 
   // Wrapper function to convert account object to username for selectAccount
   const setSelectedAccount = useCallback(

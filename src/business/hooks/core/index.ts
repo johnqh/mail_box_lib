@@ -7,7 +7,6 @@ export * from './useDebounce';
 export * from './useAsync';
 export * from './useAsyncOperation';
 export * from './useOptimizedState';
-export * from './useLocalStorage';
 
 // Wallet status hooks
 export * from './useWalletStatus';

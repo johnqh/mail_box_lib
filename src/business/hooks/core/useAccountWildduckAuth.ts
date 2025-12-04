@@ -10,11 +10,11 @@ import {
   WildduckConfig,
   WildduckUserAuth,
 } from '@sudobility/types';
-import type { StorageService } from '@sudobility/di';
+import type { StorageService, URLService } from '@sudobility/di';
 import { useWildduckAuth } from '@sudobility/wildduck_client';
 import { useEffect, useState } from 'react';
 import { useWalletStatus } from './useWalletStatus';
-import { ReferralConsumptionHelper } from '../../../utils/ReferralConsumptionHelper';
+import type { ReferralConsumptionHelper } from '../../../utils/ReferralConsumptionHelper';
 
 /**
  * Cached authentication data per account
@@ -44,25 +44,43 @@ export function clearAccountWildduckAuthCache(): void {
 }
 
 /**
+ * Configuration for useAccountWildduckAuth hook
+ */
+export interface AccountWildduckAuthConfig {
+  /** Network client for API calls */
+  networkClient: NetworkClient;
+  /** Account username to authenticate (can be wallet address or ENS/SNS name) */
+  username: Optional<string>;
+  /** WildDuck configuration */
+  config: WildduckConfig;
+  /** Storage service for caching */
+  storage: StorageService;
+  /** Development mode flag */
+  devMode: boolean;
+  /** Referral helper for consuming referral codes (optional) */
+  referralHelper?: ReferralConsumptionHelper;
+  /** URL service for cleaning up URL parameters (optional) */
+  urlService?: URLService;
+}
+
+/**
  * Hook to manage WildDuck authentication for a specific account
  *
- * @param networkClient Network client for API calls
- * @param username Account username to authenticate (can be wallet address or ENS/SNS name)
- * @param config WildDuck configuration
- * @param storage Storage service for caching
- * @param devMode Development mode flag
+ * @param options Configuration options for the hook
  * @returns WildDuck authentication for the account (undefined if not authenticated yet)
  *
  * @example
  * ```tsx
  * const networkClient = useNetworkClient();
- * const wildduckUserAuth = useAccountWildduckAuth(
+ * const wildduckUserAuth = useAccountWildduckAuth({
  *   networkClient,
- *   '0x123...abc',
+ *   username: '0x123...abc',
  *   config,
  *   storage,
- *   false
- * );
+ *   devMode: false,
+ *   referralHelper: myReferralHelper,
+ *   urlService: myUrlService,
+ * });
  *
  * if (!wildduckUserAuth) {
  *   return <div>Authenticating...</div>;
@@ -72,12 +90,17 @@ export function clearAccountWildduckAuthCache(): void {
  * ```
  */
 export function useAccountWildduckAuth(
-  networkClient: NetworkClient,
-  username: Optional<string>,
-  config: WildduckConfig,
-  storage: StorageService,
-  devMode: boolean
+  options: AccountWildduckAuthConfig
 ): Optional<WildduckUserAuth> {
+  const {
+    networkClient,
+    username,
+    config,
+    storage,
+    devMode,
+    referralHelper,
+    urlService,
+  } = options;
   const { indexerAuth } = useWalletStatus();
   const authHook = useWildduckAuth(networkClient, config, storage, devMode);
   const { authenticate } = authHook;
@@ -107,8 +130,8 @@ export function useAccountWildduckAuth(
     // Check if we already have auth cached
     const cachedAuth = authCache.get(authKey);
 
-    // Skip if already authenticated
-    const hasPendingReferral = ReferralConsumptionHelper.hasPending();
+    // Skip if already authenticated (check referral if helper is provided)
+    const hasPendingReferral = referralHelper?.hasPending() ?? false;
     if (cachedAuth && !hasPendingReferral) {
       // Ensure state matches cache
       if (wildduckUserAuth?.userId !== cachedAuth.auth.userId) {
@@ -127,7 +150,8 @@ export function useAccountWildduckAuth(
 
     (async () => {
       try {
-        const referralCode = ReferralConsumptionHelper.consume();
+        // Consume referral code if helper is provided
+        const referralCode = referralHelper?.consume();
 
         const response = await authenticate({
           username,
@@ -154,16 +178,10 @@ export function useAccountWildduckAuth(
             });
             setWildduckAuth(auth);
 
-            // Clean URL parameter if referral code was consumed
-            if (referralCode) {
+            // Clean URL parameter if referral code was consumed and URL service is provided
+            if (referralCode && urlService) {
               try {
-                const urlParams = new URLSearchParams(window.location.search);
-                urlParams.delete('referral');
-                const newSearch = urlParams.toString();
-                const newUrl = newSearch
-                  ? `${window.location.pathname}?${newSearch}`
-                  : window.location.pathname;
-                window.history.replaceState({}, '', newUrl);
+                urlService.removeQueryParam('referral');
               } catch {
                 // Silently ignore URL parameter cleanup errors
               }
@@ -185,7 +203,7 @@ export function useAccountWildduckAuth(
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [username, indexerAuth, authenticate]);
+  }, [username, indexerAuth, authenticate, referralHelper, urlService]);
 
   return wildduckUserAuth;
 }

@@ -1,12 +1,12 @@
 /**
  * React hook for managing user's selected chain with persistence
- * Persists chain selection across sessions using local storage
+ * Persists chain selection across sessions using storage service
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { type ChainInfo, RpcHelpers } from '@sudobility/configs';
 import { Chain, Optional } from '@sudobility/types';
-import { useLocalStorage } from './useLocalStorage';
+import type { StorageService } from '@sudobility/di';
 
 const STORAGE_KEY = 'selected-chain-choice';
 
@@ -15,6 +15,8 @@ export interface UseSelectedChainParams {
   chainId?: number;
   /** Whether to include test networks */
   isDev: boolean;
+  /** Storage service for persisting chain selection */
+  storage: StorageService;
 }
 
 // Extended ChainInfo with Chain enum value
@@ -61,6 +63,7 @@ export interface UseSelectedChainReturn {
 export function useSelectedChain({
   chainId,
   isDev,
+  storage,
 }: UseSelectedChainParams): UseSelectedChainReturn {
   // Get list of visible chains with Chain enum
   const chains = useMemo<ChainInfoWithEnum[]>(() => {
@@ -69,8 +72,26 @@ export function useSelectedChain({
     return visibleChains as ChainInfoWithEnum[];
   }, [isDev]);
 
-  // Track if this is the first render (for chainId initialization)
-  const [isFirstRender, setIsFirstRender] = useState(true);
+  // State for stored chain value (loaded from storage)
+  const [storedChain, setStoredChainState] = useState<Optional<Chain>>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load stored chain from storage on mount
+  useEffect(() => {
+    const loadStoredChain = async () => {
+      try {
+        const stored = await Promise.resolve(storage.getItem(STORAGE_KEY));
+        if (stored) {
+          setStoredChainState(JSON.parse(stored) as Chain);
+        }
+      } catch (error) {
+        console.error('Error loading stored chain:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadStoredChain();
+  }, [storage]);
 
   // Helper to find a chain in the chains list (assumes targetChain is valid)
   const findChainInList = useCallback(
@@ -112,10 +133,23 @@ export function useSelectedChain({
     return fallback;
   }, [chains, isDev]);
 
-  // Use local storage to persist selection
-  const [storedChain, setStoredChain] = useLocalStorage<Optional<Chain>>(
-    STORAGE_KEY,
-    null
+  // Persist chain to storage
+  const setStoredChain = useCallback(
+    (chain: Optional<Chain>) => {
+      setStoredChainState(chain);
+      try {
+        if (chain) {
+          void Promise.resolve(
+            storage.setItem(STORAGE_KEY, JSON.stringify(chain))
+          );
+        } else {
+          void Promise.resolve(storage.removeItem(STORAGE_KEY));
+        }
+      } catch (error) {
+        console.error('Error saving chain to storage:', error);
+      }
+    },
+    [storage]
   );
 
   // Determine the selected chain
@@ -128,8 +162,8 @@ export function useSelectedChain({
       }
     }
 
-    // Priority 2: On first render only, try to match chainId from wallet
-    if (isFirstRender && chainId) {
+    // Priority 2: On first load only, try to match chainId from wallet
+    if (isLoading && chainId) {
       const chainFromId = findChainByChainId(chainId);
       if (chainFromId) {
         return chainFromId;
@@ -141,24 +175,18 @@ export function useSelectedChain({
   }, [
     storedChain,
     findChainInList,
-    isFirstRender,
+    isLoading,
     chainId,
     findChainByChainId,
     getDefaultChain,
   ]);
 
-  // Persist selected chain on first render
+  // Persist selected chain after initial load if not already stored
   useEffect(() => {
-    if (isFirstRender) {
-      setIsFirstRender(false);
-      // If chain was selected from chainId or default, persist it
-      if (!storedChain) {
-        setStoredChain(selectedChain);
-      }
+    if (!isLoading && !storedChain) {
+      setStoredChain(selectedChain);
     }
-    // Only respond to first render flag changes, not selectedChain changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isFirstRender, storedChain, setStoredChain]);
+  }, [isLoading, storedChain, selectedChain, setStoredChain]);
 
   // Function to update selected chain (with validation)
   const setSelectedChain = useCallback(

@@ -1,6 +1,7 @@
+import type { PersistenceService } from '../../types/services/persistence.interface';
+
 // Platform-specific globals
 declare const crypto: { randomUUID(): string };
-declare const localStorage: Storage;
 
 interface PointsAction {
   id: string;
@@ -52,15 +53,34 @@ interface ClaimablePoints {
   claimCode: string;
 }
 
-class PointsService {
-  private static instance: PointsService;
-  private userPointsCache = new Map<string, UserPoints>();
+/**
+ * Configuration for PointsService
+ */
+interface PointsServiceConfig {
+  /**
+   * Persistence service for storing points data
+   * Must be provided by the consuming application
+   */
+  storage: PersistenceService;
+  /**
+   * Base URL for generating referral links
+   * e.g., 'https://app.example.com'
+   */
+  baseUrl: string;
+}
 
-  public static getInstance(): PointsService {
-    if (!PointsService.instance) {
-      PointsService.instance = new PointsService();
-    }
-    return PointsService.instance;
+class PointsService {
+  private userPointsCache = new Map<string, UserPoints>();
+  private storage: PersistenceService;
+  private baseUrl: string;
+
+  /**
+   * Create a new PointsService instance
+   * @param config Configuration with storage service and base URL
+   */
+  constructor(config: PointsServiceConfig) {
+    this.storage = config.storage;
+    this.baseUrl = config.baseUrl;
   }
 
   // Award points for different actions
@@ -120,13 +140,12 @@ class PointsService {
 
   // Record points action (would be sent to backend in real implementation)
   private async recordPointsAction(action: PointsAction): Promise<void> {
-    // For now, store in localStorage for demo purposes
     const storageKey = `points_${action.walletAddress}`;
-    const existingData = localStorage.getItem(storageKey);
+    const result = await this.storage.retrieve<UserPoints>(storageKey);
 
     let userPoints: UserPoints;
-    if (existingData) {
-      userPoints = JSON.parse(existingData);
+    if (result.data) {
+      userPoints = result.data;
       userPoints.actions.push(action);
       userPoints.totalPoints += action.points;
       userPoints.lastUpdated = new Date();
@@ -139,7 +158,7 @@ class PointsService {
       };
     }
 
-    localStorage.setItem(storageKey, JSON.stringify(userPoints));
+    await this.storage.store(storageKey, userPoints);
   }
 
   // Update local cache
@@ -171,12 +190,12 @@ class PointsService {
       return cached;
     }
 
-    // Load from localStorage (in real implementation, this would be an API call)
+    // Load from storage (in real implementation, this would be an API call)
     const storageKey = `points_${walletAddress}`;
-    const stored = localStorage.getItem(storageKey);
+    const result = await this.storage.retrieve<UserPoints>(storageKey);
 
-    if (stored) {
-      const userPoints = JSON.parse(stored);
+    if (result.data) {
+      const userPoints = result.data;
       // Convert string dates back to Date objects
       userPoints.lastUpdated = new Date(userPoints.lastUpdated);
       userPoints.actions = userPoints.actions.map((action: any) => ({
@@ -201,10 +220,11 @@ class PointsService {
   }
 
   // Generate referral link
-  public generateReferralLink(walletAddress: string): ReferralLink {
+  public async generateReferralLink(
+    walletAddress: string
+  ): Promise<ReferralLink> {
     const referralCode = `${walletAddress.slice(0, 8)}_${Date.now()}`;
-    const baseUrl = window.location.origin;
-    const url = `${baseUrl}?ref=${referralCode}`;
+    const url = `${this.baseUrl}?ref=${referralCode}`;
 
     const referralLink: ReferralLink = {
       walletAddress,
@@ -218,10 +238,10 @@ class PointsService {
 
     // Store referral link (in real implementation, this would be sent to backend)
     const storageKey = `referrals_${walletAddress}`;
-    const existing = localStorage.getItem(storageKey);
-    const referrals = existing ? JSON.parse(existing) : [];
+    const result = await this.storage.retrieve<ReferralLink[]>(storageKey);
+    const referrals = result.data || [];
     referrals.push(referralLink);
-    localStorage.setItem(storageKey, JSON.stringify(referrals));
+    await this.storage.store(storageKey, referrals);
 
     return referralLink;
   }
@@ -250,11 +270,11 @@ class PointsService {
   }
 
   // Generate claimable points (admin function - would be done by backend)
-  public generateClaimablePoints(
+  public async generateClaimablePoints(
     walletAddress: string,
     points: number,
     expirationHours: number = 72
-  ): ClaimablePoints {
+  ): Promise<ClaimablePoints> {
     const expirationDate = new Date();
     expirationDate.setHours(expirationDate.getHours() + expirationHours);
 
@@ -268,10 +288,10 @@ class PointsService {
 
     // Store claimable points
     const storageKey = `claimable_${walletAddress}`;
-    const existing = localStorage.getItem(storageKey);
-    const claimables = existing ? JSON.parse(existing) : [];
+    const result = await this.storage.retrieve<ClaimablePoints[]>(storageKey);
+    const claimables = result.data || [];
     claimables.push(claimablePoints);
-    localStorage.setItem(storageKey, JSON.stringify(claimables));
+    await this.storage.store(storageKey, claimables);
 
     return claimablePoints;
   }
@@ -282,11 +302,11 @@ class PointsService {
     claimCode: string
   ): Promise<boolean> {
     const storageKey = `claimable_${walletAddress}`;
-    const existing = localStorage.getItem(storageKey);
+    const result = await this.storage.retrieve<ClaimablePoints[]>(storageKey);
 
-    if (!existing) return false;
+    if (!result.data) return false;
 
-    const claimables: ClaimablePoints[] = JSON.parse(existing);
+    const claimables: ClaimablePoints[] = result.data;
     const claimableIndex = claimables.findIndex(
       c =>
         c.claimCode === claimCode &&
@@ -309,42 +329,43 @@ class PointsService {
 
     // Update storage
     claimables.splice(claimableIndex, 1, claimable);
-    localStorage.setItem(storageKey, JSON.stringify(claimables));
+    await this.storage.store(storageKey, claimables);
 
     return true;
   }
 
   // Get user's claimable points
-  public getClaimablePoints(walletAddress: string): ClaimablePoints[] {
+  public async getClaimablePoints(
+    walletAddress: string
+  ): Promise<ClaimablePoints[]> {
     const storageKey = `claimable_${walletAddress}`;
-    const existing = localStorage.getItem(storageKey);
+    const result = await this.storage.retrieve<ClaimablePoints[]>(storageKey);
 
-    if (!existing) return [];
+    if (!result.data) return [];
 
-    const claimables: ClaimablePoints[] = JSON.parse(existing);
+    const claimables: ClaimablePoints[] = result.data;
     return claimables.filter(
       c => !c.claimedAt && new Date() < new Date(c.expirationDate)
     );
   }
 
   // Get leaderboard (top point holders)
-  public getLeaderboard(
+  public async getLeaderboard(
     limit: number = 10
-  ): Array<{ walletAddress: string; totalPoints: number }> {
+  ): Promise<Array<{ walletAddress: string; totalPoints: number }>> {
     const leaderboard: Array<{ walletAddress: string; totalPoints: number }> =
       [];
 
     // In a real implementation, this would come from the backend
-    // For now, we'll scan localStorage for all user points
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith('points_')) {
-        const data = localStorage.getItem(key);
-        if (data) {
-          const userPoints: UserPoints = JSON.parse(data);
+    // For now, we'll scan storage for all user points
+    const allKeys = await this.storage.keys();
+    for (const key of allKeys) {
+      if (key.startsWith('points_')) {
+        const result = await this.storage.retrieve<UserPoints>(key);
+        if (result.data) {
           leaderboard.push({
-            walletAddress: userPoints.walletAddress,
-            totalPoints: userPoints.totalPoints,
+            walletAddress: result.data.walletAddress,
+            totalPoints: result.data.totalPoints,
           });
         }
       }
@@ -356,12 +377,29 @@ class PointsService {
   }
 }
 
-// Create singleton instance
-const pointsService = PointsService.getInstance();
+/**
+ * Create a PointsService instance
+ * @param config Configuration with storage service and base URL
+ * @returns A configured PointsService instance
+ *
+ * @example
+ * ```typescript
+ * import { createPointsService } from '@sudobility/lib';
+ *
+ * const pointsService = createPointsService({
+ *   storage: myStorageService, // Platform-specific storage
+ *   baseUrl: 'https://app.example.com',
+ * });
+ * ```
+ */
+function createPointsService(config: PointsServiceConfig): PointsService {
+  return new PointsService(config);
+}
 
 export {
-  pointsService,
+  createPointsService,
   PointsService,
+  type PointsServiceConfig,
   type PointsAction,
   type UserPoints,
   type ReferralLink,
