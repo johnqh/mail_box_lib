@@ -51,7 +51,9 @@
       "Bash(ls:*)",
       "Bash(test -f:*)",
       "Bash(rm:*)",
-      "Bash(for pkg in configs contracts indexer_client types wildduck_client)"
+      "Bash(for pkg in configs contracts indexer_client types wildduck_client)",
+      "Bash(npm update:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

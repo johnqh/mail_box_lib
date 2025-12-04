@@ -1,6 +1,6 @@
 {
   "name": "@sudobility/lib",
-  "version": "3.14.37",
+  "version": "3.14.38",
   "description": "React Native-compatible shared utilities library for blockchain email projects with Optional<T> type safety patterns and comprehensive blockchain integration",
   "type": "module",
   "main": "dist/index.js",
@@ -94,7 +94,7 @@
     "@sudobility/configs": "^0.0.42",
     "@sudobility/contracts": "^1.17.32",
     "@sudobility/di": "^1.5.5",
-    "@sudobility/indexer_client": "^0.0.72",
+    "@sudobility/indexer_client": "^0.0.74",
     "@sudobility/types": "^1.9.31",
     "@sudobility/wildduck_client": "^2.3.23",
     "@tanstack/react-query": "^5.90.11",
@@ -126,16 +126,16 @@
     "vitest": "^4.0.4"
   },
   "peerDependencies": {
-    "@bonfida/spl-name-service": "^3.0.16",
+    "@bonfida/spl-name-service": ">=3.0.0",
     "@sudobility/configs": "^0.0.42",
-    "@sudobility/contracts": "^1.17.28",
-    "@sudobility/di": "^1.4.30",
-    "@sudobility/indexer_client": "^0.0.72",
+    "@sudobility/contracts": "^1.17.32",
+    "@sudobility/di": "^1.5.5",
+    "@sudobility/indexer_client": "^0.0.74",
     "@sudobility/types": "^1.9.31",
-    "@sudobility/wildduck_client": "^2.3.18",
-    "@tanstack/react-query": "^5.90.5",
-    "react": "^19.2.0",
-    "viem": "^2.38.4"
+    "@sudobility/wildduck_client": "^2.3.23",
+    "@tanstack/react-query": ">=5.0.0",
+    "react": ">=18.0.0",
+    "viem": ">=2.0.0"
   },
   "dependencies": {
     "zustand": "^5.0.8"
