@@ -12,20 +12,14 @@ import {
   type InitiateKYCRequest,
   type InitiateKYCResponse,
   type KYCVerificationLevel,
+  type NetworkClient,
   type Optional,
 } from '@sudobility/types';
-import type { HttpClient } from '@sudobility/di';
 
 interface SignedData {
   signature: string;
   message: string;
 }
-
-/**
- * HTTP client interface for KYC operations
- * @deprecated Use HttpClient from @sudobility/di instead
- */
-export type KYCHttpClient = HttpClient;
 
 /**
  * Configuration for useKYC hook
@@ -39,8 +33,8 @@ export interface UseKYCConfig {
   autoFetch?: boolean;
   /** Signed data for authentication */
   signedData?: SignedData | null;
-  /** HTTP client for making API requests */
-  httpClient: HttpClient;
+  /** Network client for making API requests */
+  networkClient: NetworkClient;
   /** Base URL for the KYC API */
   apiBaseUrl: string;
 }
@@ -66,7 +60,7 @@ interface UseKYCReturn {
  * const { status, loading, initiateKYC } = useKYC({
  *   walletAddress: account.address,
  *   chainType: ChainType.EVM,
- *   httpClient: myHttpClient,
+ *   networkClient: myNetworkClient,
  *   apiBaseUrl: 'https://api.example.com',
  * });
  *
@@ -82,7 +76,7 @@ export function useKYC(config: UseKYCConfig): UseKYCReturn {
     chainType = ChainType.EVM,
     autoFetch = true,
     signedData,
-    httpClient,
+    networkClient,
     apiBaseUrl,
   } = config;
 
@@ -128,7 +122,7 @@ export function useKYC(config: UseKYCConfig): UseKYCReturn {
 
       const headers = createAuthHeaders();
 
-      const response = await httpClient.get<{
+      const response = await networkClient.get<{
         success: boolean;
         data?: GetKYCStatusResponse;
         error?: string;
@@ -148,6 +142,11 @@ export function useKYC(config: UseKYCConfig): UseKYCReturn {
 
       const data = response.data;
 
+      if (!data) {
+        setError('No response data received');
+        return;
+      }
+
       if (data.success && data.data) {
         setStatus(data.data);
       } else {
@@ -161,7 +160,7 @@ export function useKYC(config: UseKYCConfig): UseKYCReturn {
     } finally {
       setLoading(false);
     }
-  }, [walletAddress, signedData, createAuthHeaders, httpClient, apiBaseUrl]);
+  }, [walletAddress, signedData, createAuthHeaders, networkClient, apiBaseUrl]);
 
   /**
    * Initiate KYC verification for a specific level
@@ -199,7 +198,7 @@ export function useKYC(config: UseKYCConfig): UseKYCReturn {
           verificationLevel: level,
         };
 
-        const response = await httpClient.post<{
+        const response = await networkClient.post<{
           success: boolean;
           data?: InitiateKYCResponse;
           error?: string;
@@ -215,6 +214,11 @@ export function useKYC(config: UseKYCConfig): UseKYCReturn {
         }
 
         const data = response.data;
+
+        if (!data) {
+          setError('No response data received');
+          return undefined;
+        }
 
         if (!data.success || !data.data) {
           const errorMsg = data.error || 'Failed to initiate KYC verification';
@@ -241,7 +245,7 @@ export function useKYC(config: UseKYCConfig): UseKYCReturn {
       signedData,
       createAuthHeaders,
       fetchStatus,
-      httpClient,
+      networkClient,
       apiBaseUrl,
     ]
   );
