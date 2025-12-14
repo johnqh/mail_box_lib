@@ -12,9 +12,12 @@ import {
 } from '@sudobility/types';
 import type { StorageService, URLService } from '@sudobility/di';
 import { useWildduckAuth } from '@sudobility/wildduck_client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useWalletStatus } from './useWalletStatus';
 import type { ReferralConsumptionHelper } from '../../../utils/ReferralConsumptionHelper';
+
+// Debug: Track hook instances
+let hookInstanceCounter = 0;
 
 /**
  * Cached authentication data per account
@@ -101,9 +104,51 @@ export function useAccountWildduckAuth(
     referralHelper,
     urlService,
   } = options;
+
+  // Debug: Track this hook instance
+  const instanceIdRef = useRef<number | null>(null);
+  if (instanceIdRef.current === null) {
+    instanceIdRef.current = ++hookInstanceCounter;
+    console.log(
+      `🔑 [useAccountWildduckAuth] NEW INSTANCE #${instanceIdRef.current} created for username:`,
+      username
+    );
+  }
+  const instanceId = instanceIdRef.current;
+
   const { indexerAuth } = useWalletStatus();
+
+  // Debug: Track indexerAuth reference changes
+  const prevIndexerAuthRef = useRef<typeof indexerAuth>(null);
+  useEffect(() => {
+    if (prevIndexerAuthRef.current !== indexerAuth) {
+      console.log(
+        `🔑 [useAccountWildduckAuth #${instanceId}] indexerAuth REFERENCE CHANGED:`,
+        {
+          prevSigner: prevIndexerAuthRef.current?.signer?.substring(0, 10),
+          newSigner: indexerAuth?.signer?.substring(0, 10),
+          areSame: prevIndexerAuthRef.current === indexerAuth,
+          prevMsgHash: prevIndexerAuthRef.current?.message?.substring(0, 20),
+          newMsgHash: indexerAuth?.message?.substring(0, 20),
+        }
+      );
+      prevIndexerAuthRef.current = indexerAuth;
+    }
+  });
+
   const authHook = useWildduckAuth(networkClient, config, storage, devMode);
   const { authenticate } = authHook;
+
+  // Debug: Track authenticate function reference changes
+  const prevAuthenticateRef = useRef<typeof authenticate>(null);
+  useEffect(() => {
+    if (prevAuthenticateRef.current !== authenticate) {
+      console.log(
+        `🔑 [useAccountWildduckAuth #${instanceId}] authenticate FUNCTION REFERENCE CHANGED`
+      );
+      prevAuthenticateRef.current = authenticate;
+    }
+  });
 
   // Use React state for the auth - this is cleaner than the cache + counter pattern
   const [wildduckUserAuth, setWildduckAuth] = useState<
@@ -113,12 +158,34 @@ export function useAccountWildduckAuth(
     if (!username || !indexerAuth) return undefined;
     const authKey = `${username.toLowerCase()}:${indexerAuth.signer}`;
     const cached = authCache.get(authKey);
+    console.log(
+      `🔑 [useAccountWildduckAuth #${instanceId}] INITIAL STATE from cache:`,
+      {
+        authKey,
+        hasCached: !!cached,
+      }
+    );
     return cached?.auth;
   });
 
   // Authenticate when username changes
   useEffect(() => {
+    console.log(
+      `🔑 [useAccountWildduckAuth #${instanceId}] EFFECT TRIGGERED:`,
+      {
+        username,
+        hasIndexerAuth: !!indexerAuth,
+        indexerAuthSigner: indexerAuth?.signer?.substring(0, 10),
+        indexerAuthMsgPreview: indexerAuth?.message?.substring(0, 20),
+        currentAuthUserId: wildduckUserAuth?.userId,
+        authenticationInProgress,
+      }
+    );
+
     if (!username || !indexerAuth) {
+      console.log(
+        `🔑 [useAccountWildduckAuth #${instanceId}] Missing username or indexerAuth, clearing auth`
+      );
       setWildduckAuth(undefined);
       authenticationInProgress = null;
       return;
@@ -129,12 +196,26 @@ export function useAccountWildduckAuth(
 
     // Check if we already have auth cached
     const cachedAuth = authCache.get(authKey);
+    console.log(`🔑 [useAccountWildduckAuth #${instanceId}] Cache check:`, {
+      authKey,
+      hasCachedAuth: !!cachedAuth,
+      cachedUserId: cachedAuth?.auth?.userId,
+      cacheSize: authCache.size,
+      allCacheKeys: Array.from(authCache.keys()),
+    });
 
     // Skip if already authenticated (check referral if helper is provided)
     const hasPendingReferral = referralHelper?.hasPending() ?? false;
     if (cachedAuth && !hasPendingReferral) {
+      console.log(
+        `🔑 [useAccountWildduckAuth #${instanceId}] Using cached auth, userId:`,
+        cachedAuth.auth.userId
+      );
       // Ensure state matches cache
       if (wildduckUserAuth?.userId !== cachedAuth.auth.userId) {
+        console.log(
+          `🔑 [useAccountWildduckAuth #${instanceId}] State mismatch, updating to cached auth`
+        );
         setWildduckAuth(cachedAuth.auth);
       }
       return;
@@ -142,11 +223,18 @@ export function useAccountWildduckAuth(
 
     // Skip if another instance is authenticating
     if (authenticationInProgress === authKey) {
+      console.log(
+        `🔑 [useAccountWildduckAuth #${instanceId}] Authentication already in progress for ${authKey}, SKIPPING`
+      );
       return;
     }
 
     // Mark as in progress
     authenticationInProgress = authKey;
+    console.log(
+      `🔑 [useAccountWildduckAuth #${instanceId}] 🚀 STARTING WildDuck authenticate call for:`,
+      username
+    );
 
     (async () => {
       try {
@@ -162,6 +250,16 @@ export function useAccountWildduckAuth(
           ...(referralCode && { referralCode }),
         });
 
+        console.log(
+          `🔑 [useAccountWildduckAuth #${instanceId}] ✅ Authenticate RESPONSE:`,
+          {
+            success: response?.success,
+            hasToken: !!response?.token,
+            hasId: !!response?.id,
+            userId: response?.id,
+          }
+        );
+
         if (response && response.success) {
           const token = response.token;
           const userId = response.id;
@@ -176,6 +274,12 @@ export function useAccountWildduckAuth(
               auth,
               username,
             });
+            console.log(
+              `🔑 [useAccountWildduckAuth #${instanceId}] 🎉 Auth SUCCESS, cached for:`,
+              authKey,
+              'userId:',
+              userId
+            );
             setWildduckAuth(auth);
 
             // Clean URL parameter if referral code was consumed and URL service is provided
@@ -195,15 +299,29 @@ export function useAccountWildduckAuth(
           setWildduckAuth(undefined);
         }
       } catch (error) {
-        console.error('❌ useAccountWildduckAuth: Error:', error);
+        console.error(
+          `❌ [useAccountWildduckAuth #${instanceId}] ERROR:`,
+          error
+        );
         authCache.delete(authKey);
         setWildduckAuth(undefined);
       } finally {
+        console.log(
+          `🔑 [useAccountWildduckAuth #${instanceId}] 🏁 Auth attempt FINISHED, clearing inProgress flag`
+        );
         authenticationInProgress = null;
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username, indexerAuth, authenticate, referralHelper, urlService]);
+
+  // Debug: Log on every render
+  console.log(`🔑 [useAccountWildduckAuth #${instanceId}] RENDER:`, {
+    username,
+    hasIndexerAuth: !!indexerAuth,
+    hasWildduckAuth: !!wildduckUserAuth,
+    wildduckUserId: wildduckUserAuth?.userId,
+  });
 
   return wildduckUserAuth;
 }

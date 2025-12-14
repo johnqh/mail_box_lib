@@ -4,7 +4,7 @@
  * Manages account selection and authentication orchestration
  */
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   NetworkClient,
   Optional,
@@ -92,6 +92,33 @@ export function useMailApp(
     storage,
     devMode,
   });
+
+  // Debug logging - log on every render (not just effect)
+  console.log('📧 [useMailApp] RENDER:', {
+    selectedAccount: selectedAccount?.username,
+    accountsCount: accounts.length,
+    hasWildduckAuth: !!wildduckUserAuth,
+    wildduckUserId: wildduckUserAuth?.userId,
+  });
+
+  // Track what changed
+  useEffect(() => {
+    console.log(
+      '📧 [useMailApp] selectedAccount CHANGED to:',
+      selectedAccount?.username
+    );
+  }, [selectedAccount]);
+
+  useEffect(() => {
+    console.log('📧 [useMailApp] accounts CHANGED, count:', accounts.length);
+  }, [accounts]);
+
+  useEffect(() => {
+    console.log(
+      '📧 [useMailApp] wildduckUserAuth CHANGED, userId:',
+      wildduckUserAuth?.userId
+    );
+  }, [wildduckUserAuth]);
 
   // Wrapper function to convert account object to username for selectAccount
   const setSelectedAccount = useCallback(
