@@ -4,7 +4,10 @@
  * Manages account selection and authentication orchestration
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+
+// Debug: Track hook instances
+let mailAppInstanceCounter = 0;
 import {
   NetworkClient,
   Optional,
@@ -80,9 +83,34 @@ export function useMailApp(
   storage: StorageService,
   devMode: boolean = false
 ): UseMailAppReturn {
+  // Debug: Track this hook instance
+  const instanceIdRef = useRef<number | null>(null);
+  if (instanceIdRef.current === null) {
+    instanceIdRef.current = ++mailAppInstanceCounter;
+    console.log(`📧 [useMailApp] NEW INSTANCE #${instanceIdRef.current} created`);
+  }
+  const instanceId = instanceIdRef.current;
+
   // Use useSelectedAccount which handles account selection logic
   const { selectedAccount, selectAccount, accounts, refreshAccounts } =
     useSelectedAccount(networkClient, indexerBackendUrl, devMode);
+
+  // Track selectedAccount reference changes
+  const prevSelectedAccountRef = useRef<typeof selectedAccount>(undefined);
+  useEffect(() => {
+    const prev = prevSelectedAccountRef.current;
+    const curr = selectedAccount;
+    if (prev !== curr) {
+      console.log(`📧 [useMailApp #${instanceId}] selectedAccount REFERENCE CHANGED:`, {
+        prevUsername: prev?.username,
+        currUsername: curr?.username,
+        prevWalletAddress: prev?.walletAddress?.substring(0, 10),
+        currWalletAddress: curr?.walletAddress?.substring(0, 10),
+        areSameObject: prev === curr,
+      });
+      prevSelectedAccountRef.current = curr;
+    }
+  });
 
   // Get authentication for the selected account using username
   const wildduckUserAuth = useAccountWildduckAuth({
@@ -93,10 +121,12 @@ export function useMailApp(
     devMode,
   });
 
-  // Debug logging - log on every render (not just effect)
-  console.log('📧 [useMailApp] RENDER:', {
+  // Debug logging - log on every render
+  console.log(`📧 [useMailApp #${instanceId}] RENDER:`, {
     selectedAccount: selectedAccount?.username,
+    selectedAccountWallet: selectedAccount?.walletAddress?.substring(0, 10),
     accountsCount: accounts.length,
+    accountsList: accounts.map(a => a.username),
     hasWildduckAuth: !!wildduckUserAuth,
     wildduckUserId: wildduckUserAuth?.userId,
   });
@@ -104,21 +134,21 @@ export function useMailApp(
   // Track what changed
   useEffect(() => {
     console.log(
-      '📧 [useMailApp] selectedAccount CHANGED to:',
+      `📧 [useMailApp #${instanceId}] useEffect: selectedAccount CHANGED to:`,
       selectedAccount?.username
     );
-  }, [selectedAccount]);
+  }, [selectedAccount, instanceId]);
 
   useEffect(() => {
-    console.log('📧 [useMailApp] accounts CHANGED, count:', accounts.length);
-  }, [accounts]);
+    console.log(`📧 [useMailApp #${instanceId}] useEffect: accounts CHANGED, count:`, accounts.length, 'list:', accounts.map(a => a.username));
+  }, [accounts, instanceId]);
 
   useEffect(() => {
     console.log(
-      '📧 [useMailApp] wildduckUserAuth CHANGED, userId:',
+      `📧 [useMailApp #${instanceId}] useEffect: wildduckUserAuth CHANGED, userId:`,
       wildduckUserAuth?.userId
     );
-  }, [wildduckUserAuth]);
+  }, [wildduckUserAuth, instanceId]);
 
   // Wrapper function to convert account object to username for selectAccount
   const setSelectedAccount = useCallback(

@@ -5,12 +5,15 @@
  */
 
 import { NetworkClient, Optional } from '@sudobility/types';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   createGlobalState,
   setGlobalState,
 } from '../../../utils/useGlobalState';
 import { useWalletAccounts, WildDuckAccount } from './useWalletAccounts';
+
+// Debug: Track hook instances
+let selectedAccountInstanceCounter = 0;
 
 /**
  * Global selected account state - shared across all components
@@ -76,12 +79,28 @@ export function useSelectedAccount(
   indexerBackendUrl: string,
   devMode: boolean
 ): UseSelectedAccountReturn {
+  // Debug: Track this hook instance
+  const instanceIdRef = useRef<number | null>(null);
+  if (instanceIdRef.current === null) {
+    instanceIdRef.current = ++selectedAccountInstanceCounter;
+    console.log(`👤 [useSelectedAccount] NEW INSTANCE #${instanceIdRef.current} created`);
+  }
+  const instanceId = instanceIdRef.current;
+
   const { accounts: rawAccounts, refresh: refreshAccounts } = useWalletAccounts(
     networkClient,
     indexerBackendUrl,
     devMode
   );
   const [selectedAccount] = useGlobalSelectedAccount();
+
+  // Debug: Log on every render
+  console.log(`👤 [useSelectedAccount #${instanceId}] RENDER:`, {
+    rawAccountsCount: rawAccounts.length,
+    rawAccountsList: rawAccounts.map(a => a.username),
+    selectedAccountUsername: selectedAccount?.username,
+    selectedAccountWallet: selectedAccount?.walletAddress?.substring(0, 10),
+  });
 
   // Stabilize accounts array reference based on content
   // This prevents infinite loops from array reference changes
@@ -94,42 +113,67 @@ export function useSelectedAccount(
     [rawAccounts.length, accountsKey]
   );
 
+  // Track accounts reference changes
+  const prevAccountsRef = useRef<typeof accounts>([]);
+  useEffect(() => {
+    if (prevAccountsRef.current !== accounts) {
+      console.log(`👤 [useSelectedAccount #${instanceId}] accounts REFERENCE CHANGED:`, {
+        prevCount: prevAccountsRef.current.length,
+        currCount: accounts.length,
+        prevList: prevAccountsRef.current.map(a => a.username),
+        currList: accounts.map(a => a.username),
+      });
+      prevAccountsRef.current = accounts;
+    }
+  });
+
   // Manage selected account selection
   // This hook ONLY reacts to changes in the accounts list
   useEffect(() => {
+    console.log(`👤 [useSelectedAccount #${instanceId}] SELECTION EFFECT triggered:`, {
+      accountsCount: accounts.length,
+      selectedAccountUsername: selectedAccount?.username,
+    });
+
     // If no accounts, clear selection to undefined
     if (accounts.length === 0) {
       if (selectedAccount !== undefined) {
+        console.log(`👤 [useSelectedAccount #${instanceId}] No accounts, clearing selection`);
         setGlobalState('selectedAccount', undefined);
       }
       return;
     }
 
-    // Check if current account is still in the list
+    // Check if current account is still in the list (case-insensitive username comparison)
     const currentAccountStillExists = selectedAccount
       ? accounts.some(
           acc =>
-            acc.walletAddress === selectedAccount.walletAddress &&
-            acc.username === selectedAccount.username
+            acc.walletAddress.toLowerCase() === selectedAccount.walletAddress.toLowerCase() &&
+            acc.username.toLowerCase() === selectedAccount.username.toLowerCase()
         )
       : false;
 
+    console.log(`👤 [useSelectedAccount #${instanceId}] currentAccountStillExists:`, currentAccountStillExists);
+
     // If current account is still valid, keep it
     if (currentAccountStillExists) {
+      console.log(`👤 [useSelectedAccount #${instanceId}] Current account still valid, keeping it`);
       return;
     }
 
     // Otherwise, select the first account
+    console.log(`👤 [useSelectedAccount #${instanceId}] Selecting first account:`, accounts[0]?.username);
     setGlobalState('selectedAccount', accounts[0]);
-  }, [accounts, selectedAccount]);
+  }, [accounts, selectedAccount, instanceId]);
 
   /**
-   * Manually select an account by username
+   * Manually select an account by username (case-insensitive)
    * Finds the account in the accounts list and sets it as selected
    */
   const selectAccount = useCallback(
     (username: string) => {
-      const account = accounts.find(acc => acc.username === username);
+      const normalizedUsername = username.toLowerCase();
+      const account = accounts.find(acc => acc.username.toLowerCase() === normalizedUsername);
       if (account) {
         setGlobalState('selectedAccount', account);
       }

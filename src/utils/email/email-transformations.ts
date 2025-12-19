@@ -57,7 +57,7 @@ export function transformWalletAccountsToEmailGroups(
         addressType,
         entitled: true, // Wallet addresses are always entitled
       },
-      // Domain names (ENS/SNS) with their entitled status from the API
+      // Domain names (ENS/SNS) - always entitled (skip backend entitlement check)
       domainEmails: walletAccount.names.map(
         (nameServiceAccount: IndexerNameServiceAccount) => ({
           address: nameServiceAccount.name,
@@ -67,7 +67,7 @@ export function transformWalletAccountsToEmailGroups(
             nameServiceAccount.name,
             addressType ?? undefined
           ),
-          entitled: nameServiceAccount.entitled,
+          entitled: true, // Name service accounts are always entitled
         })
       ),
     };

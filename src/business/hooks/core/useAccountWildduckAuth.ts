@@ -38,12 +38,19 @@ const authCache = new Map<string, CachedAuth>();
 let authenticationInProgress: Optional<string> = null;
 
 /**
+ * Track failed authentication attempts to prevent infinite retries
+ * Maps authKey to failure timestamp
+ */
+const failedAuthAttempts = new Map<string, number>();
+
+/**
  * Clear all authentication cache
  * Call this when disconnecting wallet to ensure clean state
  */
 export function clearAccountWildduckAuthCache(): void {
   authCache.clear();
   authenticationInProgress = null;
+  failedAuthAttempts.clear();
 }
 
 /**
@@ -229,6 +236,15 @@ export function useAccountWildduckAuth(
       return;
     }
 
+    // Skip if authentication has previously failed for this authKey
+    // This prevents infinite retry loops
+    if (failedAuthAttempts.has(authKey)) {
+      console.log(
+        `🔑 [useAccountWildduckAuth #${instanceId}] Authentication previously failed for ${authKey}, NOT RETRYING`
+      );
+      return;
+    }
+
     // Mark as in progress
     authenticationInProgress = authKey;
     console.log(
@@ -291,11 +307,19 @@ export function useAccountWildduckAuth(
               }
             }
           } else {
+            console.log(
+              `🔑 [useAccountWildduckAuth #${instanceId}] ❌ Auth response missing token/userId, marking as failed`
+            );
             authCache.delete(authKey);
+            failedAuthAttempts.set(authKey, Date.now());
             setWildduckAuth(undefined);
           }
         } else {
+          console.log(
+            `🔑 [useAccountWildduckAuth #${instanceId}] ❌ Auth response not successful, marking as failed`
+          );
           authCache.delete(authKey);
+          failedAuthAttempts.set(authKey, Date.now());
           setWildduckAuth(undefined);
         }
       } catch (error) {
@@ -304,6 +328,7 @@ export function useAccountWildduckAuth(
           error
         );
         authCache.delete(authKey);
+        failedAuthAttempts.set(authKey, Date.now());
         setWildduckAuth(undefined);
       } finally {
         console.log(

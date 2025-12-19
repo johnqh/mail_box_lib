@@ -167,18 +167,18 @@ export function useWalletAccounts(
           entitled: true,
         });
 
-        // Add name accounts with their entitlement status from parent wallet
+        // Add name accounts - always entitled (ENS/SNS domains are free to use)
         // parent wallet's walletAddress -> walletAddress
         // parent wallet's chainType -> chainType
         // name -> username
-        // entitled -> entitled
+        // entitled -> true (skip backend entitlement check for name service accounts)
         if (walletAccount.names) {
           for (const nameAccount of walletAccount.names) {
             flattenedAccounts.push({
               walletAddress: walletAccount.walletAddress,
               chainType: walletAccount.chainType,
               username: nameAccount.name,
-              entitled: nameAccount.entitled,
+              entitled: true, // Name service accounts are always entitled
             });
           }
         }
