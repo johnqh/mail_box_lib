@@ -6,7 +6,11 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { ChainType, type NetworkClient, type Optional } from '@sudobility/types';
+import {
+  ChainType,
+  type NetworkClient,
+  type Optional,
+} from '@sudobility/types';
 import {
   type GetKYCStatusResponse,
   type InitiateKYCRequest,

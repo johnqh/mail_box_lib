@@ -83,7 +83,9 @@ export function useMailApp(
   const instanceIdRef = useRef<number | null>(null);
   if (instanceIdRef.current === null) {
     instanceIdRef.current = ++mailAppInstanceCounter;
-    console.log(`📧 [useMailApp] NEW INSTANCE #${instanceIdRef.current} created`);
+    console.log(
+      `📧 [useMailApp] NEW INSTANCE #${instanceIdRef.current} created`
+    );
   }
   const instanceId = instanceIdRef.current;
 
@@ -97,13 +99,16 @@ export function useMailApp(
     const prev = prevSelectedAccountRef.current;
     const curr = selectedAccount;
     if (prev !== curr) {
-      console.log(`📧 [useMailApp #${instanceId}] selectedAccount REFERENCE CHANGED:`, {
-        prevUsername: prev?.username,
-        currUsername: curr?.username,
-        prevWalletAddress: prev?.walletAddress?.substring(0, 10),
-        currWalletAddress: curr?.walletAddress?.substring(0, 10),
-        areSameObject: prev === curr,
-      });
+      console.log(
+        `📧 [useMailApp #${instanceId}] selectedAccount REFERENCE CHANGED:`,
+        {
+          prevUsername: prev?.username,
+          currUsername: curr?.username,
+          prevWalletAddress: prev?.walletAddress?.substring(0, 10),
+          currWalletAddress: curr?.walletAddress?.substring(0, 10),
+          areSameObject: prev === curr,
+        }
+      );
       prevSelectedAccountRef.current = curr;
     }
   });
@@ -136,7 +141,12 @@ export function useMailApp(
   }, [selectedAccount, instanceId]);
 
   useEffect(() => {
-    console.log(`📧 [useMailApp #${instanceId}] useEffect: accounts CHANGED, count:`, accounts.length, 'list:', accounts.map(a => a.username));
+    console.log(
+      `📧 [useMailApp #${instanceId}] useEffect: accounts CHANGED, count:`,
+      accounts.length,
+      'list:',
+      accounts.map(a => a.username)
+    );
   }, [accounts, instanceId]);
 
   useEffect(() => {
