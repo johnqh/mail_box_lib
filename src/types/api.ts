@@ -83,7 +83,7 @@ interface ChainInfo {
 import {
   isWildduckAuthResponse as isWDAuthResponse,
   isWildduckMessage as isWDMessage,
-} from '@sudobility/types';
+} from '@sudobility/mail_box_types';
 
 /**
  * Type guards for runtime type checking

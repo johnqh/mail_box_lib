@@ -11,12 +11,11 @@ import {
   useIndexerPointsLeaderboard,
   useIndexerPointsSiteStats,
 } from '@sudobility/indexer_client';
+import type { NetworkClient, Optional } from '@sudobility/types';
 import type {
   IndexerLeaderboardResponse,
   IndexerSiteStatsResponse,
-  NetworkClient,
-  Optional,
-} from '@sudobility/types';
+} from '@sudobility/mail_box_types';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useWalletStatus } from './useWalletStatus';
 

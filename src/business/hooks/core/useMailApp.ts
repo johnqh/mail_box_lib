@@ -8,12 +8,8 @@ import { useCallback, useEffect, useRef } from 'react';
 
 // Debug: Track hook instances
 let mailAppInstanceCounter = 0;
-import {
-  NetworkClient,
-  Optional,
-  WildduckConfig,
-  WildduckUserAuth,
-} from '@sudobility/types';
+import { NetworkClient, Optional } from '@sudobility/types';
+import { WildduckConfig, WildduckUserAuth } from '@sudobility/mail_box_types';
 import type { StorageService } from '@sudobility/di';
 import { WildDuckAccount } from './useWalletAccounts';
 import { useSelectedAccount } from './useSelectedAccount';

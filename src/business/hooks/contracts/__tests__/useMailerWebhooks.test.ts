@@ -5,7 +5,7 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useMailerWebhooks } from '../useMailerWebhooks';
-import type { IndexerWebhookData } from '@sudobility/types';
+import type { IndexerWebhookData } from '@sudobility/mail_box_types';
 
 // Mock dependencies
 vi.mock('@sudobility/indexer_client', () => ({

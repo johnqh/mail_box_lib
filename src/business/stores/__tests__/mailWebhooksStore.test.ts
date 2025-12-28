@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useMailWebhooksStore } from '../mailWebhooksStore';
-import type { IndexerWebhookData } from '@sudobility/types';
+import type { IndexerWebhookData } from '@sudobility/mail_box_types';
 
 describe('mailWebhooksStore', () => {
   const mockWebhook1: IndexerWebhookData = {

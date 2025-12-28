@@ -5,15 +5,14 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { NetworkClient, Optional } from '@sudobility/types';
 import {
   CreateMailboxRequest,
-  NetworkClient,
-  Optional,
   UpdateMailboxRequest,
   WildduckConfig,
   WildduckMailbox,
   WildduckUserAuth,
-} from '@sudobility/types';
+} from '@sudobility/mail_box_types';
 import {
   useWildduckAddresses,
   useWildduckMailboxes,

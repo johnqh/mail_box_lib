@@ -6,12 +6,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useIndexerMailWebhooks } from '@sudobility/indexer_client';
-import type {
-  IndexerWebhookData,
-  NetworkClient,
-  Optional,
-} from '@sudobility/types';
+import type { NetworkClient, Optional } from '@sudobility/types';
 import { Chain, validateAddress } from '@sudobility/types';
+import type { IndexerWebhookData } from '@sudobility/mail_box_types';
 import {
   type MessageResult,
   OnchainMailerClient,

@@ -4,12 +4,8 @@
  * Observes selectedAccount and returns appropriate auth
  */
 
-import {
-  NetworkClient,
-  Optional,
-  WildduckConfig,
-  WildduckUserAuth,
-} from '@sudobility/types';
+import { NetworkClient, Optional } from '@sudobility/types';
+import { WildduckConfig, WildduckUserAuth } from '@sudobility/mail_box_types';
 import type { StorageService, URLService } from '@sudobility/di';
 import { useWildduckAuth } from '@sudobility/wildduck_client';
 import { useEffect, useRef, useState } from 'react';

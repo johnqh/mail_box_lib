@@ -4,7 +4,7 @@
  */
 
 import { create } from 'zustand';
-import type { IndexerTemplateData } from '@sudobility/types';
+import type { IndexerTemplateData } from '@sudobility/mail_box_types';
 
 /**
  * Mail templates cache entry

@@ -6,15 +6,13 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { ChainType, type NetworkClient, type Optional } from '@sudobility/types';
 import {
-  ChainType,
   type GetKYCStatusResponse,
   type InitiateKYCRequest,
   type InitiateKYCResponse,
   type KYCVerificationLevel,
-  type NetworkClient,
-  type Optional,
-} from '@sudobility/types';
+} from '@sudobility/mail_box_types';
 
 interface SignedData {
   signature: string;

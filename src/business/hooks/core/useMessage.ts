@@ -4,12 +4,8 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  NetworkClient,
-  Optional,
-  WildduckConfig,
-  WildduckUserAuth,
-} from '@sudobility/types';
+import { NetworkClient, Optional } from '@sudobility/types';
+import { WildduckConfig, WildduckUserAuth } from '@sudobility/mail_box_types';
 import { useWildduckMessages } from '@sudobility/wildduck_client';
 import {
   createGlobalState,

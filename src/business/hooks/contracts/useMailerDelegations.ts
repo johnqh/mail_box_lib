@@ -18,12 +18,8 @@ import {
   useIndexerGetDelegatedFrom,
   useIndexerGetDelegatedTo,
 } from '@sudobility/indexer_client';
-import {
-  Chain,
-  type IndexerDelegateData,
-  NetworkClient,
-  Optional,
-} from '@sudobility/types';
+import { Chain, NetworkClient, Optional } from '@sudobility/types';
+import type { IndexerDelegateData } from '@sudobility/mail_box_types';
 import { type ChainInfo, RpcHelpers } from '@sudobility/configs';
 
 /**

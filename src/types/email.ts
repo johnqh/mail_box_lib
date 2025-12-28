@@ -1,4 +1,5 @@
-import { ChainType, IndexerWalletAccount, Optional } from '@sudobility/types';
+import { ChainType, Optional } from '@sudobility/types';
+import { IndexerWalletAccount } from '@sudobility/mail_box_types';
 
 export interface EmailAddress {
   id: string;

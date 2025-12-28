@@ -5,15 +5,14 @@
  */
 
 import { useMemo } from 'react';
+import { NetworkClient, Optional } from '@sudobility/types';
 import {
   CreateMailboxRequest,
   MailboxSpecialUse,
-  NetworkClient,
-  Optional,
   WildduckMailbox,
   WildduckUpdateMailboxRequest,
   WildduckUserAuth,
-} from '@sudobility/types';
+} from '@sudobility/mail_box_types';
 import {
   useAccountMailboxes,
   UseAccountMailboxesOptions,

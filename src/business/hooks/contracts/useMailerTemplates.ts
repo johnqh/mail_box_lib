@@ -6,14 +6,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useIndexerMailTemplates } from '@sudobility/indexer_client';
+import type { NetworkClient, Optional } from '@sudobility/types';
+import { Chain, validateAddress } from '@sudobility/types';
 import type {
   IndexerTemplateCreateRequest,
   IndexerTemplateData,
   IndexerTemplateUpdateRequest,
-  NetworkClient,
-  Optional,
-} from '@sudobility/types';
-import { Chain, validateAddress } from '@sudobility/types';
+} from '@sudobility/mail_box_types';
 import {
   type MessageResult,
   OnchainMailerClient,

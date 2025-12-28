@@ -4,7 +4,7 @@
  */
 
 import { create } from 'zustand';
-import { WildduckMailbox } from '@sudobility/types';
+import { WildduckMailbox } from '@sudobility/mail_box_types';
 
 /**
  * Mailbox cache entry

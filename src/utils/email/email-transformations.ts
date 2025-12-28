@@ -7,9 +7,9 @@ import {
   AddressType,
   ChainType,
   getAddressType,
-  IndexerNameServiceAccount,
   Optional,
 } from '@sudobility/types';
+import { IndexerNameServiceAccount } from '@sudobility/mail_box_types';
 import { WildDuckAccount } from '../../business/hooks/core/useWalletAccounts';
 
 // Local transformation type for email utilities

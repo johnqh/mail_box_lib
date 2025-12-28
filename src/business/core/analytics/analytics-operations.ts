@@ -7,10 +7,10 @@ import {
   AnalyticsEvent,
   ChainType,
   EmailAction,
-  EmailFolder,
   SubscriptionAction,
   WalletType,
 } from '@sudobility/types';
+import { EmailFolder } from '@sudobility/mail_box_types';
 
 interface AnalyticsEventData {
   name: AnalyticsEvent | string;

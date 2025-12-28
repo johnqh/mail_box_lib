@@ -14,12 +14,8 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  NetworkClient,
-  Optional,
-  WildduckConfig,
-  WildduckUserAuth,
-} from '@sudobility/types';
+import { NetworkClient, Optional } from '@sudobility/types';
+import { WildduckConfig, WildduckUserAuth } from '@sudobility/mail_box_types';
 import { useWildduckSearch } from '@sudobility/wildduck_client';
 import { useMailboxMessages } from './useMailboxMessages';
 import { Message, messageFromListItem } from '../../types/message';

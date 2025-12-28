@@ -4,7 +4,7 @@
  */
 
 import { create } from 'zustand';
-import type { IndexerWebhookData } from '@sudobility/types';
+import type { IndexerWebhookData } from '@sudobility/mail_box_types';
 
 /**
  * Mail webhooks cache entry
