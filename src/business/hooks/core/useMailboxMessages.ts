@@ -159,12 +159,20 @@ export function useMailboxMessages(
   const selectMailbox = useCallback(
     (mailboxId: string) => {
       setGlobalState('selectedMailboxId', mailboxId);
-      // Reset pagination state when selecting a new mailbox
-      setMessages([]);
+      // Check for cached messages for the new mailbox
+      const cached = wildduckUserAuth
+        ? getCachedMessages(wildduckUserAuth.userId, mailboxId)
+        : undefined;
+      // Use cached messages if available, otherwise clear
+      if (cached?.messages && cached.messages.length > 0) {
+        setMessages(cached.messages);
+      } else {
+        setMessages([]);
+      }
       setError(null);
       messagesHook.resetMessages();
     },
-    [messagesHook]
+    [messagesHook, wildduckUserAuth, getCachedMessages]
   );
 
   // Load initial messages for the selected mailbox
@@ -223,12 +231,19 @@ export function useMailboxMessages(
   // Load initial messages when mailbox or auth changes
   useEffect(() => {
     if (wildduckUserAuth && selectedMailboxId) {
-      setMessages([]);
+      // Check for cached messages for immediate display
+      const cached = getCachedMessages(wildduckUserAuth.userId, selectedMailboxId);
+      if (cached?.messages && cached.messages.length > 0) {
+        setMessages(cached.messages);
+      } else {
+        setMessages([]);
+      }
+      // Always load fresh messages in the background
       loadInitialMessages();
     } else {
       setMessages([]);
     }
-    // loadInitialMessages is intentionally omitted from dependencies to prevent infinite loop
+    // loadInitialMessages and getCachedMessages are intentionally omitted from dependencies to prevent infinite loop
     // We only want to trigger when wildduckUserAuth or selectedMailboxId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wildduckUserAuth, selectedMailboxId]);
