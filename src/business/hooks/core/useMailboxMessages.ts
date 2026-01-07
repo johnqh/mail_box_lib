@@ -232,7 +232,10 @@ export function useMailboxMessages(
   useEffect(() => {
     if (wildduckUserAuth && selectedMailboxId) {
       // Check for cached messages for immediate display
-      const cached = getCachedMessages(wildduckUserAuth.userId, selectedMailboxId);
+      const cached = getCachedMessages(
+        wildduckUserAuth.userId,
+        selectedMailboxId
+      );
       if (cached?.messages && cached.messages.length > 0) {
         setMessages(cached.messages);
       } else {
