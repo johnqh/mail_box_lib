@@ -6,7 +6,7 @@
  *
  * @example Web Usage
  * ```tsx
- * import { NetworkProvider, useNetwork } from '@sudobility/lib';
+ * import { NetworkProvider, useNetwork } from '@sudobility/mail_box_lib';
  * import { WebNetworkService } from './di/web/web-network.service';
  *
  * const networkService = new WebNetworkService();
@@ -32,7 +32,7 @@
  *
  * @example React Native Usage
  * ```tsx
- * import { NetworkProvider, useNetwork } from '@sudobility/lib';
+ * import { NetworkProvider, useNetwork } from '@sudobility/mail_box_lib';
  * import { ReactNativeNetworkService } from './di/native/network.service';
  *
  * const networkService = new ReactNativeNetworkService();

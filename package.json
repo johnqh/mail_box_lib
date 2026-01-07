@@ -1,6 +1,6 @@
 {
-  "name": "@sudobility/lib",
-  "version": "3.14.50",
+  "name": "@sudobility/mail_box_lib",
+  "version": "3.14.51",
   "description": "React Native-compatible shared utilities library for blockchain email projects with Optional<T> type safety patterns and comprehensive blockchain integration",
   "type": "module",
   "main": "dist/index.js",

@@ -308,7 +308,7 @@ export class ENSService {
  *
  * @example
  * ```typescript
- * import { createENSService } from '@sudobility/lib';
+ * import { createENSService } from '@sudobility/mail_box_lib';
  *
  * const ensService = createENSService({
  *   mainnetRpcUrl: 'https://eth.llamarpc.com',

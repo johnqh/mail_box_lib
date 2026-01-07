@@ -1,5 +1,5 @@
 /**
- * @sudobility/lib - Shared utilities and common functions for blockchain email projects
+ * @sudobility/mail_box_lib - Shared utilities and common functions for blockchain email projects
  *
  * This file exports only the symbols that are actively used by consumer projects.
  * Unused exports have been removed to reduce bundle size and improve tree-shaking.

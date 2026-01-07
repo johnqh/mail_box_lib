@@ -1,7 +1,7 @@
 # AI-Assisted Development Guide
 
 **Version: 3.6.9**
-**Package: @sudobility/lib**
+**Package: @sudobility/mail_box_lib**
 
 This guide provides AI assistants with essential context and patterns for working on this React Native-compatible shared utilities library.
 

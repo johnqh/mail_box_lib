@@ -93,7 +93,7 @@ export class ReferralConsumptionHelper {
  *
  * @example
  * ```typescript
- * import { createReferralHelper } from '@sudobility/lib';
+ * import { createReferralHelper } from '@sudobility/mail_box_lib';
  *
  * // For web
  * const referralHelper = createReferralHelper(localStorage);

@@ -65,7 +65,7 @@ function createBusinessLogicServicesSync() {
  * // In your React Native app
  * import {
  *   NavigationStateManager
- * } from '@sudobility/lib';
+ * } from '@sudobility/mail_box_lib';
  *
  * const navManager = new NavigationStateManager();
  *

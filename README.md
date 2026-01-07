@@ -1,4 +1,4 @@
-# @sudobility/lib
+# @sudobility/mail_box_lib
 
 **Version: 3.6.9**
 
@@ -7,7 +7,7 @@ React Native-compatible shared utilities library for blockchain email projects w
 ## Installation
 
 ```bash
-npm install @sudobility/lib
+npm install @sudobility/mail_box_lib
 ```
 
 ## Features
@@ -50,7 +50,7 @@ import {
   useAccountMailboxes,
   useMessages,
   Optional
-} from '@sudobility/lib';
+} from '@sudobility/mail_box_lib';
 
 // Wallet management
 const { walletAddress, isConnected, connectWallet } = useWalletStatus();
@@ -78,7 +78,7 @@ const { messages, loadMore } = useMessages({
 ### Type Safety with Optional<T>
 
 ```typescript
-import { Optional } from '@sudobility/lib';
+import { Optional } from '@sudobility/mail_box_lib';
 
 // Always use Optional<T> for nullable values
 const user: Optional<User> = getUser();
@@ -97,7 +97,7 @@ import {
   WalletDetector,
   useContractConfig,
   useMailerClaims
-} from '@sudobility/lib';
+} from '@sudobility/mail_box_lib';
 
 // Contract interaction
 const { config } = useContractConfig(chainId);

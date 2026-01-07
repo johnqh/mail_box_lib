@@ -1,5 +1,5 @@
 /**
- * Centralized type exports for @sudobility/lib
+ * Centralized type exports for @sudobility/mail_box_lib
  * All interfaces and types are consolidated here
  */
 

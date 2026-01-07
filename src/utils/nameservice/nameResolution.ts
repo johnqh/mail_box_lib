@@ -278,7 +278,7 @@ export class NameResolutionService {
  *
  * @example
  * ```typescript
- * import { createNameResolutionService } from '@sudobility/lib';
+ * import { createNameResolutionService } from '@sudobility/mail_box_lib';
  *
  * const nameService = createNameResolutionService({
  *   ens: {

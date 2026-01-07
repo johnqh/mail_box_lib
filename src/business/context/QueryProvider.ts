@@ -29,7 +29,7 @@ const getGlobalQueryClient = (): QueryClient => {
  *
  * Usage:
  * ```tsx
- * import { QueryClientProvider, getQueryClient } from '@sudobility/lib';
+ * import { QueryClientProvider, getQueryClient } from '@sudobility/mail_box_lib';
  *
  * function App() {
  *   return (

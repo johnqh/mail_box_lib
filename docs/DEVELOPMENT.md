@@ -401,7 +401,7 @@ npm test
 ```
 
 ### Publishing
-The library is published as `@sudobility/lib` and should work in both web and React Native environments.
+The library is published as `@sudobility/mail_box_lib` and should work in both web and React Native environments.
 
 ### Current Version
 **v3.6.9** - Updated @sudobility dependencies with type migration to new package structure

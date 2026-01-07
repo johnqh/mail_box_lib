@@ -384,7 +384,7 @@ class PointsService {
  *
  * @example
  * ```typescript
- * import { createPointsService } from '@sudobility/lib';
+ * import { createPointsService } from '@sudobility/mail_box_lib';
  *
  * const pointsService = createPointsService({
  *   storage: myStorageService, // Platform-specific storage
