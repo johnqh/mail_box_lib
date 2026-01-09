@@ -11,18 +11,30 @@ This document provides context and instructions for AI assistants working on the
 - ✅ ONLY commit/push when user explicitly says "commit" or "push"
 - ✅ ALWAYS wait for user approval before any git operations
 
+## Package Manager
+
+**This project uses Bun as the package manager.** Always use `bun` commands instead of `npm`:
+
+```bash
+# Install dependencies
+bun install
+
+# Run any script
+bun run <script-name>
+```
+
 ## AI Assistant Quick Start
 
 **Before any task, run these checks:**
 ```bash
-npm run check-all  # Ensures build, tests, and lint all pass
+bun run check-all  # Ensures build, tests, and lint all pass
 ```
 
 **Common tasks you might be asked to do:**
 1. Add new service → Start with interface definition in `src/types/services/`
 2. Fix type errors → Check @johnqh/types imports first, use Optional<T> for nullable types
-3. Update dependencies → Use `npm install package@latest`
-4. Debug tests → Run `npm test -- --watch`
+3. Update dependencies → Use `bun add package@latest`
+4. Debug tests → Run `bun test -- --watch`
 5. Find code → Use Glob for files, Grep for content
 
 ## AI Development Optimization
@@ -30,22 +42,22 @@ npm run check-all  # Ensures build, tests, and lint all pass
 ### Quick Command Reference
 ```bash
 # Validation
-npm run check-all       # Run all checks (lint, typecheck, tests)
-npm run validate        # Full validation with quality checks
-npm run quick-check     # Fast validation (no coverage)
+bun run check-all       # Run all checks (lint, typecheck, tests)
+bun run validate        # Full validation with quality checks
+bun run quick-check     # Fast validation (no coverage)
 
 # Development
-npm run build:watch     # Watch mode for building
-npm run test:watch      # Watch tests
-npm run lint:watch      # Watch linting
-npm run typecheck:watch # Watch TypeScript compilation
+bun run build:watch     # Watch mode for building
+bun run test:watch      # Watch tests
+bun run lint:watch      # Watch linting
+bun run typecheck:watch # Watch TypeScript compilation
 
 # Analysis
-npm run analyze:deps    # Check dependency issues
-npm run analyze:health  # Run health analysis
-npm run analyze:types   # Type coverage report
-npm run quality-check   # Full quality analysis
-npm run performance-check # Performance monitoring
+bun run analyze:deps    # Check dependency issues
+bun run analyze:health  # Run health analysis
+bun run analyze:types   # Type coverage report
+bun run quality-check   # Full quality analysis
+bun run performance-check # Performance monitoring
 ```
 
 ### AI-Friendly File Structure
@@ -307,17 +319,17 @@ src/
 Essential commands to know:
 
 ```bash
-npm run build         # TypeScript compilation
-npm run build:watch   # Watch mode compilation
-npm test             # Run all tests
-npm run test:watch   # Watch test mode
-npm run lint         # ESLint checking
-npm run lint:fix     # Auto-fix lint issues
-npm run format       # Format code with Prettier
-npm run typecheck    # Type checking without build
-npm run check-all    # Run lint, typecheck, and tests
-npm run validate     # Full validation with quality checks
-npm run analyze:health # Health analysis
+bun run build         # TypeScript compilation
+bun run build:watch   # Watch mode compilation
+bun test             # Run all tests
+bun run test:watch   # Watch test mode
+bun run lint         # ESLint checking
+bun run lint:fix     # Auto-fix lint issues
+bun run format       # Format code with Prettier
+bun run typecheck    # Type checking without build
+bun run check-all    # Run lint, typecheck, and tests
+bun run validate     # Full validation with quality checks
+bun run analyze:health # Health analysis
 ```
 
 ## AI Code Examples and Troubleshooting
@@ -465,7 +477,7 @@ Remember: This is a foundational library used by multiple projects, so stability
 - [ ] Add React hooks in `src/business/hooks/`
 - [ ] Write comprehensive tests
 - [ ] Update index.ts exports
-- [ ] Run `npm run check-all`
+- [ ] Run `bun run check-all`
 - [ ] Update API documentation if public
 
 #### Fixing a Bug
@@ -485,7 +497,7 @@ Remember: This is a foundational library used by multiple projects, so stability
 - [ ] Maintain test coverage
 - [ ] Check TypeScript types
 - [ ] Update documentation
-- [ ] Run `npm run lint:fix`
+- [ ] Run `bun run lint:fix`
 
 ### Code Search Patterns
 
@@ -599,22 +611,22 @@ const [state, setState] = useState<Optional<Data>>(null);
 **TypeScript Errors:**
 
 ```bash
-npm run typecheck  # Find all type errors
-npm run build      # Full compilation check
+bun run typecheck  # Find all type errors
+bun run build      # Full compilation check
 ```
 
 **Test Failures:**
 
 ```bash
-npm test -- --watch  # Run tests in watch mode
-npm test -- path/to/specific.test.ts  # Run specific test
+bun test -- --watch  # Run tests in watch mode
+bun test -- path/to/specific.test.ts  # Run specific test
 ```
 
 **Lint Issues:**
 
 ```bash
-npm run lint:fix  # Auto-fix most issues
-npm run format    # Format with Prettier
+bun run lint:fix  # Auto-fix most issues
+bun run format    # Format with Prettier
 ```
 
 ## Getting Help
