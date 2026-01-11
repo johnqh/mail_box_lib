@@ -1,6 +1,6 @@
 # Claude Code Assistant Instructions
 
-This document provides context and instructions for AI assistants working on the @johnqh/lib project.
+This document provides comprehensive guidance for AI assistants (Claude Code, GitHub Copilot, Cursor, etc.) working on the `@sudobility/mail_box_lib` project.
 
 ## ⚠️ CRITICAL RULES
 
@@ -32,7 +32,7 @@ bun run check-all  # Ensures build, tests, and lint all pass
 
 **Common tasks you might be asked to do:**
 1. Add new service → Start with interface definition in `src/types/services/`
-2. Fix type errors → Check @johnqh/types imports first, use Optional<T> for nullable types
+2. Fix type errors → Check @sudobility/types imports first, use Optional<T> for nullable types
 3. Update dependencies → Use `bun add package@latest`
 4. Debug tests → Run `bun test -- --watch`
 5. Find code → Use Glob for files, Grep for content
@@ -95,7 +95,7 @@ export { useFeature } from './useFeature';
 #### 🎯 Optional<T> Pattern (REQUIRED)
 ```typescript
 // Always use Optional<T> for nullable/undefined values
-import { Optional } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
 
 // ❌ WRONG: Manual nullable patterns
 function getValue(): string | null | undefined { }
@@ -137,15 +137,20 @@ try {
 
 ## Quick Reference
 
-- **Version**: 3.3.3
-- **Package**: @johnqh/lib
-- **Type**: React Native-compatible shared library
+- **Version**: 3.14.62
+- **Package**: `@sudobility/mail_box_lib`
+- **Type**: React Native-compatible shared library (ES Module)
 - **Primary Use**: Blockchain email projects (web & mobile)
-- **Dependencies**: @johnqh/types (^1.6.2), @johnqh/mail_box_contracts (^1.5.3)
+- **Key Dependencies**:
+  - `@sudobility/types` (^1.9.43) - Shared TypeScript types
+  - `@sudobility/contracts` (^1.17.53) - Smart contract interfaces
+  - `@sudobility/di` (^1.5.17) - Dependency injection
+  - `@sudobility/configs` (^0.0.56) - Configuration
+- **Test Coverage**: 165 tests across 11 test files
 
 ## Project Context
 
-### What is @johnqh/lib?
+### What is @sudobility/mail_box_lib?
 
 A React Native-compatible shared utilities library for blockchain email projects, providing:
 
@@ -165,18 +170,18 @@ A React Native-compatible shared utilities library for blockchain email projects
 5. **Type Safety**: Everything is strictly typed with TypeScript + Optional<T>
 6. **No Direct Platform Imports**: Never import React Native or web-specific modules in business logic
 
-### Recent Updates (v3.3.3)
+### Recent Updates (v3.14.62)
 
-- **@johnqh/types v1.6.2**: Updated to latest types with Optional<T> pattern
-- **Optional<T> Migration**: All nullable types now use Optional<T> from @johnqh/types
+- **@sudobility/types v1.9.43**: Updated to latest types with Optional<T> pattern
+- **Optional<T> Migration**: All nullable types now use Optional<T> from @sudobility/types
 - **Type Consolidation**:
   - `AppAnalyticsEvent` → `AnalyticsEvent`
   - `StandardEmailFolder` → `MailboxType`
   - `WalletConnectionState` → `ConnectionState`
   - `NetworkStatus` → removed (consolidated into `ConnectionState`)
 - **Package Extraction**: WildDuck and Indexer functionality moved to dedicated packages:
-  - WildDuck hooks → `@johnqh/wildduck_client`
-  - Indexer hooks → `@johnqh/indexer_client`
+  - WildDuck hooks → `@sudobility/wildduck_client`
+  - Indexer hooks → `@sudobility/indexer_client`
 - **Enhanced NetworkResponse**: Added BaseResponse fields (success, timestamp)
 - **Improved Type Safety**: Stricter typing with better error handling
 
@@ -184,15 +189,15 @@ A React Native-compatible shared utilities library for blockchain email projects
 
 **REQUIRED PATTERNS:**
 - Use `Optional<T>` instead of `T | undefined | null`
-- Import `Optional` from `@johnqh/types`
+- Import `Optional` from `@sudobility/types`
 - All hook error states should be `Optional<string>`
 - All nullable return types should use `Optional<T>`
 
 **Updated Type Mappings:**
 - `LoginMethod` → Use string literals ('email', 'wallet', 'google', etc.)
-- `AppAnalyticsEvent` → `AnalyticsEvent` (from @johnqh/types)
-- `StandardEmailFolder` → `MailboxType` (from @johnqh/types)
-- `WalletConnectionState` → `ConnectionState` (from @johnqh/types)
+- `AppAnalyticsEvent` → `AnalyticsEvent` (from @sudobility/types)
+- `StandardEmailFolder` → `MailboxType` (from @sudobility/types)
+- `WalletConnectionState` → `ConnectionState` (from @sudobility/types)
 - `ChainType.UNKNOWN` → No longer exists (use null or ConnectionState.UNKNOWN)
 
 ## Architecture Overview
@@ -230,7 +235,7 @@ src/
 1. **Define Interface** (`src/types/services/my-service.interface.ts`)
 
    ```typescript
-   import { Optional } from '@johnqh/types';
+   import { Optional } from '@sudobility/types';
 
    export interface MyService {
      method(param: string): Promise<Result>;
@@ -246,7 +251,7 @@ src/
 2. **Create Business Operations** (`src/business/core/my-service/my-service-operations.ts`)
 
    ```typescript
-   import { Optional } from '@johnqh/types';
+   import { Optional } from '@sudobility/types';
    import { MyService } from '../../../types/services/my-service.interface';
 
    export class MyServiceOperations {
@@ -279,7 +284,7 @@ src/
 
    ```typescript
    import { useState, useCallback } from 'react';
-   import { Optional } from '@johnqh/types';
+   import { Optional } from '@sudobility/types';
    import { MyServiceOperations } from '../../core/my-service/my-service-operations';
    import { createMyService } from '../../../utils/my-service';
 
@@ -340,7 +345,7 @@ bun run analyze:health # Health analysis
 ```typescript
 // File: src/business/hooks/data/useNewFeature.ts
 import { useCallback, useState } from 'react';
-import { Optional } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
 
 export const useNewFeature = (config: FeatureConfig) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -415,7 +420,7 @@ Glob "**/*.test.ts"
 
 #### Type Errors
 1. **Missing Optional<T>**: Always use `Optional<T>` for nullable types
-2. **Unknown type**: Look in @johnqh/types first, then src/types/
+2. **Unknown type**: Look in @sudobility/types first, then src/types/
 3. **NetworkResponse<T> issues**: Ensure BaseResponse fields (success, timestamp)
 
 ```typescript
@@ -438,12 +443,16 @@ const result: Optional<ExpectedType> = response.data;
 
 ## External Dependencies
 
-### Project dependencies
+### Project Dependencies
 
-- `@johnqh/types` (v1.6.2) - Shared TypeScript types and interfaces
+- `@sudobility/types` (v1.9.43) - Shared TypeScript types and interfaces
   - Provides: Optional<T>, AnalyticsEvent, ConnectionState, MailboxType, etc.
   - **CRITICAL**: Always use Optional<T> for nullable types
-- `@johnqh/mail_box_contracts` (v1.5.3) - Smart contract interfaces
+- `@sudobility/contracts` (v1.17.53) - Smart contract interfaces
+- `@sudobility/di` (v1.5.17) - Dependency injection interfaces
+- `@sudobility/configs` (v0.0.56) - Configuration management
+- `@sudobility/wildduck_client` (v2.3.39) - WildDuck email client
+- `@sudobility/indexer_client` (v0.0.89) - Indexer client
 
 ### Key Libraries
 
@@ -523,7 +532,7 @@ Remember: This is a foundational library used by multiple projects, so stability
 
 ```typescript
 // Importing Optional and types (ALWAYS use Optional<T>)
-import { Optional, AnalyticsEvent, ConnectionState } from '@johnqh/types';
+import { Optional, AnalyticsEvent, ConnectionState } from '@sudobility/types';
 
 // Importing interfaces
 import { MyService } from '../../types/services/my-service.interface';
@@ -595,7 +604,7 @@ await waitFor(() => expect(result.current.loading).toBe(false));
 
 ```typescript
 // Import Optional
-import { Optional } from '@johnqh/types';
+import { Optional } from '@sudobility/types';
 
 // Use in interfaces
 interface MyInterface {
