@@ -1,6 +1,6 @@
 {
   "name": "@sudobility/mail_box_lib",
-  "version": "3.14.70",
+  "version": "3.14.71",
   "description": "React Native-compatible shared utilities library for blockchain email projects with Optional<T> type safety patterns and comprehensive blockchain integration",
   "type": "module",
   "main": "dist/index.js",
@@ -92,7 +92,7 @@
     "@bonfida/spl-name-service": "^3.0.16",
     "@solana/web3.js": "^1.98.4",
     "@sudobility/configs": "^0.0.59",
-    "@sudobility/contracts": "^1.17.58",
+    "@sudobility/contracts": "^1.17.59",
     "@sudobility/di": "^1.5.20",
     "@sudobility/indexer_client": "^0.0.95",
     "@sudobility/mail_box_types": "^1.0.6",
@@ -129,7 +129,7 @@
   "peerDependencies": {
     "@bonfida/spl-name-service": ">=3.0.0",
     "@sudobility/configs": "^0.0.59",
-    "@sudobility/contracts": "^1.17.58",
+    "@sudobility/contracts": "^1.17.59",
     "@sudobility/di": "^1.5.20",
     "@sudobility/indexer_client": "^0.0.95",
     "@sudobility/mail_box_types": "^1.0.6",
