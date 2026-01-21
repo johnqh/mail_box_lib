@@ -12,7 +12,6 @@ import {
 } from '../../../utils/useGlobalState';
 import { useWalletAccounts, WildDuckAccount } from './useWalletAccounts';
 
-
 /**
  * Global selected account state - shared across all components
  */
