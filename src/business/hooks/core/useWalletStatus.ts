@@ -294,26 +294,15 @@ export const useWalletStatus = (): UseWalletStatusReturn => {
   // Create indexerAuth object when wallet is verified
   // Signature is already properly formatted (base64 for EVM, base58 for Solana)
   const indexerAuth = useMemo<Optional<IndexerUserAuth>>(() => {
-    console.log('🔐 [useWalletStatus] indexerAuth useMemo RECALCULATING:', {
-      hasMessage: !!status?.message,
-      hasSignature: !!status?.signature,
-      hasWalletAddress: !!status?.walletAddress,
-      walletAddress: status?.walletAddress?.substring(0, 10),
-    });
     if (!status?.message || !status?.signature || !status?.walletAddress) {
       return undefined;
     }
 
-    const auth = {
+    return {
       message: status.message,
       signature: status.signature,
       signer: status.walletAddress,
     };
-    console.log('🔐 [useWalletStatus] indexerAuth CREATED:', {
-      signer: auth.signer?.substring(0, 10),
-      msgPreview: auth.message?.substring(0, 30),
-    });
-    return auth;
   }, [status?.message, status?.signature, status?.walletAddress]);
 
   // Memoize the return object to prevent unnecessary re-renders
