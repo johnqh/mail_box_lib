@@ -12,7 +12,7 @@
         "@sudobility/indexer_client": "^0.0.108",
         "@sudobility/mail_box_types": "^1.0.9",
         "@sudobility/types": "^1.9.50",
-        "@sudobility/wildduck_client": "^2.3.62",
+        "@sudobility/wildduck_client": "^2.3.63",
         "@tanstack/react-query": "^5.90.11",
         "@testing-library/dom": "^10.4.1",
         "@testing-library/jest-dom": "^6.9.1",
@@ -50,7 +50,7 @@
         "@sudobility/indexer_client": "^0.0.108",
         "@sudobility/mail_box_types": "^1.0.9",
         "@sudobility/types": "^1.9.50",
-        "@sudobility/wildduck_client": "^2.3.62",
+        "@sudobility/wildduck_client": "^2.3.63",
         "@tanstack/react-query": ">=5.0.0",
         "react": ">=18.0.0",
         "viem": ">=2.0.0",
@@ -316,7 +316,7 @@
 
     "@sudobility/types": ["@sudobility/types@1.9.50", "", {}, "sha512-SKopIMJqgNVopcz/MNukrm936yKuBJMFcz4uUbQz9XB7cDjyuExoVeyMnvidMKtOLkmJSRdYYV4+M7eG7KN2aw=="],
 
-    "@sudobility/wildduck_client": ["@sudobility/wildduck_client@2.3.62", "", { "peerDependencies": { "@sudobility/di": "^1.5.34", "@sudobility/mail_box_types": "^1.0.9", "@sudobility/types": "^1.9.50", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0" } }, "sha512-IKkwMYm2cRepbfDZhZV1NAO8hhC8u6rg8EHoH8e4p0um7VDvgnzYnwMulchpvuPprcfbvWhRhvRpkHtBVUE2WA=="],
+    "@sudobility/wildduck_client": ["@sudobility/wildduck_client@2.3.63", "", { "peerDependencies": { "@sudobility/di": "^1.5.35", "@sudobility/mail_box_types": "^1.0.9", "@sudobility/types": "^1.9.50", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0" } }, "sha512-Z8h3SPaYwu6Y7tpn67SIDUV3LJ4lBj230ADkKWjtJFx3h59+ATxl0O+1+/eu2ujbOqOXBIRfxYZjG1mzDTUKkA=="],
 
     "@swc/helpers": ["@swc/helpers@0.5.18", "", { "dependencies": { "tslib": "^2.8.0" } }, "sha512-TXTnIcNJQEKwThMMqBXsZ4VGAza6bvN4pa41Rkqoio6QBKMvo+5lexeTMScGCIxtzgQJzElcvIltani+adC5PQ=="],
 
