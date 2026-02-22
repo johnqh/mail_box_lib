@@ -1,363 +1,329 @@
-# Claude Code Assistant Instructions
+# mail_box_lib - AI Development Guide
 
-This document provides comprehensive guidance for AI assistants (Claude Code, GitHub Copilot, Cursor, etc.) working on the `@sudobility/mail_box_lib` project.
+## Overview
 
-## ⚠️ CRITICAL RULES
+`@sudobility/mail_box_lib` is a React Native-compatible shared utilities library for blockchain email projects. It provides platform-agnostic business logic, multi-chain wallet management (Solana and EVM), on-chain mailer contract hooks, name service resolution (ENS/SNS), and Zustand-based state management. The library is designed as a foundational dependency consumed by both web and mobile applications in the 0xMail ecosystem.
 
-**NEVER automatically commit or push changes:**
-- ❌ DO NOT run `git add` without explicit user request
-- ❌ DO NOT run `git commit` without explicit user request
-- ❌ DO NOT run `git push` without explicit user request
-- ✅ ONLY commit/push when user explicitly says "commit" or "push"
-- ✅ ALWAYS wait for user approval before any git operations
-
-## Package Manager
-
-**This project uses Bun as the package manager.** Always use `bun` commands instead of `npm`:
-
-```bash
-# Install dependencies
-bun install
-
-# Run any script
-bun run <script-name>
-```
-
-## AI Assistant Quick Start
-
-**Before any task, run these checks:**
-```bash
-bun run check-all  # Ensures build, tests, and lint all pass
-```
-
-**Common tasks you might be asked to do:**
-1. Add new service → Start with interface definition in `src/types/services/`
-2. Fix type errors → Check @sudobility/types imports first, use Optional<T> for nullable types
-3. Update dependencies → Use `bun add package@latest`
-4. Debug tests → Run `bun test -- --watch`
-5. Find code → Use Glob for files, Grep for content
-
-## AI Development Optimization
-
-### Quick Command Reference
-```bash
-# Validation
-bun run check-all       # Run all checks (lint, typecheck, tests)
-bun run validate        # Full validation with quality checks
-bun run quick-check     # Fast validation (no coverage)
-
-# Development
-bun run build:watch     # Watch mode for building
-bun run test:watch      # Watch tests
-bun run lint:watch      # Watch linting
-bun run typecheck:watch # Watch TypeScript compilation
-
-# Analysis
-bun run analyze:deps    # Check dependency issues
-bun run analyze:health  # Run health analysis
-bun run analyze:types   # Type coverage report
-bun run quality-check   # Full quality analysis
-bun run performance-check # Performance monitoring
-```
-
-### AI-Friendly File Structure
-```
-src/
-├── business/           # ✅ Core business logic (AI: modify here for features)
-│   ├── hooks/         # React hooks (AI: extend functionality here)
-│   │   ├── contracts/ # Blockchain contract hooks
-│   │   └── core/      # Core utility hooks
-│   └── core/          # Domain operations (AI: business rules here)
-├── network/           # ✅ API clients (AI: update endpoints here)
-│   └── clients/       # API client implementations
-├── types/             # ✅ TypeScript definitions (AI: start here for new features)
-└── utils/             # ✅ Utility functions (AI: helpers and tools)
-```
-
-### Pattern Recognition for AI
-
-#### 🎯 Adding a New Hook Pattern
-```typescript
-// 1. Check if similar hook exists
-Grep -n "use.*Hook" src/business/hooks/
-
-// 2. Use template for consistency
-const useFeature = (config: FeatureConfig) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Optional<string>>(null);
-  // ... implementation
-};
-
-// 3. Export from index
-export { useFeature } from './useFeature';
-```
-
-#### 🎯 Optional<T> Pattern (REQUIRED)
-```typescript
-// Always use Optional<T> for nullable/undefined values
-import { Optional } from '@sudobility/types';
-
-// ❌ WRONG: Manual nullable patterns
-function getValue(): string | null | undefined { }
-const [error, setError] = useState<string | null>(null);
-
-// ✅ RIGHT: Use Optional<T>
-function getValue(): Optional<string> { }
-const [error, setError] = useState<Optional<string>>(null);
-```
-
-#### 🎯 Configuration Pattern
-```typescript
-// Always require configuration from consumer
-interface ServiceConfig {
-  required: string;      // Required fields
-  alsoRequired: string;  // Required fields
-  optional?: string;     // Optional fields
-}
-
-// Never create default configs internally
-// ❌ WRONG: const defaultConfig = { ... }
-// ✅ RIGHT: Accept config as parameter
-```
-
-#### 🎯 Error Handling Pattern
-```typescript
-// Consistent error handling across hooks
-try {
-  const result = await apiCall();
-  return result;
-} catch (err) {
-  const errorMessage = err instanceof Error
-    ? err.message
-    : 'Operation failed';
-  setError(errorMessage);
-  throw err;
-}
-```
-
-## Quick Reference
-
-- **Version**: 3.14.62
 - **Package**: `@sudobility/mail_box_lib`
-- **Type**: React Native-compatible shared library (ES Module)
-- **Primary Use**: Blockchain email projects (web & mobile)
-- **Key Dependencies**:
-  - `@sudobility/types` (^1.9.43) - Shared TypeScript types
-  - `@sudobility/contracts` (^1.17.53) - Smart contract interfaces
-  - `@sudobility/di` (^1.5.17) - Dependency injection
-  - `@sudobility/configs` (^0.0.56) - Configuration
-- **Test Coverage**: 165 tests across 11 test files
+- **Version**: 3.14.93
+- **License**: BUSL-1.1
+- **Package Manager**: Bun
+- **Module Format**: ES Module (`"type": "module"`)
+- **Build Output**: `dist/` (TypeScript compiled)
+- **Node Requirement**: >=18.0.0
 
-## Project Context
-
-### What is @sudobility/mail_box_lib?
-
-A React Native-compatible shared utilities library for blockchain email projects, providing:
-
-- Platform-agnostic business logic
-- Blockchain integration (Solana & EVM)
-- Authentication services (Firebase Auth)
-- AI-powered features (email assistance)
-- UI hooks and utilities
-- Core utility services
-
-### Key Principles
-
-1. **Platform Abstraction**: Code MUST work on both web and React Native
-2. **Interface-First Design**: ALWAYS define interfaces before implementations
-3. **Business Logic Separation**: Pure domain logic separate from platform code
-4. **Comprehensive Testing**: All business logic MUST be tested
-5. **Type Safety**: Everything is strictly typed with TypeScript + Optional<T>
-6. **No Direct Platform Imports**: Never import React Native or web-specific modules in business logic
-
-### Recent Updates (v3.14.62)
-
-- **@sudobility/types v1.9.43**: Updated to latest types with Optional<T> pattern
-- **Optional<T> Migration**: All nullable types now use Optional<T> from @sudobility/types
-- **Type Consolidation**:
-  - `AppAnalyticsEvent` → `AnalyticsEvent`
-  - `StandardEmailFolder` → `MailboxType`
-  - `WalletConnectionState` → `ConnectionState`
-  - `NetworkStatus` → removed (consolidated into `ConnectionState`)
-- **Package Extraction**: WildDuck and Indexer functionality moved to dedicated packages:
-  - WildDuck hooks → `@sudobility/wildduck_client`
-  - Indexer hooks → `@sudobility/indexer_client`
-- **Enhanced NetworkResponse**: Added BaseResponse fields (success, timestamp)
-- **Improved Type Safety**: Stricter typing with better error handling
-
-### Type Migration Notes
-
-**REQUIRED PATTERNS:**
-- Use `Optional<T>` instead of `T | undefined | null`
-- Import `Optional` from `@sudobility/types`
-- All hook error states should be `Optional<string>`
-- All nullable return types should use `Optional<T>`
-
-**Updated Type Mappings:**
-- `LoginMethod` → Use string literals ('email', 'wallet', 'google', etc.)
-- `AppAnalyticsEvent` → `AnalyticsEvent` (from @sudobility/types)
-- `StandardEmailFolder` → `MailboxType` (from @sudobility/types)
-- `WalletConnectionState` → `ConnectionState` (from @sudobility/types)
-- `ChainType.UNKNOWN` → No longer exists (use null or ConnectionState.UNKNOWN)
-
-## Architecture Overview
+## Project Structure
 
 ```
 src/
-├── business/           # Core business logic (platform-agnostic)
-│   ├── core/          # Domain operations
-│   │   ├── analytics/ # Analytics business logic
-│   │   ├── auth/      # Authentication logic
-│   │   ├── navigation/# Navigation state
-│   │   └── wallet/    # Wallet status management
-│   ├── hooks/         # React hooks
-│   │   ├── contracts/ # Blockchain contract hooks
-│   │   └── core/      # Core utility hooks
-│   └── context/       # React contexts
-├── di/                # Dependency injection
-├── network/           # HTTP clients
-│   └── clients/       # API client implementations
-├── storage/           # Storage services
-├── types/             # TypeScript definitions
-│   ├── api.ts         # API response types
-│   └── services/      # Service interfaces
-└── utils/             # Platform-specific implementations
-    ├── async-helpers.ts
-    ├── auth/          # Authentication utilities
-    ├── blockchain/    # Blockchain utilities
-    └── contracts/     # Smart contract utilities
+├── index.ts                          # Root barrel export (curated, tree-shakeable)
+├── business/                         # Core business logic layer
+│   ├── index.ts                      # Re-exports hooks, context, core, points, stores, types
+│   ├── context/                      # React context providers
+│   │   ├── QueryProvider.ts          # TanStack Query global client + QueryClientProvider
+│   │   └── NetworkContext.tsx         # NetworkProvider/useNetwork (DI-based connectivity)
+│   ├── core/                         # Domain operations (pure logic, no UI)
+│   │   ├── analytics/                # Analytics event tracking operations
+│   │   ├── auth/                     # Auth business logic + email address validation
+│   │   ├── navigation/               # Navigation state management
+│   │   ├── query/                    # TanStack Query client config, keys, STALE_TIMES
+│   │   └── wallet/                   # Wallet status management exports
+│   ├── hooks/                        # React hooks (platform-agnostic)
+│   │   ├── contracts/                # Blockchain contract hooks
+│   │   │   ├── useMailerClient.ts    # OnchainMailerClient operations (send, delegate, claim)
+│   │   │   ├── useMailerClaims.ts    # Revenue claiming from mailer contracts
+│   │   │   ├── useMailerContractApproval.ts  # USDC approval for mailer
+│   │   │   ├── useMailerDelegations.ts       # Delegation management
+│   │   │   ├── useMailerPermissions.ts       # Permission management
+│   │   │   ├── useMailerTemplates.ts         # Email template management
+│   │   │   ├── useMailerWebhooks.ts          # Webhook management
+│   │   │   ├── useContractConfig.ts          # Chain config resolution
+│   │   │   └── useWalletDetector.ts          # Multi-chain wallet detection
+│   │   ├── core/                     # Core utility hooks
+│   │   │   ├── useWalletStatus.ts    # Global wallet state (createGlobalState-based)
+│   │   │   ├── useWalletAccounts.ts  # Wallet account list management
+│   │   │   ├── useSelectedAccount.ts # Account selection logic
+│   │   │   ├── useSelectedChain.ts   # Chain selection management
+│   │   │   ├── useMailApp.ts         # Central mail app orchestration hook
+│   │   │   ├── useAccountMailboxes.ts        # Mailbox fetching per account
+│   │   │   ├── useAccountWildduckAuth.ts     # WildDuck auth per account
+│   │   │   ├── useMailboxesAndSettings.ts    # Combined mailboxes + settings
+│   │   │   ├── useMailAccountSettings.ts     # Account settings management
+│   │   │   ├── useMailboxMessages.ts         # Mailbox message list
+│   │   │   ├── useMessages.ts                # Message list hook
+│   │   │   ├── useMessage.ts                 # Single message detail hook
+│   │   │   ├── usePoints.ts                  # Points display hook
+│   │   │   ├── useWalletPoints.ts            # Wallet-specific points
+│   │   │   ├── useReferralCode.ts            # Referral code management
+│   │   │   ├── useReferralShare.ts           # Referral sharing
+│   │   │   ├── useAsync.ts                   # Generic async operation wrapper
+│   │   │   ├── useAsyncOperation.ts          # Typed async operation helper
+│   │   │   ├── useDebounce.ts                # Debounce utility hook
+│   │   │   └── useOptimizedState.ts          # Performance-optimized state
+│   │   ├── kyc/                      # KYC verification hooks
+│   │   │   └── useKYC.ts             # KYC status + initiation via Sumsub
+│   │   └── nameservice/              # Name resolution hooks
+│   │       └── useNameServiceQueries.ts  # ENS/SNS TanStack Query hooks
+│   ├── points/                       # Points/rewards system
+│   │   └── points.service.ts         # PointsService class (referrals, claims, leaderboard)
+│   ├── stores/                       # Zustand stores
+│   │   ├── mailboxStore.ts           # Mailbox cache by userId
+│   │   ├── unifiedMessagesStore.ts   # Message list + detail cache
+│   │   ├── mailTemplatesStore.ts     # Template cache by wallet address
+│   │   └── mailWebhooksStore.ts      # Webhook cache by wallet address
+│   └── types/                        # Business-layer types
+│       └── message.ts                # Unified Message type + transform functions
+├── types/                            # TypeScript type definitions
+│   ├── index.ts                      # Barrel export for types
+│   ├── api.ts                        # API response types, validation, error classes
+│   ├── email.ts                      # User, EmailAddress, WalletUserData
+│   ├── blockchain/                   # Blockchain-specific types
+│   │   └── claimable-rewards.ts
+│   ├── business/                     # UI/business types
+│   │   └── ui.ts                     # DocSection and similar UI types
+│   ├── common/                       # Common utilities
+│   │   └── validated-response.interface.ts
+│   └── services/                     # Service interfaces
+│       └── persistence.interface.ts  # PersistenceService, PersistenceResult
+└── utils/                            # Utility functions and helpers
+    ├── index.ts                      # Barrel export for utils
+    ├── auth/                         # Authentication utilities
+    │   └── blockchainAuth.ts         # SIWE/Solana sign messages, address detection
+    ├── blockchain/                   # Blockchain helpers
+    │   ├── walletCapabilities.ts     # Wallet availability checks
+    │   └── walletDebugger.ts         # Wallet diagnostics logging
+    ├── contracts/                    # Smart contract utilities
+    │   ├── mailService.ts            # Mail contract helper
+    │   └── mailerService.ts          # MailerContract class (viem-based EVM interactions)
+    ├── email/                        # Email transformation utilities
+    │   └── email-transformations.ts  # Wallet-to-email group transformations
+    ├── nameservice/                  # Name resolution
+    │   ├── nameResolution.ts         # NameResolutionService (ENS + SNS)
+    │   ├── ens.ts                    # ENS resolution (viem)
+    │   ├── sns.ts                    # SNS resolution (Bonfida)
+    │   └── testENSResolution.ts      # ENS test helper
+    ├── navigation/                   # Platform-specific navigation
+    │   ├── navigation.web.ts         # Web navigation (window.location)
+    │   └── navigation.reactnative.ts # React Native navigation stubs
+    ├── notification/                 # Notification helpers
+    │   └── notification.ts           # createNotificationHelper
+    ├── useGlobalState.ts             # Provider-free global state (React Native compatible)
+    ├── ReferralConsumptionHelper.ts  # Referral code processing
+    ├── attachment-utils.ts           # File-to-base64 conversion
+    ├── document-helpers.ts           # DOM utility wrappers
+    ├── errorHandling.ts              # Error handling utilities
+    ├── formatters.ts                 # formatWalletAddress, formatFileSize, formatNumber, etc.
+    └── url-params.ts                 # URL search param utilities
 ```
 
-## Common Tasks & Patterns
+## Key Exports
 
-### Adding a New Service (Complete Example)
+### React Hooks - Core
 
-1. **Define Interface** (`src/types/services/my-service.interface.ts`)
+| Hook | Purpose |
+|------|---------|
+| `useWalletStatus` | Global wallet connection/verification state management |
+| `useWalletAccounts` | Fetches wallet accounts from the indexer |
+| `useSelectedAccount` | Account selection with auto-select logic |
+| `useSelectedChain` | Chain selection management |
+| `useMailApp` | Central orchestration: account selection + WildDuck auth |
+| `useAccountMailboxes` | Fetches mailboxes for selected account |
+| `useMailboxesAndSettings` | Combined mailboxes + settings for an account |
+| `useMailAccountSettings` | Account settings management |
+| `useAccountWildduckAuth` | WildDuck authentication per account |
+| `useMessages` / `useMessage` | Message list and detail hooks |
+| `usePoints` / `useWalletPoints` | Points system display |
+| `useReferralCode` | Referral code management |
+| `useKYC` | KYC verification flow (Sumsub integration) |
+| `useDebounce` | Debounce utility |
+| `useAsync` / `useAsyncOperation` | Generic async operation wrappers |
 
-   ```typescript
-   import { Optional } from '@sudobility/types';
+### React Hooks - Blockchain Contracts
 
-   export interface MyService {
-     method(param: string): Promise<Result>;
-   }
+| Hook | Purpose |
+|------|---------|
+| `useMailerClient` | OnchainMailerClient operations (send, delegate, claim revenue) |
+| `useMailerClaims` | Query and claim revenue from mailer contracts |
+| `useMailerContractApproval` | USDC token approval management |
+| `useMailerDelegations` | Delegation management on-chain |
+| `useMailerPermissions` | Permission management on-chain |
+| `useMailerTemplates` | On-chain email template management |
+| `useMailerWebhooks` | Webhook management on-chain |
+| `useWalletDetector` | Multi-chain wallet detection (EVM + Solana) |
+| `useContractConfig` | Chain configuration resolution |
 
-   export interface Result {
-     success: boolean;
-     data?: any;
-     error?: Optional<string>;
-   }
-   ```
+### React Hooks - Name Service
 
-2. **Create Business Operations** (`src/business/core/my-service/my-service-operations.ts`)
+| Hook | Purpose |
+|------|---------|
+| `useENSFromWallet` | Reverse resolve wallet to ENS name |
+| `useWalletFromENS` | Forward resolve ENS name to wallet |
+| `useSNSFromWallet` | Reverse resolve wallet to SNS name |
+| `useWalletFromSNS` | Forward resolve SNS name to wallet |
+| `useNameServiceResolution` | Unified name resolution (ENS + SNS) |
 
-   ```typescript
-   import { Optional } from '@sudobility/types';
-   import { MyService } from '../../../types/services/my-service.interface';
+### Providers and Context
 
-   export class MyServiceOperations {
-     constructor(private myService: MyService) {}
+| Export | Purpose |
+|--------|---------|
+| `QueryClientProvider` / `useQueryClient` | TanStack Query provider (re-exported) |
+| `NetworkProvider` / `useNetwork` | DI-based network connectivity context |
+| `STALE_TIMES` | Pre-configured stale times for different query categories |
 
-     async businessMethod(data: BusinessData): Promise<BusinessResult> {
-       // Pure business logic - NO platform imports!
-       const result = await this.myService.method(data.param);
+### Zustand Stores
 
-       if (!result.success) {
-         throw new MyServiceError(result.error || 'Operation failed');
-       }
+| Store | Purpose |
+|-------|---------|
+| `useMailboxStore` | Caches mailboxes by userId |
+| `useUnifiedMessagesStore` | Caches message lists (by mailbox) and individual messages |
+| `useMailTemplatesStore` | Caches templates by wallet address |
+| `useMailWebhooksStore` | Caches webhooks by wallet address |
 
-       return {
-         processed: true,
-         value: result.data,
-       };
-     }
-   }
+### Utilities
 
-   export class MyServiceError extends Error {
-     constructor(message: string) {
-       super(message);
-       this.name = 'MyServiceError';
-     }
-   }
-   ```
+| Export | Purpose |
+|--------|---------|
+| `connectWallet` / `disconnectWallet` / `verifyWallet` | Wallet lifecycle operations |
+| `createAuthMessage` / `createSIWEMessage` / `createSolanaSignMessage` | Auth message creation |
+| `detectAddressType` / `isValidAddress` / `isValidBlockchainUsername` | Address validation |
+| `resolveNameOrAddress` / `ENSName` / `SNSName` | Name resolution |
+| `formatWalletAddress` / `formatFileSize` / `formatNumber` / `formatPercentage` | Formatters |
+| `createGlobalState` / `getGlobalState` / `setGlobalState` | Provider-free global state |
+| `createNotificationHelper` | Notification utility factory |
+| `createPointsService` / `PointsService` | Points/rewards system |
+| `ReferralConsumptionHelper` / `createReferralHelper` | Referral code management |
+| `convertFileToBase64Attachment` | Attachment encoding |
+| `chainTypeToString` / `flattenEmailGroups` / `transformWalletAccountsToEmailGroups` | Email transforms |
 
-3. **Create React Hook** (`src/business/hooks/data/useMyService.ts`)
+### Type Exports
 
-   ```typescript
-   import { useState, useCallback } from 'react';
-   import { Optional } from '@sudobility/types';
-   import { MyServiceOperations } from '../../core/my-service/my-service-operations';
-   import { createMyService } from '../../../utils/my-service';
-
-   export const useMyService = () => {
-     const [loading, setLoading] = useState(false);
-     const [error, setError] = useState<Optional<string>>(null);
-
-     const operations = new MyServiceOperations(createMyService());
-
-     const executeMethod = useCallback(async (data: BusinessData) => {
-       setLoading(true);
-       setError(null);
-
-       try {
-         const result = await operations.businessMethod(data);
-         return result;
-       } catch (err) {
-         const errorMsg = err instanceof Error ? err.message : 'Unknown error';
-         setError(errorMsg);
-         throw err;
-       } finally {
-         setLoading(false);
-       }
-     }, []);
-
-     return {
-       executeMethod,
-       loading,
-       error,
-       clearError: () => setError(null),
-     };
-   };
-   ```
+| Type | Source |
+|------|--------|
+| `Optional<T>` | `@sudobility/types` (re-used everywhere, not re-exported) |
+| `Message` | `business/types/message.ts` - Unified message type |
+| `User` / `WalletUserData` / `EmailAddress` | `types/email.ts` |
+| `Wallet` / `EVMWallet` / `SolanaWallet` | `@sudobility/contracts` (re-exported) |
+| `PersistenceService` / `PersistenceResult` | `types/services/persistence.interface.ts` |
+| DI types (`AnalyticsClient`, `AppConfig`, `PlatformStorage`, `NotificationService`, etc.) | `@sudobility/di` (re-exported) |
 
 ## Development Commands
 
-Essential commands to know:
-
 ```bash
-bun run build         # TypeScript compilation
-bun run build:watch   # Watch mode compilation
-bun test             # Run all tests
-bun run test:watch   # Watch test mode
-bun run lint         # ESLint checking
-bun run lint:fix     # Auto-fix lint issues
-bun run format       # Format code with Prettier
-bun run typecheck    # Type checking without build
-bun run check-all    # Run lint, typecheck, and tests
-bun run validate     # Full validation with quality checks
-bun run analyze:health # Health analysis
+# Primary validation (run before any PR)
+bun run check-all         # lint + typecheck + test:run
+
+# Building
+bun run build             # TypeScript compilation (tsc -p tsconfig.build.json)
+bun run build:watch       # Watch mode compilation
+bun run clean             # Remove dist/
+
+# Testing (Vitest + happy-dom)
+bun test                  # Run all tests (watch mode by default)
+bun run test:run          # Run all tests once
+bun run test:coverage     # Run tests with V8 coverage
+bun run test:watch        # Explicit watch mode
+
+# Linting & Formatting
+bun run lint              # ESLint check
+bun run lint:fix          # ESLint auto-fix
+bun run format            # Prettier format
+bun run format:check      # Prettier check
+
+# Type checking
+bun run typecheck         # tsc --noEmit
+bun run typecheck:watch   # Watch mode typecheck
+
+# Quick checks
+bun run quick-check       # lint + typecheck (no tests)
+
+# Code generation
+bun run create:hook       # Generate new hook from template
+bun run create:service    # Generate new service from template
+bun run create:type       # Generate new type definition
+bun run create:test       # Generate new test file
+
+# Analysis
+bun run analyze:health    # Health analysis
+bun run analyze:deps      # Dependency check (outdated + audit)
+bun run analyze:size      # Build size check
+bun run quality-check     # Full quality analysis
 ```
 
-## AI Code Examples and Troubleshooting
+## Architecture and Patterns
 
-### 🚀 Quick Start Templates
+### Optional\<T\> Pattern (Mandatory)
 
-#### Creating a New Hook
+All nullable and undefined values must use `Optional<T>` from `@sudobility/types`. This is the single most important type pattern in the codebase.
+
 ```typescript
-// File: src/business/hooks/data/useNewFeature.ts
-import { useCallback, useState } from 'react';
 import { Optional } from '@sudobility/types';
 
-export const useNewFeature = (config: FeatureConfig) => {
+// Correct
+const [error, setError] = useState<Optional<string>>(null);
+function getUser(): Optional<User> { ... }
+
+// Incorrect - never do this
+const [error, setError] = useState<string | null>(null);
+function getUser(): User | undefined | null { ... }
+```
+
+### TanStack Query Integration
+
+Server state is managed via TanStack React Query v5. The library provides:
+- A pre-configured `QueryClient` with smart retry logic (no retry on 4xx, exponential backoff) via `createQueryClient()`
+- Pre-defined `STALE_TIMES` constants for different data categories (messages: 30s, mailboxes: 5min, etc.)
+- `QueryClientProvider` re-exported for consumers to wrap their apps
+- Name service hooks use `useQuery` for cached resolution
+
+### Zustand Stores
+
+Client-side caching uses Zustand v5 stores for mailboxes, messages, templates, and webhooks. Stores follow a consistent pattern:
+- Cache keyed by userId or walletAddress
+- `cachedAt` timestamps on all entries
+- `set`/`get`/`clear`/`clearAll` operations
+- The `unifiedMessagesStore` automatically cross-populates individual message cache from list responses
+
+### Global State (Provider-Free)
+
+`createGlobalState` in `utils/useGlobalState.ts` provides module-level shared state without React Context providers. This is critical for React Native compatibility. Used for wallet status and other singleton states.
+
+```typescript
+const useGlobalWalletStatus = createGlobalState<Optional<WalletStatus>>('walletStatus', undefined);
+```
+
+### Multi-Chain Architecture
+
+The library supports both EVM (Ethereum, etc.) and Solana chains:
+- `ChainType` enum from `@sudobility/types` distinguishes chain families
+- `OnchainMailerClient` from `@sudobility/contracts` is chain-agnostic (wallet + chainInfo per operation)
+- Authentication messages differ per chain (SIWE for EVM, custom format for Solana)
+- Signature encoding differs per chain (base64 for EVM, base58 for Solana)
+- Name resolution supports ENS (.eth, .box) and SNS (.sol)
+
+### Dependency Injection
+
+Platform-specific services are injected via interfaces from `@sudobility/di`:
+- `PlatformNetwork` for `NetworkProvider`
+- `StorageService` for persistence
+- `AnalyticsClient` for analytics
+- `NotificationService` for notifications
+
+This ensures business logic remains platform-agnostic.
+
+### Hook Pattern
+
+All hooks follow a consistent structure:
+
+```typescript
+export const useFeature = (config: FeatureConfig) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Optional<string>>(null);
 
-  const fetchData = useCallback(async (param: string) => {
+  const action = useCallback(async (...args) => {
     setIsLoading(true);
     setError(null);
-
     try {
-      // Implementation logic
-      const result = await performOperation(param);
+      const result = await performOperation(...args);
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Operation failed';
@@ -368,292 +334,104 @@ export const useNewFeature = (config: FeatureConfig) => {
     }
   }, [config]);
 
-  return { fetchData, isLoading, error, clearError: () => setError(null) };
+  return { action, isLoading, error, clearError: () => setError(null) };
 };
 ```
 
-### 🎯 Common Patterns Recognition
+### Unified Message Type
 
-#### Configuration Extraction Pattern
-```typescript
-// BEFORE (Internal config ❌)
-const useService = () => {
-  const client = new APIClient('https://hardcoded-url.com');
-  // ...
-};
+The `Message` type in `business/types/message.ts` merges list-view (`WildduckMessage`) and detail-view (`WildduckMessageDetail`) into a single interface. Transform functions `messageFromListItem()` and `messageFromDetailedResponse()` handle conversion. The `hasDetailedContent` flag distinguishes whether full content is loaded.
 
-// AFTER (Consumer config ✅)
-const useService = (config: ServiceConfig) => {
-  const client = new APIClient(config.apiUrl);
-  // ...
-};
-```
+## Common Tasks
 
-### 🔍 AI Search Commands
+### Adding a New Hook
 
-#### Find Similar Code
-```bash
-# Find all hooks with similar functionality
-Grep -n "use.*" src/business/hooks/
+1. Create the hook file in the appropriate directory:
+   - `src/business/hooks/core/` for general hooks
+   - `src/business/hooks/contracts/` for blockchain contract hooks
+2. Follow the standard hook pattern (loading, error, clearError, useCallback)
+3. Use `Optional<T>` for all nullable state
+4. Export from the directory's `index.ts`
+5. Add to `src/business/hooks/index.ts` if in a new subdirectory
+6. Add to `src/index.ts` if it should be a public export
+7. Write tests in `__tests__/` directory adjacent to the hook
+8. Run `bun run check-all`
 
-# Find configuration patterns
-Grep -n "Config" src/network/clients/
-Grep -n "interface.*Config" src/
+### Adding a New Zustand Store
 
-# Find error handling patterns
-Grep -n "catch.*err" src/business/hooks/
-```
+1. Create in `src/business/stores/`
+2. Follow the existing pattern: interface for cache entry, interface for state, `create<State>()` call
+3. Include `cachedAt: number` in cache entries
+4. Provide `set`, `get`, `clear`, `clearAll` methods
+5. Export from `src/business/stores/index.ts`
 
-#### Locate Files by Pattern
-```bash
-# Find all hook files
-Glob "**/use*.ts"
+### Adding a Blockchain Operation
 
-# Find all interface definitions
-Glob "**/*.interface.ts"
+1. Contract hooks go in `src/business/hooks/contracts/`
+2. Use `OnchainMailerClient` from `@sudobility/contracts` (stateless API)
+3. Pass `connectedWallet: Wallet` and `chainInfo: ChainInfo` per operation
+4. Use `useMemo(() => new OnchainMailerClient(), [])` for the client instance
+5. Low-level viem contract interactions go in `src/utils/contracts/`
 
-# Find all test files
-Glob "**/*.test.ts"
-```
+### Adding a New Type
 
-### 🛠️ Troubleshooting Guide for AI
+1. Define interface in `src/types/` (or `src/types/services/` for service interfaces)
+2. Use `Optional<T>` for nullable fields
+3. Export from `src/types/index.ts`
+4. If it should be a public export, add to `src/index.ts`
 
-#### Type Errors
-1. **Missing Optional<T>**: Always use `Optional<T>` for nullable types
-2. **Unknown type**: Look in @sudobility/types first, then src/types/
-3. **NetworkResponse<T> issues**: Ensure BaseResponse fields (success, timestamp)
+## Testing
 
-```typescript
-// Type assertion pattern for legacy code
-const result = response.data as ExpectedType;
-
-// Preferred Optional<T> pattern
-const result: Optional<ExpectedType> = response.data;
-```
-
-#### Hook Issues
-1. **Wrong parameter pattern**: Check hook signature and configuration requirements
-2. **Missing config**: Ensure hooks receive required configuration objects
-3. **State not updating**: Verify dependencies in useCallback/useMemo
-
-#### API Client Issues
-1. **Endpoint not found**: Check if endpoint exists in client class
-2. **Authentication fails**: Verify authentication configuration
-3. **CORS issues**: Check if using correct API URL
-
-## External Dependencies
-
-### Project Dependencies
-
-- `@sudobility/types` (v1.9.43) - Shared TypeScript types and interfaces
-  - Provides: Optional<T>, AnalyticsEvent, ConnectionState, MailboxType, etc.
-  - **CRITICAL**: Always use Optional<T> for nullable types
-- `@sudobility/contracts` (v1.17.53) - Smart contract interfaces
-- `@sudobility/di` (v1.5.17) - Dependency injection interfaces
-- `@sudobility/configs` (v0.0.56) - Configuration management
-- `@sudobility/wildduck_client` (v2.3.39) - WildDuck email client
-- `@sudobility/indexer_client` (v0.0.89) - Indexer client
-
-### Key Libraries
-
-- **React/React Native**: UI framework compatibility
-- **Firebase**: Backend services
-- **Blockchain**: @solana/web3.js, viem for crypto operations
-- **Testing**: Vitest, @testing-library/react
-- **Crypto**: @noble/hashes, bs58
-
-## Deployment & CI/CD
-
-### Automated Processes
-
-- **CI Pipeline**: Runs on every push/PR
-- **AI Code Review**: Automated analysis of changes
-- **Security Audits**: Vulnerability scanning
-- **Multi-platform Testing**: Tests on different OS/Node versions
-- **Auto-publishing**: Publishes to npm on version changes
-
-Remember: This is a foundational library used by multiple projects, so stability and backward compatibility are crucial!
-
-# AI Assistant Guidelines
-
-### Task Checklist for Common Operations
-
-#### Adding a New Feature
-
-- [ ] Define TypeScript interfaces first (use Optional<T>)
-- [ ] Implement business logic in `src/business/core/`
-- [ ] Create platform implementations in `src/utils/`
-- [ ] Add React hooks in `src/business/hooks/`
-- [ ] Write comprehensive tests
-- [ ] Update index.ts exports
-- [ ] Run `bun run check-all`
-- [ ] Update API documentation if public
-
-#### Fixing a Bug
-
-- [ ] Locate the bug using search/grep
-- [ ] Check if bug exists in both platforms
-- [ ] Write a failing test first
-- [ ] Fix the implementation
-- [ ] Verify test passes
-- [ ] Check for similar bugs elsewhere
-- [ ] Run full test suite
-
-#### Refactoring Code
-
-- [ ] Ensure interface compatibility
-- [ ] Update all platform implementations
-- [ ] Maintain test coverage
-- [ ] Check TypeScript types
-- [ ] Update documentation
-- [ ] Run `bun run lint:fix`
-
-### Code Search Patterns
+- **Framework**: Vitest with happy-dom environment
+- **Test helpers**: `@testing-library/react` for hook testing (`renderHook`, `act`, `waitFor`)
+- **Mocking**: `vi.mock()` for external packages, `vi.fn()` for function stubs
+- **Coverage thresholds**: 70% global, 80% for `src/business/core/`, 75% for `src/network/clients/`
+- **Test location**: `__tests__/` directories co-located with source files
+- **Setup file**: `src/test/setup.ts`
 
 ```bash
-# Find all interfaces
-**/*.interface.ts
-
-# Find platform-specific implementations
-**/*.web.ts
-**/*.reactnative.ts
-
-# Find business operations
-**/business/core/**/*-operations.ts
-
-# Find React hooks
-**/business/hooks/**/*.ts
-
-# Find tests
-**/__tests__/**/*.test.ts
+bun test                          # Watch mode (default)
+bun run test:run                  # Run once
+bun run test:coverage             # With coverage report
+bun test src/business/hooks/contracts/__tests__/useMailerClaims.test.ts  # Specific file
 ```
 
-### Common Import Patterns
+## Peer Dependencies
 
-```typescript
-// Importing Optional and types (ALWAYS use Optional<T>)
-import { Optional, AnalyticsEvent, ConnectionState } from '@sudobility/types';
+These must be provided by the consuming application:
 
-// Importing interfaces
-import { MyService } from '../../types/services/my-service.interface';
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `react` | >=18.0.0 | React framework |
+| `@tanstack/react-query` | >=5.0.0 | Server state management |
+| `zustand` | >=5.0.0 | Client state management |
+| `viem` | >=2.0.0 | EVM blockchain interactions |
+| `@bonfida/spl-name-service` | >=3.0.0 | Solana name service resolution |
+| `@sudobility/types` | ^1.9.51 | Shared types (Optional\<T\>, ChainType, etc.) |
+| `@sudobility/contracts` | ^1.17.62 | OnchainMailerClient, wallet types |
+| `@sudobility/di` | ^1.5.36 | DI interfaces (storage, network, analytics) |
+| `@sudobility/configs` | ^0.0.63 | Configuration (ChainInfo, RpcHelpers) |
+| `@sudobility/mail_box_types` | ^1.0.10 | WildDuck + indexer type definitions |
+| `@sudobility/wildduck_client` | ^2.3.64 | WildDuck API client |
+| `@sudobility/indexer_client` | ^0.0.109 | Indexer API client |
 
-// Importing from barrel exports
-import { ServiceA, ServiceB } from '../services';
+## Key Dev Dependencies
 
-// Platform-aware imports (use dynamic requires)
-const Service = Platform.OS === 'web'
-  ? require('./service.web').WebService
-  : require('./service.reactnative').ReactNativeService;
-```
+| Package | Purpose |
+|---------|---------|
+| `typescript` | ^5.9.3 - Strict mode enabled |
+| `vitest` | ^4.0.4 - Test framework |
+| `@testing-library/react` | ^16.3.0 - Hook/component testing |
+| `eslint` | ^9.37.0 - Linting |
+| `prettier` | ^3.6.2 - Code formatting |
+| `happy-dom` | ^20.0.0 - DOM environment for tests |
+| `@solana/web3.js` | ^1.98.4 - Solana blockchain SDK |
 
-### API Integration Patterns
+## TypeScript Configuration
 
-Use consistent patterns for API client integration:
-
-```typescript
-// Authenticated endpoint pattern
-async authenticatedCall(authToken: string, data: RequestData) {
-  return this.client.post('/api/endpoint', data, {
-    headers: {
-      'Authorization': `Bearer ${authToken}`,
-      'Content-Type': 'application/json'
-    }
-  });
-}
-
-// Configuration-based clients
-interface ClientConfig {
-  apiUrl: string;
-  apiToken: string;
-  options?: RequestOptions;
-}
-```
-
-### Testing Patterns
-
-```typescript
-// Mock Optional<T> values
-const mockService = {
-  method: vi.fn().mockResolvedValue({ success: true }),
-};
-
-// Test Optional<T> return values
-await expect(promise).resolves.toBe(expected);
-await expect(promise).rejects.toThrow(ErrorType);
-
-// Test hooks with Optional<T>
-const { result } = renderHook(() => useMyHook());
-await waitFor(() => expect(result.current.loading).toBe(false));
-```
-
-### Common Pitfalls to Avoid
-
-- ❌ Don't use `T | undefined | null` - use `Optional<T>`
-- ❌ Don't import React Native modules in business logic
-- ❌ Don't skip interface definitions
-- ❌ Don't forget platform detection in index files
-- ❌ Don't hardcode API endpoints (use config)
-- ❌ Don't ignore TypeScript errors
-- ❌ Don't mix concerns (business/platform/UI)
-- ❌ Don't skip error handling
-- ❌ Don't forget to export from index files
-
-### Quick Fixes for Common Issues
-
-**Optional<T> Usage:**
-
-```typescript
-// Import Optional
-import { Optional } from '@sudobility/types';
-
-// Use in interfaces
-interface MyInterface {
-  data: Optional<string>;
-  error: Optional<Error>;
-}
-
-// Use in functions
-function getValue(): Optional<string> { }
-const [state, setState] = useState<Optional<Data>>(null);
-```
-
-**TypeScript Errors:**
-
-```bash
-bun run typecheck  # Find all type errors
-bun run build      # Full compilation check
-```
-
-**Test Failures:**
-
-```bash
-bun test -- --watch  # Run tests in watch mode
-bun test -- path/to/specific.test.ts  # Run specific test
-```
-
-**Lint Issues:**
-
-```bash
-bun run lint:fix  # Auto-fix most issues
-bun run format    # Format with Prettier
-```
-
-## Getting Help
-
-### Resources
-
-1. **Development Guide**: `docs/DEVELOPMENT.md`
-2. **API Documentation**: `docs/API.md`
-3. **Type Documentation**: `docs/TYPES.md`
-4. **Templates**: `templates/` directory
-5. **Test Examples**: Existing `__tests__` directories
-
-### When Stuck
-
-1. Look at similar existing implementations
-2. Check the templates directory for patterns
-3. Review the type definitions for interfaces
-4. Run the tests to understand expected behavior
-5. Check the development guide for best practices
-
-Remember: Always use `Optional<T>` for nullable types - this is a REQUIRED pattern in this codebase!
+- **Target**: ES2020
+- **Module**: ESNext with bundler resolution
+- **Strict mode**: Fully enabled (all strict flags on)
+- **Extra checks**: `noUnusedLocals`, `noUnusedParameters`, `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`
+- **JSX**: react-jsx
+- **Tests excluded** from compilation (`**/*.test.ts`, `**/*.spec.ts`)
