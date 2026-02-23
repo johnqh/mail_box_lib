@@ -5,11 +5,11 @@
 `@sudobility/mail_box_lib` is a React Native-compatible shared utilities library for blockchain email projects. It provides platform-agnostic business logic, multi-chain wallet management (Solana and EVM), on-chain mailer contract hooks, name service resolution (ENS/SNS), and Zustand-based state management. The library is designed as a foundational dependency consumed by both web and mobile applications in the 0xMail ecosystem.
 
 - **Package**: `@sudobility/mail_box_lib`
-- **Version**: 3.14.93
+- **Version**: 3.14.97
 - **License**: BUSL-1.1
-- **Package Manager**: Bun
+- **Package Manager**: Bun (never npm/yarn/pnpm)
 - **Module Format**: ES Module (`"type": "module"`)
-- **Build Output**: `dist/` (TypeScript compiled)
+- **Build Output**: `dist/` (TypeScript compiled via `tsconfig.build.json`)
 - **Node Requirement**: >=18.0.0
 
 ## Project Structure
@@ -24,10 +24,16 @@ src/
 │   │   └── NetworkContext.tsx         # NetworkProvider/useNetwork (DI-based connectivity)
 │   ├── core/                         # Domain operations (pure logic, no UI)
 │   │   ├── analytics/                # Analytics event tracking operations
+│   │   │   └── analytics-operations.ts  # DefaultAnalyticsOperations class (Firebase, Amplitude, Mixpanel)
 │   │   ├── auth/                     # Auth business logic + email address validation
+│   │   │   └── auth-business-logic.ts   # DefaultAuthBusinessLogic, DefaultEmailAddressBusinessLogic, EmailAddressHelper
 │   │   ├── navigation/               # Navigation state management
+│   │   │   └── navigation-state.ts   # DefaultNavigationOperations, NavigationStateManager
 │   │   ├── query/                    # TanStack Query client config, keys, STALE_TIMES
+│   │   │   ├── query-client.ts       # createQueryClient(), STALE_TIMES constants
+│   │   │   └── query-keys.ts         # queryKeys factory, createQueryKey(), getServiceKeys()
 │   │   └── wallet/                   # Wallet status management exports
+│   │       └── index.ts              # Re-exports from useWalletStatus hook
 │   ├── hooks/                        # React hooks (platform-agnostic)
 │   │   ├── contracts/                # Blockchain contract hooks
 │   │   │   ├── useMailerClient.ts    # OnchainMailerClient operations (send, delegate, claim)
@@ -45,6 +51,7 @@ src/
 │   │   │   ├── useSelectedAccount.ts # Account selection logic
 │   │   │   ├── useSelectedChain.ts   # Chain selection management
 │   │   │   ├── useMailApp.ts         # Central mail app orchestration hook
+│   │   │   ├── useMailAccount.ts     # Mail account management
 │   │   │   ├── useAccountMailboxes.ts        # Mailbox fetching per account
 │   │   │   ├── useAccountWildduckAuth.ts     # WildDuck auth per account
 │   │   │   ├── useMailboxesAndSettings.ts    # Combined mailboxes + settings
@@ -68,9 +75,9 @@ src/
 │   │   └── points.service.ts         # PointsService class (referrals, claims, leaderboard)
 │   ├── stores/                       # Zustand stores
 │   │   ├── mailboxStore.ts           # Mailbox cache by userId
-│   │   ├── unifiedMessagesStore.ts   # Message list + detail cache
-│   │   ├── mailTemplatesStore.ts     # Template cache by wallet address
-│   │   └── mailWebhooksStore.ts      # Webhook cache by wallet address
+│   │   ├── unifiedMessagesStore.ts   # Message list + detail cache (cross-populates on setMessages)
+│   │   ├── mailTemplatesStore.ts     # Template cache by wallet address (lowercase-normalized)
+│   │   └── mailWebhooksStore.ts      # Webhook cache by wallet address (lowercase-normalized)
 │   └── types/                        # Business-layer types
 │       └── message.ts                # Unified Message type + transform functions
 ├── types/                            # TypeScript type definitions
@@ -78,42 +85,43 @@ src/
 │   ├── api.ts                        # API response types, validation, error classes
 │   ├── email.ts                      # User, EmailAddress, WalletUserData
 │   ├── blockchain/                   # Blockchain-specific types
-│   │   └── claimable-rewards.ts
+│   │   └── claimable-rewards.ts      # ClaimableReward, ClaimRewardResult
 │   ├── business/                     # UI/business types
-│   │   └── ui.ts                     # DocSection and similar UI types
+│   │   └── ui.ts                     # DocSection
 │   ├── common/                       # Common utilities
-│   │   └── validated-response.interface.ts
+│   │   └── validated-response.interface.ts  # ApiResponse validator, UserData validator
 │   └── services/                     # Service interfaces
-│       └── persistence.interface.ts  # PersistenceService, PersistenceResult
+│       └── persistence.interface.ts  # PersistenceService, CacheService, DatabaseService, etc.
 └── utils/                            # Utility functions and helpers
     ├── index.ts                      # Barrel export for utils
     ├── auth/                         # Authentication utilities
-    │   └── blockchainAuth.ts         # SIWE/Solana sign messages, address detection
+    │   └── blockchainAuth.ts         # SIWE/Solana sign messages, address detection, signature formatting
     ├── blockchain/                   # Blockchain helpers
-    │   ├── walletCapabilities.ts     # Wallet availability checks
+    │   ├── walletCapabilities.ts     # Wallet availability checks (Phantom, Solflare, MetaMask, etc.)
     │   └── walletDebugger.ts         # Wallet diagnostics logging
     ├── contracts/                    # Smart contract utilities
-    │   ├── mailService.ts            # Mail contract helper
-    │   └── mailerService.ts          # MailerContract class (viem-based EVM interactions)
+    │   ├── mailService.ts            # Re-exports from mailerService
+    │   └── mailerService.ts          # MailerContract class (viem-based EVM interactions, USDC approval)
     ├── email/                        # Email transformation utilities
     │   └── email-transformations.ts  # Wallet-to-email group transformations
     ├── nameservice/                  # Name resolution
-    │   ├── nameResolution.ts         # NameResolutionService (ENS + SNS)
-    │   ├── ens.ts                    # ENS resolution (viem)
-    │   ├── sns.ts                    # SNS resolution (Bonfida)
+    │   ├── nameResolution.ts         # NameResolutionService (ENS + SNS unified resolver)
+    │   ├── ens.ts                    # ENSService (viem-based, subgraph queries, .box support)
+    │   ├── sns.ts                    # SNS resolution (Bonfida dynamic import)
     │   └── testENSResolution.ts      # ENS test helper
     ├── navigation/                   # Platform-specific navigation
-    │   ├── navigation.web.ts         # Web navigation (window.location)
-    │   └── navigation.reactnative.ts # React Native navigation stubs
+    │   ├── navigation.ts            # Platform-agnostic navigation hooks (useNavigation, useLocation, useSearchParams)
+    │   ├── navigation.web.ts         # WebNavigationService (History API)
+    │   └── navigation.reactnative.ts # ReactNativeNavigationService (React Navigation stubs)
     ├── notification/                 # Notification helpers
     │   └── notification.ts           # createNotificationHelper
     ├── useGlobalState.ts             # Provider-free global state (React Native compatible)
-    ├── ReferralConsumptionHelper.ts  # Referral code processing
-    ├── attachment-utils.ts           # File-to-base64 conversion
-    ├── document-helpers.ts           # DOM utility wrappers
-    ├── errorHandling.ts              # Error handling utilities
+    ├── ReferralConsumptionHelper.ts  # Referral code processing (record/consume pattern)
+    ├── attachment-utils.ts           # File-to-base64 conversion (chunked for large files)
+    ├── document-helpers.ts           # DOM utility wrappers (web/RN compatible)
+    ├── errorHandling.ts              # AppError class, retryWithBackoff, withErrorBoundary
     ├── formatters.ts                 # formatWalletAddress, formatFileSize, formatNumber, etc.
-    └── url-params.ts                 # URL search param utilities
+    └── url-params.ts                 # SimpleURLSearchParams, createSearchParams (cross-platform)
 ```
 
 ## Key Exports
@@ -278,10 +286,10 @@ Server state is managed via TanStack React Query v5. The library provides:
 ### Zustand Stores
 
 Client-side caching uses Zustand v5 stores for mailboxes, messages, templates, and webhooks. Stores follow a consistent pattern:
-- Cache keyed by userId or walletAddress
+- Cache keyed by userId or walletAddress (templates/webhooks normalize to lowercase)
 - `cachedAt` timestamps on all entries
 - `set`/`get`/`clear`/`clearAll` operations
-- The `unifiedMessagesStore` automatically cross-populates individual message cache from list responses
+- The `unifiedMessagesStore` automatically cross-populates individual message cache from list responses and updates list caches when a detailed message is set
 
 ### Global State (Provider-Free)
 
@@ -299,6 +307,7 @@ The library supports both EVM (Ethereum, etc.) and Solana chains:
 - Authentication messages differ per chain (SIWE for EVM, custom format for Solana)
 - Signature encoding differs per chain (base64 for EVM, base58 for Solana)
 - Name resolution supports ENS (.eth, .box) and SNS (.sol)
+- Wallet capabilities detection for multi-chain wallets (Phantom, Backpack, Torus)
 
 ### Dependency Injection
 
@@ -307,6 +316,7 @@ Platform-specific services are injected via interfaces from `@sudobility/di`:
 - `StorageService` for persistence
 - `AnalyticsClient` for analytics
 - `NotificationService` for notifications
+- `NavigationService` for platform-agnostic navigation
 
 This ensures business logic remains platform-agnostic.
 
@@ -341,6 +351,18 @@ export const useFeature = (config: FeatureConfig) => {
 ### Unified Message Type
 
 The `Message` type in `business/types/message.ts` merges list-view (`WildduckMessage`) and detail-view (`WildduckMessageDetail`) into a single interface. Transform functions `messageFromListItem()` and `messageFromDetailedResponse()` handle conversion. The `hasDetailedContent` flag distinguishes whether full content is loaded.
+
+### MailerContract (EVM)
+
+The `MailerContract` class in `utils/contracts/mailerService.ts` provides low-level viem-based interaction with the on-chain mailer contract. It handles:
+- Priority and regular email sending (with automatic USDC approval)
+- Recipient and owner share claiming
+- Fee querying and USDC balance checks
+- 90/10 revenue split (recipients get 90% from priority emails)
+
+### Navigation Abstraction
+
+The navigation system provides platform-agnostic hooks (`useNavigation`, `useLocation`, `useSearchParams`) that work identically on web (via History API) and React Native (via React Navigation stubs). Platform detection happens automatically in `navigation.ts`.
 
 ## Common Tasks
 
@@ -407,13 +429,13 @@ These must be provided by the consuming application:
 | `zustand` | >=5.0.0 | Client state management |
 | `viem` | >=2.0.0 | EVM blockchain interactions |
 | `@bonfida/spl-name-service` | >=3.0.0 | Solana name service resolution |
-| `@sudobility/types` | ^1.9.51 | Shared types (Optional\<T\>, ChainType, etc.) |
-| `@sudobility/contracts` | ^1.17.62 | OnchainMailerClient, wallet types |
-| `@sudobility/di` | ^1.5.36 | DI interfaces (storage, network, analytics) |
-| `@sudobility/configs` | ^0.0.63 | Configuration (ChainInfo, RpcHelpers) |
-| `@sudobility/mail_box_types` | ^1.0.10 | WildDuck + indexer type definitions |
-| `@sudobility/wildduck_client` | ^2.3.64 | WildDuck API client |
-| `@sudobility/indexer_client` | ^0.0.109 | Indexer API client |
+| `@sudobility/types` | ^1.9.53 | Shared types (Optional\<T\>, ChainType, etc.) |
+| `@sudobility/contracts` | ^1.17.66 | OnchainMailerClient, wallet types |
+| `@sudobility/di` | ^1.5.38 | DI interfaces (storage, network, analytics) |
+| `@sudobility/configs` | ^0.0.65 | Configuration (ChainInfo, RpcHelpers) |
+| `@sudobility/mail_box_types` | ^1.0.12 | WildDuck + indexer type definitions |
+| `@sudobility/wildduck_client` | ^2.3.68 | WildDuck API client |
+| `@sudobility/indexer_client` | ^0.0.112 | Indexer API client |
 
 ## Key Dev Dependencies
 
@@ -434,4 +456,16 @@ These must be provided by the consuming application:
 - **Strict mode**: Fully enabled (all strict flags on)
 - **Extra checks**: `noUnusedLocals`, `noUnusedParameters`, `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`
 - **JSX**: react-jsx
+- **Build config** (`tsconfig.build.json`): Relaxes `noUnusedLocals`, `noUnusedParameters`, `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess` for build compatibility
 - **Tests excluded** from compilation (`**/*.test.ts`, `**/*.spec.ts`)
+
+## ESLint Configuration
+
+- Flat config format (`eslint.config.js`)
+- TypeScript parser with project-aware rules
+- React hooks plugin (`exhaustive-deps: warn`)
+- Prettier integration (`prettier/prettier: error`)
+- `@typescript-eslint/no-explicit-any: off`
+- Unused vars allowed with `_` prefix
+- Sort imports enabled (ignoreCase, ignoreDeclarationSort)
+- Test files have relaxed rules (no-explicit-any off)
