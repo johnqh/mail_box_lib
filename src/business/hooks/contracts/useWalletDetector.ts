@@ -1,6 +1,12 @@
 /**
- * React hook for WalletDetector operations
- * Provides utilities for detecting and validating wallet types and addresses
+ * @fileoverview React hook for multi-chain wallet detection and address validation.
+ *
+ * Provides utilities to detect whether an address belongs to EVM (Ethereum-compatible)
+ * or Solana chains, validate addresses, and retrieve structured wallet information.
+ *
+ * Detection is based on address format:
+ * - EVM: `0x` prefix + 40 hex characters
+ * - Solana: base58 encoded, 32-44 characters, no `0x` prefix
  */
 
 import { useCallback, useState } from 'react';
@@ -29,7 +35,26 @@ interface UseWalletDetectorReturn {
 }
 
 /**
- * Hook for wallet detection and validation operations
+ * Hook for detecting wallet chain types and validating blockchain addresses.
+ *
+ * All detection operations are synchronous regex-based checks wrapped in async
+ * interfaces for consistency with the hook pattern. No network calls are made.
+ *
+ * @returns UseWalletDetectorReturn with detection/validation functions and state
+ *
+ * @example
+ * ```typescript
+ * const { detectWalletType, isEVMAddress, getWalletInfo } = useWalletDetector();
+ *
+ * if (isEVMAddress('0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7')) {
+ *   console.log('This is an Ethereum address');
+ * }
+ *
+ * const info = await getWalletInfo(userInput);
+ * if (info) {
+ *   console.log(`Chain: ${info.chainType}, Valid: ${info.isValid}`);
+ * }
+ * ```
  */
 export const useWalletDetector = (): UseWalletDetectorReturn => {
   const [isLoading, setIsLoading] = useState(false);

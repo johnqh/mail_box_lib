@@ -1,6 +1,16 @@
 /**
- * React hook for managing contract configurations
- * Provides utilities for setting up chain configs for UnifiedMailBoxClient
+ * @fileoverview React hook for managing multi-chain contract configurations.
+ *
+ * Provides state management and preset builders for configuring EVM and Solana
+ * chain parameters (RPC endpoints, contract addresses, program IDs) needed by
+ * the UnifiedMailBoxClient.
+ *
+ * @example
+ * ```typescript
+ * const { setEVMConfig, getMainnetEVMConfig, isConfigValid } = useContractConfig();
+ * setEVMConfig(getMainnetEVMConfig({ mailer: '0xYourContract' }));
+ * console.log('Valid:', isConfigValid()); // true
+ * ```
  */
 
 import { useCallback, useState } from 'react';
@@ -37,7 +47,13 @@ interface UseContractConfigReturn {
 }
 
 /**
- * Hook for managing contract configurations for different chains
+ * Hook for managing contract configurations for EVM and Solana chains.
+ *
+ * Provides state for the current chain configuration, setter functions for
+ * individual chain configs, preset builders for common networks (mainnet EVM,
+ * devnet Solana), and validation utilities.
+ *
+ * @returns UseContractConfigReturn with config state, setters, presets, and validators
  */
 export const useContractConfig = (): UseContractConfigReturn => {
   const [config, setConfig] = useState<ChainConfig | null>(null);

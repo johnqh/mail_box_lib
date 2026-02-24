@@ -1,13 +1,39 @@
+/**
+ * @fileoverview Performance-optimized state management hooks.
+ *
+ * Provides specialized hooks that reduce unnecessary React re-renders:
+ * - `useOptimizedState` - Only triggers re-render when value actually changes
+ * - `useBatchedState` - Batches multiple state updates into one render
+ * - `useDebouncedState` - Dual value/debouncedValue for high-frequency inputs
+ * - `useArrayState` - Array state with built-in add/remove/toggle operations
+ * - `useMapState` - Map state with built-in set/delete/update operations
+ * - `usePrevious` - Tracks the previous value for comparison
+ * - `useChangedValues` - Detects which object keys changed between renders
+ */
+
 import { useCallback, useMemo, useRef, useState } from 'react';
 
 // Platform-specific timer type
 type NodeJSTimeout = ReturnType<typeof setTimeout>;
 
 /**
- * Optimized state management hooks to reduce re-renders
+ * Optimized useState that only triggers re-renders when the value actually changes.
+ *
+ * Uses reference equality (or a custom comparator) to skip state updates
+ * when the new value is identical to the current value.
+ *
+ * @typeParam T - The state value type
+ * @param initialValue - Initial state value
+ * @param isEqual - Optional custom equality function (defaults to `===`)
+ * @returns Tuple of [value, setValue] where setValue skips no-op updates
+ *
+ * @example
+ * ```typescript
+ * const [count, setCount] = useOptimizedState(0);
+ * setCount(0); // No re-render since value hasn't changed
+ * setCount(1); // Re-renders
+ * ```
  */
-
-// Optimized useState that only triggers re-renders when value actually changes
 const useOptimizedState = <T>(
   initialValue: T,
   isEqual?: (a: T, b: T) => boolean

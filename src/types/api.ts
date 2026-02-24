@@ -125,33 +125,57 @@ const validateWalletAddress = (address: string, type: ChainType): boolean => {
 };
 
 /**
- * Error types for API operations
+ * Error types for API operations.
+ *
+ * These classes form a unified error hierarchy rooted at `AppError`:
+ * - `ApiError` extends `AppError` for all API-related errors
+ * - `AuthenticationError` extends `ApiError` for 401 errors
+ * - `ValidationError` extends `ApiError` for 400 validation errors
+ *
+ * This hierarchy allows consumers to use `isAppError()` from `errorHandling.ts`
+ * to catch all structured errors, or `instanceof ApiError` for API-specific ones.
  */
-class ApiError extends Error {
-  constructor(
-    message: string,
-    public statusCode?: number,
-    public response?: any
-  ) {
-    super(message);
+import { AppError } from '../utils/errorHandling';
+
+class ApiError extends AppError {
+  /** Raw response data from the failed request, if available */
+  response?: any;
+
+  /**
+   * @param message - Human-readable error message
+   * @param statusCode - HTTP status code (default: 500)
+   * @param response - Raw response data for debugging
+   */
+  constructor(message: string, statusCode?: number, response?: any) {
+    super(message, 'API_ERROR', statusCode);
     this.name = 'ApiError';
+    this.response = response;
   }
 }
 
+/**
+ * Error thrown when an API request fails due to authentication issues (HTTP 401).
+ */
 class AuthenticationError extends ApiError {
   constructor(message: string = 'Authentication failed') {
     super(message, 401);
     this.name = 'AuthenticationError';
+    this.code = 'AUTHENTICATION_ERROR';
   }
 }
 
+/**
+ * Error thrown when an API request fails due to validation issues (HTTP 400).
+ */
 class ValidationError extends ApiError {
-  constructor(
-    message: string = 'Validation failed',
-    public field?: string
-  ) {
+  /** The specific field that failed validation, if applicable */
+  field?: string | undefined;
+
+  constructor(message: string = 'Validation failed', field?: string) {
     super(message, 400);
     this.name = 'ValidationError';
+    this.code = 'VALIDATION_ERROR';
+    this.field = field;
   }
 }
 

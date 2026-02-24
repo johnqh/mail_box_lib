@@ -1,9 +1,18 @@
-import { Optional } from '@sudobility/types';
 /**
- * TanStack Query hooks for Name Service resolution (ENS/SNS)
+ * @fileoverview TanStack Query hooks for Name Service resolution (ENS and SNS).
  *
- * These hooks replace custom caching logic with TanStack Query's optimized caching.
+ * Provides reactive, cached name resolution between wallet addresses and domain names:
+ * - `useENSFromWallet` - Reverse resolve Ethereum address to ENS name
+ * - `useWalletFromENS` - Forward resolve ENS domain to wallet address
+ * - `useSNSFromWallet` - Reverse resolve Solana address to SNS name
+ * - `useWalletFromSNS` - Forward resolve SNS domain to wallet address
+ * - `useNameServiceResolution` - Auto-detecting unified resolver (ENS or SNS)
+ *
+ * All hooks use TanStack Query with `STALE_TIMES.NAME_SERVICE_RESOLUTION`
+ * for automatic caching, deduplication, and background refetching.
  */
+
+import { Optional } from '@sudobility/types';
 
 import {
   useQuery,
@@ -36,7 +45,22 @@ interface WalletResolutionResponse {
 }
 
 /**
- * Hook to resolve ENS name from wallet address
+ * Reverse resolves an Ethereum wallet address to its primary ENS name.
+ *
+ * Only enabled when the input is a valid Ethereum address (starts with `0x`).
+ * Returns the primary ENS name or null if none is set.
+ *
+ * @param walletAddress - The Ethereum address to resolve
+ * @param options - Additional TanStack Query options
+ * @returns UseQueryResult containing ENSResolutionResponse with ensName
+ *
+ * @example
+ * ```typescript
+ * const { data } = useENSFromWallet('0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7');
+ * if (data?.success && data.ensName) {
+ *   console.log(`ENS name: ${data.ensName}`);
+ * }
+ * ```
  */
 const useENSFromWallet = (
   walletAddress: string,
@@ -69,7 +93,21 @@ const useENSFromWallet = (
 };
 
 /**
- * Hook to resolve wallet address from ENS name
+ * Forward resolves an ENS domain name to its associated Ethereum wallet address.
+ *
+ * Only enabled when the input contains a dot (e.g., `vitalik.eth`, `example.box`).
+ *
+ * @param ensName - The ENS domain name to resolve
+ * @param options - Additional TanStack Query options
+ * @returns UseQueryResult containing WalletResolutionResponse with walletAddress
+ *
+ * @example
+ * ```typescript
+ * const { data } = useWalletFromENS('vitalik.eth');
+ * if (data?.success && data.walletAddress) {
+ *   console.log(`Wallet: ${data.walletAddress}`);
+ * }
+ * ```
  */
 const useWalletFromENS = (
   ensName: string,
@@ -104,7 +142,21 @@ const useWalletFromENS = (
 };
 
 /**
- * Hook to resolve SNS name from wallet address
+ * Reverse resolves a Solana wallet address to its primary SNS (Bonfida) name.
+ *
+ * Only enabled when the input is a non-Ethereum address (does not start with `0x`).
+ *
+ * @param walletAddress - The Solana address to resolve
+ * @param options - Additional TanStack Query options
+ * @returns UseQueryResult containing SNSResolutionResponse with snsName
+ *
+ * @example
+ * ```typescript
+ * const { data } = useSNSFromWallet('Crf8hzfthWGbGbLTVCiqRqV5MVnbpHB1L9KQMd6gsinb');
+ * if (data?.success && data.snsName) {
+ *   console.log(`SNS name: ${data.snsName}`);
+ * }
+ * ```
  */
 const useSNSFromWallet = (
   walletAddress: string,
@@ -137,7 +189,21 @@ const useSNSFromWallet = (
 };
 
 /**
- * Hook to resolve wallet address from SNS name
+ * Forward resolves an SNS (Bonfida) domain name to its associated Solana wallet address.
+ *
+ * Only enabled when the input contains a dot (e.g., `bonfida.sol`).
+ *
+ * @param snsName - The SNS domain name to resolve
+ * @param options - Additional TanStack Query options
+ * @returns UseQueryResult containing WalletResolutionResponse with walletAddress
+ *
+ * @example
+ * ```typescript
+ * const { data } = useWalletFromSNS('bonfida.sol');
+ * if (data?.success && data.walletAddress) {
+ *   console.log(`Wallet: ${data.walletAddress}`);
+ * }
+ * ```
  */
 const useWalletFromSNS = (
   snsName: string,
@@ -171,7 +237,24 @@ const useWalletFromSNS = (
 };
 
 /**
- * Generic hook to resolve name service (auto-detects ENS or SNS)
+ * Auto-detecting unified name service resolver.
+ *
+ * Determines the appropriate resolution strategy based on the input:
+ * - Ethereum address (starts with `0x`) -> ENS reverse resolution
+ * - Solana address (base58, no `0x` prefix) -> SNS reverse resolution
+ * - Domain name (contains `.`) -> SNS forward resolution, then ENS fallback
+ *
+ * @param input - A wallet address or domain name to resolve
+ * @param options - Additional TanStack Query options
+ * @returns UseQueryResult containing either ENSResolutionResponse or SNSResolutionResponse
+ *
+ * @example
+ * ```typescript
+ * const { data } = useNameServiceResolution(userInput);
+ * if (data?.success) {
+ *   // data contains either ensName or snsName depending on input type
+ * }
+ * ```
  */
 const useNameServiceResolution = (
   input: string,
