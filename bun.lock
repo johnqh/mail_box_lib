@@ -8,7 +8,7 @@
         "@bonfida/spl-name-service": "^3.0.16",
         "@solana/web3.js": "^1.98.4",
         "@sudobility/configs": "^0.0.70",
-        "@sudobility/contracts": "^1.17.71",
+        "@sudobility/contracts": "^1.17.72",
         "@sudobility/di": "^1.5.48",
         "@sudobility/indexer_client": "^0.0.122",
         "@sudobility/mail_box_types": "^1.0.18",
@@ -46,7 +46,7 @@
       "peerDependencies": {
         "@bonfida/spl-name-service": ">=3.0.0",
         "@sudobility/configs": "^0.0.70",
-        "@sudobility/contracts": "^1.17.71",
+        "@sudobility/contracts": "^1.17.72",
         "@sudobility/di": "^1.5.48",
         "@sudobility/indexer_client": "^0.0.122",
         "@sudobility/mail_box_types": "^1.0.18",
@@ -307,7 +307,7 @@
 
     "@sudobility/configs": ["@sudobility/configs@0.0.70", "", { "peerDependencies": { "@sudobility/types": "^1.9.59" } }, "sha512-6NgEvvKGk0+0iPgtVRVF5SYrSvznkPC/EF9M6igxCEquExVVugUo3qS1cjP1HJujih1T/5XaM7igkXZteJeTbg=="],
 
-    "@sudobility/contracts": ["@sudobility/contracts@1.17.71", "", { "dependencies": { "@openzeppelin/contracts": "^5.4.0" }, "peerDependencies": { "@solana/spl-token": ">=0.4.0", "@solana/web3.js": ">=1.95.0", "@sudobility/configs": "^0.0.69", "@sudobility/mail_box_types": "^1.0.17", "@sudobility/types": "^1.9.58", "@tanstack/react-query": ">=5.0.0", "buffer": ">=6.0.0", "react": "^18.0.0 || ^19.0.0", "react-native": ">=0.70.0", "react-native-get-random-values": ">=1.8.0", "react-native-url-polyfill": ">=2.0.0", "text-encoding": ">=0.7.0", "viem": ">=2.0.0" }, "optionalPeers": ["@solana/spl-token", "@solana/web3.js", "@tanstack/react-query", "buffer", "react", "react-native", "react-native-get-random-values", "react-native-url-polyfill", "text-encoding", "viem"] }, "sha512-phuLDGUm/Lneey5RgUHxSeGHBM2nPwbej5fezJN6gSu7ZdLIdrQEuMFeQvpVxT78yyAxVy0Y0JRNA4P8kXSBgQ=="],
+    "@sudobility/contracts": ["@sudobility/contracts@1.17.72", "", { "dependencies": { "@openzeppelin/contracts": "^5.4.0" }, "peerDependencies": { "@solana/spl-token": ">=0.4.0", "@solana/web3.js": ">=1.95.0", "@sudobility/configs": "^0.0.70", "@sudobility/mail_box_types": "^1.0.18", "@sudobility/types": "^1.9.59", "@tanstack/react-query": ">=5.0.0", "buffer": ">=6.0.0", "react": "^18.0.0 || ^19.0.0", "react-native": ">=0.70.0", "react-native-get-random-values": ">=1.8.0", "react-native-url-polyfill": ">=2.0.0", "text-encoding": ">=0.7.0", "viem": ">=2.0.0" }, "optionalPeers": ["@solana/spl-token", "@solana/web3.js", "@tanstack/react-query", "buffer", "react", "react-native", "react-native-get-random-values", "react-native-url-polyfill", "text-encoding", "viem"] }, "sha512-lQiVLYSWr+gkKAOCxx1pGCCl2HvCdq1lHXlDU6eQOoq4A4Jfy3z9dzc3ZntAI4vrtZZa3TnhZngS5sd0TPCNKQ=="],
 
     "@sudobility/di": ["@sudobility/di@1.5.48", "", { "peerDependencies": { "@notifee/react-native": ">=7.0.0", "@react-native-async-storage/async-storage": ">=1.19.0", "@react-native-community/netinfo": ">=9.0.0", "@react-native-firebase/analytics": ">=18.0.0", "@react-native-firebase/app": ">=18.0.0", "@react-native-firebase/messaging": ">=18.0.0", "@react-native-firebase/remote-config": ">=18.0.0", "@sudobility/types": "^1.9.59", "firebase": ">=11.0.0", "react": ">=18.0.0", "react-native": ">=0.70.0" }, "optionalPeers": ["@notifee/react-native", "@react-native-async-storage/async-storage", "@react-native-community/netinfo", "@react-native-firebase/analytics", "@react-native-firebase/app", "@react-native-firebase/messaging", "@react-native-firebase/remote-config", "firebase", "react-native"] }, "sha512-GCB8Le58jbY1b820zANGxPcd7PoLNvptTPQZJk+b4E0he+SQ+kGBB8GPPXeTRsLhiMlMMgQBnSVoGD9oCJ+5Uw=="],
 
