@@ -10,7 +10,7 @@
         "@sudobility/configs": "^0.0.73",
         "@sudobility/contracts": "^1.17.78",
         "@sudobility/di": "^1.5.57",
-        "@sudobility/indexer_client": "^0.0.131",
+        "@sudobility/indexer_client": "^0.0.132",
         "@sudobility/mail_box_types": "^1.0.22",
         "@sudobility/types": "^1.9.62",
         "@sudobility/wildduck_client": "^2.3.88",
@@ -48,7 +48,7 @@
         "@sudobility/configs": "^0.0.73",
         "@sudobility/contracts": "^1.17.78",
         "@sudobility/di": "^1.5.57",
-        "@sudobility/indexer_client": "^0.0.131",
+        "@sudobility/indexer_client": "^0.0.132",
         "@sudobility/mail_box_types": "^1.0.22",
         "@sudobility/types": "^1.9.62",
         "@sudobility/wildduck_client": "^2.3.88",
@@ -311,7 +311,7 @@
 
     "@sudobility/di": ["@sudobility/di@1.5.57", "", { "peerDependencies": { "@notifee/react-native": ">=7.0.0", "@react-native-async-storage/async-storage": ">=1.19.0", "@react-native-community/netinfo": ">=9.0.0", "@react-native-firebase/analytics": ">=18.0.0", "@react-native-firebase/app": ">=18.0.0", "@react-native-firebase/messaging": ">=18.0.0", "@react-native-firebase/remote-config": ">=18.0.0", "@sudobility/types": "^1.9.62", "firebase": ">=11.0.0", "react": ">=18.0.0", "react-native": ">=0.70.0" }, "optionalPeers": ["@notifee/react-native", "@react-native-async-storage/async-storage", "@react-native-community/netinfo", "@react-native-firebase/analytics", "@react-native-firebase/app", "@react-native-firebase/messaging", "@react-native-firebase/remote-config", "firebase", "react-native"] }, "sha512-LYdbjTObAI9YOV4TCTXPp13ybrcq9V2BOPauGRyjHmp88HYJmWTGsCezZDgrggfauh1WgbEKOe4GcbkzrVgGqw=="],
 
-    "@sudobility/indexer_client": ["@sudobility/indexer_client@0.0.131", "", { "peerDependencies": { "@sudobility/configs": "^0.0.73", "@sudobility/di": "^1.5.56", "@sudobility/mail_box_types": "^1.0.22", "@sudobility/types": "^1.9.62", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0" } }, "sha512-rO7d+hW9MlLzp+W8h7NInjQKdcTl2R+HY8UfvCTyi+WJJXW63SAcBb702SdTDWlYWXiH/2jtggC7Dw/DrsABVw=="],
+    "@sudobility/indexer_client": ["@sudobility/indexer_client@0.0.132", "", { "peerDependencies": { "@sudobility/configs": "^0.0.73", "@sudobility/di": "^1.5.57", "@sudobility/mail_box_types": "^1.0.22", "@sudobility/types": "^1.9.62", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0" } }, "sha512-CalvChUOglfnVaM+w5G3WG2q9WczT/xHl6TFWSyW6UT3g7D5EDdawr2Mrm6SHn6RG98rBjQEWGgHFgQlAzSQbQ=="],
 
     "@sudobility/mail_box_types": ["@sudobility/mail_box_types@1.0.22", "", { "peerDependencies": { "@sudobility/types": "^1.9.62" } }, "sha512-VT5Ry+PUSvJR9SiErQbIyWuCUZZ8Sl8G8n8hqIafj6Y7duKND4wfPciUY9cH3xPKt+xIqA7AsoHvbqHJzHL9Cg=="],
 
