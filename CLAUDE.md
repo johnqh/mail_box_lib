@@ -1,5 +1,10 @@
 # mail_box_lib - AI Development Guide
 
+> **Git policy — never auto-commit or auto-push.** Leave your work in the working tree.
+> Run `git commit`, `git push`, `gh pr create`, or `scripts/push_all.sh` **only when the user
+> explicitly asks in that turn**. Approval for an earlier change does not carry forward, and
+> finishing a task is not permission to commit it.
+
 ## Overview
 
 `@sudobility/mail_box_lib` is a React Native-compatible shared utilities library for blockchain email projects. It provides platform-agnostic business logic, multi-chain wallet management (Solana and EVM), on-chain mailer contract hooks, name service resolution (ENS/SNS), and Zustand-based state management. The library is designed as a foundational dependency consumed by both web and mobile applications in the 0xMail ecosystem.
@@ -469,3 +474,7 @@ These must be provided by the consuming application:
 - Unused vars allowed with `_` prefix
 - Sort imports enabled (ignoreCase, ignoreDeclarationSort)
 - Test files have relaxed rules (no-explicit-any off)
+
+## Git Workflow
+
+- Do not use feature branches for code changes. Always stay on the current branch.
