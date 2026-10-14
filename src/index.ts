@@ -29,6 +29,7 @@ export {
   useAccountWildduckAuth,
   clearAccountWildduckAuthCache,
   useKYC,
+  useCustomAddress,
   useMailAccountSettings,
   useMailApp,
   useMailboxesAndSettings,
@@ -191,6 +192,32 @@ export {
   flattenEmailGroups,
   transformWalletAccountsToEmailGroups,
 } from './utils/email/email-transformations';
+
+// Plus ("+tag") subaddressing helpers
+export type { ParsedSubaddress } from './utils/email/plus-addressing';
+export {
+  parseSubaddress,
+  stripSubaddressTag,
+  getSubaddressTag,
+  hasSubaddressTag,
+  buildSubaddress,
+  sameBaseAddress,
+} from './utils/email/plus-addressing';
+
+// From-identity selection (compose / reply)
+export type {
+  FromIdentity,
+  FromIdentityAccount,
+  FromIdentityKind,
+  ReplyFromOptions,
+} from './utils/email/from-identity';
+export {
+  buildFromIdentities,
+  classifyIdentityKind,
+  defaultFromIdentity,
+  findIdentityForAddress,
+  replyFromAddress,
+} from './utils/email/from-identity';
 
 // ============================================================================
 // ATTACHMENT UTILITIES

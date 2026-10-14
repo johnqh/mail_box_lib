@@ -23,6 +23,12 @@ import {
 export interface WildDuckAccount extends WalletData {
   username: string;
   entitled: boolean;
+  /**
+   * True when this account is the wallet's user-defined (custom) address rather
+   * than the wallet address itself or an ENS/SNS name. Used for From-identity
+   * priority and settings gating.
+   */
+  isCustom?: boolean;
 }
 
 /**
@@ -181,6 +187,18 @@ export function useWalletAccounts(
               entitled: true, // Name service accounts are always entitled
             });
           }
+        }
+
+        // Add the wallet's user-defined (custom) address, if set. It is its own
+        // mailbox (same as ENS/SNS) and always entitled.
+        if (walletAccount.customAddress) {
+          flattenedAccounts.push({
+            walletAddress: walletAccount.walletAddress,
+            chainType: walletAccount.chainType,
+            username: walletAccount.customAddress,
+            entitled: true,
+            isCustom: true,
+          });
         }
       }
 

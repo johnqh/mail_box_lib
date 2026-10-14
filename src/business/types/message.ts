@@ -51,8 +51,34 @@ export interface Message {
   references?: Optional<string[]>;
   replyTo?: Optional<WildduckMessageAddress>; // Changed from inReplyTo to match WildduckMessageDetail
 
+  /**
+   * The exact address this message was delivered to (SMTP RCPT TO), including
+   * any `+tag`. Derived from the envelope (preferred) or a Delivered-To /
+   * X-Original-Rcpt header. Used to pick a reply From that mirrors the
+   * delivered-to address (Gmail-style subaddressing).
+   */
+  deliveredTo?: Optional<string>;
+
   // Metadata to track which view this message came from
   hasDetailedContent?: boolean;
+}
+
+/**
+ * Case-insensitively read the first value of a message header.
+ */
+function firstHeaderValue(
+  headers: Optional<Record<string, string | string[]>>,
+  name: string
+): Optional<string> {
+  if (!headers) return undefined;
+  const target = name.toLowerCase();
+  for (const key of Object.keys(headers)) {
+    if (key.toLowerCase() === target) {
+      const value = headers[key];
+      return Array.isArray(value) ? value[0] : value;
+    }
+  }
+  return undefined;
 }
 
 /**
@@ -166,6 +192,20 @@ export function messageFromDetailedResponse(
   }
   if (response.replyTo !== undefined) {
     message.replyTo = response.replyTo;
+  }
+
+  // Derive the delivered-to address (preserves any +tag) for reply-From
+  // mirroring. Prefer the SMTP envelope recipient; fall back to headers.
+  const envelopeRcpt = response.envelope?.rcpt?.[0]?.value;
+  if (envelopeRcpt) {
+    message.deliveredTo = envelopeRcpt;
+  } else {
+    const deliveredHeader =
+      firstHeaderValue(response.headers, 'Delivered-To') ??
+      firstHeaderValue(response.headers, 'X-Original-Rcpt');
+    if (deliveredHeader) {
+      message.deliveredTo = deliveredHeader;
+    }
   }
 
   return message;

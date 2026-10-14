@@ -19,6 +19,7 @@ export * from './useSelectedChain';
 export * from './useAccountMailboxes';
 export * from './useMailboxesAndSettings';
 export * from './useMailAccountSettings';
+export * from './useCustomAddress';
 export * from './useMailboxMessages';
 export * from './useMessages';
 export * from './useMessage';

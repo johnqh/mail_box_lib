@@ -160,6 +160,19 @@ export function useMailAccountSettings(
       return [
         ...baseSettingsSections,
         {
+          id: 'customAddress',
+          title: t
+            ? t('sections.customAddress', 'Custom Address')
+            : 'Custom Address',
+          icon: 'at-symbol',
+          description: t
+            ? t(
+                'customAddress.description',
+                'Choose your own email address (one time)'
+              )
+            : 'Choose your own email address (one time)',
+        },
+        {
           id: 'points',
           title: t ? t('sections.points', 'Points') : 'Points',
           icon: 'star',
