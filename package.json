@@ -1,6 +1,6 @@
 {
   "name": "@sudobility/mail_box_lib",
-  "version": "3.14.139",
+  "version": "3.14.140",
   "description": "React Native-compatible shared utilities library for blockchain email projects with Optional<T> type safety patterns and comprehensive blockchain integration",
   "type": "module",
   "main": "dist/index.js",
@@ -91,13 +91,13 @@
   "devDependencies": {
     "@bonfida/spl-name-service": "^3.0.16",
     "@solana/web3.js": "^1.98.4",
-    "@sudobility/configs": "^0.0.77",
-    "@sudobility/contracts": "^1.17.83",
-    "@sudobility/di": "^1.5.70",
-    "@sudobility/indexer_client": "^0.0.144",
-    "@sudobility/mail_box_types": "^1.0.27",
-    "@sudobility/types": "^1.9.68",
-    "@sudobility/wildduck_client": "^2.3.100",
+    "@sudobility/configs": "^0.0.78",
+    "@sudobility/contracts": "^1.17.84",
+    "@sudobility/di": "^1.5.73",
+    "@sudobility/indexer_client": "^0.0.148",
+    "@sudobility/mail_box_types": "^1.0.28",
+    "@sudobility/types": "^1.9.72",
+    "@sudobility/wildduck_client": "^2.3.104",
     "@tanstack/react-query": "^5.90.11",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -129,13 +129,13 @@
   },
   "peerDependencies": {
     "@bonfida/spl-name-service": ">=3.0.0",
-    "@sudobility/configs": "^0.0.77",
-    "@sudobility/contracts": "^1.17.83",
-    "@sudobility/di": "^1.5.70",
-    "@sudobility/indexer_client": "^0.0.144",
-    "@sudobility/mail_box_types": "^1.0.27",
-    "@sudobility/types": "^1.9.68",
-    "@sudobility/wildduck_client": "^2.3.100",
+    "@sudobility/configs": "^0.0.78",
+    "@sudobility/contracts": "^1.17.84",
+    "@sudobility/di": "^1.5.73",
+    "@sudobility/indexer_client": "^0.0.148",
+    "@sudobility/mail_box_types": "^1.0.28",
+    "@sudobility/types": "^1.9.72",
+    "@sudobility/wildduck_client": "^2.3.104",
     "@tanstack/react-query": ">=5.0.0",
     "react": ">=18.0.0",
     "viem": ">=2.0.0",
@@ -146,7 +146,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/johnqh/mail_box_lib.git"
+    "url": "https://github.com/Sudobility/mail_box_lib.git"
   },
   "bugs": {
     "url": "https://github.com/johnqh/mail_box_lib/issues"
